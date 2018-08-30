@@ -1,0 +1,379 @@
+[09-Jul-2018 12:34:33 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'tblurlconfig.geneveda' in 'field list'
+Raw SQL : SELECT 
+                    tblurlconfig.id, tblurlconfig.Guid_user, tblurlconfig.geneveda, tblurlconfig.pin, 
+                    tblaccount.*,  
+                    tblsource.description, tblsource.Guid_source, tblsource.code, 
+                    tbldevice.`serial_number`                     
+                    FROM tblurlconfig 
+                    LEFT JOIN `tblaccount` ON tblurlconfig.account = tblaccount.Guid_account
+                    LEFT JOIN `tblsource` ON tblurlconfig.location = tblsource.code
+                    LEFT JOIN `tbldevice` ON tblurlconfig.device_id = tbldevice.id
+                    WHERE tblurlconfig.Guid_user=:Guid_user' in /home3/elmirak/public_html/mdlab/classes/Db.class.php:249
+Stack trace:
+#0 /home3/elmirak/public_html/mdlab/classes/Db.class.php(112): Db->ExceptionLog('SQLSTATE[42S22]...', 'SELECT \n       ...')
+#1 /home3/elmirak in /home3/elmirak/public_html/mdlab/classes/Db.class.php on line 249
+[09-Jul-2018 13:56:32 Europe/Amsterdam] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home3/elmirak/public_html/mdlab/header.php:11) in /home3/elmirak/public_html/mdlab/functions.php on line 7
+[09-Jul-2018 14:45:18 Europe/Amsterdam] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home3/elmirak/public_html/mdlab/header.php:11) in /home3/elmirak/public_html/mdlab/functions.php on line 7
+[09-Jul-2018 14:45:47 Europe/Amsterdam] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home3/elmirak/public_html/mdlab/header.php:11) in /home3/elmirak/public_html/mdlab/functions.php on line 7
+[09-Jul-2018 14:46:04 Europe/Amsterdam] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home3/elmirak/public_html/mdlab/header.php:11) in /home3/elmirak/public_html/mdlab/functions.php on line 7
+[09-Jul-2018 14:48:00 Europe/Amsterdam] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home3/elmirak/public_html/mdlab/header.php:11) in /home3/elmirak/public_html/mdlab/functions.php on line 6
+[09-Jul-2018 14:49:07 Europe/Amsterdam] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home3/elmirak/public_html/mdlab/header.php:11) in /home3/elmirak/public_html/mdlab/functions.php on line 6
+[09-Jul-2018 14:57:06 Europe/Amsterdam] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home3/elmirak/public_html/mdlab/header.php:11) in /home3/elmirak/public_html/mdlab/functions.php on line 2
+[09-Jul-2018 14:57:09 Europe/Amsterdam] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home3/elmirak/public_html/mdlab/header.php:11) in /home3/elmirak/public_html/mdlab/functions.php on line 2
+[09-Jul-2018 15:01:54 Europe/Amsterdam] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home3/elmirak/public_html/mdlab/header.php:11) in /home3/elmirak/public_html/mdlab/functions.php on line 6
+[10-Jul-2018 00:22:08 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'url_flag' in 'where clause'
+Raw SQL : SELECT * FROM tbldevice  WHERE url_flag=1 ORDER BY serial_number ASC' in /home3/elmirak/public_html/mdlab/classes/Db.class.php:249
+Stack trace:
+#0 /home3/elmirak/public_html/mdlab/classes/Db.class.php(112): Db->ExceptionLog('SQLSTATE[42S22]...', 'SELECT * FROM t...')
+#1 /home3/elmirak/public_html/mdlab/classes/Db.class.php(157): Db->Init('SELECT * FROM t...', NULL)
+#2 /home3/elmirak/public_html/mdlab/classes/Db.class.php(228): Db->query('SELECT * FROM t...')
+#3 /home3/elmirak/public_html/mdlab/url-configuration.php(20): Db->selectAll('tbldevice', ' WHERE url_flag...')
+#4 {main}
+  thrown in /home3/elmirak/public_html/mdlab/classes/Db.class.php on line 249
+[10-Jul-2018 12:05:29 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'ID' at line 1
+Raw SQL : SELECT id FROM `tbldevice`  WHERE serial_number=Device ID' in /home3/elmirak/public_html/mdlab/classes/Db.class.php:249
+Stack trace:
+#0 /home3/elmirak/public_html/mdlab/classes/Db.class.php(112): Db->ExceptionLog('SQLSTATE[42000]...', 'SELECT id FROM ...')
+#1 /home3/elmirak/public_html/mdlab/classes/Db.class.php(207): Db->Init('SELECT id FROM ...', NULL)
+#2 /home3/elmirak/public_html/mdlab/functions.php(117): Db->row('SELECT id FROM ...')
+#3 /home3/elmirak/public_html/mdlab/url-configuration.php(36): get_field_value(Object(Db), 'tbldevice', 'id', ' WHERE serial_n...')
+#4 {main}
+  thrown in /home3/elmirak/public_html/mdlab/classes/Db.class.php on line 249
+[10-Jul-2018 13:08:18 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'ID' at line 1
+Raw SQL : SELECT id FROM `tbldevice`  WHERE serial_number=Device ID' in /home3/elmirak/public_html/mdlab/classes/Db.class.php:249
+Stack trace:
+#0 /home3/elmirak/public_html/mdlab/classes/Db.class.php(112): Db->ExceptionLog('SQLSTATE[42000]...', 'SELECT id FROM ...')
+#1 /home3/elmirak/public_html/mdlab/classes/Db.class.php(207): Db->Init('SELECT id FROM ...', NULL)
+#2 /home3/elmirak/public_html/mdlab/functions.php(117): Db->row('SELECT id FROM ...')
+#3 /home3/elmirak/public_html/mdlab/url-configuration.php(36): get_field_value(Object(Db), 'tbldevice', 'id', ' WHERE serial_n...')
+#4 {main}
+  thrown in /home3/elmirak/public_html/mdlab/classes/Db.class.php on line 249
+[10-Jul-2018 13:08:51 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'ID' at line 1
+Raw SQL : SELECT id FROM `tbldevice`  WHERE serial_number=Device ID' in /home3/elmirak/public_html/mdlab/classes/Db.class.php:249
+Stack trace:
+#0 /home3/elmirak/public_html/mdlab/classes/Db.class.php(112): Db->ExceptionLog('SQLSTATE[42000]...', 'SELECT id FROM ...')
+#1 /home3/elmirak/public_html/mdlab/classes/Db.class.php(207): Db->Init('SELECT id FROM ...', NULL)
+#2 /home3/elmirak/public_html/mdlab/functions.php(117): Db->row('SELECT id FROM ...')
+#3 /home3/elmirak/public_html/mdlab/url-configuration.php(36): get_field_value(Object(Db), 'tbldevice', 'id', ' WHERE serial_n...')
+#4 {main}
+  thrown in /home3/elmirak/public_html/mdlab/classes/Db.class.php on line 249
+[11-Jul-2018 15:31:16 Europe/Amsterdam] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home3/elmirak/public_html/mdlab/header.php:14) in /home3/elmirak/public_html/mdlab/functions.php on line 6
+[11-Jul-2018 15:46:26 Europe/Amsterdam] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home3/elmirak/public_html/mdlab/header.php:14) in /home3/elmirak/public_html/mdlab/functions.php on line 6
+[13-Jul-2018 15:44:12 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/dev/login/elmira/url-configuration.php on line 218
+[13-Jul-2018 15:44:33 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/dev/login/elmira/url-configuration.php on line 218
+[13-Jul-2018 15:45:04 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/dev/login/elmira/url-configuration.php on line 218
+[13-Jul-2018 17:01:43 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/dev/login/elmira/url-configuration.php on line 219
+[13-Jul-2018 17:05:44 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/dev/login/elmira/url-configuration.php on line 219
+[13-Jul-2018 18:25:37 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/dev/login/elmira/url-configuration.php on line 219
+[13-Jul-2018 18:32:31 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/dev/login/elmira/url-configuration.php on line 219
+[13-Jul-2018 18:32:32 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/dev/login/elmira/url-configuration.php on line 219
+[13-Jul-2018 18:32:33 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/dev/login/elmira/url-configuration.php on line 219
+[13-Jul-2018 18:32:39 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/dev/login/elmira/url-configuration.php on line 219
+[13-Jul-2018 18:32:44 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/dev/login/elmira/url-configuration.php on line 219
+[13-Jul-2018 18:32:54 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/dev/login/elmira/url-configuration.php on line 219
+[13-Jul-2018 18:33:04 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/dev/login/elmira/url-configuration.php on line 219
+[13-Jul-2018 18:33:14 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/dev/login/elmira/url-configuration.php on line 219
+[13-Jul-2018 18:33:24 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/dev/login/elmira/url-configuration.php on line 219
+[13-Jul-2018 18:33:34 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/dev/login/elmira/url-configuration.php on line 219
+[13-Jul-2018 18:33:57 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/dev/login/elmira/url-configuration.php on line 219
+[13-Jul-2018 22:07:06 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'tbldevice.serial_number' in 'field list'
+Raw SQL : SELECT 
+                    tblurlconfig.id, tblurlconfig.Guid_user, tblurlconfig.geneveda, tblurlconfig.pin, 
+                    tblaccount.*,  
+                    tblsource.description, tblsource.Guid_source, tblsource.code, 
+                    tbldevice.`serial_number`, tbldevice.`id` AS device_id                     
+                    FROM tblurlconfig 
+                    LEFT JOIN `tblaccount` ON tblurlconfig.account = tblaccount.Guid_account
+                    LEFT JOIN `tblsource` ON tblurlconfig.location = tblsource.code
+                    LEFT JOIN `tbldevice` ON tblurlconfig.device_id = tbldevice.id
+                    WHERE tblurlconfig.Guid_user=:Guid_user 
+                    ORDER BY tblurlconfig.id DESC LIMIT 5' in /home/zkf5aup0kp1o/public_html/dev/login/elmira/classes/Db.class.php:249
+Stack trace:
+#0 /home/zkf5aup0kp1o/public_html/dev in /home/zkf5aup0kp1o/public_html/dev/login/elmira/classes/Db.class.php on line 249
+[13-Jul-2018 22:07:08 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'tbldevice.serial_number' in 'field list'
+Raw SQL : SELECT 
+                    tblurlconfig.id, tblurlconfig.Guid_user, tblurlconfig.geneveda, tblurlconfig.pin, 
+                    tblaccount.*,  
+                    tblsource.description, tblsource.Guid_source, tblsource.code, 
+                    tbldevice.`serial_number`, tbldevice.`id` AS device_id                     
+                    FROM tblurlconfig 
+                    LEFT JOIN `tblaccount` ON tblurlconfig.account = tblaccount.Guid_account
+                    LEFT JOIN `tblsource` ON tblurlconfig.location = tblsource.code
+                    LEFT JOIN `tbldevice` ON tblurlconfig.device_id = tbldevice.id
+                    WHERE tblurlconfig.Guid_user=:Guid_user 
+                    ORDER BY tblurlconfig.id DESC LIMIT 5' in /home/zkf5aup0kp1o/public_html/dev/login/elmira/classes/Db.class.php:249
+Stack trace:
+#0 /home/zkf5aup0kp1o/public_html/dev in /home/zkf5aup0kp1o/public_html/dev/login/elmira/classes/Db.class.php on line 249
+[13-Jul-2018 22:07:16 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'tbldevice.serial_number' in 'field list'
+Raw SQL : SELECT 
+                    tblurlconfig.id, tblurlconfig.Guid_user, tblurlconfig.geneveda, tblurlconfig.pin, 
+                    tblaccount.*,  
+                    tblsource.description, tblsource.Guid_source, tblsource.code, 
+                    tbldevice.`serial_number`, tbldevice.`id` AS device_id                     
+                    FROM tblurlconfig 
+                    LEFT JOIN `tblaccount` ON tblurlconfig.account = tblaccount.Guid_account
+                    LEFT JOIN `tblsource` ON tblurlconfig.location = tblsource.code
+                    LEFT JOIN `tbldevice` ON tblurlconfig.device_id = tbldevice.id
+                    WHERE tblurlconfig.Guid_user=:Guid_user 
+                    ORDER BY tblurlconfig.id DESC LIMIT 5' in /home/zkf5aup0kp1o/public_html/dev/login/elmira/classes/Db.class.php:249
+Stack trace:
+#0 /home/zkf5aup0kp1o/public_html/dev in /home/zkf5aup0kp1o/public_html/dev/login/elmira/classes/Db.class.php on line 249
+[13-Jul-2018 20:08:37 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:08:37 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:08:39 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:08:39 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:10:07 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:10:07 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:10:40 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:10:40 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:10:42 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:10:42 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:12:01 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:12:01 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:12:15 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:12:15 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:12:37 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:12:37 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:12:51 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:12:51 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:13:14 UTC] PHP Notice:  Undefined variable: _SESSION in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/url-configuration.php on line 3
+[13-Jul-2018 20:13:14 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:13:14 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:14:18 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:14:18 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:14:56 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:14:56 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:15:37 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:15:37 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:15:50 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:15:50 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:16:20 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:16:20 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:16:36 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:16:36 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:17:25 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:17:25 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:17:27 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:17:27 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 22:17:50 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'tbldevice.serial_number' in 'field list'
+Raw SQL : SELECT 
+                    tblurlconfig.id, tblurlconfig.Guid_user, tblurlconfig.geneveda, tblurlconfig.pin, 
+                    tblaccount.*,  
+                    tblsource.description, tblsource.Guid_source, tblsource.code, 
+                    tbldevice.`serial_number`, tbldevice.`id` AS device_id                     
+                    FROM tblurlconfig 
+                    LEFT JOIN `tblaccount` ON tblurlconfig.account = tblaccount.Guid_account
+                    LEFT JOIN `tblsource` ON tblurlconfig.location = tblsource.code
+                    LEFT JOIN `tbldevice` ON tblurlconfig.device_id = tbldevice.id
+                    WHERE tblurlconfig.Guid_user=:Guid_user 
+                    ORDER BY tblurlconfig.id DESC LIMIT 5' in /home/zkf5aup0kp1o/public_html/dev/login/elmira/classes/Db.class.php:249
+Stack trace:
+#0 /home/zkf5aup0kp1o/public_html/dev in /home/zkf5aup0kp1o/public_html/dev/login/elmira/classes/Db.class.php on line 249
+[13-Jul-2018 22:17:55 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'tbldevice.serial_number' in 'field list'
+Raw SQL : SELECT 
+                    tblurlconfig.id, tblurlconfig.Guid_user, tblurlconfig.geneveda, tblurlconfig.pin, 
+                    tblaccount.*,  
+                    tblsource.description, tblsource.Guid_source, tblsource.code, 
+                    tbldevice.`serial_number`, tbldevice.`id` AS device_id                     
+                    FROM tblurlconfig 
+                    LEFT JOIN `tblaccount` ON tblurlconfig.account = tblaccount.Guid_account
+                    LEFT JOIN `tblsource` ON tblurlconfig.location = tblsource.code
+                    LEFT JOIN `tbldevice` ON tblurlconfig.device_id = tbldevice.id
+                    WHERE tblurlconfig.Guid_user=:Guid_user 
+                    ORDER BY tblurlconfig.id DESC LIMIT 5' in /home/zkf5aup0kp1o/public_html/dev/login/elmira/classes/Db.class.php:249
+Stack trace:
+#0 /home/zkf5aup0kp1o/public_html/dev in /home/zkf5aup0kp1o/public_html/dev/login/elmira/classes/Db.class.php on line 249
+[13-Jul-2018 20:18:19 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:18:19 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:20:00 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:20:00 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:21:29 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:21:29 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:21:40 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:21:40 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:22:51 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:22:51 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:23:29 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:23:29 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 17
+[13-Jul-2018 20:23:33 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 18
+[13-Jul-2018 20:23:33 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/config.php on line 18
+[13-Jul-2018 22:24:09 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'tbldevice.serial_number' in 'field list'
+Raw SQL : SELECT 
+                    tblurlconfig.id, tblurlconfig.Guid_user, tblurlconfig.geneveda, tblurlconfig.pin, 
+                    tblaccount.*,  
+                    tblsource.description, tblsource.Guid_source, tblsource.code, 
+                    tbldevice.`serial_number`, tbldevice.`id` AS device_id                     
+                    FROM tblurlconfig 
+                    LEFT JOIN `tblaccount` ON tblurlconfig.account = tblaccount.Guid_account
+                    LEFT JOIN `tblsource` ON tblurlconfig.location = tblsource.code
+                    LEFT JOIN `tbldevice` ON tblurlconfig.device_id = tbldevice.id
+                    WHERE tblurlconfig.Guid_user=:Guid_user 
+                    ORDER BY tblurlconfig.id DESC LIMIT 5' in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php:250
+Stack trace:
+#0 /home/zkf5aup0kp1o/publi in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php on line 250
+[13-Jul-2018 22:26:05 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'tbldevice.serial_number' in 'field list'
+Raw SQL : SELECT 
+                    tblurlconfig.id, tblurlconfig.Guid_user, tblurlconfig.geneveda, tblurlconfig.pin, 
+                    tblaccount.*,  
+                    tblsource.description, tblsource.Guid_source, tblsource.code, 
+                    tbldevice.`serial_number`, tbldevice.`id` AS device_id                     
+                    FROM tblurlconfig 
+                    LEFT JOIN `tblaccount` ON tblurlconfig.account = tblaccount.Guid_account
+                    LEFT JOIN `tblsource` ON tblurlconfig.location = tblsource.code
+                    LEFT JOIN `tbldevice` ON tblurlconfig.device_id = tbldevice.id
+                    WHERE tblurlconfig.Guid_user=:Guid_user 
+                    ORDER BY tblurlconfig.id DESC LIMIT 5' in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php:250
+Stack trace:
+#0 /home/zkf5aup0kp1o/publi in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php on line 250
+[13-Jul-2018 22:26:22 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'tbldevice.serial_number' in 'field list'
+Raw SQL : SELECT 
+                    tblurlconfig.id, tblurlconfig.Guid_user, tblurlconfig.geneveda, tblurlconfig.pin, 
+                    tblaccount.*,  
+                    tblsource.description, tblsource.Guid_source, tblsource.code, 
+                    tbldevice.`serial_number`, tbldevice.`id` AS device_id                     
+                    FROM tblurlconfig 
+                    LEFT JOIN `tblaccount` ON tblurlconfig.account = tblaccount.Guid_account
+                    LEFT JOIN `tblsource` ON tblurlconfig.location = tblsource.code
+                    LEFT JOIN `tbldevice` ON tblurlconfig.device_id = tbldevice.id
+                    WHERE tblurlconfig.Guid_user=:Guid_user 
+                    ORDER BY tblurlconfig.id DESC LIMIT 5' in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php:250
+Stack trace:
+#0 /home/zkf5aup0kp1o/publi in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php on line 250
+[13-Jul-2018 22:27:57 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'tbldevice.serial_number' in 'field list'
+Raw SQL : SELECT 
+                    tblurlconfig.id, tblurlconfig.Guid_user, tblurlconfig.geneveda, tblurlconfig.pin, 
+                    tblaccount.*,  
+                    tblsource.description, tblsource.Guid_source, tblsource.code, 
+                    tbldevice.`serial_number`, tbldevice.`id` AS device_id                     
+                    FROM tblurlconfig 
+                    LEFT JOIN `tblaccount` ON tblurlconfig.account = tblaccount.Guid_account
+                    LEFT JOIN `tblsource` ON tblurlconfig.location = tblsource.code
+                    LEFT JOIN `tbldevice` ON tblurlconfig.device_id = tbldevice.id
+                    WHERE tblurlconfig.Guid_user=:Guid_user 
+                    ORDER BY tblurlconfig.id DESC LIMIT 5' in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php:250
+Stack trace:
+#0 /home/zkf5aup0kp1o/publi in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php on line 250
+[13-Jul-2018 22:28:16 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'tbldevice.serial_number' in 'field list'
+Raw SQL : SELECT 
+                    tblurlconfig.id, tblurlconfig.Guid_user, tblurlconfig.geneveda, tblurlconfig.pin, 
+                    tblaccount.*,  
+                    tblsource.description, tblsource.Guid_source, tblsource.code, 
+                    tbldevice.`serial_number`, tbldevice.`id` AS device_id                     
+                    FROM tblurlconfig 
+                    LEFT JOIN `tblaccount` ON tblurlconfig.account = tblaccount.Guid_account
+                    LEFT JOIN `tblsource` ON tblurlconfig.location = tblsource.code
+                    LEFT JOIN `tbldevice` ON tblurlconfig.device_id = tbldevice.id
+                    WHERE tblurlconfig.Guid_user=:Guid_user 
+                    ORDER BY tblurlconfig.id DESC LIMIT 5' in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php:250
+Stack trace:
+#0 /home/zkf5aup0kp1o/publi in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php on line 250
+[13-Jul-2018 22:28:41 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'tbldevice.serial_number' in 'field list'
+Raw SQL : SELECT 
+                    tblurlconfig.id, tblurlconfig.Guid_user, tblurlconfig.geneveda, tblurlconfig.pin, 
+                    tblaccount.*,  
+                    tblsource.description, tblsource.Guid_source, tblsource.code, 
+                    tbldevice.`serial_number`, tbldevice.`id` AS device_id                     
+                    FROM tblurlconfig 
+                    LEFT JOIN `tblaccount` ON tblurlconfig.account = tblaccount.Guid_account
+                    LEFT JOIN `tblsource` ON tblurlconfig.location = tblsource.code
+                    LEFT JOIN `tbldevice` ON tblurlconfig.device_id = tbldevice.id
+                    WHERE tblurlconfig.Guid_user=:Guid_user 
+                    ORDER BY tblurlconfig.id DESC LIMIT 5' in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php:250
+Stack trace:
+#0 /home/zkf5aup0kp1o/publi in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php on line 250
+[13-Jul-2018 22:28:45 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'tbldevice.serial_number' in 'field list'
+Raw SQL : SELECT 
+                    tblurlconfig.id, tblurlconfig.Guid_user, tblurlconfig.geneveda, tblurlconfig.pin, 
+                    tblaccount.*,  
+                    tblsource.description, tblsource.Guid_source, tblsource.code, 
+                    tbldevice.`serial_number`, tbldevice.`id` AS device_id                     
+                    FROM tblurlconfig 
+                    LEFT JOIN `tblaccount` ON tblurlconfig.account = tblaccount.Guid_account
+                    LEFT JOIN `tblsource` ON tblurlconfig.location = tblsource.code
+                    LEFT JOIN `tbldevice` ON tblurlconfig.device_id = tbldevice.id
+                    WHERE tblurlconfig.Guid_user=:Guid_user 
+                    ORDER BY tblurlconfig.id DESC LIMIT 5' in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php:251
+Stack trace:
+#0 /home/zkf5aup0kp1o/publi in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php on line 251
+[13-Jul-2018 22:28:52 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'tbldevice.serial_number' in 'field list'
+Raw SQL : SELECT 
+                    tblurlconfig.id, tblurlconfig.Guid_user, tblurlconfig.geneveda, tblurlconfig.pin, 
+                    tblaccount.*,  
+                    tblsource.description, tblsource.Guid_source, tblsource.code, 
+                    tbldevice.`serial_number`, tbldevice.`id` AS device_id                     
+                    FROM tblurlconfig 
+                    LEFT JOIN `tblaccount` ON tblurlconfig.account = tblaccount.Guid_account
+                    LEFT JOIN `tblsource` ON tblurlconfig.location = tblsource.code
+                    LEFT JOIN `tbldevice` ON tblurlconfig.device_id = tbldevice.id
+                    WHERE tblurlconfig.Guid_user=:Guid_user 
+                    ORDER BY tblurlconfig.id DESC LIMIT 5' in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php:252
+Stack trace:
+#0 /home/zkf5aup0kp1o/publi in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php on line 252
+[13-Jul-2018 22:29:29 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'tbldevice.serial_number' in 'field list'
+Raw SQL : SELECT 
+                    tblurlconfig.id, tblurlconfig.Guid_user, tblurlconfig.geneveda, tblurlconfig.pin, 
+                    tblaccount.*,  
+                    tblsource.description, tblsource.Guid_source, tblsource.code, 
+                    tbldevice.`serial_number`, tbldevice.`id` AS device_id                     
+                    FROM tblurlconfig 
+                    LEFT JOIN `tblaccount` ON tblurlconfig.account = tblaccount.Guid_account
+                    LEFT JOIN `tblsource` ON tblurlconfig.location = tblsource.code
+                    LEFT JOIN `tbldevice` ON tblurlconfig.device_id = tbldevice.id
+                    WHERE tblurlconfig.Guid_user=:Guid_user 
+                    ORDER BY tblurlconfig.id DESC LIMIT 5' in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php:250
+Stack trace:
+#0 /home/zkf5aup0kp1o/publi in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php on line 250
+[13-Jul-2018 22:29:31 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'tbldevice.serial_number' in 'field list'
+Raw SQL : SELECT 
+                    tblurlconfig.id, tblurlconfig.Guid_user, tblurlconfig.geneveda, tblurlconfig.pin, 
+                    tblaccount.*,  
+                    tblsource.description, tblsource.Guid_source, tblsource.code, 
+                    tbldevice.`serial_number`, tbldevice.`id` AS device_id                     
+                    FROM tblurlconfig 
+                    LEFT JOIN `tblaccount` ON tblurlconfig.account = tblaccount.Guid_account
+                    LEFT JOIN `tblsource` ON tblurlconfig.location = tblsource.code
+                    LEFT JOIN `tbldevice` ON tblurlconfig.device_id = tbldevice.id
+                    WHERE tblurlconfig.Guid_user=:Guid_user 
+                    ORDER BY tblurlconfig.id DESC LIMIT 5' in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php:250
+Stack trace:
+#0 /home/zkf5aup0kp1o/publi in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php on line 250
+[13-Jul-2018 22:29:51 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'tbldevice.serial_number' in 'field list'
+Raw SQL : SELECT 
+                    tblurlconfig.id, tblurlconfig.Guid_user, tblurlconfig.geneveda, tblurlconfig.pin, 
+                    tblaccount.*,  
+                    tblsource.description, tblsource.Guid_source, tblsource.code, 
+                    tbldevice.`serial_number`, tbldevice.`id` AS device_id                     
+                    FROM tblurlconfig 
+                    LEFT JOIN `tblaccount` ON tblurlconfig.account = tblaccount.Guid_account
+                    LEFT JOIN `tblsource` ON tblurlconfig.location = tblsource.code
+                    LEFT JOIN `tbldevice` ON tblurlconfig.device_id = tbldevice.id
+                    WHERE tblurlconfig.Guid_user=:Guid_user 
+                    ORDER BY tblurlconfig.id DESC LIMIT 5' in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php:250
+Stack trace:
+#0 /home/zkf5aup0kp1o/publi in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php on line 250
+[13-Jul-2018 22:30:24 Europe/Amsterdam] PHP Fatal error:  Uncaught exception 'Exception' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'tbldevice.serial_number' in 'field list'
+Raw SQL : SELECT 
+                    tblurlconfig.id, tblurlconfig.Guid_user, tblurlconfig.geneveda, tblurlconfig.pin, 
+                    tblaccount.*,  
+                    tblsource.description, tblsource.Guid_source, tblsource.code, 
+                    tbldevice.`serial_number`, tbldevice.`id` AS device_id                     
+                    FROM tblurlconfig 
+                    LEFT JOIN `tblaccount` ON tblurlconfig.account = tblaccount.Guid_account
+                    LEFT JOIN `tblsource` ON tblurlconfig.location = tblsource.code
+                    LEFT JOIN `tbldevice` ON tblurlconfig.device_id = tbldevice.id
+                    WHERE tblurlconfig.Guid_user=:Guid_user 
+                    ORDER BY tblurlconfig.id DESC LIMIT 5' in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php:250
+Stack trace:
+#0 /home/zkf5aup0kp1o/publi in /home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php on line 250
+[13-Jul-2018 20:37:02 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/e/config.php on line 17
+[13-Jul-2018 20:37:02 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/e/config.php on line 17
+[13-Jul-2018 20:38:02 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/e/config.php on line 17
+[13-Jul-2018 20:38:02 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/e/config.php on line 17
+[13-Jul-2018 20:39:17 UTC] PHP Warning:  require(/home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php): failed to open stream: No such file or directory in /home/zkf5aup0kp1o/public_html/questionnaire/login/elm/config.php on line 17
+[13-Jul-2018 20:39:17 UTC] PHP Fatal error:  require(): Failed opening required '/home/zkf5aup0kp1o/public_html/questionnaire/login/elmira/classes/Db.class.php' (include_path='.:/opt/alt/php54/usr/share/pear:/opt/alt/php54/usr/share/php') in /home/zkf5aup0kp1o/public_html/questionnaire/login/elm/config.php on line 17
+[13-Jul-2018 22:41:15 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/questionnaire/login/elm/url-configuration.php on line 220
+[13-Jul-2018 22:46:32 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/questionnaire/login/elm/url-configuration.php on line 220
+[13-Jul-2018 22:52:19 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/questionnaire/login/elm/url-configuration.php on line 220
+[13-Jul-2018 20:54:53 UTC] PHP Notice:  Undefined variable: _SESSION in /home/zkf5aup0kp1o/public_html/questionnaire/login/elm/url-configuration.php on line 3
+[13-Jul-2018 22:57:00 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/questionnaire/login/elm/url-configuration.php on line 220
+[13-Jul-2018 22:58:43 Europe/Amsterdam] PHP Notice:  Undefined index: logo in /home/zkf5aup0kp1o/public_html/questionnaire/login/elm/url-configuration.php on line 220
