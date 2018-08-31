@@ -1,3 +1,0 @@
-[09-Jul-2018 15:49:37 Europe/Amsterdam] PHP Warning:  require(../db/dbconnect.php): failed to open stream: No such file or directory in /home3/elmirak/public_html/mdlab/login/index.php on line 3
-[09-Jul-2018 15:49:37 Europe/Amsterdam] PHP Warning:  require(../db/dbconnect.php): failed to open stream: No such file or directory in /home3/elmirak/public_html/mdlab/login/index.php on line 3
-[09-Jul-2018 15:49:37 Europe/Amsterdam] PHP Fatal error:  require(): Failed opening required '../db/dbconnect.php' (include_path='.:/opt/php56/lib/php') in /home3/elmirak/public_html/mdlab/login/index.php on line 3
