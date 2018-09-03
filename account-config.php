@@ -103,7 +103,8 @@ if(isset($_POST['submit_account'])){
     }
 }
 $salesreps = $db->selectAll('tblsalesrep');
-$accounts = $db->selectAll('tblaccount');
+$accounts = $db->selectAll('tblaccount', ' ORDER BY name ASC');
+
 $tblproviders = $db->selectAll('tblprovider');
 $states = $db->selectAll('tblstates');
 ?>
@@ -515,6 +516,7 @@ $states = $db->selectAll('tblstates');
             fixedHeader: true,
             //searching: false,
             lengthChange: false,
+            "order": [[ 1, "asc" ]],
             "aoColumnDefs": [
               { 
                   "bSortable": false, 
