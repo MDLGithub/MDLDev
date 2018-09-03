@@ -69,9 +69,11 @@ $query = 'SELECT  u.Guid_user, u.email,
 	WHERE p.Guid_user!="" AND st.mdl_number!="" ';
 
 $result = $db->query($query);
-$revenueTotal = 0;
-foreach ($result as $k=>$v){
-    $revenueTotal += $v['revenue'];
+if($result){
+    $revenueTotal = 0;
+    foreach ($result as $k=>$v){
+	$revenueTotal += $v['revenue'];
+    }
 }
 
 ?>
@@ -98,12 +100,14 @@ foreach ($result as $k=>$v){
 	    <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
 	</section>
 	<div class="scroller">
+	    <?php if(isset($revenueTotal)){ ?>
 	    <div class="row">
 		<div class="col-md-12 text-right priceSum pR-30">
-		    Total:&nbsp;&nbsp;&nbsp;
+		    Total Revenue:&nbsp;&nbsp;&nbsp;
 		    $<?php echo formatMoney($revenueTotal); ?>
 		</div>
 	    </div>
+	    <?php } ?>
 	    <div class="row">
 		<div class="col-md-12">
 		    <table id="dataTable" class="display" style="width:100%">
@@ -125,9 +129,9 @@ foreach ($result as $k=>$v){
 				<td><?php echo $v['mdl_number']; ?></td>
 				<td><a target="_blank" href="<?php echo SITE_URL."/patient-info.php?patient=".$v['Guid_user']; ?>"><?php echo $v['first_name']; ?></a></td>
 				<td><a target="_blank" href="<?php echo SITE_URL."/patient-info.php?patient=".$v['Guid_user']; ?>"><?php echo $v['last_name']; ?></a></td>
-				<td><?php echo $v['name']." ".$v['name']; ?></td>
+				<td><?php echo $v['account']." ".$v['name']; ?></td>
 				<td><?php echo $v['slaserep_fName']." ".$v['salesrep_lName']; ?></td>
-				<td><?php echo (!preg_match("/0{4}/" , $v['date_reported'])) ? date('n/j/Y h:m A', strtotime($v['date_reported'])) : ""; ?></td>
+				<td><?php echo (!preg_match("/0{4}/" , $v['date_reported'])) ? date('n/j/Y', strtotime($v['date_reported'])) : ""; ?></td>
 				<td>$<?php echo formatMoney($v['revenue']); ?></td>
 			    </tr>
 			    <?php } ?>

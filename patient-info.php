@@ -80,6 +80,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		}
 	    }
 
+	    if(isset($_POST['dob']) && $_POST['dob']!=""){
+		$dob= date('Y-m-d h:i:s', strtotime($_POST['dob']));
+		updateTable($db, 'tblpatient', array('dob'=>$dob), array('Guid_user'=>$_GET['patient']));
+	    }
+
 	    //update patient table for reason and cpecimen collected values
 	    $wherePatient = array('Guid_user'=>$_GET['patient']);
 	    $patientData = array();
@@ -260,7 +265,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			<input type="hidden" name="save" value="1"/>
 			<div class="row">
 			    <div class="col-md-6 pInfo">
-				<p><label>Date of Birth:</label> <?php echo ($patient['dob']!="")?date("n/j/Y", strtotime($patient['dob'])):""; ?></p>
+				<p><label>Date of Birth:</label><input type="text" name="dob" class="datepicker" value="<?php echo ($patient['dob']!="")?date("n/j/Y", strtotime($patient['dob'])):""; ?>" autocomplete="off" /></p>
 				<p><label>Email:</label> <input type="email" name="email" value="<?php echo $patient['email']; ?>" autocomplete="off"/> </p>
 				<p><label>Registration Date:</label> <?php echo date("n/j/Y h:m A", strtotime($patient['Date_created'])); ?></p>
 			    </div>
@@ -417,7 +422,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					    <th>Date Checked</th>
 					    <th>Checked By</th>
 					    <th>Deductible $</th>
-					    <th class="text-center">Action</th>
+					    <th class="text-center actions">Action</th>
 					</tr>
 				    </thead>
 				    <tbody>
@@ -425,7 +430,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					$dedSum = 0;
 					foreach ($deductableLogs as $k=>$v) {
 					    if($v['deductable']!=""){
-						$dedSum += (int)$v['deductable'];
+						$dedSum += $v['deductable'];
 					    }
 					?>
 					<tr id="<?php echo $v['Guid_deductable']; ?>">
@@ -433,12 +438,14 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					    <td><span class="editable_checked_by"><?php echo $v['checked_by']; ?></span></td>
 					    <td>$<span class="editable_deductable"><?php echo formatMoney($v['deductable']); ?></span></td>
 					    <td class="text-center">
+						<div class="action-btns">
 						<a data-id="<?php echo $v['Guid_deductable']; ?>" class="edit_deductable">
 						    <span class="fas fa-pencil-alt"></span>
 						</a>
 						<a href="<?php echo SITE_URL."/patient-info.php?patient=".$_GET['patient'].'&delete-deductible='.$v['Guid_deductable']; ?>" onclick="javascript:confirmationDeleteDeductible($(this));return false;" class="color-red">
 						    <span class="far fa-trash-alt"></span>
 						</a>
+						</div>
 					    </td>
 					</tr>
 					<?php } ?>
@@ -469,26 +476,28 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					<th>Date Paid</th>
 					<th>Payor</th>
 					<th>Amount $</th>
-					<th class="text-center">Action</th>
+					<th class="text-center actions">Action</th>
 				    </tr>
 				</thead>
 				<tbody>
 				    <?php
 				    $revSum = 0;
 				    foreach ($revenues as $k=>$v) {
-					$revSum += (int)$v['amount'];
+					$revSum += $v['amount'];
 				    ?>
 				    <tr id="<?php echo $v['Guid_revenue']; ?>">
 					<td><span class="editable_date_payd"><?php echo (!preg_match("/0{4}/" , $v['date_paid'])) ? date('n/j/Y', strtotime($v['date_paid'])) : ""; ?></span></td>
 					<td><span class="editable_payor"><?php echo $v['payor']; ?></span></td>
 					<td>$<span class="editable_amount"><?php echo formatMoney($v['amount']); ?></span></td>
 					<td class="text-center">
+					    <div class="action-btns">
 					    <a data-id="<?php echo $v['Guid_revenue']; ?>" class="edit_reveue">
 						<span class="fas fa-pencil-alt"></span>
 					    </a>
 					    <a href="<?php echo SITE_URL."/patient-info.php?patient=".$_GET['patient'].'&delete-revenue='.$v['Guid_revenue']; ?>" onclick="javascript:confirmationDeleteRevenue($(this));return false;" class="color-red">
 						<span class="far fa-trash-alt"></span>
 					    </a>
+					    </div>
 					</td>
 				    </tr>
 

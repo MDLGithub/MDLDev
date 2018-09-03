@@ -760,7 +760,7 @@ $(document).ready(function () {
 	var formData = '<tr>\n\
 			    <td><input required name="deductableAdd[date_checked][]" class="deductable-first datepicker" autocomplete="off" placeholder="Date Checked" type="text" /></td>\n\
 			    <td><input required name="deductableAdd[checked_by][]" placeholder="Checked By" type="text" /></td>\n\
-			    <td>$ <input required name="deductableAdd[deductable][]" placeholder="Deductable" type="number" min=\"0.00\" step=\"0.01\" /></td>\n\
+			    <td>$ <input required name="deductableAdd[deductable][]" placeholder="Deductible" type="number" min=\"0.00\" step=\"0.01\" /></td>\n\
 			    <td class="text-center"><a class="color-red removeTableRow"><span class="fas fa-minus-circle" aria-hidden="true"></span></a></td>\n\
 			</tr>';
 	$('#deductable-table .priceSum').before(formData);

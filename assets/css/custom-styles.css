@@ -1105,10 +1105,12 @@ table.dataTable thead .sorting {
 #deductable-log input[type="text"],
 #deductable-log input[type="number"]{
     border-bottom: 1px solid;
-    max-width: 270px;
+    width: 170px;
+    max-width: 90%;
     min-width: 35%;
     height: 27px;
 }
+
 #patient-info-box .pInfo textarea{
     resize: vertical;
 }
@@ -1144,7 +1146,10 @@ main .box{
 }
 .fas.fa-pencil-alt,
 .far.fa-trash-alt{
-    margin: 0 6px;
+    margin: 0 5px;
+}
+.action-btns{
+    width: 55px;
 }
 .priceSum {
     font-weight: bold;
@@ -1160,5 +1165,6 @@ span.editable_date_payd,
 span.editable_payor,
 span.editable_amount{
     display: inline-block;
-    min-width: 185px;
+    width: 170px;
+    max-width: 80%;
 }
