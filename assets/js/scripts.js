@@ -28,6 +28,8 @@ $(document).ready(function () {
         }
     });
     
+  
+    
     //$('.datepicker').datepicker({ dateFormat: 'm/d/yy' });
     $('body').on('click','.datepicker', function() {
         $(this).datepicker('destroy').datepicker({showOn:'focus',dateFormat: 'm/d/yy'}).focus();
@@ -49,10 +51,20 @@ $(document).ready(function () {
         }else{
             console.log(val.length);
             if(val.length==7 || val.length==0){
-                $(this).removeClass('error-border');
+                $(this).removeClass('error error-border');
+                $('#message').html("");
             } else {
-                $(this).addClass('error-border');                
+                $(this).addClass('error error-border');  
+                $('#message').html("MDL# must contain 7 digits only.");
             }
+        }
+    });
+    $( "form#mdlInfoForm" ).submit(function( event ) {
+        if ($(".mdlnumber").hasClass('error')) {
+            event.preventDefault();
+            $('#message').html("MDL# must contain 7 digits only.");
+        } else {
+            return;
         }
     });
    
@@ -64,6 +76,7 @@ $(document).ready(function () {
             return;
         }
     });
+    
         
     /**
      * Home page toggle for search sidebar
