@@ -1168,3 +1168,7 @@ span.editable_amount{
     width: 170px;
     max-width: 80%;
 }
+#add-declined-reason{
+    font-size: 25px;
+    margin-left: 15px;
+}
