@@ -271,10 +271,12 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			    </div>
 			    <div class="col-md-6 pB-30">
 				<div class="row">
+				    <div id="message" class="error-text">
 				    <?php if($errorMsgMdlStats){ ?>
 					<!--Form Error messages go here-->
-					<div class="error-text"><?php echo $errorMsgMdlStats; ?></div>
+					<?php echo $errorMsgMdlStats; ?>
 				    <?php } ?>
+				    </div>
 				    <div id="specimenRadioBox" class="<?php echo ($patient['specimen_collected']=='Yes')?'hidden':"";?>" >
 					<h5>Specimen collected?</h5>
 					<div class="col-md-4 pL-0">
@@ -307,7 +309,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 				    <div id="mdlInfoBox" class="pInfo <?php echo ($patient['specimen_collected']!='Yes')?'hidden':"";?>">
 					<p>
 					    <label>MDL#:</label>
-					    <input type="number" autocomplete="off" class="mdlnumber" name="mdl_number" value="<?php echo isset($_POST['mdl_number'])?$_POST['mdl_number']:$mdlInfo['mdl_number']; ?>" />
+					    <?php
+					    $mdlNumber = isset($_POST['mdl_number'])?$_POST['mdl_number']:$mdlInfo['mdl_number'];
+					    $mdlClass = (strlen($mdlNumber)!=0 && strlen($mdlNumber)<7)?' error error-border' : '';
+					    ?>
+					    <input type="number" autocomplete="off" class="mdlnumber <?php echo $mdlClass; ?>" name="mdl_number" value="<?php echo $mdlNumber; ?>" />
 					</p>
 					<p>
 					    <label>Specimen Collection Date:</label>
@@ -516,7 +522,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		    </div>
 		    <div class="row actionButtons pB-30">
 			<div class="col-md-12">
-			    <button name="save" type="submit" class="button btn-inline">Save</button>
+			    <button id="save-patient-info" name="save" type="submit" class="button btn-inline">Save</button>
 			    <button name="print" type="submit" class="button btn-inline">Print</button>
 			    <button name="email" type="submit" class="button btn-inline">Email</button>
 			 </div>
