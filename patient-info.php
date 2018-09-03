@@ -345,6 +345,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 						    <option <?php echo ($mdlInfo['Guid_declined_reason']==$v['Guid_declined_reason'])?" selected":""; ?> value="<?php echo $v['Guid_declined_reason']; ?>"><?php echo $v['reason']; ?></option>
 						<?php } ?>
 					    </select>
+					    <?php if($role=='Admin'){ ?>
+					    <a href="<?php echo SITE_URL."/patient-info.php?patient=".$_GET['patient']."&add-declined-reason=1";?>" id="add-declined-reason">
+						<span class="fas fa-plus-circle" aria-hidden="true"></span>
+					    </a>
+					    <?php } ?>
 					</p>
 					<p>
 					    <label>Date Reported:</label>
@@ -538,6 +543,41 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     </div>
     <div id="admin_print"></div>
 </main>
+
+
+<?php
+    if(isset($_POST['add_new_declined_reason'])){
+	$reasonData=array('reason'=>$_POST['reason']);
+	$insertReason = insertIntoTable($db, 'tbl_mdl_status_declined_reasons', $reasonData);
+	if($insertReason['insertID']!=""){
+	    Leave(SITE_URL."/patient-info.php?patient=".$_GET['patient']);
+	}
+    }
+?>
+
+<?php if(isset($_GET['add-declined-reason']) && $_GET['add-declined-reason']=='1'){ ?>
+<div class="modalBlock ">
+    <div class="contentBlock">
+	<h5 class="providersTitle">Add New Declined Reason</h5>
+	<form method="POST" >
+	    <div class="f2">
+		<label class="dynamic" for="reason"><span>Declined Reason</span></label>
+		<div class="group">
+		    <input required autocomplete="off" id="reason" name="reason" type="text" value="" placeholder="Declined Reason">
+		    <p class="f_status">
+			<span class="status_icons"><strong></strong></span>
+		    </p>
+		</div>
+	    </div>
+	    <div class="">
+		<button class="btn-inline" name="add_new_declined_reason" type="submit" >Save</button>
+		<button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>
+	    </div>
+	</form>
+
+    </div>
+</div>
+<?php } ?>
 
 <?php require_once 'scripts.php'; ?>
 <?php require_once 'footer.php'; ?>
