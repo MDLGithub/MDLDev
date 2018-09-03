@@ -959,3 +959,30 @@ function uploadFile($uploadName, $uploadFolder=NULL){
     return $message;
 }
 
+function getEventSchedule($db,$id=""){
+    if($id){
+        $query = "SELECT evt.id, evt.title, evt.start_event, evt.end_event,"
+                . " CONCAT(salerep.first_name, ' ', salerep.last_name) as salesrep,"
+                . " acct.logo, acct.account, acct.name, evt.comments"
+                . "  FROM tblevents evt "
+                . "LEFT JOIN tblsalesrep salerep ON evt.salesrepid = salerep.Guid_salesrep "
+                . "LEFT JOIN tblaccount acct ON evt.accountid = acct.Guid_account "
+                . "WHERE evt.id =:id "
+                . "ORDER BY evt.id";
+        
+        $result = $db->query($query, array("id"=>$id));
+    }
+    else{
+        $query = "SELECT evt.id, evt.title, evt.start_event, evt.end_event,"
+                . " CONCAT(salerep.first_name, ' ', salerep.last_name) as salesrep,"
+                . " acct.logo, acct.account, acct.name, evt.comments"
+                . "  FROM tblevents evt "
+                . "LEFT JOIN tblsalesrep salerep ON evt.salesrepid = salerep.Guid_salesrep "
+                . "LEFT JOIN tblaccount acct ON evt.accountid = acct.Guid_account "
+                . "ORDER BY evt.id";
+        $result = $db->query($query);
+    }
+    
+    return $result;
+}
+
