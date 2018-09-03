@@ -53,7 +53,8 @@ if (isset($_POST['generate_url_config']) && $_POST['generate_url_config']=='1'){
 
     extract($_POST);
 
-    if($role=='Sales Rep' && $dv==''){
+    $reqLocations = array('D', 'F', 'L', 'DE');
+    if($role=='Sales Rep' && $dv=='' && in_array($lc, $reqLocations)){
 	$isValid = FALSE;
 	$generateUrlLink = "";
 	$dvMessage = "<div class='error-text'>Please select device.</div>";

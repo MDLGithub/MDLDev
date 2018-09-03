@@ -27,30 +27,52 @@ $adminsQ = 'SELECT u.Guid_user, u.email, a.first_name, a.last_name, st.mdl_numbe
 	    LEFT JOIN tbluser u ON st.Guid_user=u.Guid_user
 	    LEFT JOIN tbladmins a ON u.Guid_user=a.Guid_user
 	    WHERE a.Guid_user!="" ';
-$query1 = $db->query($adminsQ);
+//$query1 = $db->query($adminsQ);
 
 $patientsQ ='SELECT u.Guid_user, u.email, a.firstname AS first_name, a.lastname AS last_name, st.mdl_number, st.Guid_user
 	    FROM tbl_mdl_stats st
 	    LEFT JOIN tbluser u ON st.Guid_user=u.Guid_user
 	    LEFT JOIN tblpatient a ON u.Guid_user=a.Guid_user
 	    WHERE a.Guid_user!=""';
-$query2 = $db->query($patientsQ);
+//$query2 = $db->query($patientsQ);
+
 
 $salesrepsQ = 'SELECT u.Guid_user, u.email, a.Guid_user, a.first_name, a.last_name, st.mdl_number, st.Guid_user
 	    FROM tbl_mdl_stats st
 	    LEFT JOIN tbluser u ON st.Guid_user=u.Guid_user
 	    LEFT JOIN tblsalesrep a ON u.Guid_user=a.Guid_user
 	    WHERE a.Guid_user!=""';
-$query3 = $db->query($salesrepsQ);
+//$query3 = $db->query($salesrepsQ);
 
 $providersQ = 'SELECT u.Guid_user, u.email, a.Guid_user, a.first_name, a.last_name, st.mdl_number, st.Guid_user
 	    FROM tbl_mdl_stats st
 	    LEFT JOIN tbluser u ON st.Guid_user=u.Guid_user
 	    LEFT JOIN tblprovider a ON u.Guid_user=a.Guid_user
 	    WHERE a.Guid_user!=""';
-$query4 = $db->query($providersQ);
+//$query4 = $db->query($providersQ);
 
-$result = array_merge($query1,$query2,$query3,$query4);
+//$result = array_merge($query1,$query2,$query3,$query4);
+
+$query = 'SELECT  u.Guid_user, u.email,
+	p.Guid_patient, p.firstname AS first_name, p.lastname AS last_name,
+	st.mdl_number, st.Guid_user, st.date_reported,
+	r.amount AS revenue,
+	s.Guid_salesrep, s.first_name AS slaserep_fName, s.last_name AS salesrep_lName,
+	a.Guid_account, a.account, a.name
+	FROM tbl_mdl_stats st
+	LEFT JOIN tbluser u ON st.Guid_user=u.Guid_user
+	LEFT JOIN tblpatient p ON u.Guid_user=p.Guid_user
+	LEFT JOIN tbl_revenue r ON u.Guid_user=r.Guid_user
+	LEFT JOIN tblsalesrep s ON u.Guid_user=s.Guid_user
+	LEFT JOIN tblaccountrep sac ON s.Guid_salesrep=sac.Guid_salesrep
+	LEFT JOIN tblaccount a ON sac.Guid_account=a.Guid_account
+	WHERE p.Guid_user!="" AND st.mdl_number!="" ';
+
+$result = $db->query($query);
+$revenueTotal = 0;
+foreach ($result as $k=>$v){
+    $revenueTotal += $v['revenue'];
+}
 
 ?>
 <main class="full-width">
@@ -76,13 +98,12 @@ $result = array_merge($query1,$query2,$query3,$query4);
 	    <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
 	</section>
 	<div class="scroller">
-<!--            <div class="row">
-		<div class="col-md-12">
-		    <a class="add-new-device" href="<?php echo SITE_URL; ?>?action=add">
-			<span class="fas fa-plus-circle" aria-hidden="true"></span> Add
-		    </a>
+	    <div class="row">
+		<div class="col-md-12 text-right priceSum pR-30">
+		    Total:&nbsp;&nbsp;&nbsp;
+		    $<?php echo formatMoney($revenueTotal); ?>
 		</div>
-	    </div>               -->
+	    </div>
 	    <div class="row">
 		<div class="col-md-12">
 		    <table id="dataTable" class="display" style="width:100%">
@@ -91,7 +112,10 @@ $result = array_merge($query1,$query2,$query3,$query4);
 				<th  class="actions">MDL#</th>
 				<th>First Name</th>
 				<th>Last Name</th>
-				<th>Email</th>
+				<th>Account</th>
+				<th>Genetic Consultant</th>
+				<th>Date Reported</th>
+				<th>Revenue</th>
 				<!--<th class="noFilter actions text-center">Actions</th>-->
 			    </tr>
 			</thead>
@@ -99,9 +123,12 @@ $result = array_merge($query1,$query2,$query3,$query4);
 			    <?php foreach ($result as $k=>$v){ ?>
 			    <tr>
 				<td><?php echo $v['mdl_number']; ?></td>
-				<td><?php echo $v['first_name']; ?></td>
-				<td><?php echo $v['last_name']; ?></td>
-				<td><?php echo $v['email']; ?></td>
+				<td><a target="_blank" href="<?php echo SITE_URL."/patient-info.php?patient=".$v['Guid_user']; ?>"><?php echo $v['first_name']; ?></a></td>
+				<td><a target="_blank" href="<?php echo SITE_URL."/patient-info.php?patient=".$v['Guid_user']; ?>"><?php echo $v['last_name']; ?></a></td>
+				<td><?php echo $v['name']." ".$v['name']; ?></td>
+				<td><?php echo $v['slaserep_fName']." ".$v['salesrep_lName']; ?></td>
+				<td><?php echo (!preg_match("/0{4}/" , $v['date_reported'])) ? date('n/j/Y h:m A', strtotime($v['date_reported'])) : ""; ?></td>
+				<td>$<?php echo formatMoney($v['revenue']); ?></td>
 			    </tr>
 			    <?php } ?>
 			</tbody>

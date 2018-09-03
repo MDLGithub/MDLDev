@@ -51,6 +51,9 @@ body{
 .pL-30{
        padding-left: 30px!important;
 }
+.pR-30{
+    padding-right: 30px !important;
+}
 .wh-35{
     width: 35px !important;
     height: 35px !important;
@@ -733,7 +736,7 @@ thead th{
 }
 
 #dataTableHome {
-	display:contents;
+	display: block;
     width:100%;
     overflow-y:scroll;
     table-layout:fixed;
@@ -796,8 +799,8 @@ table.dataTable thead .sorting {
 }
 
 #patient-info-box .contentBlock {
-    width: 90%;
-    left: 5%;
+    width: 60%;
+    left: 20%;
     top: 10%;
 }
 .button, form button[type="submit"]{
@@ -844,6 +847,11 @@ table.dataTable thead .sorting {
 .col-md-3 .pT-20 #image{
 	margin-top:10px;
 	margin-left:-20px;
+}
+
+.accountLogo{
+    max-width: 100%;
+    height: auto!important;
 }
 
 @media (min-width: 1200px){
@@ -1086,11 +1094,23 @@ table.dataTable thead .sorting {
     margin-bottom: 5px;
     margin-right: 5px;
 }
+#patient-info-box .pInfo > p{
+    margin-bottom: 10px;
+}
 #patient-info-box .pInfo input,
+#patient-info-box .pInfo select,
+#patient-info-box .pInfo textarea,
 #revenue input[type="text"],
-#deductable-log input[type="text"]{
+#revenue input[type="number"],
+#deductable-log input[type="text"],
+#deductable-log input[type="number"]{
     border-bottom: 1px solid;
-    max-width: 100%;
+    max-width: 270px;
+    min-width: 35%;
+    height: 27px;
+}
+#patient-info-box .pInfo textarea{
+    resize: vertical;
 }
 #patient-info-box .pInfo .editable_text {
     display: inline-block;
@@ -1126,10 +1146,19 @@ main .box{
 .far.fa-trash-alt{
     margin: 0 6px;
 }
-tr.priceSum {
+.priceSum {
     font-weight: bold;
     font-style: italic;
 }
 .mn.incomplete{
     color: #2e5fa9;
+}
+span.editable_date_checked,
+span.editable_checked_by,
+span.editable_deductable,
+span.editable_date_payd,
+span.editable_payor,
+span.editable_amount{
+    display: inline-block;
+    min-width: 185px;
 }

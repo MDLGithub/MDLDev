@@ -1,12 +1,12 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+//error_reporting(E_ALL);
+//ini_set('display_errors', 1);
 
 // Database server, username, password, and database name.
 define("DB_SERVER", "localhost");
-define("DB_USER", "elmirak_mdlab18");
-define("DB_PASSWORD", "yftE8ZuP)j1V");
-define("DB_NAME", "elmirak_mdlab_shareddb");
+define("DB_USER", "root");
+define("DB_PASSWORD", "");
+define("DB_NAME", "dev_shareddb_new");
 define("DB_PREFIX", "tbl");
 
 // Paths

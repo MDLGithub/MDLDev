@@ -5,19 +5,28 @@ $(document).ready(function () {
     Number.prototype.formatMoney = function(c, d, t){
 	var n = this,
 	c = isNaN(c = Math.abs(c)) ? 2 : c,
-	d = d == undefined ? "." : d,
-	t = t == undefined ? "," : t,
+	d = d == undefined ? "," : d,
+	t = t == undefined ? "." : t,
 	s = n < 0 ? "-" : "",
 	i = String(parseInt(n = Math.abs(Number(n) || 0).toFixed(c))),
 	j = (j = i.length) > 3 ? j % 3 : 0;
        return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
     };
     $( ".money2" ).each(function( index ) {
-	var thisNum =  parseInt($( this ).text());
-	$( this ).text((thisNum).formatMoney(2, '.', ','));
+	var thisNum =  parseFloat($( this ).text());
+	$( this ).text((thisNum).formatMoney(2));
     });
 
-
+    //patient info page status
+    $("#mdl-status").on('change', function() {
+	var optionTxt = $(this).find("option:selected").text();
+	if( optionTxt == 'Declined' ){
+	    $('#status-declined-reasons').removeClass('hidden');
+	} else {
+	    $('#status-declined-reasons').addClass('hidden');
+	    $('#status-declined-reasons option').prop('selected',false);
+	}
+    });
 
     //$('.datepicker').datepicker({ dateFormat: 'm/d/yy' });
     $('body').on('click','.datepicker', function() {
@@ -26,6 +35,25 @@ $(document).ready(function () {
     $('body').delegate( ".numberonly", "input", function() {
 	var val = $(this).val();
 	$(this).val(val.replace(/\D/g,''));
+    });
+
+
+    /**
+     * MDL# allow only input 7 digits
+     * used on patient info page
+     */
+    $('body').delegate( ".mdlnumber", "input", function() {
+	var val = $(this).val();
+	if(val.length>7){
+	    $(this).val(val.slice(0, 7));
+	}else{
+	    console.log(val.length);
+	    if(val.length==7 || val.length==0){
+		$(this).removeClass('error-border');
+	    } else {
+		$(this).addClass('error-border');
+	    }
+	}
     });
 
     $( "form" ).submit(function( event ) {
@@ -67,8 +95,6 @@ $(document).ready(function () {
 
     });
 
-
-
     $("#selectAllPrintOptions").change(function() {
 	if(this.checked) {
 	    $('.printSelectBlock .print1').prop('checked', true);
@@ -83,7 +109,11 @@ $(document).ready(function () {
 
     $('.closeModal').on('click', function(e){
 	e.preventDefault();
-	$('.modalBlock').removeClass('show').addClass('hide');
+	$('.modalBlock').removeClass('show').addClass('hidden');
+    });
+    $('.openUserInfoModal').on('click', function(e){
+	e.preventDefault();
+	$('.modalBlock').removeClass('hidden').addClass('show');
     });
 
     /**
@@ -664,10 +694,10 @@ $(document).ready(function () {
 	var datePaydTxt = $('#revenue-table #'+dataID+" .editable_date_payd").text();
 	var datePayorTxt = $('#revenue-table #'+dataID+" .editable_payor").text();
 	var dateAmmountTxt = $('#revenue-table #'+dataID+" .editable_amount").text();
-
+	dateAmmountTxt = dateAmmountTxt.replace(/\,/g,"");
 	var datePaydInput = $("<input required autocomplete=\"off\" type=\"text\" name=\"revenueEdit["+dataID+"][date_paid]\" class=\"datepicker\" />");
 	var datePayorInput = $("<input required autocomplete=\"off\" type=\"text\" name=\"revenueEdit["+dataID+"][payor]\" />");
-	var dateAmountInput = $("<input required autocomplete=\"off\" type=\"text\" name=\"revenueEdit["+dataID+"][amount]\" class=\"numberonly\" />");
+	var dateAmountInput = $("<input required autocomplete=\"off\"  min=\"0.00\" step=\"0.01\" type=\"number\"  name=\"revenueEdit["+dataID+"][amount]\"  />");
 
 	datePaydInput.val(datePaydTxt);
 	datePayorInput.val(datePayorTxt);
@@ -689,10 +719,10 @@ $(document).ready(function () {
 	var dateCheckedTxt = $('#deductable-table #'+dataID+" .editable_date_checked").text();
 	var checkedByTxt = $('#deductable-table #'+dataID+" .editable_checked_by").text();
 	var deductableTxt = $('#deductable-table #'+dataID+" .editable_deductable").text();
-	console.log(dateCheckedTxt);
+	deductableTxt = deductableTxt.replace(/\,/g,"");
 	var dateCheckedInput = $("<input required autocomplete=\"off\" type=\"text\" name=\"deductableEdit["+dataID+"][date_checked]\" class=\"datepicker\" />");
 	var checkedByInput = $("<input required autocomplete=\"off\" type=\"text\" name=\"deductableEdit["+dataID+"][checked_by]\" />");
-	var deductableInput = $("<input required autocomplete=\"off\" type=\"text\" name=\"deductableEdit["+dataID+"][deductable]\" class=\"numberonly\" />");
+	var deductableInput = $("<input required autocomplete=\"off\" min=\"0.00\" step=\"0.01\" type=\"number\" name=\"deductableEdit["+dataID+"][deductable]\" />");
 
 	dateCheckedInput.val(dateCheckedTxt);
 	checkedByInput.val(checkedByTxt);
@@ -707,25 +737,33 @@ $(document).ready(function () {
 
     });
 
-    $('#add-revenue').on('click', function(){
-	console.log('here');
-	$('.revenue-form').html();
-	var formData = '<table class="table"><tr>\n\
-			<td><input name="revenueAdd[date_paid]" class="deductable-first datepicker" autocomplete="off" class="revenue-first" placeholder="Date Paid" type="text" /></td>\n\
-			<td><input name="revenueAdd[payor]" placeholder="Payor" type="text" /></td>\n\
-			<td><input name="revenueAdd[amount]" class="numberonly"  placeholder="Amount $" type="text" /></td>\n\
-			</tr></table>';
-	$('.revenue-form').html(formData);
-    });
-    $('#add-deductable-log').on('click', function(){
-	$('.deductable-form').html();
-	var formData = '<table class="table"><tr>\n\
-			    <td><input required="" name="deductableAdd[date_checked]" class="deductable-first datepicker" autocomplete="off" placeholder="Date Checked" type="text" /></td>\n\
-			    <td><input required="" name="deductableAdd[checked_by]" placeholder="Checked By" type="text" /></td>\n\
-			    <td><input required="" name="deductableAdd[deductable]" class="numberonly"  placeholder="Deductable $" type="text" /></td>\n\
-			</tr></table>';
 
-	$('.deductable-form').html(formData);
+    $('table').delegate( ".removeTableRow", "click", function() {
+	var val = $(this).parent().parent().remove();
+    });
+    /**
+     * Add revenue table row
+     */
+    $('#add-revenue').on('click', function(){
+	var formData = '<tr>\n\
+			<td><input required name="revenueAdd[date_paid][]" class="deductable-first datepicker" autocomplete="off" class="revenue-first" placeholder="Date Paid" type="text" /></td>\n\
+			<td><input required name="revenueAdd[payor][]" placeholder="Payor" type="text" /></td>\n\
+			<td>$ <input required name="revenueAdd[amount][]" placeholder="Amount" type="number"  min=\"0.00\" step=\"0.01\"/></td>\n\
+			<td class="text-center"><a class="color-red removeTableRow"><span class="fas fa-minus-circle" aria-hidden="true"></span></a></td>\n\
+			</tr>';
+	$('#revenue-table .priceSum').before(formData);
+    });
+    /**
+     * Add deductable table row
+     */
+    $('#add-deductable-log').on('click', function(){
+	var formData = '<tr>\n\
+			    <td><input required name="deductableAdd[date_checked][]" class="deductable-first datepicker" autocomplete="off" placeholder="Date Checked" type="text" /></td>\n\
+			    <td><input required name="deductableAdd[checked_by][]" placeholder="Checked By" type="text" /></td>\n\
+			    <td>$ <input required name="deductableAdd[deductable][]" placeholder="Deductable" type="number" min=\"0.00\" step=\"0.01\" /></td>\n\
+			    <td class="text-center"><a class="color-red removeTableRow"><span class="fas fa-minus-circle" aria-hidden="true"></span></a></td>\n\
+			</tr>';
+	$('#deductable-table .priceSum').before(formData);
     });
 
 

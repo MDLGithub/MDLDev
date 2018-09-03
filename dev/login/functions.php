@@ -365,7 +365,7 @@ function getUserDetails($db, $userRole, $userID){
 	$q .= " WHERE Guid_user=:Guid_user";
 	$userDetail = $db->row($q, array("Guid_user"=>$userID));
     }
-    var_dump($userRole);
+
     return $userDetail;
 }
 function saveUserRole($db, $Guid_user, $Guid_role) {
@@ -382,6 +382,7 @@ function saveUserRole($db, $Guid_user, $Guid_role) {
 }
 
 function saveUserDetails($db, $Guid_user, $Guid_role, $userDetails){
+
     if($Guid_role=='1'){//admin
 	$userQ = "SELECT Guid_user FROM tbladmins WHERE Guid_user=:Guid_user";
 	$isUserExists = $db->row($userQ, array('Guid_user'=>$Guid_user));
@@ -958,3 +959,40 @@ function uploadFile($uploadName, $uploadFolder=NULL){
 
     return $message;
 }
+/**
+ * format Money Function
+ * @param type $number
+ * @return string
+ */
+function formatMoney($number){
+    $pieces = explode(".", $number);
+    $startPiece = $pieces[0];
+    if(isset($pieces[1])){
+	$endPiece = $pieces[1];
+    }
+    $n=number_format(abs($startPiece));
+    $newNum = $n;
+    if(isset($endPiece)&&$endPiece!=""){
+	$newNum .= ".".$endPiece;
+	if(strlen($endPiece)=='1'){
+	    $newNum .= "0";
+	}
+    } else {
+	$newNum .= ".00";
+    }
+
+    return $newNum;
+}
+
+//$result = alternative_money( '%!n ' . $currency[1], $amt);
+//function alternative_money($val,$symbol='$',$r=2) {
+//    $n = $val;
+//    $c = is_float($n) ? 1 : number_format($n,$r);
+//    $d = '.';
+//    $t = ',';
+//    $sign = ($n < 0) ? '-' : '';
+//    $i = $n=number_format(abs($n),$r);
+//    $j = (($j = $i.length) > 3) ? $j % 3 : 0;
+//
+//    return  $symbol.$sign .($j ? substr($i,0, $j) + $t : '').preg_replace('/(\d{3})(?=\d)/',"$1" + $t,substr($i,$j)) ;
+//}
