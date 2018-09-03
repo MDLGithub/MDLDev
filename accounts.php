@@ -50,12 +50,6 @@ if( isset($_POST['manage_provider'])){
     if($provider_id!=""){
         $data['provider_id']=$provider_id;
     }
-    
-    
-    $userData = array(
-        'email' => $provider_email,
-        'password' => encode_password($provider_password)
-    );
     if($_FILES["photo_filename"]["name"] != ""){
         $fileName = $_FILES["photo_filename"]["name"];        
         $data['photo_filename'] = $fileName;
@@ -110,8 +104,7 @@ if( isset($_POST['manage_provider'])){
 
             $providerDataArray['action'] = 'insert';
             $providerDataArray['provider_id']=$_POST['provider_id'];
-            var_dump($data);
-            
+           
             $isProviderValid = validateProviderId($db, $providerDataArray);        
             if($isProviderValid['status']==1){
                 $insert = insertIntoTable($db, 'tblprovider', $data, $msg); 
@@ -138,8 +131,6 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
     $provider_photo_filename = $providerInfo["photo_filename"];  
     $providerTitleTxt = "Update Provider";
     $labelClass="";  
-    $provider_email = $providerInfo["provider_email"];
-    $provider_password = $providerInfo["provider_password"];
 } elseif (!isset($_GET['provider_guid']) || $_GET['provider_guid']=="") {
     $labelClass = "";
     $providerBoxClass = "hide";
@@ -149,8 +140,6 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
     $provider_account_id = "";
     $provider_first_name = "";
     $provider_last_name = "";
-    $provider_email = "";
-    $provider_password = "";
     $provider_title = "";
     $provider_photo_filename = "";
     $providerTitleTxt = "Add Provider";
@@ -163,8 +152,6 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
     $provider_account_id = "";
     $provider_first_name = "";
     $provider_last_name = "";
-    $provider_email = "";
-    $provider_password = "";
     $provider_title = "";
     $provider_photo_filename = "";
     $providerTitleTxt = "Add Provider";
@@ -388,21 +375,6 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
                     </p>
                 </div>
             </div>
-            <?php if($role=='Admin'){ ?>
-            <div class="f2 <?php echo ($provider_last_name!="")?"valid":"";?>">
-                <label class="dynamic" for="provider_email"><span>Email</span></label>
-                <div class="group">
-                    <input autocomplete="off" id="provider_email" name="provider_email" type="text" value="<?php echo $provider_email; ?>" placeholder="Email">
-                </div>
-            </div>
-            <div class="f2 <?php echo ($provider_last_name!="")?"valid":"";?>">
-                <label class="dynamic" for="provider_password"><span>Password</span></label>
-                <div class="group">
-                    <input autocomplete="off" id="provider_password" name="provider_password" type="password" value="" placeholder="Password">
-                </div>
-            </div>
-            
-            <?php } ?>
             
             <div class="form-group">
                 <div class="row">
