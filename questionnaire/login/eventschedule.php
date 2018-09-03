@@ -488,7 +488,7 @@ $thisMessage = "";
                                         </div>
                                     </div>
                                 </div>
-                                <?php if ($role == 'Admin') { ?>
+                                <?php if ($role == 'Admin' || $role == 'Sales Manager') { ?>
                                     <div class='col-md-2'>
                                         <div class="form-group">
                                             <select class="form-control" id="salesrepopt">
@@ -700,7 +700,7 @@ $thisMessage = "";
                                         </div>
                                     </div>
                                 </div>
-                                <?php if ($role == 'Admin') { ?>
+                                <?php if ($role == 'Admin' || $role == 'Sales Manager') { ?>
                                     <div class='col-md-2'>
                                         <div class="form-group">
                                             <select class="form-control" id="modalsalesrepopt">
