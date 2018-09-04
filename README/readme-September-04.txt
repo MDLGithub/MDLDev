@@ -19,6 +19,6 @@ in coonfig.php need to add this lines
 // Login security params, should have deffernt values for each server
 define("SECURE", TRUE); // FOR Production should be TRUE if https
 define('PASSWORD_SALT', "ZCep0jVFDtp9Pc7eftIAXt"); //22 characters, Should be different for dev and prod
-define('SESSIN_NAME', "mdldevadmin"); //Should be different for dev and prod
+define('SESSION_NAME', "mdldevadmin"); //Should be different for dev and prod
 
 require_once('functions-ss-login.php');
