@@ -1,0 +1,30 @@
+Database:
+
+DROP TABLE IF EXISTS `tblevents`;
+
+CREATE TABLE `tblevents` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `start_event` datetime NOT NULL,
+  `end_event` datetime NOT NULL,
+  `salesrepid` int(11) NOT NULL,
+  `accountid` int(11) NOT NULL,
+  `comments` longtext,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
+
+Files:
+
+Added:
+
+1. questionnaire/login/eventschedule.php
+2. questionnaire/login/eventload.php
+3. questionnaire/login/eventupdate.php
+4. questionnaire/login/eventinsert.php
+5. questionnaire/login/eventdelete.php
+6. questionnaire/login/assets/eventschedule/
+
+Modified:
+
+1. questionnaire/login/functions.php
