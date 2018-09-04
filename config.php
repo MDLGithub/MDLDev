@@ -13,7 +13,7 @@ define("DB_PREFIX", "tbl");
 // Login security params, should have deffernt values for each server
 define("SECURE", FALSE); // FOR Production should be TRUE if https
 define('PASSWORD_SALT', "ZCep0jVFDtp9Pc7eftIAXt"); //22 characters, Should be different for dev and prod
-define('SESSIN_NAME', "mdldevadmin"); //Should be different for dev and prod
+define('SESSION_NAME', "mdldevadmin"); //Should be different for dev and prod
 
 // Paths
 define("SITE_ROOT", $_SERVER["DOCUMENT_ROOT"] . "/dev/login");
