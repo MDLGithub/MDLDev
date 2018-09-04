@@ -1,6 +1,9 @@
 <?php
 require_once('config.php');
-$result = getEventSchedule($db);
+$salesRepId = isset($_REQUEST['salerepId'])? $_REQUEST['salerepId'] : 0;
+$accountId = isset($_REQUEST['accountId'])? $_REQUEST['accountId'] : 0;
+
+$result = getEventSchedule($db,$salesRepId,$accountId);
 foreach($result as $row)
 {
  $data[] = array(
