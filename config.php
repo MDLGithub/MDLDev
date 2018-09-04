@@ -1,6 +1,6 @@
 <?php
-//error_reporting(E_ALL);
-//ini_set('display_errors', 1);
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 // Database server, username, password, and database name.
 define("DB_SERVER", "localhost");
@@ -8,6 +8,12 @@ define("DB_USER", "root");
 define("DB_PASSWORD", "");
 define("DB_NAME", "dev_shareddb_new");
 define("DB_PREFIX", "tbl");
+
+
+// Login security params, should have deffernt values for each server
+define("SECURE", FALSE); // FOR Production should be TRUE if https
+define('PASSWORD_SALT', "ZCep0jVFDtp9Pc7eftIAXt"); //22 characters, Should be different for dev and prod
+define('SESSIN_NAME', "mdldevadmin"); //Should be different for dev and prod
 
 // Paths
 define("SITE_ROOT", $_SERVER["DOCUMENT_ROOT"] . "/dev/login");
@@ -23,6 +29,7 @@ function __autoload($classname)
 
 //include global functions
 require_once('functions.php');
+require_once('functions-ss-login.php');
 
 //Open database
 $mysql_err = false;

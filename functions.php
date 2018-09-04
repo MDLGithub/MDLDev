@@ -1,4 +1,5 @@
 <?php
+
 /**
 *  Redirect url
 */
@@ -25,40 +26,32 @@ function encode_password($password) {
 }
 
 /**
-*  Do Login Function
-*/
-function doLogin($db){
-    $showMsg = "";
-    if(isset($_POST['login'])){
-	$email = $_POST['email'];
-	$db->bind("email",$email);
-	$user   =  $db->row("SELECT * FROM `".DB_PREFIX."user` WHERE email = :email");
-	if ($user AND ( $user["password"] == encode_password($_POST['password']))){
-	    $showMsg = false;
-	    $_SESSION['user']['id'] = $user['Guid_user'];
-	    $_SESSION['user']['type'] = $user['user_type'];
-	    $_SESSION['user']['email'] = $user['email'];
-	}else{
-	    $showMsg = true;
-	}
+ * Generates random string.
+ *
+ * @param int $length
+ * @return string
+ */
+function str_random($length = 16)
+{
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+	$randomString .= $characters[rand(0, strlen($characters) - 1)];
+    }
 
-	return $showMsg;
-    }
+    return $randomString;
 }
+
 /**
-*  Do Logout Function
+*  Generate a token string
+*
+* @return $str
 */
-function doLogout(){
-    unset($_SESSION['user']);
-}
-/**
-*  Check if user logged in
-*/
-function isUserLogin(){
-    if( isset($_SESSION['user']['email']) && $_SESSION['user']['email'] != ''){
-	return true;
-    }
-    return false;
+function generateTokenString(){
+   // generate as random of a token as possible for lower PHP versions
+   $str = sha1(uniqid(sha1(PASSWORD_SALT), true) . time() . str_random(20));
+
+   return $str;
 }
 /**
 *   Return page url

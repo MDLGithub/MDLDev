@@ -1,12 +1,12 @@
 <?php
-    require_once('settings.php');
     require_once('config.php');
+    require_once('settings.php');
 
-    $showMsg = doLogin($db);
-
-    if(isUserLogin()){
+    $checkLogin = login_check($db);
+    if ($checkLogin['status']) {
 	Leave('dashboard.php');
+    } else {
+	require_once 'login.php';
     }
 
-    require_once 'login.php';
 ?>

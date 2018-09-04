@@ -1,24 +1,22 @@
 <?php
 ob_start();
-require_once('settings.php');
 require_once('config.php');
+require_once('settings.php');
 require_once('header.php');
-require_once ('navbar.php');
-
-if (!isUserLogin()) {
+if (!login_check($db)) {
     Leave(SITE_URL);
 }
 if (isset($_GET['logout'])) {
-    doLogout();
+    logout();
     Leave(SITE_URL);
 }
+
 $userID = $_SESSION['user']["id"];
 $roleInfo = getRole($db, $userID);
 $roleID = $roleInfo['Guid_role'];
 $accessRole = getAccessRoleByKey('devices');
 $roleIDs = unserialize($accessRole['role_ids']);
 $dataViewAccess = isUserHasAnyAccess($roleIDs, $roleID, 'view');
-
 
 $thisMessage = "";
 $fieldMsg = "";
@@ -61,9 +59,12 @@ if(isset($_GET['id'])&&$_GET['id']!=""){
 }
 
 if(isset($_POST['add_new_device'])){
-    $data = $_POST;
-    unset($data['add_new_device']);
-    $insert = insertIntoTable($db,'tbldevice', $data);
+    $deviceData = array(
+	'device_name'=>$_POST['device_name'],
+	'url_flag'=>$_POST['url_flag']
+    );
+
+    $insert = insertIntoTable($db,'tbldevice', $deviceData);
     if($insert['status']=='1'){
 	Leave(SITE_URL.'/devicesInventory.php'.$link);
     }
@@ -117,6 +118,8 @@ if(isset($_POST['save_device_inv'])){
 $devices = getDeviceinves($db);
 $salesreps = $db->selectAll('tblsalesrep');
 $getDevices = $db->selectAll('tbldevice');
+
+require_once ('navbar.php');
 ?>
 
 <main class="full-width">
