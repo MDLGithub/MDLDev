@@ -1,16 +1,17 @@
 <?php  
 ob_start();
-require_once('settings.php'); 
-require_once('config.php'); 
-require_once 'header.php';
+require_once('config.php');
+require_once('settings.php');
+require_once('header.php');
+if (!login_check($db)) {
+    Leave(SITE_URL);
+}
+if (isset($_GET['logout'])) {
+    logout();
+    Leave(SITE_URL);
+}
 
-if(!isUserLogin()){
-    Leave(SITE_URL);
-}
-if(isset($_GET['logout'])){
-    doLogout();
-    Leave(SITE_URL);
-}
+
 $userID = $_SESSION['user']["id"];
 $roleInfo = getRole($db, $userID);
 $role = $roleInfo['role'];

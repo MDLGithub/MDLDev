@@ -1,14 +1,13 @@
 <?php
 ob_start();
-require_once('settings.php');
 require_once('config.php');
+require_once('settings.php');
 require_once('header.php');
-
-if (!isUserLogin()) {
+if (!login_check($db)) {
     Leave(SITE_URL);
 }
 if (isset($_GET['logout'])) {
-    doLogout();
+    logout();
     Leave(SITE_URL);
 }
 
