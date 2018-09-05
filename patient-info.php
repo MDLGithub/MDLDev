@@ -419,6 +419,10 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 							if($v['age_personal'] && $v['age_personal']!=""){
 							    $ansPersonal .= " (Age ". $v['age_personal']."); ";
 							}
+							if($v['age_personal']==""&&$v['age_personal']==""){
+							    $ansPersonal = "No Cancer History";
+							}
+
 
 							$ansFamType =  $v['cancer_type'];
 							if(strpos(trim($ansFamType), ' ') == false){
@@ -428,9 +432,9 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 							if($v['age_relative'] && $v['age_relative']!=""){
 							    $ansFam .= " (Age ". $v['age_relative']."); ";
 							}
-
-
-
+							if($v['cancer_type']==""&&$v['relative']==""){
+							    $ansPersonal = "No Cancer History";
+							}
 
 						    }
 						    $ansPersonal = rtrim($ansPersonal,'; ');
