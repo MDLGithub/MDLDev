@@ -43,8 +43,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     
     $sqlSSQualify = "SELECT ssq.* FROM tbl_ss_qualify ssq WHERE ssq.Guid_qualify=:Guid_qualify";
     $ssQualifyResult = $db->query($sqlSSQualify, array('Guid_qualify'=>$Guid_qualify));
-    var_dump($sqlSSQualify);
-    
+        
     $errorMsgMdlStats = "";
     if(isset($_POST['save'])){
         
@@ -268,7 +267,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <p><label>Date of Birth:</label><input type="text" name="dob" class="datepicker" value="<?php echo ($qualifyResult['dob']!="")?date("n/j/Y", strtotime($qualifyResult['dob'])):""; ?>" autocomplete="off" /></p>
                                 <p><label>Email:</label> <input type="email" name="email" value="<?php echo $qualifyResult['email']; ?>" autocomplete="off"/> </p>
                                 <p><label>Registration Date:</label> <?php echo date("n/j/Y h:m A", strtotime($qualifyResult['Date_created'])); ?></p>
-                                <p><label>Insurance:</label> <?php echo$qualifyResult['insurance']; ?></p>
+                                <p><label>Insurance:</label> <?php echo $qualifyResult['insurance']; ?></p>
                             </div>
                             <div class="col-md-6 pB-30">                    
                                 <div class="row">
@@ -379,7 +378,6 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                     foreach ($ssQualifyResult as $k=>$v){ 
                                         $Guid_qualify = $v['Guid_qualify'];
                                         $Date_created = $v['Date_created'];
-                                        
                                         $qFam = $db->query("SELECT * FROM `tblqualifyfam` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created", array('Guid_qualify'=>$Guid_qualify, 'Date_created'=>$Date_created));
                                         $qAns = $db->query("SELECT * FROM `tbl_ss_qualifyans` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created", array('Guid_qualify'=>$Guid_qualify, 'Date_created'=>$Date_created));
                                         $queryPers = "SELECT * FROM `tbl_ss_qualifypers` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created";
@@ -387,9 +385,9 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                         
                                     ?>
                                     <tr>
-                                        <td><button class="print report" data-selected_questionnaire="<?php echo $v['Guid_qualify']; ?>" ></button></td>
+                                        <td><button class="print report" data-selected_date="<?php echo $qualifyResult; ?>" data-selected_questionnaire="<?php echo $v['Guid_qualify']; ?>" ></button></td>
                                         <td><?php echo $v['qualified']; ?></td>
-                                        <td><?php echo date("n/j/Y h:m:s A", strtotime($v['Date_created'])); ?></td> 
+                                        <td><?php echo date("n/j/Y H:m:s A", strtotime($v['Date_created'])); ?></td> 
                                         <td>
                                             <p>
                                                 <?php 
@@ -408,28 +406,44 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                                 ?>
                                                 <?php 
                                                 if(!empty($qAns)){    
-                                                    echo "<label>Personal: </label> "; 
-                                                    $ans = "";
+                                                    $personal = "<label>Personal: </label> "; 
+                                                    $family = "<label>Family: </label> "; 
+                                                    $ansPersonal = "";
+                                                    $ansFam = "";
                                                     foreach ($qAns as $k=>$v) {
-                                                        $ansType =  $v['cancer_personal']." ".$v['cancer_type'];
-                                                        if(strpos(trim($ansType), ' ') == false){
-                                                            $ansType .=  " Cancer";
+                                                        $ansPersonalType =  $v['cancer_personal'];                                                        
+                                                        if(strpos(trim($ansPersonalType), ' ') == false){
+                                                            $ansPersonalType .=  " Cancer";
                                                         }
-                                                        $ans .= $ansType;
+                                                        $ansPersonal .= $ansPersonalType;
                                                         if($v['age_personal'] && $v['age_personal']!=""){
-                                                            $ans .= " (Age ". $v['age_personal']."); ";
-                                                        } 
+                                                            $ansPersonal .= " (Age ". $v['age_personal']."); ";
+                                                        }
+                                                        
+                                                        $ansFamType =  $v['cancer_type'];
+                                                        if(strpos(trim($ansFamType), ' ') == false){
+                                                            $ansFamType .=  " Cancer";
+                                                        }
+                                                        $ansFam .= $v['relative'].", ".$ansFamType;
+                                                        if($v['age_relative'] && $v['age_relative']!=""){
+                                                            $ansFam .= " (Age ". $v['age_relative']."); ";
+                                                        }
+                                                        
+                                                        
+                                                         
                                                        
                                                     } 
-                                                    $ans = rtrim($ans,'; ');
-                                                     echo $ans;                                                    
+                                                    $ansPersonal = rtrim($ansPersonal,'; ');
+                                                    $ansFam = rtrim($ansFam,'; ');
+                                                    echo "<p>".$personal.$ansPersonal."</p>";                                                    
+                                                    echo "<p>".$family.$ansFam."</p>";                                                    
                                                 } 
                                                 ?>
                                                
                                             </p>
                                             <p>
                                                 <?php 
-                                                if(!empty($qFam)){
+                                                /*if(!empty($qFam)){
                                                     echo "<label>Family: </label> "; 
                                                     $fam = "";
                                                     foreach ($qFam as $k=>$v) {
@@ -442,7 +456,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                                     
                                                     $fam = rtrim($fam,'; ');
                                                     echo $fam;
-                                                } 
+                                                } */
                                                 ?>
                                             </p>
                                         </td>
