@@ -433,7 +433,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                                             $ansFam .= " (Age ". $v['age_relative']."); ";
                                                         }
                                                         if($v['cancer_type']==""&&$v['relative']==""){
-                                                            $ansPersonal = "No Cancer History";
+                                                            $ansFam = "No Cancer History";
                                                         }  
                                                        
                                                     } 
