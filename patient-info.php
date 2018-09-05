@@ -208,20 +208,20 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		}
 	    }
 
-	    $url=SITE_URL."/patient-info.php?patient=$guid_user&u";
+	    $url=SITE_URL."/patient-info.php?patient=$Guid_user&u";
 	    Leave($url);
 	}
     }
     //delete deductible log row
     if(isset($_GET['delete-deductible']) && $_GET['delete-deductible']!=""){
 	deleteByField($db,'tbl_deductable_log', 'Guid_deductable', $_GET['delete-deductible']);
-	$url=SITE_URL."/patient-info.php?patient=$guid_user";
+	$url=SITE_URL."/patient-info.php?patient=$Guid_user";
 	Leave($url);
     }
     //delete revenue row
     if(isset($_GET['delete-revenue']) && $_GET['delete-revenue']!=""){
 	deleteByField($db,'tbl_revenue', 'Guid_revenue', $_GET['delete-revenue']);
-	$url=SITE_URL."/patient-info.php?patient=$guid_user";
+	$url=SITE_URL."/patient-info.php?patient=$Guid_user";
 	Leave($url);
     }
 
