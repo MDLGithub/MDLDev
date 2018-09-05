@@ -735,28 +735,24 @@ thead th{
     padding-right: 0;
 }
 
-#dataTableHome,
-#tableHeaderFixed{
-	display: block;
+#dataTableHome {
+    display: block;
     width:100%;
     overflow-y:scroll;
     table-layout:fixed;
 }
 
-#dataTableHome_wrapper,
-#tableHeaderFixed_wrapper{
+#dataTableHome_wrapper{
 	display:flex;
 	flex-direction:column;
 	flex-grow:2;
 	z-index:1;
 }
-#dataTableHome,
-#tableHeaderFixed{
+#dataTableHome{
     width: 100%!important;
 }
 
-#dataTableHome thead,
-#tableHeaderFixed thead{
+#dataTableHome thead{
 	position: -webkit-sticky;
 	position: -moz-sticky;
 	position: -ms-sticky;
@@ -771,40 +767,29 @@ thead th{
 
 }
 
-#dataTableHome thead tr,
-#tableHeaderFixed thead tr{
+#dataTableHome thead tr{
     width:inherit;
     table-layout:fixed;
 
 }
 
-#dataTableHome thead th,
-#tableHeaderFixed thead th{
+#dataTableHome thead th{
 	width:inherit;
 
 }
-#tableHeaderFixed thead th{
-    box-sizing: border-box!important;
-    padding: 10px 18px !important;
-}
-#tableHeaderFixed_filter{
-    display: none;
-}
-#dataTableHome tbody,
-#tableHeaderFixed tbody{
+
+#dataTableHome tbody {
     overflow-x:hidden;
     display:block;
     width:calc(100% - 18px);
 }
-#dataTableHome tbody .t_row,
-#tableHeaderFixed tbody .t_row {
+#dataTableHome tbody .t_row {
     display:table;
     width:100%;
     table-layout:fixed;
 }
 
-#dataTableHome tbody tr td:last-child,
-#tableHeaderFixed tbody tr td:last-child{
+#dataTableHome tbody tr td:last-child{
 	text-align:center;
 }
 
@@ -856,7 +841,6 @@ table.dataTable thead .sorting {
 }
 
 #dataTableHome_length{
-#tableHeaderFixed_length{
 	padding-top: 0.5em;
 }
 
@@ -900,24 +884,21 @@ and (orientation : landscape) {
 	margin-left:2em;
     }
 
-    #dataTableHome thead,
-    #tableHeaderFixed thead{
+    #dataTableHome thead{
 	top:220px;
 	position: absolute;
-	display: table-row;
-	width: 97%;
-	top: 33px;
+	    display: table-row;
+	    width: 97%;
+	    top: 33px;
     }
 
-    #dataTableHome tbody,
-    #tableHeaderFixed tbody{
+	#dataTableHome tbody{
 	margin-top:70px;
     }
 
-    #dataTableHome tbody td,
-    #tableHeaderFixed tbody td {
-	overflow: hidden;
-    }
+    #dataTableHome tbody td {
+	    overflow: hidden;
+	}
 
     .home_scroller{
 	overflow-y:hidden;
@@ -956,35 +937,30 @@ and (orientation : portrait) {
 	/*margin-right:-300px;*/
     }
 
-	#dataTableHome_info,
-	#tableHeaderFixed_info{
-	    padding-top:0;
-	    margin-top: 0px;
+	#dataTableHome_info{
+	padding-top:0;
+	margin-top: 0px;
+    }
+
+	#dataTableHome_wrapper{
+		width: fit-content;
 	}
 
-	#dataTableHome_wrapper,
-	#tableHeaderFixed_wrapper{
-	    width: fit-content;
+	#dataTableHome thead{
+	top:25px;
+	position:absolute;
+	display:table-row;
+	width:165%;
+    }
+
+
+	#dataTableHome tbody{
+		overflow-x: scroll;
+		width:165%;
+		margin-top: 60px;
 	}
 
-	#dataTableHome thead,
-	#tableHeaderFixed thead{
-	    top:25px;
-	    position:absolute;
-	    display:table-row;
-	    width:165%;
-	}
-
-
-	#dataTableHome tbody,
-	#tableHeaderFixed tbody{
-	    overflow-x: scroll;
-	    width:165%;
-	    margin-top: 60px;
-	}
-
-	#dataTableHome tbody td,
-	#tableHeaderFixed tbody td{
+	#dataTableHome tbody td{
 		overflow:hidden;
 	}
 
@@ -1037,20 +1013,17 @@ and (orientation : portrait) {
   and (orientation: landscape)
   and (-webkit-min-device-pixel-ratio: 2) {
 
-    #dataTableHome thead,
-    #tableHeaderFixed thead{
+	#dataTableHome thead{
 	top:210px;
 	position:fixed;
 	width:70%;
     }
 
-    #dataTableHome tbody,
-    #tableHeaderFixed tbody{
+    #dataTableHome tbody{
 	margin-top: 60px;
     }
 
-    #dataTableHome_info,
-    #tableHeaderFixed_info{
+    #dataTableHome_info{
 	padding-top:0;
 	margin-top: 0px;
     }
@@ -1076,25 +1049,21 @@ and (orientation : portrait) {
   and (orientation: portrait)
   and (-webkit-min-device-pixel-ratio: 2) {
 
-    #dataTableHome thead,
-    #tableHeaderFixed thead{
+    #dataTableHome thead{
 	top:210px;
 	position:fixed;
 	width:63%;
     }
 
-    #dataTableHome tbody,
-    #tableHeaderFixed tbody{
+    #dataTableHome tbody{
 	margin-top:20px;
     }
 
-    #dataTableHome tbody td,
-    #tableHeaderFixed tbody td {
+    #dataTableHome tbody td {
 	    overflow: hidden;
 	}
 
-    #dataTableHome_info,
-    #tableHeaderFixed_info{
+    #dataTableHome_info{
 	padding-top:0;
 	margin-top: 0px;
     }
