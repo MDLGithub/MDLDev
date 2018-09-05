@@ -385,7 +385,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 
 				    ?>
 				    <tr>
-					<td><button class="print report" data-selected_date="<?php echo $qualifyResult; ?>" data-selected_questionnaire="<?php echo $v['Guid_qualify']; ?>" ></button></td>
+					<td><button class="print report" data-selected_date="<?php echo $v['Date_created']; ?>" data-selected_questionnaire="<?php echo $v['Guid_qualify']; ?>" ></button></td>
 					<td><?php echo $v['qualified']; ?></td>
 					<td><?php echo date("n/j/Y H:m:s A", strtotime($v['Date_created'])); ?></td>
 					<td>
