@@ -565,7 +565,7 @@ $(document).ready(function () {
     
     
     //$('#dataTable thead tr').clone(true).appendTo( '#dataTable thead' );
-    $('#dataTable thead tr:eq(0) th').each( function (i) {
+    $('#dataTable thead tr:eq(0) th, #tableHeaderFixed  thead tr:eq(0) th').each( function (i) {
         if( !$(this).hasClass('noFilter') ){
             var title = $(this).text();
             $(this).html( '<input class="dataTableFilterInput" type="text" placeholder="'+title+'" />' );

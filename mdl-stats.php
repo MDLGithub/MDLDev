@@ -45,9 +45,11 @@ if($result){
 
 require_once ('navbar.php');
 ?>
-<main class="full-width">   
-    <div class="box full visible ">  
-        <section id="palette_top">
+
+<main class="full-width">
+    <div class="box full visible">
+      
+        <section id="palette_top" class="shorter_palette_top">
             <h4>  
                 <ol class="breadcrumb">
                     <li><a href="<?php echo SITE_URL; ?>">Home</a></li>
@@ -56,8 +58,9 @@ require_once ('navbar.php');
             </h4>
             <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>
             <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
-        </section>
-        <div class="scroller">  
+        </section> 
+
+        <div id="app_data" class="home_scroller"> 
             <?php if(isset($revenueTotal)){ ?>
             <div class="row">                   
                 <div class="col-md-12 text-right priceSum pR-30">
@@ -65,25 +68,26 @@ require_once ('navbar.php');
                     $<?php echo formatMoney($revenueTotal); ?>
                 </div>                 
             </div>   
-            <?php } ?>            
-            <div class="row">
-                <div class="col-md-12">
-                    <table id="dataTable" class="display" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th  class="actions">MDL#</th>                                
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                                <th>Account</th>
-                                <th>Genetic Consultant</th>
-                                <th>Date Reported</th>
-                                <th>Revenue</th>
-                                <!--<th class="noFilter actions text-center">Actions</th>-->
-                            </tr>
-                        </thead>
-                        <tbody>
+            <?php } ?> 
+                
+                <div class="formContent">
+                    
+                <table id="tableHeaderFixed" class="pseudo_t table">
+                    <thead>
+                        <tr>
+                            <th  class="actions">MDL#</th>                                
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Account</th>
+                            <th>Genetic Consultant</th>
+                            <th>Date Reported</th>
+                            <th>Revenue</th>
+                            <!--<th class="noFilter actions text-center">Actions</th>-->
+                        </tr>
+                    </thead>
+                   <tbody>
                             <?php foreach ($result as $k=>$v){ ?>
-                            <tr>
+                            <tr  class="t_row">
                                 <td><?php echo $v['mdl_number']; ?></td>
                                 <td><a target="_blank" href="<?php echo SITE_URL."/patient-info.php?patient=".$v['Guid_user']; ?>"><?php echo $v['first_name']; ?></a></td>
                                 <td><a target="_blank" href="<?php echo SITE_URL."/patient-info.php?patient=".$v['Guid_user']; ?>"><?php echo $v['last_name']; ?></a></td>
@@ -96,15 +100,19 @@ require_once ('navbar.php');
                         </tbody>
                     </table>
                 </div>
-            </div>           
+           
         </div>
+      
     </div>
 </main>
 
+
+
+
 <?php require_once('scripts.php');?>
 <script type="text/javascript">  
-    if ($('#dataTable').length ) {
-        var table = $('#dataTable').DataTable({
+    if ($('#tableHeaderFixed').length ) {
+        var table = $('#tableHeaderFixed').DataTable({
             orderCellsTop: true,
             fixedHeader: true,
             //searching: false,
