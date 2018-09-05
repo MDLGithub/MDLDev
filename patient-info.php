@@ -24,27 +24,26 @@ $dataViewAccess = isUserHasAnyAccess($roleIDs, $roleID, 'view');
 
 $isValid = TRUE;
 if(isset($_GET['patient']) && $_GET['patient'] !="" ){
-    $patientUserID = $_GET['patient'];
-    $sqlQ = "SELECT q.Guid_qualify, q.Guid_user, q.qualified, q.insurance, q.Date_created,u.email,
-	    qa.age_personal, qa.cancer_type AS p_cancer_type,
-	    qp.cancer_type AS f_cancer_type
-	    FROM tbl_ss_qualify q
-	    LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user
-	    LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user
-	    LEFT JOIN tbl_ss_qualifyans qa ON q.Guid_qualify=qa.Guid_qualify
-	    LEFT JOIN tbl_ss_qualifyfam qf ON q.Guid_qualify=qf.Guid_qualify
-	    LEFT JOIN tbl_ss_qualifypers qp ON q.Guid_qualify=qp.Guid_qualify
-	    WHERE q.Guid_user = $patientUserID AND q.Date_created=qa.Date_created";
-    $result = $db->query($sqlQ);
-    $patientQ =  "SELECT p.*, u.email FROM tblpatient p
-		LEFT JOIN tbluser u ON p.Guid_user = u.Guid_user
-		WHERE p.Guid_user=".$patientUserID;
-    $patient = $db->row($patientQ);
-    $guid_user = $_GET['patient'];
+    $Guid_user = $_GET['patient'];
+
+    $sqlQualify = "SELECT q.Guid_qualify,q.Guid_user,q.insurance,q.Date_created,
+		    p.*, u.email
+		    FROM tblqualify q
+		    LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user
+		    LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user
+		    WHERE q.Guid_user=:Guid_user";
+    $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$Guid_user));
+
     $mdlInfoQ = "SELECT * FROM tbl_mdl_stats stats "
 		. "LEFT JOIN tbl_mdl_status status ON stats.Guid_status = status.Guid_status "
 		. "WHERE stats.Guid_user=:Guid_user";
-    $mdlInfo = $db->row($mdlInfoQ, array('Guid_user'=>$_GET['patient']));
+    $mdlInfo = $db->row($mdlInfoQ, array('Guid_user'=>$Guid_user));
+
+    $Guid_qualify = $qualifyResult['Guid_qualify'];
+
+    $sqlSSQualify = "SELECT ssq.* FROM tbl_ss_qualify ssq WHERE ssq.Guid_qualify=:Guid_qualify";
+    $ssQualifyResult = $db->query($sqlSSQualify, array('Guid_qualify'=>$Guid_qualify));
+    var_dump($sqlSSQualify);
 
     $errorMsgMdlStats = "";
     if(isset($_POST['save'])){
@@ -111,7 +110,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		if($mdlInfo['Guid_status'] != $_POST['Guid_status']){
 		    $statusLogData = array(
 			'Guid_status' => $_POST['Guid_status'],
-			'Guid_user' => $_GET['patient'],
+			'Guid_patient' => $_GET['patient'],
+			'recorded_by' => $_SESSION['user']['id'],
 			'mdl_number' => $_POST['mdl_number'],
 			'date' => date('Y-m-d H:i:s')
 		    );
@@ -259,15 +259,16 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		<?php if(isset($message)){ ?>
 		<div class="error-text"><?php echo $message; ?></div>
 		<?php } ?>
-		<h2 class="text-center"><?php echo ucfirst($patient['firstname'])." ".ucfirst($patient['lastname']);?></h2>
+		<h2 class="text-center"><?php echo ucfirst($qualifyResult['firstname'])." ".ucfirst($qualifyResult['lastname']);?></h2>
 
 		<form id="mdlInfoForm" action="" method="POST" >
 			<input type="hidden" name="save" value="1"/>
 			<div class="row">
 			    <div class="col-md-6 pInfo">
-				<p><label>Date of Birth:</label><input type="text" name="dob" class="datepicker" value="<?php echo ($patient['dob']!="")?date("n/j/Y", strtotime($patient['dob'])):""; ?>" autocomplete="off" /></p>
-				<p><label>Email:</label> <input type="email" name="email" value="<?php echo $patient['email']; ?>" autocomplete="off"/> </p>
-				<p><label>Registration Date:</label> <?php echo date("n/j/Y h:m A", strtotime($patient['Date_created'])); ?></p>
+				<p><label>Date of Birth:</label><input type="text" name="dob" class="datepicker" value="<?php echo ($qualifyResult['dob']!="")?date("n/j/Y", strtotime($qualifyResult['dob'])):""; ?>" autocomplete="off" /></p>
+				<p><label>Email:</label> <input type="email" name="email" value="<?php echo $qualifyResult['email']; ?>" autocomplete="off"/> </p>
+				<p><label>Registration Date:</label> <?php echo date("n/j/Y h:m A", strtotime($qualifyResult['Date_created'])); ?></p>
+				<p><label>Insurance:</label> <?php echo$qualifyResult['insurance']; ?></p>
 			    </div>
 			    <div class="col-md-6 pB-30">
 				<div class="row">
@@ -277,18 +278,18 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					<?php echo $errorMsgMdlStats; ?>
 				    <?php } ?>
 				    </div>
-				    <div id="specimenRadioBox" class="<?php echo ($patient['specimen_collected']=='Yes')?'hidden':"";?>" >
+				    <div id="specimenRadioBox" class="<?php echo ($qualifyResult['specimen_collected']=='Yes')?'hidden':"";?>" >
 					<h5>Specimen collected?</h5>
 					<div class="col-md-4 pL-0">
 					    <div id="specimen">
-						<input <?php echo ($patient['specimen_collected']=='Yes')?"checked":"";?> type="radio" name="specimen_collected" value="Yes" /> Yes &nbsp;&nbsp;
-						<?php if($patient['specimen_collected'] !== 'Yes'){ ?>
-						<input <?php echo ($patient['specimen_collected']=='No')?"checked":"";?> type="radio" name="specimen_collected" value="No" /> No
+						<input <?php echo ($qualifyResult['specimen_collected']=='Yes')?"checked":"";?> type="radio" name="specimen_collected" value="Yes" /> Yes &nbsp;&nbsp;
+						<?php if($qualifyResult['specimen_collected'] !== 'Yes'){ ?>
+						<input <?php echo ($qualifyResult['specimen_collected']=='No')?"checked":"";?> type="radio" name="specimen_collected" value="No" /> No
 						<?php } ?>
 					    </div>
 					</div>
 				    </div>
-				    <div id="select-reson" class="col-md-8 <?php echo ( is_null($patient['specimen_collected']) || $patient['specimen_collected']=='Yes')?"hidden":"";?>">
+				    <div id="select-reson" class="col-md-8 <?php echo ( is_null($qualifyResult['specimen_collected']) || $qualifyResult['specimen_collected']=='Yes')?"hidden":"";?>">
 					<div class="f2">
 					    <!--<label class="dynamic" for="reason_not"><span>Reasons for not taking the test</span></label>-->
 					    <?php $reasons = $db->selectAll('tbl_reasons');?>
@@ -296,7 +297,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 						<select id="reason" name="Guid_reason" class="no-selection">
 						    <option value="">Reasons for not taking the test</option>
 						    <?php foreach ($reasons as $k=>$v){?>
-							<option <?php echo ($patient['Guid_reason']==$v['Guid_reason'])?"selected":""; ?> value="<?php echo $v['Guid_reason']; ?>"><?php echo $v['reason']; ?></option>
+							<option <?php echo ($qualifyResult['Guid_reason']==$v['Guid_reason'])?"selected":""; ?> value="<?php echo $v['Guid_reason']; ?>"><?php echo $v['reason']; ?></option>
 						    <?php } ?>
 						</select>
 						<p class="f_status">
@@ -306,7 +307,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					</div>
 				    </div>
 
-				    <div id="mdlInfoBox" class="pInfo <?php echo ($patient['specimen_collected']!='Yes')?'hidden':"";?>">
+				    <div id="mdlInfoBox" class="pInfo <?php echo ($qualifyResult['specimen_collected']!='Yes')?'hidden':"";?>">
 					<p>
 					    <label>MDL#:</label>
 					    <?php
@@ -364,53 +365,128 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			    </div>
 			</div>
 
-			<div id="questionaryInfo" class="row pT-30">
-			<table class="table">
+		    <div class="row pT-30">
+			<div id="questionaryInfo"  class="col-md-6">
+			    <table class="table">
 			    <thead>
 				<th>Print</th>
 				<th>Qualified</th>
-				<th>Insurance</th>
 				<th>Date Completed</th>
 				<th>Clinical History</th>
 			    </thead>
 			    <tbody>
-				<?php foreach ($result as $k=>$v){ ?>
+				<?php
+				    foreach ($ssQualifyResult as $k=>$v){
+					$Guid_qualify = $v['Guid_qualify'];
+					$Date_created = $v['Date_created'];
+
+					$qFam = $db->query("SELECT * FROM `tblqualifyfam` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created", array('Guid_qualify'=>$Guid_qualify, 'Date_created'=>$Date_created));
+					$qAns = $db->query("SELECT * FROM `tbl_ss_qualifyans` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created", array('Guid_qualify'=>$Guid_qualify, 'Date_created'=>$Date_created));
+					$queryPers = "SELECT * FROM `tbl_ss_qualifypers` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created";
+					//$qPers = $db->query($queryPers, array('Guid_qualify'=>$Guid_qualify, 'Date_created'=>$Date_created));
+
+				    ?>
 				    <tr>
 					<td><button class="print report" data-selected_questionnaire="<?php echo $v['Guid_qualify']; ?>" ></button></td>
-					<?php if(isset($v['qualified']) && isFieldVisibleByRole($roleIDs['meets_mn']['view'], $roleID)) {?>
 					<td><?php echo $v['qualified']; ?></td>
-					<?php }  ?>
-					<?php if(isFieldVisibleByRole($roleIDs['insurance']['view'], $roleID)) {?>
-					<td><?php echo $v['insurance']; ?> </td>
-					<?php } ?>
-					<?php if(isFieldVisibleByRole($roleIDs['from_date']['view'], $roleID)) {?>
-					<td><?php echo date("n/j/Y h:m A", strtotime($v['Date_created'])); ?></td>
-					<?php } ?>
-					<?php if(isFieldVisibleByRole($roleIDs['location']['view'], $roleID)) {?>
+					<td><?php echo date("n/j/Y h:m:s A", strtotime($v['Date_created'])); ?></td>
 					<td>
 					    <p>
-						<label>Personal:</label>
-						<?php if($v['p_cancer_type']){?>
-						    <?php echo $v['p_cancer_type']; ?> Cancer
-						<?php } ?>
-						<?php if($v['age_personal']){?>
-						 (Age <?php echo $v['age_personal']; ?>)
-						<?php } ?>
+						<?php
+//                                                if(!empty($qPers)){
+//                                                    echo "<label>Personal:</label>";
+//                                                    foreach ($qPers as $k=>$v) {
+//                                                        $pCType =  $v['cancer_type'];
+//                                                        if(strpos(trim($v['cancer_type']), ' ') == false){
+//                                                            $pCType .=  " Cancer";
+//                                                        }
+//                                                        $pCType .=  "; ";
+//                                                    }
+//                                                    $pCType = rtrim($pCType,'; ');
+//                                                    echo $pCType."<br/>";
+//                                                }
+						?>
+						<?php
+						if(!empty($qAns)){
+						    echo "<label>Personal: </label> ";
+						    $ans = "";
+						    foreach ($qAns as $k=>$v) {
+							$ansType =  $v['cancer_personal']." ".$v['cancer_type'];
+							if(strpos(trim($ansType), ' ') == false){
+							    $ansType .=  " Cancer";
+							}
+							$ans .= $ansType;
+							if($v['age_personal'] && $v['age_personal']!=""){
+							    $ans .= " (Age ". $v['age_personal']."); ";
+							}
+
+						    }
+						    $ans = rtrim($ans,'; ');
+						     echo $ans;
+						}
+						?>
+
 					    </p>
 					    <p>
-						<label>Family:</label>
-						<?php if($v['f_cancer_type']){?>
-						<?php echo $v['f_cancer_type']; ?>
-						<?php } ?>
+						<?php
+						if(!empty($qFam)){
+						    echo "<label>Family: </label> ";
+						    $fam = "";
+						    foreach ($qFam as $k=>$v) {
+							$fam .= $v['cancer_type'];
+							if(strpos(trim($v['cancer_type']), ' ') == false){
+							    $fam .= " Cancer";
+							}
+							$fam .= "; ";
+						    }
+
+						    $fam = rtrim($fam,'; ');
+						    echo $fam;
+						}
+						?>
 					    </p>
 					</td>
-					<?php } ?>
 				    </tr>
 				<?php } ?>
 			    </tbody>
 			</table>
+			</div>
+			<div id="statusLogs"  class="col-md-6">
+			    <table class="table">
+			    <thead>
+				<th>Status</th>
+				<th>Date/Time</th>
+				<th>Comment</th>
+				<th>Recorded By</th>
+			    </thead>
+			    <tbody>
+				<?php
+				$patientID=$_GET['patient'];
+				$qStatusLog = 'SELECT sl.recorded_by, p.firstname, p.lastname, s.status, sl.date, sl.comment '
+					    . 'FROM tbl_mdl_status_log sl '
+					    . 'LEFT JOIN tbl_mdl_status s ON sl.Guid_status=s.Guid_status '
+					    . 'LEFT JOIN tblpatient p ON sl.Guid_patient=p.Guid_user '
+					    . 'WHERE sl.Guid_patient='.$patientID;
+				$ststusLogs = $db->query($qStatusLog);
+				foreach ($ststusLogs as $k=>$v){
+				    if($v['recorded_by']){
+				    $userInfo = getUserFullInfo($db, $v['recorded_by']);
+				    }
+				    $userFullName = (isset($userInfo)&&$userInfo!="") ? $userInfo['first_name']." ".$userInfo['last_name'] : "";
+
+				?>
+				    <tr>
+					<td><?php echo $v['status']; ?></td>
+					<td><?php echo date("n/j/Y h:m A", strtotime($v['date'])); ?></td>
+					<td><?php echo $v['comment']; ?></td>
+					<td><?php echo $userFullName; ?></td>
+				    </tr>
+				<?php } ?>
+			    </tbody>
+			</table>
+			</div>
 		    </div>
-		    <div id="pLogs" class="row <?php echo (!$patient['specimen_collected'] || $patient['specimen_collected']=='No')?"hidden":"";?>">
+		    <div id="pLogs" class="row <?php echo (!$qualifyResult['specimen_collected'] || $qualifyResult['specimen_collected']=='No')?"hidden":"";?>">
 			<div id="deductable-log" class="col-md-6">
 			    <?php
 				$whereUser = array('Guid_user'=>$_GET['patient']);

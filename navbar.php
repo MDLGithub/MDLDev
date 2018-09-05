@@ -33,6 +33,7 @@
 			<?php if($role=='Admin' || $role=='Sales Manager') { ?>
 			    <li><a href="<?php echo SITE_URL; ?>/salesreps.php">Genetic Consultants</a></li>
 			<?php } ?>
+			<li><a href="<?php echo SITE_URL; ?>/eventschedule.php">Event Schedule</a></li>
 		    <?php } ?>
 		    <?php if($role=='Admin'){ ?>
 			<li><a href="<?php echo SITE_URL; ?>/access-roles.php">Access Roles</a></li>
