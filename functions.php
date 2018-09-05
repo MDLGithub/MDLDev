@@ -164,6 +164,42 @@ function getUserName($db, $userID){
     
     return $result;
 }
+
+function getUserFullInfo($db, $userID){    
+    $query = "SELECT * FROM tblrole r LEFT JOIN tbluserrole u ON r.Guid_role = u.Guid_role WHERE u.Guid_user = $userID";
+    
+    $userInfo = $db->row($query);
+    $result = "";
+    
+    if ($userInfo['role']=='Sales Rep' || $userInfo['role']=='Sales Manager') {
+        $query = "SELECT * FROM `tblsalesrep` WHERE Guid_user=:Guid_user";
+        $salesrepInfo = $db->row($query, array("Guid_user"=>$userID));
+        if(!empty($salesrepInfo)){
+            $result = $salesrepInfo;
+        }
+    } elseif ($userInfo['role']=='Physician') {
+        $query = "SELECT * FROM `tblprovider` WHERE Guid_user=:Guid_user";
+        $providerInfo = $db->row($query, array("Guid_user"=>$userID));
+        if(!empty($providerInfo)){
+            $result = $providerInfo;
+        }
+    } elseif ($userInfo['role']=='Admin') {
+        $query = "SELECT * FROM `tbladmins` WHERE Guid_user=:Guid_user";
+        $providerInfo = $db->row($query, array("Guid_user"=>$userID));
+        if(!empty($providerInfo)){
+            $result = $providerInfo;
+        }
+    } else {
+        
+        $query = "SELECT *, firstname AS first_name, lastname AS last_name FROM `tblpatient` WHERE Guid_user=:Guid_user";
+        $patientInfo = $db->row($query, array("Guid_user"=>$userID));
+        if(!empty($patientInfo)){
+            $result = $patientInfo;
+        }
+    }
+    
+    return $result;
+}
 /**
  * Check if current user has access to the fields
  * All configurations doing from Access Roles page
