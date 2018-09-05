@@ -34,7 +34,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
 
 $thisMessage = "";
 ?>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">-->
 <link rel="stylesheet" href="assets/eventschedule/css/fullcalendar.css" />
 <link rel="stylesheet" href="assets/eventschedule/css/bootstrap-datetimepicker.min.css">
 <script src="assets/eventschedule/js/jquery.min.js"></script>
@@ -43,17 +43,16 @@ $thisMessage = "";
 <script src="assets/eventschedule/js/fullcalendar.min.js"></script>
 <script src="assets/eventschedule/js/bootstrap-datetimepicker.min.js"></script>
 <style>
-    #datetimepicker1 table tr > th, #datetimepicker2 table tr > th{
-        border-radius: 0px !important;
-    }
-
-    #datetimepicker1 .btn, #datetimepicker2 .btn{
-        min-width : 0px;
-    }
-    #datetimepicker1 .btn:hover, #datetimepicker2 .btn:hover{
-        box-shadow: none;
-    }
-
+    .col-md-1 { width: 9.333333% !important;}
+    .container { max-width: 1358px !important;}
+    #datetimepicker1{ position: relative; width: 172px; }
+    #datetimepicker1 input{ width: 100%; }
+    #datetimepicker1 img{ position: absolute; top: 8px; right: 5px;}
+    
+    #datetimepicker2{ position: relative; width: 172px; }
+    #datetimepicker2 input{ width: 100%; }
+    #datetimepicker2 img{ position: absolute; top: 8px; right: 5px;}
+    
     /* The Modal (background) */
     .schedulemodal {
         display: none; /* Hidden by default */
@@ -91,7 +90,11 @@ $thisMessage = "";
         text-decoration: none;
         cursor: pointer;
     }
-
+    .evtcontent{ padding: 5px 5px; white-space: pre-wrap !important;}
+    .evttitle{font-weight: bold; color: #3a87ad; white-space: pre-wrap !important;}
+    
+    .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/sample-icon1.png"); background-repeat: no-repeat;background-size: 20px 20px;}
+    .rightCircleicon2{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/sample-icon2.png"); background-repeat: no-repeat;background-size: 20px 20px;}
 </style>
 <script>
 
@@ -144,7 +147,7 @@ $thisMessage = "";
             header: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'month,agendaWeek'
+                right: 'month,agendaWeek,agendaDay'
             },
             eventSources: cursource,
             selectable: true,
@@ -155,7 +158,8 @@ $thisMessage = "";
                 var moment = $.datepicker.formatDate('yy-mm-dd', new Date());
                 // Get the modal
                 var modal = document.getElementById('myModal');
-                var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD HH:mm:ss");
+                //var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD HH:mm:ss");
+                var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
                 var thisdate = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
                 if (moment <= thisdate) {
                     $('#updateEvent').find('input, textarea, button, select').prop("disabled", false);
@@ -167,7 +171,16 @@ $thisMessage = "";
                 $("#modalsalesrepopt option:contains(" + event.salesrep + ")").attr('selected', 'selected');
                 $("#modalaccountopt option:contains(" + event.account + ")").attr('selected', 'selected');
                 $("#modalcomment").val(event.comments);
+                $("#modalfull_name_id").val(event.hltname);
+                $("#modalstreet1_id").val(event.street1);
+                $("#modalstreet2_id").val(event.street2);
+                $("#modalcity_id").val(event.city);
+                $("#modalstate_id").val(event.state);
+                $("#modalzip_id").val(event.zip);
                 $("#modalid").val(event.id);
+                $("#modalsalerepid").val(event.salesrepid);
+                $("#modalhealthcareid").val(event.healthcareid);
+                
                 if (event.title == 'BRCA Day') {
                     $('#brcaradio').prop("checked", true);
                     var modalevtType = $(this).val();
@@ -207,6 +220,7 @@ $thisMessage = "";
                 $('.tooltipevent').remove();
             },
             eventRender: function (event, element, view) {
+                var time = $.fullCalendar.formatDate(event.start, "hh:mm a");
                 var logo = "";
                 var account = "";
                 var name = "";
@@ -215,22 +229,32 @@ $thisMessage = "";
                     logo = '<div class="fc-logo">' + event.logo + '</div>';
                 if (event.account)
                     account = event.account + ' - ';
-                if (event.name)
-                    name = event.name;
+                
                 if (event.salesrep)
-                    salesrep = '<div class="fc-salesrep">' + event.salesrep + '</div>';
+                    salesrep = '<div class="fc-salesrep">' + event.salesrep + ' | ' + time + '</div>';
                 var cmts = '';
 
                 var view = $('#calendar').fullCalendar('getView');
                 if (view.name == 'agendaWeek' && event.comments)
-                    cmts = '<div class="fc-comments">' + event.comments + '</div>';
+                    cmts = '<div class="fc-comments">' + event.comments + '</div>'
+                
+                var icon = '';
+                if(event.title == 'BRCA Day'){
+                    icon = 'rightCircleicon1';
+                    if (event.name) name = event.name;
+                }
+                else{
+                    icon = 'rightCircleicon2';
+                    if(event.hltname) name = event.hltname;
+                }
 
+                
+                
                 var content = '<a class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable">' +
-                        '<div class="fc-content">' +
-                        '<div class="fc-title">' + event.title + '</div>' +
-                        logo +
-                        '<div class="fc-name">' + account + name + '</div>' +
-                        salesrep + cmts +
+                        '<div class="fc-content evtcontent">' +
+                        '<div class="'+ icon + '"></div>' + 
+                        '<div class="fc-title evttitle">' + name + '</div>' +
+                         salesrep + cmts +
                         '</div>' +
                         '</a>';
 
@@ -240,6 +264,10 @@ $thisMessage = "";
                 if (event.salesrep == null || event.account == null) {
                     element.css('background-color', '#FF6347');
                     element.css('border-color', '#FF6347');
+                }
+                else{
+                    element.css('background-color', '#fff');
+                    element.css('color', '#000');
                 }
             },
 
@@ -253,19 +281,31 @@ $thisMessage = "";
             }
             var title = $("input[name='eventtype']:checked").parent('label').text();
             if ($('#eventstart').val() && ($('#salerepid').val() || $('#accountopt').val() != 0)) {
-                var start = dateFormat($('#eventstart').val(), "yyyy-mm-dd HH:MM:ss");
-                var end = dateFormat($('#eventstart').val(), "yyyy-mm-dd HH:MM:ss");
+                var start = dateFormat($('#eventstart').val(), "yyyy-mm-dd");
+                var end = dateFormat($('#eventstart').val(), "yyyy-mm-dd");
                 var accountId = $('#accountopt').val();
                 var salesrepId = $('#salerepid').val() ? $('#salerepid').val() : 0;
                 var comments = $('#comment').val();
-
+                var full_name = $('#full_name_id').val() ? $('#full_name_id').val() : '';
+                var street1 = $('#street1_id').val() ? $('#street1_id').val() : '';
+                var street2 = $('#street2_id').val() ? $('#street2_id').val() : '';
+                var city = $('#city_id').val() ? $('#city_id').val() : '';
+                var state = $('#state_id').val() ? $('#state_id').val() : '';
+                var zip = $('#zip_id').val() ? $('#zip_id').val() : '';
+                
                 var eventData = {
                     title: title,
                     start: start,
                     end: end,
                     salesrepId: salesrepId,
                     accountId: accountId,
-                    comments: comments
+                    comments: comments,
+                    full_name: full_name,
+                    street1: street1,
+                    street2: street2,
+                    city:city,
+                    state:state,
+                    zip:zip
                 };
                 $.ajax({
                     url: "eventinsert.php",
@@ -275,7 +315,7 @@ $thisMessage = "";
                     {
                         //$('#calendar').fullCalendar('renderEvent', eventData, true); // stick? = true
                         $('#calendar').fullCalendar('refetchEvents');
-                        alert("Added Successfully");
+                        //alert("Added Successfully");
                     }
                 })
 
@@ -292,13 +332,19 @@ $thisMessage = "";
             }
             var title = $("input[name='modaleventtype']:checked").parent('label').text();
             if ($('#modaleventstart').val() && ($('#modalsalerepid').val() || $('#modalaccountopt').val() != 0)) {
-                var start = dateFormat($('#modaleventstart').val(), "yyyy-mm-dd HH:MM:ss");
-                var end = dateFormat($('#modaleventstart').val(), "yyyy-mm-dd HH:MM:ss");
+                var start = dateFormat($('#modaleventstart').val(), "yyyy-mm-dd");
+                var end = dateFormat($('#modaleventstart').val(), "yyyy-mm-dd");
                 var accountId = $('#modalaccountopt').val();
                 var salesrepId = $('#modalsalerepid').val() ? $('#modalsalerepid').val() : 0;
                 var comments = $('#modalcomment').val();
+                var full_name = $('#modalfull_name_id').val() ? $('#modalfull_name_id').val() : '';
+                var street1 = $('#modalstreet1_id').val() ? $('#modalstreet1_id').val() : '';
+                var street2 = $('#modalstreet2_id').val() ? $('#modalstreet2_id').val() : '';
+                var city = $('#modalcity_id').val() ? $('#modalcity_id').val() : '';
+                var state = $('#modalstate_id').val() ? $('#modalstate_id').val() : '';
+                var zip = $('#modalzip_id').val() ? $('#modalzip_id').val() : '';
+                var modalhealthcareid = $('#modalhealthcareid').val() ? $('#modalhealthcareid').val() : '';
                 var modalid = $('#modalid').val();
-
                 var eventData = {
                     modaltitle: title,
                     modalstart: start,
@@ -306,7 +352,14 @@ $thisMessage = "";
                     modalsalesrepId: salesrepId,
                     modalaccountId: accountId,
                     modalcomments: comments,
-                    modalid: modalid
+                    full_name: full_name,
+                    street1: street1,
+                    street2: street2,
+                    city:city,
+                    state:state,
+                    zip:zip,
+                    modalid: modalid,
+                    modalhealthcareid: modalhealthcareid
                 };
 
                 $.ajax({
@@ -317,13 +370,19 @@ $thisMessage = "";
                     {
                         //$('#calendar').fullCalendar('renderEvent', eventData, true); // stick? = true
                         $('#calendar').fullCalendar('refetchEvents');
-                        alert("Updated Successfully");
+                        //alert("Updated Successfully");
                     }
                 })
 
-            } else {
+            } else { alert("not")
                 return false;
             }
+        });
+        
+        // cancel update
+        $('#eventcancel').on('click', function () {
+            var modal = document.getElementById('myModal');
+            modal.style.display = "none";
         });
 
         // Whenever the user clicks on the "delete" button
@@ -341,7 +400,7 @@ $thisMessage = "";
                         $('#calendar').fullCalendar('refetchEvents');
                         var modal = document.getElementById('myModal');
                         modal.style.display = "none";
-                        alert("Event Removed");
+                        //alert("Event Removed");
                     }
                 })
             }
@@ -506,7 +565,7 @@ $thisMessage = "";
             <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
         </section>
         <div class="scroller event-schedule">
-            <div class="container">                
+            <div class="container">  
                 <form id='createEvent'>
                     <div class="panel panel-primary">
                         <div class="panel-body">
@@ -525,7 +584,7 @@ $thisMessage = "";
                                     <div class='col-md-2'>
                                         <div class="form-group">
                                             <select class="form-control" id="salesrepopt">
-                                                <option value="0">-- Select Salesrep --</option>
+                                                <option value="0">Genetic Consultant</option>
                                                 <?php
                                                 foreach ($salesrep as $srole) {
                                                     if ($srole['first_name']) {
@@ -563,7 +622,7 @@ $thisMessage = "";
                                 <div class='col-md-2 accounttype'>
                                     <div class="form-group">
                                         <select class="form-control" id="accountopt">
-                                            <option value="0">-- Select Account --</option>
+                                            <option value="0">Account</option>
                                             <?php
                                             foreach ($accountdt as $acct) {
                                                 ?>
@@ -604,7 +663,7 @@ $thisMessage = "";
                                 </div>    
                                 <div class='col-md-4'>
                                     <div class="form-group"> <!-- State Button -->
-                                        <select class="form-control" id="state_id">
+                                        <select class="form-control" id="state_id" name="state">
                                             <option value="AL">Alabama</option>
                                             <option value="AK">Alaska</option>
                                             <option value="AZ">Arizona</option>
@@ -677,7 +736,7 @@ $thisMessage = "";
                                     <div class='col-md-2'>
                                         <div class="form-group">
                                             <select class="form-control" id="salesrepfilter">
-                                                <option value="0">-- Select Salesrep --</option>
+                                                <option value="0">Genetic Consultant</option>
                                                 <?php
                                                 foreach ($salesrep as $srole) {
                                                     if ($srole['first_name']) {
@@ -693,7 +752,7 @@ $thisMessage = "";
                                     <div class='col-md-2'>
                                         <div class="form-group">
                                             <select class="form-control" id="accountfilter">
-                                                <option value="0">-- Select Account --</option>
+                                                <option value="0">Account</option>
                                                 <?php
                                                 foreach ($accountdt as $acct) {
                                                     ?>
@@ -720,6 +779,7 @@ $thisMessage = "";
                     <span class="close">&times;</span>
                     <form id='updateEvent'>
                         <input type="hidden" name="modalid" id="modalid" value="">
+                        <input type="hidden" name="modalhealthcareid" id="modalhealthcareid" value="">
                         <div class="panel-primary">
                             <div class="panel-body">
                                 <div class="row">
@@ -737,7 +797,7 @@ $thisMessage = "";
                                         <div class='col-md-2'>
                                             <div class="form-group">
                                                 <select class="form-control" id="modalsalesrepopt">
-                                                    <option value="0">-- Select Salesrep --</option>
+                                                    <option value="0">Genetic Consultant</option>
                                                     <?php
                                                     foreach ($salesrep as $srole) {
                                                         if ($srole['first_name']) {
@@ -775,7 +835,7 @@ $thisMessage = "";
                                     <div class='col-md-2 modalaccounttype'>
                                         <div class="form-group">
                                             <select class="form-control" id="modalaccountopt">
-                                                <option value="0">-- Select Account --</option>
+                                                <option value="0">Account</option>
                                                 <?php
                                                 foreach ($accountdt as $acct) {
                                                     ?>
@@ -792,32 +852,33 @@ $thisMessage = "";
                                         </div> 
                                     </div>  
                                     <button type="submit" id="eventupdate" class="btn btn-default">Update</button>
+                                    <button type="submit" id="eventcancel" class="btn btn-default">Cancel</button>
                                     <button type="button" class="btn btn-danger" id="eventdelete" style="border-radius: 2em !important; margin: 7px 0;">Delete</button>
                                 </div>
                                 <div class="row modalhealthcare" style="display: none;">
                                     <div class='col-md-4'>
                                         <div class="form-group"> <!-- Full Name -->
-                                            <input type="text" class="form-control" id="full_name_id" name="full_name" placeholder="Full Name">
+                                            <input type="text" class="form-control" id="modalfull_name_id" name="modalfull_name" placeholder="Full Name">
                                         </div>	
                                     </div>    
                                     <div class='col-md-4'>
                                         <div class="form-group"> <!-- Street 1 -->
-                                            <input type="text" class="form-control" id="street1_id" name="street1" placeholder="Street address, P.O. box, company name, c/o">
+                                            <input type="text" class="form-control" id="modalstreet1_id" name="modalstreet1" placeholder="Street address, P.O. box, company name, c/o">
                                         </div>					
                                     </div>    
                                     <div class='col-md-4'>    
                                         <div class="form-group"> <!-- Street 2 -->
-                                            <input type="text" class="form-control" id="street2_id" name="street2" placeholder="Apartment, suite, unit, building, floor, etc.">
+                                            <input type="text" class="form-control" id="modalstreet2_id" name="modalstreet2" placeholder="Apartment, suite, unit, building, floor, etc.">
                                         </div>	
                                     </div>    
                                     <div class='col-md-4'>
                                         <div class="form-group"> <!-- City-->
-                                            <input type="text" class="form-control" id="city_id" name="city" placeholder="City">
+                                            <input type="text" class="form-control" id="modalcity_id" name="modalcity" placeholder="City">
                                         </div>									
                                     </div>    
                                     <div class='col-md-4'>
                                         <div class="form-group"> <!-- State Button -->
-                                            <select class="form-control" id="state_id">
+                                            <select class="form-control" id="modalstate_id" name="modalstate">
                                                 <option value="AL">Alabama</option>
                                                 <option value="AK">Alaska</option>
                                                 <option value="AZ">Arizona</option>
@@ -874,7 +935,7 @@ $thisMessage = "";
                                     </div>    
                                     <div class='col-md-4'>
                                         <div class="form-group"> <!-- Zip Code-->
-                                            <input type="text" class="form-control" id="zip_id" name="zip" placeholder="zip code">
+                                            <input type="text" class="form-control" id="modalzip_id" name="modalzip" placeholder="zip code">
                                         </div>	
                                     </div>    
                                 </div>  
@@ -890,8 +951,18 @@ $thisMessage = "";
 </main>
 <script>
     $(function () {
-        $('#datetimepicker1').datetimepicker();
-        $('#datetimepicker2').datetimepicker();
+        $('#eventstart').datepicker({
+            dateFormat: "yy-mm-dd",
+            showOn: 'both',
+            buttonImageOnly: true,
+            buttonImage: 'http://jqueryui.com/resources/demos/datepicker/images/calendar.gif'
+        });
+        $('#modaleventstart').datepicker({
+            dateFormat: "yy-mm-dd",
+            showOn: 'both',
+            buttonImageOnly: true,
+            buttonImage: 'http://jqueryui.com/resources/demos/datepicker/images/calendar.gif'
+        });
     });
 </script>
 <?php require_once 'scripts.php'; ?>

@@ -1,5 +1,7 @@
 Database:
 
+Dated: 2018-08-04
+
 DROP TABLE IF EXISTS `tblevents`;
 
 CREATE TABLE `tblevents` (
@@ -12,6 +14,26 @@ CREATE TABLE `tblevents` (
   `comments` longtext,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
+----------------------------------------------------------
+
+Dated: 2018-08-05
+
+DROP TABLE IF EXISTS `tblhealthcare`;
+
+CREATE TABLE `tblhealthcare` (
+  `Guid_healthcare` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(128) NOT NULL,
+  `street1` varchar(128) NOT NULL,
+  `street2` varchar(128) NOT NULL,
+  `city` varchar(64) NOT NULL,
+  `state` varchar(2) NOT NULL,
+  `zip` varchar(10) NOT NULL,
+  PRIMARY KEY (`Guid_healthcare`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+ALTER TABLE `tblevents` 
+ADD COLUMN `healthcareid` INT(11) NULL AFTER `accountid`;
 
 
 Files:

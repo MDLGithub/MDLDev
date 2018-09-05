@@ -14,7 +14,15 @@ foreach($result as $row)
   'salesrep' => $row["salesrep"],
   'logo' => $row['logo'],
   'account' => $row['account'],
-  'name' => $row['name'],
+  'name' => $row['name'],  
+  'hltname' => $row['hltname'],
+  'street1' => $row['street1'],
+  'street2' => $row['street2'],
+  'city' => $row['city'],
+  'state' => $row['state'],
+  'zip' => $row['zip'],
+  'healthcareid' => $row['healthcareid'], 
+  'salesrepid' => $row['salesrepid'],   
   'comments' => $row['comments']   
  );
 }
