@@ -1,16 +1,16 @@
 <?php
 ob_start();
-require_once('settings.php');
 require_once('config.php');
+require_once('settings.php');
 require_once('header.php');
-
-if (!isUserLogin()) {
+if (!login_check($db)) {
     Leave(SITE_URL);
 }
 if (isset($_GET['logout'])) {
-    doLogout();
+    logout();
     Leave(SITE_URL);
 }
+
 $error = array();
 $userID = $_SESSION['user']["id"];
 $roleInfo = getRole($db, $userID);
@@ -392,8 +392,6 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
         $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
         $where .= " q.account_number IN (" . $default_account . ")";
     }
-    
-   
 }
 
 if($role == 'Physician'){
@@ -406,6 +404,11 @@ if($role == 'Physician'){
 $where  .= " AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%test%' "
         . "AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE 'John Doe' "
         . "AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE 'Jane Doe'";
+
+if($role == "Sales Rep"){
+    
+    
+}
 
 $sqlTbl .= $whereTest;
 $sqlTbl .= $whereIncomplete;

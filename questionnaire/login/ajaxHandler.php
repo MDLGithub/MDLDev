@@ -1,6 +1,6 @@
 <?php
-require_once('settings.php'); 
-require_once('config.php'); 
+require_once('config.php');
+require_once('settings.php');  
     
 if(isset($_POST['url_config']) && $_POST['url_config']=='1'){
     load_url_config($db, $_POST['id']);

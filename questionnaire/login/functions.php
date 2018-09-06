@@ -25,40 +25,32 @@ function encode_password($password) {
 }
 
 /**
-*  Do Login Function
-*/
-function doLogin($db){
-    $showMsg = "";
-    if(isset($_POST['login'])){
-        $email = $_POST['email'];
-        $db->bind("email",$email);
-        $user   =  $db->row("SELECT * FROM `".DB_PREFIX."user` WHERE email = :email");        
-        if ($user AND ( $user["password"] == encode_password($_POST['password']))){
-            $showMsg = false;			
-            $_SESSION['user']['id'] = $user['Guid_user'];
-            $_SESSION['user']['type'] = $user['user_type'];
-            $_SESSION['user']['email'] = $user['email'];
-        }else{
-            $showMsg = true;
-        }	
-
-        return $showMsg;	
-    }	
-}
-/**
-*  Do Logout Function
-*/
-function doLogout(){
-    unset($_SESSION['user']);
-}
-/**
-*  Check if user logged in
-*/
-function isUserLogin(){
-    if( isset($_SESSION['user']['email']) && $_SESSION['user']['email'] != ''){
-        return true;
+ * Generates random string.
+ *
+ * @param int $length
+ * @return string
+ */
+function str_random($length = 16)
+{
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, strlen($characters) - 1)];
     }
-    return false;
+
+    return $randomString;
+}
+
+/**
+*  Generate a token string
+*
+* @return $str
+*/
+function generateTokenString(){
+   // generate as random of a token as possible for lower PHP versions
+   $str = sha1(uniqid(sha1(PASSWORD_SALT), true) . time() . str_random(20));
+   
+   return $str;
 }
 /**
 *   Return page url
@@ -171,6 +163,43 @@ function getUserName($db, $userID){
     
     return $result;
 }
+
+function getUserFullInfo($db, $userID){    
+    $query = "SELECT * FROM tblrole r LEFT JOIN tbluserrole u ON r.Guid_role = u.Guid_role WHERE u.Guid_user = $userID";
+    
+    $userInfo = $db->row($query);
+    $result = "";
+    
+    if ($userInfo['role']=='Sales Rep' || $userInfo['role']=='Sales Manager') {
+        $query = "SELECT * FROM `tblsalesrep` WHERE Guid_user=:Guid_user";
+        $salesrepInfo = $db->row($query, array("Guid_user"=>$userID));
+        if(!empty($salesrepInfo)){
+            $result = $salesrepInfo;
+        }
+    } elseif ($userInfo['role']=='Physician') {
+        $query = "SELECT * FROM `tblprovider` WHERE Guid_user=:Guid_user";
+        $providerInfo = $db->row($query, array("Guid_user"=>$userID));
+        if(!empty($providerInfo)){
+            $result = $providerInfo;
+        }
+    } elseif ($userInfo['role']=='Admin') {
+        $query = "SELECT * FROM `tbladmins` WHERE Guid_user=:Guid_user";
+        $providerInfo = $db->row($query, array("Guid_user"=>$userID));
+        if(!empty($providerInfo)){
+            $result = $providerInfo;
+        }
+    } else {
+        
+        $query = "SELECT *, firstname AS first_name, lastname AS last_name FROM `tblpatient` WHERE Guid_user=:Guid_user";
+        $patientInfo = $db->row($query, array("Guid_user"=>$userID));
+        if(!empty($patientInfo)){
+            $result = $patientInfo;
+        }
+    }
+    
+    return $result;
+}
+
 /**
  * Check if current user has access to the fields
  * All configurations doing from Access Roles page
@@ -365,7 +394,7 @@ function getUserDetails($db, $userRole, $userID){
         $q .= " WHERE Guid_user=:Guid_user";
         $userDetail = $db->row($q, array("Guid_user"=>$userID));
     }
-    var_dump($userRole);
+
     return $userDetail;    
 }
 function saveUserRole($db, $Guid_user, $Guid_role) {
@@ -991,3 +1020,27 @@ function getEventSchedule($db,$salesRepId,$accountId){
     return $result;
 }
 
+/**
+ * format Money Function
+ * @param type $number
+ * @return string
+ */
+function formatMoney($number){
+    $pieces = explode(".", $number);  
+    $startPiece = $pieces[0];
+    if(isset($pieces[1])){
+        $endPiece = $pieces[1];
+    }     
+    $n=number_format(abs($startPiece));
+    $newNum = $n;
+    if(isset($endPiece)&&$endPiece!=""){        
+        $newNum .= ".".$endPiece;
+        if(strlen($endPiece)=='1'){
+            $newNum .= "0";
+        }
+    } else {
+        $newNum .= ".00";
+    }
+    
+    return $newNum;
+}

@@ -1,11 +1,26 @@
 <?php 
-
-$showMsg = doLogin($db);
-
-if(isUserLogin()){
-    Leave('url-configuration.php');
+ob_start();
+sec_session_start();
+if (login_check($db)) {
+    Leave(SITE_URL.'/dashboard.php');
 }
-require_once './header.php';
+$showMsg = "";
+$message = "";
+
+if (isset($_POST['email'], $_POST['password'])) {    
+    $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+    $password = $_POST['password']; // The hashed password. 
+    $login = login($email, $password, $db);
+    if ( $login['status'] == true) {
+        // Login success 
+        Leave(SITE_URL.'/dashboard.php');
+    } else {
+        $showMsg = '1';
+        $message = $login['message'];
+    }    
+} 
+
+require_once './header.php'; 
 ?>
 
 <form  action="" method="post">
@@ -19,7 +34,7 @@ require_once './header.php';
                 
                  <?php if( $showMsg && $showMsg != "" ){ ?>	
                         <div class="warning">
-                          <strong>Warning!</strong> Username or password is not correct.
+                          <strong>Warning!</strong> <?php echo $message; ?>
                         </div>
                 <?php } ?>
                 

@@ -4,14 +4,21 @@ ini_set('display_errors', 1);
 
 // Database server, username, password, and database name.
 define("DB_SERVER", "localhost");
-define("DB_USER", "elmirak_mdlab18");
-define("DB_PASSWORD", "yftE8ZuP)j1V");
-define("DB_NAME", "elmirak_mdlab_shareddb");
+define("DB_USER", "root");
+define("DB_PASSWORD", "epro@123");
+define("DB_NAME", "brcadev");
 define("DB_PREFIX", "tbl");
 
+
+// Login security params, should have deffernt values for each server
+define("SECURE", FALSE); // FOR Production should be TRUE if https
+define('PASSWORD_SALT', "ZCep0jVFDtp9Pc7eftIAXt"); //22 characters, Should be different for dev and prod
+define('SESSION_NAME', "mdldevadmin"); //Should be different for dev and prod
+
 // Paths
-define("SITE_ROOT", $_SERVER["DOCUMENT_ROOT"] . "/dev/login");
-define("SITE_URL", "http://".$_SERVER["HTTP_HOST"] . "/dev/login");
+define("SITE_ROOT", $_SERVER["DOCUMENT_ROOT"] . "/MDLDev/questionnaire/login");
+define("SITE_URL", "http://".$_SERVER["HTTP_HOST"] . "/MDLDev/questionnaire/login");
+
 
 // Autoload classes
 function __autoload($classname)
@@ -23,6 +30,7 @@ function __autoload($classname)
 
 //include global functions
 require_once('functions.php');
+require_once('functions-ss-login.php');
 
 //Open database
 $mysql_err = false;

@@ -1,17 +1,16 @@
 <?php
 ob_start();
-require_once('settings.php');
 require_once('config.php');
+require_once('settings.php');
 require_once('header.php');
-require_once ('navbar.php');
-
-if (!isUserLogin()) {
+if (!login_check($db)) {
     Leave(SITE_URL);
 }
 if (isset($_GET['logout'])) {
-    doLogout();
+    logout();
     Leave(SITE_URL);
 }
+
 $userID = $_SESSION['user']["id"];
 $roleInfo = getRole($db, $userID);
 $roleID = $roleInfo['Guid_role'];
@@ -128,6 +127,8 @@ $salesreps = $db->selectAll('tblsalesrep');
 $accounts = $db->selectAll('tblaccount');
 $tblproviders = $db->selectAll('tblprovider');
 $states = $db->selectAll('tblstates');
+
+require_once ('navbar.php');
 ?>
 
 <main class="full-width">    
