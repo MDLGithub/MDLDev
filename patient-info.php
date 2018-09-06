@@ -41,7 +41,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 
     $Guid_qualify = $qualifyResult['Guid_qualify'];
 
-    $sqlSSQualify = "SELECT ssq.* FROM tbl_ss_qualify ssq WHERE ssq.Guid_qualify=:Guid_qualify";
+    $sqlSSQualify = "SELECT ssq.* FROM tbl_ss_qualify ssq WHERE ssq.Guid_qualify=:Guid_qualify  ORDER BY Date_created DESC";
     $ssQualifyResult = $db->query($sqlSSQualify, array('Guid_qualify'=>$Guid_qualify));
 
     $errorMsgMdlStats = "";
@@ -112,6 +112,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			'Guid_patient' => $_GET['patient'],
 			'recorded_by' => $_SESSION['user']['id'],
 			'mdl_number' => $_POST['mdl_number'],
+			'comment'=>$_POST['comment'],
 			'date' => date('Y-m-d H:i:s')
 		    );
 		    $inserStatusLog = insertIntoTable($db, 'tbl_mdl_status_log', $statusLogData);
@@ -122,9 +123,6 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 	    } else {
 		$mdlStatsData['Guid_declined_reason']='0';
 	    }
-	    if(isset($_POST['notes'])){
-		$mdlStatsData['notes']=$_POST['notes'];
-	    }
 	    if(isset($_POST['specimen_collection_date'])){
 		$mdlStatsData['specimen_collection_date']=($_POST['specimen_collection_date']!="")?date('Y-m-d h:i:s', strtotime($_POST['specimen_collection_date'])):"";
 	    }
@@ -133,6 +131,9 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 	    }
 	    if(isset($_POST['date_reported'])){
 		$mdlStatsData['date_reported']=($_POST['date_reported']!="")?date('Y-m-d h:i:s', strtotime($_POST['date_reported'])):"";
+	    }
+	    if(isset($_POST['comment'])){
+		$mdlStatsData['notes']=$_POST['comment'];
 	    }
 
 	    if($mdlInfo){ //update existing
@@ -157,7 +158,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			'Guid_user'=>$_GET['patient'],
 			'date_paid'=>$date_paid,
 			'payor'=>$revData['payor'][$i],
-			'amount'=>$revData['amount'][$i]
+			'insurance'=>$revData['insurance'][$i],
+			'patient'=>$revData['patient'][$i]
 		    );
 		    insertIntoTable($db, 'tbl_revenue', $dataRevenue);
 		}
@@ -171,7 +173,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		    $dataRevenue = array(
 			'date_paid'=>$date_paid,
 			'payor'=>$revenueData['payor'],
-			'amount'=>$revenueData['amount']
+			'insurance'=>$revenueData['insurance'],
+			'patient'=>$revenueData['patient']
 		    );
 		    $updateReveue = updateTable($db, 'tbl_revenue', $dataRevenue, $whereRevenue);
 		}
@@ -356,8 +359,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					    <input type="text" autocomplete="off" class="datepicker" name="date_reported" value="<?php echo isset($mdlInfo['date_reported'])?((!preg_match("/0{4}/" , $mdlInfo['date_reported'])) ? date('n/j/Y', strtotime($mdlInfo['date_reported'])) : ""):""; ?>" />
 					</p>
 					<p>
-					    <label>Notes:</label>
-					    <textarea autocomplete="off" name="notes"><?php echo isset($mdlInfo['notes'])?$mdlInfo['notes']:""; ?></textarea>
+					    <label>Comment:</label>
+					    <textarea autocomplete="off" name="comment"><?php echo isset($mdlInfo['notes'])?$mdlInfo['notes']:""; ?></textarea>
 					</p>
 				    </div>
 				</div>
@@ -370,7 +373,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			    <thead>
 				<th>Print</th>
 				<th>Qualified</th>
-				<th>Date Completed</th>
+				<th>Submission History</th>
 				<th>Clinical History</th>
 			    </thead>
 			    <tbody>
@@ -378,36 +381,34 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 				    foreach ($ssQualifyResult as $k=>$v){
 					$Guid_qualify = $v['Guid_qualify'];
 					$Date_created = $v['Date_created'];
-					$qFam = $db->query("SELECT * FROM `tblqualifyfam` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created", array('Guid_qualify'=>$Guid_qualify, 'Date_created'=>$Date_created));
-					$qAns = $db->query("SELECT * FROM `tbl_ss_qualifyans` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created", array('Guid_qualify'=>$Guid_qualify, 'Date_created'=>$Date_created));
-					$queryPers = "SELECT * FROM `tbl_ss_qualifypers` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created";
+					//$qFam = $db->query("SELECT * FROM `tblqualifyfam` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created", array('Guid_qualify'=>$Guid_qualify, 'Date_created'=>$Date_created));
+					//$queryPers = "SELECT * FROM `tbl_ss_qualifypers` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created";
 					//$qPers = $db->query($queryPers, array('Guid_qualify'=>$Guid_qualify, 'Date_created'=>$Date_created));
+					$qAns = $db->query("SELECT * FROM `tbl_ss_qualifyans` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created", array('Guid_qualify'=>$Guid_qualify, 'Date_created'=>$Date_created));
+					$qualifyedClass = "";
+					if($v['qualified'] == 'No'){
+					    $qualifyedClass = "mn no";
+					} elseif ($v['qualified'] == 'Yes') {
+					    $qualifyedClass = "mn yes";
+					}
 
 				    ?>
 				    <tr>
-					<td><button class="print report" data-selected_date="<?php echo $v['Date_created']; ?>" data-selected_questionnaire="<?php echo $v['Guid_qualify']; ?>" ></button></td>
-					<td><?php echo $v['qualified']; ?></td>
+					<td>
+					    <?php if($v['qualified'] == 'Unknown'){ ?>
+						<span class="not-printable" ></span>
+					    <?php } else { ?>
+						<button class="print report" data-selected_date="<?php echo $v['Date_created']; ?>" data-selected_questionnaire="<?php echo $v['Guid_qualify']; ?>" ></button>
+					    <?php } ?>
+					</td>
+					<td class="<?php echo $qualifyedClass;?>"><?php echo $v['qualified']; ?></td>
 					<td><?php echo date("n/j/Y H:m:s A", strtotime($v['Date_created'])); ?></td>
 					<td>
 					    <p>
 						<?php
-//                                                if(!empty($qPers)){
-//                                                    echo "<label>Personal:</label>";
-//                                                    foreach ($qPers as $k=>$v) {
-//                                                        $pCType =  $v['cancer_type'];
-//                                                        if(strpos(trim($v['cancer_type']), ' ') == false){
-//                                                            $pCType .=  " Cancer";
-//                                                        }
-//                                                        $pCType .=  "; ";
-//                                                    }
-//                                                    $pCType = rtrim($pCType,'; ');
-//                                                    echo $pCType."<br/>";
-//                                                }
-						?>
-						<?php
+						$personal = "<label>Personal: </label> ";
+						$family = "<label>Family: </label> ";
 						if(!empty($qAns)){
-						    $personal = "<label>Personal: </label> ";
-						    $family = "<label>Family: </label> ";
 						    $ansPersonal = "";
 						    $ansFam = "";
 						    foreach ($qAns as $k=>$v) {
@@ -441,28 +442,14 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 						    $ansFam = rtrim($ansFam,'; ');
 						    echo "<p>".$personal.$ansPersonal."</p>";
 						    echo "<p>".$family.$ansFam."</p>";
+						} else {
+						    echo "<p>".$personal." No Cancer History</p>";
+						    echo "<p>".$family." No Cancer History</p>";
 						}
 						?>
 
 					    </p>
-					    <p>
-						<?php
-						/*if(!empty($qFam)){
-						    echo "<label>Family: </label> ";
-						    $fam = "";
-						    foreach ($qFam as $k=>$v) {
-							$fam .= $v['cancer_type'];
-							if(strpos(trim($v['cancer_type']), ' ') == false){
-							    $fam .= " Cancer";
-							}
-							$fam .= "; ";
-						    }
 
-						    $fam = rtrim($fam,'; ');
-						    echo $fam;
-						} */
-						?>
-					    </p>
 					</td>
 				    </tr>
 				<?php } ?>
@@ -473,7 +460,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			    <table class="table">
 			    <thead>
 				<th>Status</th>
-				<th>Date/Time</th>
+				<th>Test Status Change Log</th>
 				<th>Comment</th>
 				<th>Recorded By</th>
 			    </thead>
@@ -580,7 +567,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 				    <tr>
 					<th>Date Paid</th>
 					<th>Payor</th>
-					<th>Amount $</th>
+					<th>Insurance $</th>
+					<th>Patient $</th>
 					<th class="text-center actions">Action</th>
 				    </tr>
 				</thead>
@@ -588,12 +576,14 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 				    <?php
 				    $revSum = 0;
 				    foreach ($revenues as $k=>$v) {
-					$revSum += $v['amount'];
+					$revSum += $v['insurance'];
+					$revSum += $v['patient'];
 				    ?>
 				    <tr id="<?php echo $v['Guid_revenue']; ?>">
 					<td><span class="editable_date_payd"><?php echo (!preg_match("/0{4}/" , $v['date_paid'])) ? date('n/j/Y', strtotime($v['date_paid'])) : ""; ?></span></td>
 					<td><span class="editable_payor"><?php echo $v['payor']; ?></span></td>
-					<td>$<span class="editable_amount"><?php echo formatMoney($v['amount']); ?></span></td>
+					<td>$<span class="editable_insurance"><?php echo formatMoney($v['insurance']); ?></span></td>
+					<td>$<span class="editable_patient"><?php echo formatMoney($v['patient']); ?></span></td>
 					<td class="text-center">
 					    <div class="action-btns">
 					    <a data-id="<?php echo $v['Guid_revenue']; ?>" class="edit_reveue">
@@ -609,6 +599,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 				    <?php } ?>
 				    <tr class="priceSum">
 				    <?php if(count($revenues) > 1){ ?>
+					<td>&nbsp;&nbsp;</td>
 					<td>&nbsp;&nbsp;</td>
 					<td class="text-right">Total: &nbsp;&nbsp;</td>
 					<td class="strong">$<span class=""><?php echo formatMoney($revSum); ?></span></td>

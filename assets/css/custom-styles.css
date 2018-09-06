@@ -257,7 +257,18 @@ table.prev_settings thead > tr > th,
     display: none;
 }
 
-
+.not-printable {
+    display: inline-block;
+    width: 1.625em;
+    height: 1.625em;
+    background: url(../images/icon_no_print.jpg) 0 0 no-repeat;
+    background-size: cover;
+    opacity: 0.5;
+}
+#deductable-table th,
+#revenue-table th{
+    box-sizing: border-box !important;
+}
 
 .remove-account{
     color: #f00;
@@ -1179,7 +1190,8 @@ span.editable_checked_by,
 span.editable_deductable,
 span.editable_date_payd,
 span.editable_payor,
-span.editable_amount{
+span.editable_insurance,
+span.editable_patient{
     display: inline-block;
     width: 170px;
     max-width: 80%;

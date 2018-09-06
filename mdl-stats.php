@@ -23,7 +23,7 @@ $users = getUsersAndRoles($db);
 $query = 'SELECT  u.Guid_user, u.email,
 	p.Guid_patient, p.firstname AS first_name, p.lastname AS last_name,
 	st.mdl_number, st.Guid_user, st.date_reported,
-	r.amount AS revenue,
+	r.insurance, r.patient,
 	s.Guid_salesrep, s.first_name AS slaserep_fName, s.last_name AS salesrep_lName,
 	a.Guid_account, a.account, a.name
 	FROM tbl_mdl_stats st
@@ -39,7 +39,8 @@ $result = $db->query($query);
 if($result){
     $revenueTotal = 0;
     foreach ($result as $k=>$v){
-	$revenueTotal += $v['revenue'];
+	$revenueTotal += $v['insurance'];
+	$revenueTotal += $v['patient'];
     }
 }
 
@@ -81,7 +82,8 @@ require_once ('navbar.php');
 			    <th>Account</th>
 			    <th>Genetic Consultant</th>
 			    <th>Date Reported</th>
-			    <th>Revenue</th>
+			    <th>Insurance</th>
+			    <th>Patient</th>
 			    <!--<th class="noFilter actions text-center">Actions</th>-->
 			</tr>
 		    </thead>
@@ -94,7 +96,8 @@ require_once ('navbar.php');
 				<td><?php echo $v['account']." ".$v['name']; ?></td>
 				<td><?php echo $v['slaserep_fName']." ".$v['salesrep_lName']; ?></td>
 				<td><?php echo (!preg_match("/0{4}/" , $v['date_reported'])) ? date('n/j/Y', strtotime($v['date_reported'])) : ""; ?></td>
-				<td>$<?php echo formatMoney($v['revenue']); ?></td>
+				<td>$<?php echo formatMoney($v['insurance']); ?></td>
+				<td>$<?php echo formatMoney($v['patient']); ?></td>
 			    </tr>
 			    <?php } ?>
 			</tbody>

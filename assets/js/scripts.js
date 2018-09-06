@@ -706,23 +706,25 @@ $(document).ready(function () {
 
 	var datePaydTxt = $('#revenue-table #'+dataID+" .editable_date_payd").text();
 	var datePayorTxt = $('#revenue-table #'+dataID+" .editable_payor").text();
-	var dateAmmountTxt = $('#revenue-table #'+dataID+" .editable_amount").text();
-	dateAmmountTxt = dateAmmountTxt.replace(/\,/g,"");
+	var dateInsuranceTxt = $('#revenue-table #'+dataID+" .editable_insurance").text();
+	dateInsuranceTxt = dateInsuranceTxt.replace(/\,/g,"");
+	var datePatientTxt = $('#revenue-table #'+dataID+" .editable_patient").text();
+	datePatientTxt = datePatientTxt.replace(/\,/g,"");
+
 	var datePaydInput = $("<input required autocomplete=\"off\" type=\"text\" name=\"revenueEdit["+dataID+"][date_paid]\" class=\"datepicker\" />");
 	var datePayorInput = $("<input required autocomplete=\"off\" type=\"text\" name=\"revenueEdit["+dataID+"][payor]\" />");
-	var dateAmountInput = $("<input required autocomplete=\"off\"  min=\"0.00\" step=\"0.01\" type=\"number\"  name=\"revenueEdit["+dataID+"][amount]\"  />");
+	var dateInsuranceInput = $("<input required autocomplete=\"off\"  min=\"0.00\" step=\"0.01\" type=\"number\"  name=\"revenueEdit["+dataID+"][insurance]\"  />");
+	var datePatientInput = $("<input required autocomplete=\"off\"  min=\"0.00\" step=\"0.01\" type=\"number\"  name=\"revenueEdit["+dataID+"][patient]\"  />");
 
 	datePaydInput.val(datePaydTxt);
 	datePayorInput.val(datePayorTxt);
-	dateAmountInput.val(dateAmmountTxt);
+	dateInsuranceInput.val(dateInsuranceTxt);
+	datePatientInput.val(datePatientTxt);
 
 	$('#revenue-table #'+dataID+" .editable_date_payd").replaceWith(datePaydInput);
 	$('#revenue-table #'+dataID+" .editable_payor").replaceWith(datePayorInput);
-	$('#revenue-table #'+dataID+" .editable_amount").replaceWith(dateAmountInput);
-
-	$('#revenue-table #'+dataID+" .action_second").removeClass('hide');
-	$('#revenue-table #'+dataID+" .action_first").addClass('hide');
-
+	$('#revenue-table #'+dataID+" .editable_insurance").replaceWith(dateInsuranceInput);
+	$('#revenue-table #'+dataID+" .editable_patient").replaceWith(datePatientInput);
     });
 
     //edit deductable item
@@ -761,7 +763,8 @@ $(document).ready(function () {
 	var formData = '<tr>\n\
 			<td><input required name="revenueAdd[date_paid][]" class="deductable-first datepicker" autocomplete="off" class="revenue-first" placeholder="Date Paid" type="text" /></td>\n\
 			<td><input required name="revenueAdd[payor][]" placeholder="Payor" type="text" /></td>\n\
-			<td>$ <input required name="revenueAdd[amount][]" placeholder="Amount" type="number"  min=\"0.00\" step=\"0.01\"/></td>\n\
+			<td>$ <input required name="revenueAdd[insurance][]" placeholder="Insurance" type="number"  min=\"0.00\" step=\"0.01\"/></td>\n\
+			<td>$ <input required name="revenueAdd[patient][]" placeholder="Patient" type="number"  min=\"0.00\" step=\"0.01\"/></td>\n\
 			<td class="text-center"><a class="color-red removeTableRow"><span class="fas fa-minus-circle" aria-hidden="true"></span></a></td>\n\
 			</tr>';
 	$('#revenue-table .priceSum').before(formData);
