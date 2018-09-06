@@ -52,7 +52,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 <script src="assets/eventschedule/js/fullcalendar.min.js"></script>
 <script src="assets/eventschedule/js/bootstrap-datetimepicker.min.js"></script>
 <style>
-    .col-md-1 { width: 9.333333% !important;}
+    .col-md-1 { width: 10.333333% !important;}
     .container { max-width: 1358px !important;}
     #datetimepicker1{ position: relative; width: 172px; }
     #datetimepicker1 input{ width: 100%; }
@@ -61,6 +61,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     #datetimepicker2{ position: relative; width: 172px; }
     #datetimepicker2 input{ width: 100%; }
     #datetimepicker2 img{ position: absolute; top: 8px; right: 5px;}
+    textarea.form-control{height: auto !important;}
     
     /* The Modal (background) */
     .schedulemodal {
@@ -108,13 +109,15 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 <script>
 
     $(document).ready(function () {
-
+        $(".f2").width('95%');
         $("input[name='eventtype']").click(function () {
             var evtType = $(this).val();
             if (evtType == 2) {
+                $(".f2").width('100%');
                 $("div.accounttype").hide();
                 $("div.healthcare").show();
             } else {
+                $(".f2").width('95%');
                 $("div.accounttype").show();
                 $("div.healthcare").hide();
             }
@@ -578,10 +581,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     <label class="dynamic" for="event_date"><span>Event Date</span></label>
 
                     <div class="group">                       
-                        <input readonly class="datepicker" type="text" id="eventstart" name="eventstart" value="<?php echo ((!isset($_POST['clear'])) && isset($_POST['from_date']) && strlen($_POST['from_date'])) ? $_POST['from_date'] : ""; ?>" placeholder="From Date">
+                        <input readonly class="datepicker" type="text" id="eventstart" name="eventstart" value="<?php echo ((!isset($_POST['clear'])) && isset($_POST['from_date']) && strlen($_POST['from_date'])) ? $_POST['from_date'] : ""; ?>" placeholder="Event Date">
 
                         <p class="f_status">
-                            <span class="status_icons"><strong></strong></span>
+                            <span class=""><strong></strong></span>
                         </p>
                     </div>
                 </div>
@@ -590,341 +593,108 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
                     <div class="group">
                         <?php if ($role == 'Admin' || $role == 'Sales Manager') { ?>
-                                <select id="salesrepopt" name="salesrepopt" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrep'])) && (strlen($_POST['salesrep']))) ? "" : "no-selection"; ?>">
+                                <select id="salesrepopt" name="salesrepopt" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrepopt'])) && (strlen($_POST['salesrepopt']))) ? "" : "no-selection"; ?>">
                                 <option value="">Genetic Consultant</option>							
                                 <?php
+                                
                                 $salesreps = $db->query("SELECT * FROM tblsalesrep GROUP BY first_name");
 
                                 foreach ($salesreps as $salesrep) {
+                                    if($salesrep['first_name'] != "" || $salesrep['last_name'] != ""){
                                     ?>
-                                    <option value="<?php echo $salesrep['Guid_user']; ?>"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrep']) && ($_POST['salesrep'] == $salesrep['Guid_user'])) ? " selected" : ""); ?>><?php echo $salesrep['first_name']." ".$salesrep['last_name']; ?></option>
+                                    <option value="<?php echo $salesrep['Guid_user']; ?>"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrepopt']) && ($_POST['salesrepopt'] == $salesrep['Guid_user'])) ? " selected" : ""); ?>><?php echo $salesrep['first_name']." ".$salesrep['last_name']; ?></option>
                                     <?php
-                                }
-                                ?>
-                            </select>
-                                <?php } ?>
-
-                        <p class="f_status">
-                            <span class="status_icons"><strong></strong></span>
-                        </p>
-                    </div>
-                </div>
-                              
-                <?php if(isFieldVisibleByRole($roleIDs['first_name']['view'], $roleID)) {?>
-                    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['first_name'])) && (strlen(trim($_POST['first_name'])))) ? " show-label valid" : ""; ?>">
-                        <label class="dynamic" for="first_name"><span>First Name</span></label>
-
-                        <div class="group">
-                            <input id="first_name" name="first_name" type="text" value="<?php echo ((!isset($_POST['clear'])) && isset($_POST['first_name']) && strlen(trim($_POST['first_name']))) ? trim($_POST['first_name']) : ""; ?>" placeholder="First Name">
-
-                            <p class="f_status">
-                                <span class="status_icons"><strong></strong></span>
-                            </p>
-                        </div>
-                    </div>
-                <?php } ?>
-                <?php if(isFieldVisibleByRole($roleIDs['last_name']['view'], $roleID)) {?>
-                <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['last_name'])) && (strlen(trim($_POST['last_name'])))) ? " show-label valid" : ""; ?>">
-                    <label class="dynamic" for="last_name"><span>Last Name</span></label>
-
-                    <div class="group">
-                        <input id="last_name" name="last_name" type="text" value="<?php echo ((!isset($_POST['clear'])) && isset($_POST['last_name']) && strlen(trim($_POST['last_name']))) ? trim($_POST['last_name']) : ""; ?>" placeholder="Last Name">
-
-                        <p class="f_status">
-                            <span class="status_icons"><strong></strong></span>
-                        </p>
-                    </div>
-                </div>
-                <?php } ?>
-                <?php if(isFieldVisibleByRole($roleIDs['insurance']['view'], $roleID)) {?>
-                    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['insurance'])) && (strlen($_POST['insurance']))) ? " show-label valid" : ""; ?>">
-                        <label class="dynamic" for="insurance"><span>Insurance</span></label>
-
-                        <div class="group">
-                            <select id="insurance" name="insurance" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['insurance'])) && (strlen($_POST['insurance']))) ? "" : "no-selection"; ?>">
-                                <option value="">Insurance</option>
-                                <option value="aetna"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['insurance']) && ($_POST['insurance'] == "aetna")) ? " selected" : ""); ?>>Aetna</option>
-                                <option value="medicare"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['insurance']) && ($_POST['insurance'] == "medicare")) ? " selected" : ""); ?>>Medicare</option>
-                                <option value="other"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['insurance']) && ($_POST['insurance'] == "other")) ? " selected" : ""); ?>>Other</option>
-                                <option value="none"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['insurance']) && ($_POST['insurance'] == "none")) ? " selected" : ""); ?>>None</option>
-                            </select>
-
-                            <p class="f_status">
-                                <span class="status_icons"><strong></strong></span>
-                            </p>
-                        </div>
-                    </div>
-                <?php }?>
-                <?php
-                if (($role == "Sales Rep") || ((isset($_POST['salesrep']) && strlen($_POST['salesrep']) && (!isset($_POST['clear']))))) {
-                    $query = "SELECT 
-                    tblaccount.*                   
-                    FROM tblsalesrep 
-                    LEFT JOIN `tblaccountrep` ON  tblsalesrep.Guid_salesrep = tblaccountrep.Guid_salesrep
-                    LEFT JOIN `tblaccount` ON tblaccountrep.Guid_account = tblaccount.Guid_account                    
-                    WHERE tblsalesrep.Guid_user=";
-
-                    if (isset($_POST['salesrep']) && strlen($_POST['salesrep'])) {
-                        $query .= $_POST['salesrep'];
-                    } else {
-                        $query .= $_SESSION['user']['id'];
-                    }
-                } else {
-                    $query = "SELECT * FROM tblaccount";
-                }
-
-                $query .= " ORDER BY account";
-
-                $accounts = $db->query($query);
-                ?>
-                
-                <?php if(isFieldVisibleByRole($roleIDs['account']['view'], $roleID)) {?>
-                    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['account'])) && (strlen(trim($_POST['account'])))) ? " show-label valid" : ""; ?>">
-                        <label class="dynamic" for="account"><span>Account</span></label>
-
-                        <div class="group">
-                            <select id="account" name="account" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['account'])) && (strlen($_POST['account']))) ? "" : "no-selection"; ?>">
-                                <option value="">Account</option>	
-                                <?php
-                                foreach ($accounts as $account) {
-                                    $default_account .= $account['account'] . ",";
-                                    ?>
-                                    <option value="<?php echo $account['account']; ?>"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['account']) && ($_POST['account'] == $account['account'])) ? " selected" : ""); ?>><?php echo $account['account'] . " - " . ucwords(strtolower($account['name'])); ?></option>
-                                    <?php
-                                }
-
-                                $default_account = rtrim($default_account, ',');
-                                ?>
-                            </select>
-
-                            <p class="f_status">
-                                <span class="status_icons"><strong></strong></span>
-                            </p>
-                        </div>
-                    </div>
-                <?php } ?>
-                
-                <?php if(isFieldVisibleByRole($roleIDs['provider']['view'], $roleID)) {?>
-                    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['provider'])) && (strlen($_POST['provider']))) ? " show-label valid" : ""; ?>">
-                        <label class="dynamic" for="provider"><span>Provider</span></label>
-
-                        <div class="group">
-                            <select id="provider" name="provider" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['provider'])) && (strlen($_POST['provider']))) ? "" : "no-selection"; ?>">
-                                <option value="">Provider</option>							
-                                <?php
-                                $default_account = ltrim($default_account, ',');
-                                if($default_account){
-                                $query = "SELECT * FROM tblprovider WHERE account_id IN (" . $default_account . ") GROUP BY first_name";
-
-                                $providers = $db->query($query);
-                                foreach ($providers as $provider) {
-                                    ?>
-                                    <option value="<?php echo $provider['Guid_provider']; ?>"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['provider']) && ($_POST['provider'] == $provider['Guid_provider'])) ? " selected" : ""); ?>><?php echo $provider['first_name']." ".$provider['last_name']; ?></option>
-                                    <?php
-                                }
+                                    }
                                 }
                                 ?>
                             </select>
 
-                            <p class="f_status">
-                                <span class="status_icons"><strong></strong></span>
-                            </p>
-                        </div>
-                    </div>
-                <?php } ?>
-                <?php if(isFieldVisibleByRole($roleIDs['location']['view'], $roleID)) {?>
-                    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['location'])) && (strlen($_POST['location']))) ? " show-label valid" : ""; ?>">
-                        <label class="dynamic" for="location"><span>Location</span></label>
-
-                        <div class="group">
-                            <select id="location" name="location" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['location'])) && (strlen($_POST['location']))) ? "" : "no-selection"; ?>">
-                                <option value="">Location</option>							
-                                <?php
-                                $locations = $db->query("SELECT description FROM tblsource");
-
-                                foreach ($locations as $location) {
-                                    ?>
-                                    <option value="<?php echo $location['description']; ?>"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['location']) && ($_POST['location'] == $location['description'])) ? " selected" : ""); ?>><?php echo $location['description']; ?></option>
-                                    <?php
-                                }
-                                ?>
-                            </select>
-
-                            <p class="f_status">
-                                <span class="status_icons"><strong></strong></span>
-                            </p>
-                        </div>
-                    </div>
-                <?php  } ?>
-                <?php if(isFieldVisibleByRole($roleIDs['salesrep']['view'], $roleID)) {?>
-                    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrep'])) && (strlen($_POST['salesrep']))) ? " show-label valid" : ""; ?>">
-                        <label class="dynamic" for="salesrep"><span>Genetic Consultant</span></label>
-
-                        <div class="group">
-                            <select id="salesrep" name="salesrep" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrep'])) && (strlen($_POST['salesrep']))) ? "" : "no-selection"; ?>">
-                                <option value="">Genetic Consultant</option>							
-                                <?php
-                                $salesreps = $db->query("SELECT * FROM tblsalesrep GROUP BY first_name");
-
-                                foreach ($salesreps as $salesrep) {
-                                    ?>
-                                    <option value="<?php echo $salesrep['Guid_user']; ?>"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrep']) && ($_POST['salesrep'] == $salesrep['Guid_user'])) ? " selected" : ""); ?>><?php echo $salesrep['first_name']." ".$salesrep['last_name']; ?></option>
-                                    <?php
-                                }
-                                ?>
-                            </select>
-
-                            <p class="f_status">
-                                <span class="status_icons"><strong></strong></span>
-                            </p>
-                        </div>
-                    </div>
-                <?php }   ?>
-                <?php if($role != 'Physician') { ?>
-                <div>
-                    <input id="show-tests" name="mark_test" value="1" type="checkbox" <?php echo ((!isset($_POST['clear'])) && (isset($_POST['mark_test']) && ($_POST['mark_test'] == 1)) ? " checked" : ""); ?> />
-                    <label for="show-tests">Show Tests</label>                     
-                </div>
-                <?php } ?>
-                
-                <!-- <fieldset class="cbox">
-                     <label for="auto_apply">
-                         <input id="auto_apply" type="checkbox" checked>
-                         <strong>Auto Apply</strong>
-                     </label>
-                 </fieldset> -->
-
-                <button id="filter" value="1" name="search" type="submit" class="button filter half"><strong>Search</strong></button>
-                <button type="submit" name="clear" class="button cancel half"><strong>Clear</strong></button>
-            </form>
-            <!--********************   SEARCH BY PALETTE END    ******************** -->
-
-        </div>
-        <?php } ?>
-    </div>    
-</aside>
-<?php
-// Salesrep table
-$clause = " ORDER BY Guid_salesrep";
-$salesrep = $db->selectAll('tblsalesrep', $clause);
-
-?>
-<main>
-    <?php if ($thisMessage != "") { ?>
-        <section id="msg_display" class="show success">
-            <h4><?php echo $thisMessage; ?></h4>
-        </section>
-    <?php } ?>    
-    <div class="box full visible ">  
-        <section id="palette_top">
-            <h4>             
-                <ol class="breadcrumb">
-                    <li><a href="<?php echo SITE_URL; ?>">Home</a></li>
-                    <li class="active">Event Schedule</li>   
-                </ol>      
-            </h4>
-            <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>
-            <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
-        </section>
-        <div class="scroller event-schedule">
-            <div class="container">  
-                <form id='createEvent'>
-                    <div class="panel panel-primary">
-                        <div class="panel-body">
-                            <div class="row">
-                                <div class='col-md-2'>
-                                    <div class="form-group">
-                                        <div class='input-group date' id='datetimepicker1'>
-                                            <input type='text' id="eventstart" class="form-control" placeholder="Event Date" />
-                                            <span class="input-group-addon">
-                                                <span class="glyphicon glyphicon-calendar"></span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <?php if ($role == 'Admin' || $role == 'Sales Manager') { ?>
-                                    <div class='col-md-2'>
-                                        <div class="form-group">
-                                            <select class="form-control" id="salesrepopt">
-                                                <option value="0">Genetic Consultant</option>
-                                                <?php
-                                                foreach ($salesrep as $srole) {
-                                                    if ($srole['first_name']) {
-                                                        ?>
-                                                        <option value='<?php echo $srole['Guid_salesrep']; ?>'><?php echo $srole['first_name'] . " " . $srole['last_name']; ?></option>
-                                                        <?php
-                                                    }
-                                                }
-                                                ?>
-                                            </select>
-                                        </div>
-                                    </div>
                                 <?php } ?>
                                 <?php if ($role == 'Sales Rep') { ?>
-                                    <div class='col-md-2'>
-                                        <div class="form-group">
-                                            <span><?php
+                                    <span><?php
                                                 echo $salesRepDetails['first_name'] . " " . $salesRepDetails['last_name'];
                                                 ?>
-                                            </span>    
-                                        </div>
-                                    </div>
-                                <?php } ?>
+                                    </span>    
+                                    <?php } ?>
                                 <input type="hidden" id="salerepid" value="<?php echo $salesRepDetails['Guid_salesrep']; ?>">
-                                <div class='col-md-2'>
-                                    <div class="form-group">
-                                        <div class="eventtype">
-                                            <label><input type="radio" name="eventtype" value="1" checked>BRCA Day</label>
-                                        </div>
-                                        <div class="eventtype">
+
+                        <p class="f_status">
+                            <span class=""><strong></strong></span>
+                        </p>
+                    </div>
+                </div>
+                <div class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['eventtype'])) && (strlen($_POST['eventtype']))) ? "valid" : ""; ?>" style="margin-top: 15px;">
+                    <div class="group">
+                        <div class="eventtype">
+                            <label style="padding-right: 11px;"><input type="radio" name="eventtype" value="1" checked>BRCA Day</label>
                                             <label><input type="radio" name="eventtype" value="2">Health Care Fair</label>
-                                        </div>
-                                    </div>
+                                        </div><p class="f_status">
+                            <span class=""><strong></strong></span>
+                        </p>
+                    </div>
+                </div>
+                <div class='f2 accounttype'>
+                    <div class="group">
+                        <select class="form-control" id="accountopt">
+                            <option value="0">Account</option>
+                            <?php
+                            foreach ($accountdt as $acct) {
+                                ?>
+                                <option value='<?php echo $acct['Guid_account']; ?>'><?php echo $acct['account'] . ' - ' . ucfirst(strtolower($acct['name'])); ?></option>
+                                <?php
+                            }
+                            ?>
+                        </select>
+                    <p class="f_status">
+                                <span class=""><strong></strong></span>
+                            </p>    
+                    </div>
+                </div>
+                <div class='f2 accounttype'> 
+                    <div class="group">
+                        <textarea class="form-control" rows="10" id="comment" placeholder="Comments"></textarea>
+                    </div> 
+                </div> 
+                <div class="healthcare" style="display: none;">
+                                <div class="f2">
+                                <div class="group">
+                                    <!-- Full Name -->
+                                    <input type="text" class="form-control" id="full_name_id" name="full_name" placeholder="Full Name">
+                                    <p class="f_status">
+                                        <span class=""><strong></strong></span>
+                                    </p>
                                 </div> 
-                                <div class='col-md-2 accounttype'>
-                                    <div class="form-group">
-                                        <select class="form-control" id="accountopt">
-                                            <option value="0">Account</option>
-                                            <?php
-                                            foreach ($accountdt as $acct) {
-                                                ?>
-                                                <option value='<?php echo $acct['Guid_account']; ?>'><?php echo $acct['account'] . ' - ' . ucfirst(strtolower($acct['name'])); ?></option>
-                                                <?php
-                                            }
-                                            ?>
-                                        </select>
-                                    </div>
                                 </div>
-                                <div class='col-md-2 accounttype'> 
-                                    <div class="form-group">
-                                        <textarea class="form-control" rows="5" id="comment" placeholder="Comments"></textarea>
-                                    </div> 
-                                </div>    
-                                <button type="submit" id="eventsave" class="btn btn-default">Save</button> 
-                            </div>
-                            <div class="row healthcare" style="display: none;">
-                                <div class='col-md-4'>
-                                    <div class="form-group"> <!-- Full Name -->
-                                        <input type="text" class="form-control" id="full_name_id" name="full_name" placeholder="Full Name">
-                                    </div>	
-                                </div>    
-                                <div class='col-md-4'>
-                                    <div class="form-group"> <!-- Street 1 -->
+                                <div class="f2">
+                                <div class="group">
+                                    <!-- Street 1 -->
                                         <input type="text" class="form-control" id="street1_id" name="street1" placeholder="Street address, P.O. box, company name, c/o">
-                                    </div>					
-                                </div>    
-                                <div class='col-md-4'>    
-                                    <div class="form-group"> <!-- Street 2 -->
+                                    <p class="f_status">
+                                    <span class=""><strong></strong></span>
+                                    </p>
+                                </div>  
+                                </div>
+                                <div class="f2">    
+                                <div class="group">    
+                                    <!-- Street 2 -->
                                         <input type="text" class="form-control" id="street2_id" name="street2" placeholder="Apartment, suite, unit, building, floor, etc.">
-                                    </div>	
-                                </div>    
-                                <div class='col-md-4'>
-                                    <div class="form-group"> <!-- City-->
+                                    <p class="f_status">
+                                    <span class=""><strong></strong></span>
+                                    </p>
+                                </div>
+                                </div>
+                                <div class="f2">    
+                                <div class="group">
+                                    <!-- City-->
                                         <input type="text" class="form-control" id="city_id" name="city" placeholder="City">
-                                    </div>									
-                                </div>    
-                                <div class='col-md-4'>
-                                    <div class="form-group"> <!-- State Button -->
+                                    <p class="f_status">
+                                    <span class=""><strong></strong></span>
+                                    </p>    
+                                </div>
+                                </div>
+                                <div class="f2">    
+                                <div class="group">
+                                    <!-- State Button -->
                                         <select class="form-control" id="state_id" name="state">
                                             <option value="AL">Alabama</option>
                                             <option value="AK">Alaska</option>
@@ -977,18 +747,57 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                             <option value="WV">West Virginia</option>
                                             <option value="WI">Wisconsin</option>
                                             <option value="WY">Wyoming</option>
-                                        </select>					
-                                    </div>
-                                </div>    
-                                <div class='col-md-4'>
-                                    <div class="form-group"> <!-- Zip Code-->
+                                        </select>
+                                    <p class="f_status">
+                                    <span class=""><strong></strong></span>
+                                    </p>
+                                </div>
+                                </div>
+                                <div class="f2">    
+                                <div class="group">
+                                    <!-- Zip Code-->
                                         <input type="text" class="form-control" id="zip_id" name="zip" placeholder="zip code">
-                                    </div>	
-                                </div>    
-                            </div>  
-                        </div>
-                    </div>
-                </form>  
+                                    <p class="f_status">
+                                    <span class=""><strong></strong></span>
+                                    </p>    
+                                </div>  
+                                </div>
+                            </div>
+                              
+                <button type="submit" id="eventsave" class="button filter half">Save</button> 
+                <button type="submit" name="clear" class="button cancel half"><strong>Clear</strong></button>
+            </form>
+            <!--********************   SEARCH BY PALETTE END    ******************** -->
+
+        </div>
+        <?php } ?>
+    </div>    
+</aside>
+<?php
+// Salesrep table
+$clause = " ORDER BY Guid_salesrep";
+$salesrep = $db->selectAll('tblsalesrep', $clause);
+
+?>
+<main>
+    <?php if ($thisMessage != "") { ?>
+        <section id="msg_display" class="show success">
+            <h4><?php echo $thisMessage; ?></h4>
+        </section>
+    <?php } ?>    
+    <div class="box full visible ">  
+        <section id="palette_top">
+            <h4>             
+                <ol class="breadcrumb">
+                    <li><a href="<?php echo SITE_URL; ?>">Home</a></li>
+                    <li class="active">Event Schedule</li>   
+                </ol>      
+            </h4>
+            <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>
+            <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
+        </section>
+        <div class="scroller event-schedule">
+            <div class="container">  
                 <div class="filterby">
                     <div>                
                         <div>
@@ -1110,7 +919,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                     </div>
                                     <div class='col-md-2 modalaccounttype'> 
                                         <div class="form-group">
-                                            <textarea class="form-control" rows="5" id="modalcomment" placeholder="Comments"></textarea>
+                                            <textarea class="form-control" rows="10" id="modalcomment" placeholder="Comments"></textarea>
                                         </div> 
                                     </div>  
                                     <button type="submit" id="eventupdate" class="btn btn-default">Update</button>
