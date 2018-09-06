@@ -369,11 +369,17 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     
                     <div class="row pT-30">
                         <div id="questionaryInfo"  class="col-md-6">
+                            <h5>
+                                Submission History 
+<!--                                <a class="pull-right" id="add-deductable-log">
+                                    <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
+                                </a>-->
+                            </h5>
                             <table class="table">
                             <thead>
                                 <th>Print</th>
                                 <th>Qualified</th>
-                                <th>Submission History</th>
+                                <th>Date Completed</th>
                                 <th>Clinical History</th>
                             </thead>
                             <tbody>
@@ -457,10 +463,16 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         </table>
                         </div>
                         <div id="statusLogs"  class="col-md-6">
+                            <h5>
+                                Test Status Change Log
+<!--                                <a class="pull-right" id="add-deductable-log">
+                                    <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
+                                </a>-->
+                            </h5>
                             <table class="table">
                             <thead>
                                 <th>Status</th>
-                                <th>Test Status Change Log</th>
+                                <th>Date/Time</th>
                                 <th>Comment</th>
                                 <th>Recorded By</th>
                             </thead>
