@@ -50,6 +50,7 @@ $urlPrev = "https://www.mdlab.com/previous";
 $urlStr = "";
 $generateUrlLink = $urlMain;
 $isValid = TRUE;
+$accountMessage=""; $dvMessage="";
 if (isset($_POST['generate_url_config']) && $_POST['generate_url_config']=='1'){     
     
     extract($_POST);
@@ -60,7 +61,14 @@ if (isset($_POST['generate_url_config']) && $_POST['generate_url_config']=='1'){
         $generateUrlLink = "";
         $dvMessage = "<div class='error-text'>Please select device.</div>";
     }
+    $accountNumber = $_POST['an'];
+    $hasAccountProviders = $db->query("SELECT Guid_provider FROM tblprovider WHERE account_id=:account_id", array('account_id'=>$accountNumber));
     
+    if(empty($hasAccountProviders)){
+        $isValid = FALSE;
+        $generateUrlLink = "";
+        $accountMessage = "<div class='error-text'>Selected account doesn't have providers.</div>";
+    }
     if(isset($_POST['previous']) && $_POST['previous'] != ""){
         $generateUrlLink = $urlPrev;
     }
@@ -253,8 +261,8 @@ $accountProviders = '';
                     </div>
                       <div class="row">
                           <div class="col-md-12">
-                              <div class="form-group">
-                                    <select name="an" id="account" class="form-control">
+                                <div class="form-group ">
+                                    <select name="an" id="account" class="form-control <?php if(!$isValid && $accountMessage!="") { echo 'error-border'; }?>">
                                         <option value="0">Account</option>
                                      <?php
                                          foreach ($accounts as $k=>$v){
@@ -316,7 +324,7 @@ $accountProviders = '';
                                       
                                       ?>
                                     <div class="form-group">
-                                        <select name="dv" id="deviceId" class="form-control <?php if(!$isValid) { echo 'error-border'; }?>">
+                                        <select name="dv" id="deviceId" class="form-control <?php if(!$isValid && $dvMessage!="") { echo 'error-border'; }?>">
                                             <option value="">Device ID</option>                                            
                                             <?php 
                                             $thisSalesRep = get_field_value($db, 'tblsalesrep', 'Guid_salesrep', ' WHERE Guid_user='.$userID);
@@ -328,10 +336,12 @@ $accountProviders = '';
                                             <option <?php echo $isDevice; ?> value="<?php echo $v['id'];?>" ><?php echo $v['serial_number']." - ".$v['device_name'];?></option>
                                            <?php } ?>
 
-                                        </select>
-                                        <?php if(!$isValid) { echo $dvMessage; }?>
+                                        </select>                                        
                                     </div>
+                                    <?php if(!$isValid && $dvMessage!="") { echo $dvMessage; }?>
                                   <?php } ?>
+                                  
+                                    <?php if(!$isValid && $accountMessage!="") { echo $accountMessage; }?>
                                  <div class="text-center">
                                     <button name="generate_url_config" value="1" type="submit" class="btn btn-info">Generate URL</button>                  
                                  </div>                              

@@ -339,11 +339,13 @@ a:hover, a:focus {
 
 .error-text,
 .success-text{
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     color: #f00;
     font-weight: bold;
     font-size: 12px;
     padding: 5px;
+    line-height: 10px;
+    
 }
 .success-text{
     color: #4eff3a;

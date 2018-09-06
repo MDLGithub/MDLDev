@@ -7,6 +7,7 @@ ALTER TABLE `tbl_revenue` ADD COLUMN `patient` VARCHAR(255) AFTER `insurance`;
 patient-info.php
 custom-styles.css
 mdl-stats.php
+url-configuration.php
 
 
 
