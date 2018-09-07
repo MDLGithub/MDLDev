@@ -1013,15 +1013,101 @@ function formatMoney($number){
     return $newNum;
 }
 
-//$result = alternative_money( '%!n ' . $currency[1], $amt);
-//function alternative_money($val,$symbol='$',$r=2) {
-//    $n = $val; 
-//    $c = is_float($n) ? 1 : number_format($n,$r);
-//    $d = '.';
-//    $t = ',';
-//    $sign = ($n < 0) ? '-' : '';
-//    $i = $n=number_format(abs($n),$r); 
-//    $j = (($j = $i.length) > 3) ? $j % 3 : 0; 
-//
-//    return  $symbol.$sign .($j ? substr($i,0, $j) + $t : '').preg_replace('/(\d{3})(?=\d)/',"$1" + $t,substr($i,$j)) ;
-//}
+function get_status_names($db, $statusIds=array()){
+    $statusStr = "";
+    $ids = "";
+    if(!empty($statusIds)){
+        foreach ($statusIds as $k=>$v){
+            $ids .= $v.', ';
+        }
+        $ids = rtrim($ids, ', ');
+        $statuses = $db->query("SELECT Guid_status,status FROM tbl_mdl_status WHERE Guid_status IN($ids)");
+        foreach ($statuses as $k=>$v){
+            if($k==0 ){
+                $statusStr .= $v['status'];
+                if(count($statuses)>1){
+                    $statusStr .= ": ";
+                }
+            } else {
+                $statusStr .= $v['status'].", ";
+            }
+        }
+    }
+    $statusStr = rtrim($statusStr, ', ');
+    return $statusStr;
+}
+
+function get_status_dropdown($db, $parent='0') {
+    $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
+    
+    $content = '<div class="f2  ">
+                    <div class="group">
+                        <select data-parent="'.$parent.'" required class="status-dropdown" name="status[]" id="">
+                            <option value="0">Select Status</option>';    
+    if ( $statuses ) {
+        foreach ( $statuses as $status ) {  
+            $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
+             
+            $optionClass = '';
+            if ( !empty($checkCildren) ) { 
+                $optionClass = 'has_sub_menu';                 
+            }            
+            $content .= "<option value='".$status['Guid_status']."' class='".$optionClass."'>".$status['status'];
+            
+            $content .= '</option>';
+        }
+    }
+    $content .= '</select><p class="f_status"><span class="status_icons"><strong></strong></span>
+                            </p></div></div>';
+   
+    return $content;
+}
+function get_nested_status_dropdown($db, $parent = 0) {
+    $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
+    
+    $content = '<select class="no-selection" name="parent_id" id="parent">
+                            <option value="0">Select Status Parent</option>';    
+    if ( $statuses ) {
+        foreach ( $statuses as $status ) {  
+            $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
+             
+            $optionClass = '';
+            if ( !empty($checkCildren) ) { 
+                $optionClass = 'has_sub_menu';                 
+            }            
+            $content .= "<option value='".$status['Guid_status']."' class='".$optionClass."'>".$status['status'];
+            if ( !empty($checkCildren) ) {
+                $content .= get_option_of_nested_status( $db, $status['Guid_status'], "-&nbsp;" );
+            }
+            $content .= '</option>';
+        }
+    }
+    $content .= "</select>";
+   
+    return $content;
+}
+function get_option_of_nested_status($db, $parent = 0,  $level = '') {
+    $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
+    if ( $statuses ) {
+        $content ='';
+        $prefix = 0;
+        foreach ( $statuses as $status ) {  
+            
+            $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
+            $optionClass = '';
+           
+            if ( !empty($checkCildren) ) { 
+                $optionClass = 'has_sub';   
+            }            
+            $content .= "<option value='".$status['Guid_status']."' class='".$optionClass."'>".$level . " " .$status['status'];
+
+            if ( !empty($checkCildren) ) {
+                $prefix .= '-';
+                $content .= get_option_of_nested_status( $db, $status['Guid_status'], $level . "-&nbsp;" );
+            }
+            $content .= '</option>';
+        }
+    }
+   
+    return $content;
+}

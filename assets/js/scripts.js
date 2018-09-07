@@ -171,10 +171,41 @@ $(document).ready(function () {
     });
     
     /**
+     * account dropdown on change function
+     * update account info when account selected
+     */
+    $('#status-dropdowns-box').delegate( ".status-dropdown", "change", function() { 
+        var val =  this.value;
+        //console.log(accountId);
+        $(this).parent().parent().nextAll().remove();
+        var ajaxUrl = baseUrl+'/ajaxHandler.php';
+        if(val && val!="0"){
+            $.ajax( ajaxUrl , {
+
+                type: 'POST',
+                data: {
+                   status_dropdown: '1',
+                   parent_id: val,
+                },
+                success: function(response) {
+                    var result = JSON.parse(response);
+                    if(result.content !=""){
+                        var content = result.content
+                        $('#status-dropdowns-box').append(content);
+                    }
+                },
+                error: function() {
+                    console.log('0');
+                }
+            });
+        }
+    });
+    
+    
+    /**
      * Homepage Filter 
      * Account-Provider-Salesrep dropdown change
-     */
-        
+     */        
     $("#filter_form #account, #filter_form #provider, #filter_form #salesrep").on('change', function() {
         var thisName = this.name;
         var accountVal  = $('#filter_form #account').val();        
