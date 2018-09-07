@@ -17,6 +17,42 @@ if(isset($_POST['get_account_full_info']) && $_POST['get_account_full_info']=='1
 if(isset($_POST['get_account_provider']) && $_POST['get_account_provider']=='1'){
     get_provider_by_guid($db, $_POST['provider_guid']);
 }
+if(isset($_POST['status_dropdown']) && $_POST['status_dropdown']=='1'){
+    __status_dropdown($db, $_POST['parent_id']);
+}
+
+//get status dropdown
+function __status_dropdown($db, $parent) {
+    $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
+    $content = "";
+    if ( !empty($statuses) ) {
+    $content .= '<div class="f2  ">
+		    <div class="group">
+			<select data-parent="'.$parent.'" required class="status-dropdown" name="status[]" id="">
+			   ';
+
+	foreach ( $statuses as $status ) {
+	    $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
+
+	    $optionClass = '';
+	    if ( !empty($checkCildren) ) {
+		$optionClass = 'has_sub_menu';
+	    }
+	    $content .= "<option value='".$status['Guid_status']."' class='".$optionClass."'>".$status['status'];
+
+	    $content .= '</option>';
+	}
+
+    $content .= "</select>";
+    $content .= '<p class="f_status">
+				<span class="status_icons"><strong></strong></span>
+			    </p></div></div>';
+    }
+
+    echo json_encode( array('content'=>$content));
+    exit();
+}
+
 
 //Homepage filter account, get correlation between account, providers, sales reps
 if(isset($_POST['get_account_correlations']) && $_POST['get_account_correlations']!=''){
