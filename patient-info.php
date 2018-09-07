@@ -26,7 +26,7 @@ $isValid = TRUE;
 if(isset($_GET['patient']) && $_GET['patient'] !="" ){     
     $Guid_user = $_GET['patient'];
     
-    $sqlQualify = "SELECT q.Guid_qualify,q.Guid_user,q.insurance,q.Date_created,
+    $sqlQualify = "SELECT q.Guid_qualify,q.Guid_user,q.insurance,q.other_insurance,q.Date_created,
                     p.*, u.email 
                     FROM tblqualify q
                     LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user
@@ -83,57 +83,13 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 updateTable($db, 'tblpatient', array('dob'=>$dob), array('Guid_user'=>$_GET['patient']));
             }
 
-            //update patient table for reason and cpecimen collected values
-            $wherePatient = array('Guid_user'=>$_GET['patient']);
-            $patientData = array();
-            if(isset($_POST['specimen_collected'])&&$_POST['specimen_collected']!=""){
-                $patientData['specimen_collected']=$_POST['specimen_collected']; 
-            }
-            if(isset($_POST['Guid_reason'])&&$_POST['Guid_reason']!=""){
-                $patientData['Guid_reason']=$_POST['Guid_reason']; 
-            } else {
-                $patientData['Guid_reason']="";
-            }
-            if(!empty($patientData)){
-                $updatePatient = updateTable($db, 'tblpatient', $patientData, $wherePatient);
-            }
-
             //update mdl stats info 
             if(isset($_POST['mdl_number'])){
                 $mdlStatsData['mdl_number']=$_POST['mdl_number'];
 
             }
-            if(isset($_POST['Guid_status'])){
-                $mdlStatsData['Guid_status']=$_POST['Guid_status'];
-                //update log table if status changed
-                if($mdlInfo['Guid_status'] != $_POST['Guid_status']){
-                    $statusLogData = array(                                              
-                        'Guid_status' => $_POST['Guid_status'],
-                        'Guid_patient' => $_GET['patient'],  
-                        'recorded_by' => $_SESSION['user']['id'],  
-                        'mdl_number' => $_POST['mdl_number'],
-                        'comment'=>$_POST['comment'],
-                        'date' => date('Y-m-d H:i:s')
-                    );
-                    $inserStatusLog = insertIntoTable($db, 'tbl_mdl_status_log', $statusLogData);
-                }
-            }
-            if(isset($_POST['Guid_declined_reason'])&&$_POST['Guid_declined_reason']!=""){
-                $mdlStatsData['Guid_declined_reason']=$_POST['Guid_declined_reason'];
-            } else {
-                $mdlStatsData['Guid_declined_reason']='0';
-            }            
-            if(isset($_POST['specimen_collection_date'])){
-                $mdlStatsData['specimen_collection_date']=($_POST['specimen_collection_date']!="")?date('Y-m-d h:i:s', strtotime($_POST['specimen_collection_date'])):"";
-            }
-            if(isset($_POST['date_accessioned'])){
-                $mdlStatsData['date_accessioned']=($_POST['date_accessioned']!="")?date('Y-m-d h:i:s', strtotime($_POST['date_accessioned'])):"";
-            }
-            if(isset($_POST['date_reported'])){
-                $mdlStatsData['date_reported']=($_POST['date_reported']!="")?date('Y-m-d h:i:s', strtotime($_POST['date_reported'])):"";
-            }
-            if(isset($_POST['comment'])){
-                $mdlStatsData['notes']=$_POST['comment'];
+            if(isset($_POST['notes'])){
+                $mdlStatsData['notes']=$_POST['notes'];
             }
 
             if($mdlInfo){ //update existing
@@ -271,6 +227,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <p><label>Email:</label> <input type="email" name="email" value="<?php echo $qualifyResult['email']; ?>" autocomplete="off"/> </p>
                                 <p><label>Registration Date:</label> <?php echo date("n/j/Y h:m A", strtotime($qualifyResult['Date_created'])); ?></p>
                                 <p><label>Insurance:</label> <?php echo $qualifyResult['insurance']; ?></p>
+                                <p><label>Other Insurance:</label> <?php echo $qualifyResult['other_insurance']; ?></p>
                             </div>
                             <div class="col-md-6 pB-30">                    
                                 <div class="row">
@@ -317,50 +274,10 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                             $mdlClass = (strlen($mdlNumber)!=0 && strlen($mdlNumber)<7)?' error error-border' : '';
                                             ?>
                                             <input type="number" autocomplete="off" class="mdlnumber <?php echo $mdlClass; ?>" name="mdl_number" value="<?php echo $mdlNumber; ?>" />
-                                        </p>
-                                        <p>
-                                            <label>Specimen Collection Date:</label>
-                                            <input type="text" autocomplete="off" class="datepicker" name="specimen_collection_date" value="<?php echo isset($mdlInfo['specimen_collection_date'])?((!preg_match("/0{4}/" , $mdlInfo['specimen_collection_date'])) ? date('n/j/Y', strtotime($mdlInfo['specimen_collection_date'])) : ""):""; ?>" />
-                                        </p>
-                                        <p>
-                                            <label>Date Accessioned:</label>
-                                            <input type="text" autocomplete="off" class="datepicker" name="date_accessioned" value="<?php echo isset($mdlInfo['date_accessioned'])?((!preg_match("/0{4}/" , $mdlInfo['date_accessioned'])) ? date('n/j/Y', strtotime($mdlInfo['date_accessioned'])) : ""):""; ?>" />
-                                        </p>
-                                        <p>
-                                            <label>Test Status:</label> 
-                                            <?php $status = $db->selectAll('tbl_mdl_status'); ?>
-                                            <select id="mdl-status" name="Guid_status">
-                                                <option value="">Select Status</option>
-                                                <?php 
-                                                $reasonClass = "hidden";
-                                                foreach ($status as $k=>$v){ ?>
-                                                    <option <?php echo ($mdlInfo['Guid_status']==$v['Guid_status'])?" selected":""; ?> value="<?php echo $v['Guid_status']; ?>"><?php echo $v['status']; ?></option>
-                                                <?php } ?>
-                                            </select>                                            
-                                            <!--<input type="text" autocomplete="off" class="" name="status" value="<?php echo isset($mdlInfo['status'])?$mdlInfo['status']:""; ?>" />-->
-                                        </p>
-                                        <p id="status-declined-reasons" class="<?php echo ($mdlInfo['status']=="Declined")?"":"hidden"; ?>">
-                                            <label>Status Declined Reasons:</label> 
-                                            <?php $reasons = $db->selectAll('tbl_mdl_status_declined_reasons', ' ORDER BY reason'); ?>
-                                            <select id="mdl-status" name="Guid_declined_reason">
-                                                <option value="">Select Reason</option>
-                                                <?php foreach ($reasons as $k=>$v){ ?>
-                                                    <option <?php echo ($mdlInfo['Guid_declined_reason']==$v['Guid_declined_reason'])?" selected":""; ?> value="<?php echo $v['Guid_declined_reason']; ?>"><?php echo $v['reason']; ?></option>
-                                                <?php } ?>
-                                            </select>   
-                                            <?php if($role=='Admin'){ ?>
-                                            <a href="<?php echo SITE_URL."/patient-info.php?patient=".$_GET['patient']."&add-declined-reason=1";?>" id="add-declined-reason">
-                                                <span class="fas fa-plus-circle" aria-hidden="true"></span>
-                                            </a>
-                                            <?php } ?>
-                                        </p>
-                                        <p>
-                                            <label>Date Reported:</label>
-                                            <input type="text" autocomplete="off" class="datepicker" name="date_reported" value="<?php echo isset($mdlInfo['date_reported'])?((!preg_match("/0{4}/" , $mdlInfo['date_reported'])) ? date('n/j/Y', strtotime($mdlInfo['date_reported'])) : ""):""; ?>" />                                
-                                        </p>
+                                        </p>                                        
                                         <p>
                                             <label>Comment:</label>
-                                            <textarea autocomplete="off" name="comment"><?php echo isset($mdlInfo['notes'])?$mdlInfo['notes']:""; ?></textarea>                                
+                                            <textarea autocomplete="off" name="notes"><?php echo isset($mdlInfo['notes'])?$mdlInfo['notes']:""; ?></textarea>                                
                                         </p>
                                     </div> 
                                 </div>
@@ -370,8 +287,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     <div class="row pT-30">
                         <div id="questionaryInfo"  class="col-md-6">
                             <h5>
-                                Submission History 
-<!--                                <a class="pull-right" id="add-deductable-log">
+                                Submission History: 
+                                <!-- <a class="pull-right" id="add-deductable-log">
                                     <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
                                 </a>-->
                             </h5>
@@ -408,7 +325,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                             <?php } ?>
                                         </td>
                                         <td class="<?php echo $qualifyedClass;?>"><?php echo $v['qualified']; ?></td>
-                                        <td><?php echo date("n/j/Y H:m:s A", strtotime($v['Date_created'])); ?></td> 
+                                        <td><?php echo date("n/j/Y h:m:s A", strtotime($v['Date_created'])); ?></td> 
                                         <td>
                                             <p>
                                                 <?php 
@@ -464,39 +381,34 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         </div>
                         <div id="statusLogs"  class="col-md-6">
                             <h5>
-                                Test Status Change Log
-<!--                                <a class="pull-right" id="add-deductable-log">
+                                Test Status Change Log:
+                                <a title="Add New Test Status Log" class="pull-right" href="<?php echo SITE_URL."/patient-info.php?patient=".$Guid_user."&status_log=1";?>">
                                     <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
-                                </a>-->
+                                </a>
                             </h5>
                             <table class="table">
                             <thead>
-                                <th>Status</th>
-                                <th>Date/Time</th>
-                                <th>Comment</th>
-                                <th>Recorded By</th>
+                                <th>Date</th>
+                                <th>Status 
+                                    <a title="Add New Status"  href="<?php echo SITE_URL .'/patient-info.php?patient='.$Guid_user.'&manage_status=add'; ?>" >
+                                        <span class="fas fa-plus-circle" aria-hidden="true"></span> 
+                                    </a>
+                                </th>
                             </thead>
                             <tbody>
                                 <?php 
                                 $patientID=$_GET['patient'];
-                                $qStatusLog = 'SELECT sl.recorded_by, p.firstname, p.lastname, s.status, sl.date, sl.comment '
+                                $qStatusLog = 'SELECT sl.status_ids, sl.date '
                                             . 'FROM tbl_mdl_status_log sl '
-                                            . 'LEFT JOIN tbl_mdl_status s ON sl.Guid_status=s.Guid_status '
                                             . 'LEFT JOIN tblpatient p ON sl.Guid_patient=p.Guid_user '
-                                            . 'WHERE sl.Guid_patient='.$patientID;
+                                            . 'WHERE sl.Guid_patient='.$patientID.' '
+                                            . 'Order BY date DESC';
                                 $ststusLogs = $db->query($qStatusLog);
                                 foreach ($ststusLogs as $k=>$v){ 
-                                    if($v['recorded_by']){
-                                    $userInfo = getUserFullInfo($db, $v['recorded_by']);
-                                    }
-                                    $userFullName = (isset($userInfo)&&$userInfo!="") ? $userInfo['first_name']." ".$userInfo['last_name'] : "";
-                                    
                                 ?>
                                     <tr>
-                                        <td><?php echo $v['status']; ?></td>                                        
-                                        <td><?php echo date("n/j/Y h:m A", strtotime($v['date'])); ?></td>         
-                                        <td><?php echo $v['comment']; ?></td>
-                                        <td><?php echo $userFullName; ?></td>
+                                        <td><?php echo date("n/j/Y", strtotime($v['date'])); ?></td> 
+                                        <td><?php echo get_status_names( $db, unserialize($v['status_ids']) ); ?></td>   
                                     </tr>
                                 <?php } ?>
                             </tbody>
@@ -642,39 +554,142 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 </main>
 
 
-<?php
-    if(isset($_POST['add_new_declined_reason'])){
-        $reasonData=array('reason'=>$_POST['reason']);
-        $insertReason = insertIntoTable($db, 'tbl_mdl_status_declined_reasons', $reasonData);
-        if($insertReason['insertID']!=""){
-            Leave(SITE_URL."/patient-info.php?patient=".$_GET['patient']);
-        }
-    }
-?>
 
-<?php if(isset($_GET['add-declined-reason']) && $_GET['add-declined-reason']=='1'){ ?>
-<div class="modalBlock ">
+<?php
+    if(isset($_POST['manage_status'])){ 
+        $statusData=array('parent_id'=>$_POST['parent_id'], 'status'=>$_POST['status'], 'order_by'=>$_POST['order_by']);
+        $insertStatus = insertIntoTable($db, 'tbl_mdl_status', $statusData);
+        if($insertStatus['insertID']!=""){
+            $message = "New Status Inserted.";
+            //Leave(SITE_URL."/patient-info.php?patient=".$_GET['patient']);
+        }
+    } 
+?>
+<?php if(isset($_GET['manage_status'])){ ?>
+<div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock">
-        <h5 class="providersTitle">Add New Declined Reason</h5>        
-        <form method="POST" >     
-            <div class="f2">
-                <label class="dynamic" for="reason"><span>Declined Reason</span></label>
-                <div class="group">
-                    <input required autocomplete="off" id="reason" name="reason" type="text" value="" placeholder="Declined Reason">
-                    <p class="f_status">
-                        <span class="status_icons"><strong></strong></span>
-                    </p>
+        <a class="close" href="<?php echo SITE_URL."/patient-info.php?patient=".$Guid_user; ?>">X</a>        
+        
+        <h5 class="title">
+<!--            <a class="" id="open-new-status-form">
+                <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add New
+            </a>&nbsp;&nbsp;
+            <a class="" id="opent-status-list">
+                <span class="fas fa-list " aria-hidden="true"></span> List Statuses
+            </a>-->
+            Add New Status
+        </h5>
+        <div class="content">
+            <!--<div class="status-list">list here...</div>-->
+            <div class="add-status-form">
+                <form action="" method="POST">
+                <h4 class="text-center"></h4>
+                <?php if(isset($message)){ ?>
+                    <div class="text-center success-text"><?php echo $message; ?></div>
+                <?php } ?>
+                <div class="f2 ">
+                    <label class="dynamic" for="status"><span>Status Name</span></label>
+                    <div class="group">
+                        <input required autocomplete="off" id="status" name="status" type="text" value="" placeholder="Status Name">
+                        <p class="f_status">
+                            <span class="status_icons"><strong></strong></span>
+                        </p>
+                    </div>
                 </div>
-            </div>            
-            <div class="">
-                <button class="btn-inline" name="add_new_declined_reason" type="submit" >Save</button>
-                <button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>                   
+                <div class="f2  ">
+                    <label class="dynamic" for="parent"><span>Status Parent</span></label>
+                    <div class="group">
+                        
+                            <?php 
+                                echo get_nested_status_dropdown($db);
+                            ?>
+                        <p class="f_status">
+                            <span class="status_icons"><strong></strong></span>
+                        </p>
+                    </div>
+                </div>
+                <div class="f2 ">
+                    <label class="dynamic" for="order_by"><span>Order By</span></label>
+                    <div class="group">
+                        <input type="number" min="0" step="1" autocomplete="off" id="order_by" name="order_by"  value="" placeholder="Order By">
+                        <p class="f_status">
+                            <span class="status_icons"><strong></strong></span>
+                        </p>
+                    </div>
+                </div>
+                
+                 <div class="text-right pT-10">
+                    <button class="button btn-inline" name="manage_status" type="submit" >Save</button>
+                    <!--<button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>-->                   
+                </div>
+                </form>
             </div>
-        </form>
-          
-    </div>    
+        </div>
+    </div>
 </div>
 <?php } ?>
+
+<?php
+
+    if(isset($_POST['add_status_log'])){ 
+        $statusIDs = serialize($_POST['status']);
+        $statusLogData=array(
+                'status_ids'=>$statusIDs,
+                'Guid_patient'=>$Guid_user,
+                
+            );
+        
+         $statusLogData = array(                                              
+                        'status_ids' => $statusIDs,
+                        'Guid_patient' => $_GET['patient'],  
+                        'recorded_by' => $_SESSION['user']['id'],  
+                        //'mdl_number' => $_POST['mdl_number'],
+                        //'comment'=>$_POST['comment'],
+                        'date' => date('Y-m-d h:i:s', strtotime($_POST['date']))
+                    );
+        
+        $insertStatusLog = insertIntoTable($db, 'tbl_mdl_status_log', $statusLogData);
+        if($insertStatusLog['insertID']!=""){
+            $message = "New Status Inserted.";
+            Leave(SITE_URL."/patient-info.php?patient=".$_GET['patient']);
+        }
+    } 
+?>
+<?php if(isset($_GET['status_log'])){ ?>
+<div id="manage-status-modal" class="modalBlock ">
+    <div class="contentBlock">
+        <a class="close" href="<?php echo SITE_URL."/patient-info.php?patient=".$Guid_user; ?>">X</a>        
+        
+        <h5 class="title">
+            Add Status Log
+        </h5>
+        <div class="content">
+            <!--<div class="status-list">list here...</div>-->
+            <div class="add-status-form">
+                <form action="" method="POST">
+                <h4 class="text-center"></h4>
+                <?php if(isset($message)){ ?>
+                    <div class="text-center success-text"><?php echo $message; ?></div>
+                <?php } ?>
+                <div class="">
+                        <input required class="datepicker" autocomplete="off" id="status" name="date" type="text" value="" placeholder="Date">
+                </div>
+                <div id="status-dropdowns-box">                                            
+                    <?php echo get_status_dropdown($db, $parent_id='0'); ?>                            
+                </div>
+               
+                
+                 <div class="text-right pT-10">
+                    <button class="button btn-inline" name="add_status_log" type="submit" >Save</button>
+                    <!--<button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>-->                   
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php } ?>
+
 
 <?php require_once 'scripts.php'; ?>
 <?php require_once 'footer.php'; ?>
