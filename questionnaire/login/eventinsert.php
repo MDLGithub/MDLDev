@@ -1,5 +1,6 @@
 <?php
 require_once('config.php');
+require_once ('functions_event.php');
 
 $startdate = $_POST['start'] . " " . date("H:m:s");
 $enddate = $_POST['end'] . " " . date("H:m:s");

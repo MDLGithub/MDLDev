@@ -1,10 +1,12 @@
 <?php
 ob_start();
- 
+
 require_once('config.php');
 require_once('settings.php');
 require_once('header.php');
 require_once ('navbar.php');
+require_once ('functions_event.php');
+
 if (!login_check($db)) {
     Leave(SITE_URL);
 }
@@ -57,12 +59,19 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     #datetimepicker1{ position: relative; width: 172px; }
     #datetimepicker1 input{ width: 100%; }
     #datetimepicker1 img{ position: absolute; top: 8px; right: 5px;}
-    
+
     #datetimepicker2{ position: relative; width: 172px; }
     #datetimepicker2 input{ width: 100%; }
     #datetimepicker2 img{ position: absolute; top: 8px; right: 5px;}
     textarea.form-control{height: auto !important;}
-    
+    .fc-event-container {padding: 10px 0 !important;}
+
+    .fc-event {
+        box-shadow:  0 0 .25em !important;
+        border-radius:  .625em !important;
+    }
+    .fc-axis{display: none !important;}
+
     /* The Modal (background) */
     .schedulemodal {
         display: none; /* Hidden by default */
@@ -102,9 +111,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     }
     .evtcontent{ padding: 5px 5px; white-space: pre-wrap !important;}
     .evttitle{font-weight: bold; color: #3a87ad; white-space: pre-wrap !important;}
-    
-    .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/sample-icon1.png"); background-repeat: no-repeat;background-size: 20px 20px;}
-    .rightCircleicon2{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/sample-icon2.png"); background-repeat: no-repeat;background-size: 20px 20px;}
+
+    .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px;}
+    .rightCircleicon2{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_health_fair.png"); background-repeat: no-repeat;background-size: 20px 20px;}
 </style>
 <script>
 
@@ -143,7 +152,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             if (salesrep != 0 || account != 0) {
                 cursource = 'eventload.php?salerepId=' + salesrep + '&accountId=' + account;
             }
-
+            
             $('#calendar').fullCalendar('removeEventSources');
             $('#calendar').fullCalendar('refetchEvents');
             if (salesrep == 0 && account == 0) {
@@ -165,6 +174,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             selectable: true,
             selectHelper: true,
             editable: false,
+            eventOverlap: false,
             eventClick: function (event)
             {
                 var moment = $.datepicker.formatDate('yy-mm-dd', new Date());
@@ -180,8 +190,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     ;
                 }
                 $('#myModal').find('#modaleventstart').val(start);
-                $("#modalsalesrepopt option:contains(" + event.salesrep + ")").attr('selected', 'selected');
-                $("#modalaccountopt option:contains(" + event.account + ")").attr('selected', 'selected');
+                $("#modalsalesrepopt").val(event.salesrepid);
+                $("#modalaccountopt").val(event.accountid);
+                //$("#modalsalesrepopt option:contains(" + event.salesrep + ")").attr('selected', 'selected');
+                //$("#modalaccountopt option:contains(" + event.account + ")").attr('selected', 'selected');
                 $("#modalcomment").val(event.comments);
                 $("#modalfull_name_id").val(event.hltname);
                 $("#modalstreet1_id").val(event.street1);
@@ -192,7 +204,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 $("#modalid").val(event.id);
                 $("#modalsalerepid").val(event.salesrepid);
                 $("#modalhealthcareid").val(event.healthcareid);
-                
+
                 if (event.title == 'BRCA Day') {
                     $('#brcaradio').prop("checked", true);
                     var modalevtType = $(this).val();
@@ -211,7 +223,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     message += 'SalesRep is not assigned';
                 if (calEvent.salesrep == null && calEvent.account == null)
                     message += ' and ';
-                if (calEvent.account == null)
+                if (calEvent.account == null && calEvent.title == 'BRCA Day')
                     message += 'Account Number is missing';
                 if (message != '') {
                     var tooltip = '<div class="tooltipevent" style="padding:20px 20px;min-width:100px;min-height:100px;background:#FF4500;color:#000;position:absolute;z-index:10001;">' + message + '</div>';
@@ -241,43 +253,57 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     logo = '<div class="fc-logo">' + event.logo + '</div>';
                 if (event.account)
                     account = event.account + ' - ';
-                
+
                 if (event.salesrep)
-                    salesrep = '<div class="fc-salesrep">' + event.salesrep + ' | ' + time + '</div>';
+                    salesrep = '<div class="fc-salesrep">' + event.salesrep + '</div>';
                 var cmts = '';
 
                 var view = $('#calendar').fullCalendar('getView');
                 if (view.name == 'agendaWeek' && event.comments)
                     cmts = '<div class="fc-comments">' + event.comments + '</div>'
-                
+
                 var icon = '';
-                if(event.title == 'BRCA Day'){
+                if (event.title == 'BRCA Day') {
                     icon = 'rightCircleicon1';
-                    if (event.name) name = event.name;
-                }
-                else{
+                    if (event.name)
+                        name = event.name;
+                } else {
                     icon = 'rightCircleicon2';
-                    if(event.hltname) name = event.hltname;
+                    if (event.hltname)
+                        name = event.hltname;
                 }
 
-                
-                
-                var content = '<a class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable">' +
+                var borderColor = 'border: 2px solid #30a844 !important'; // default color
+                if (event.color) {
+                    borderColor = "border: 2px solid " + event.color + " !important";
+                }
+
+                var modifiedName = sentenceCase(name.substring(0, 10));
+                if (name.length > 10)
+                    modifiedName += "...";
+
+                var content = '<a class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable" style="' + borderColor + '">' +
                         '<div class="fc-content evtcontent">' +
-                        '<div class="'+ icon + '"></div>' + 
-                        '<div class="fc-title evttitle">' + name + '</div>' +
-                         salesrep + cmts +
+                        '<div class="' + icon + '"></div>' +
+                        '<div class="fc-title evttitle">' + modifiedName + '</div>' +
+                        salesrep + cmts +
                         '</div>' +
                         '</a>';
 
                 return $(content);
             },
             eventAfterRender: function (event, element, view) {
-                if (event.salesrep == null || event.account == null) {
-                    element.css('background-color', '#FF6347');
+                if ((event.salesrep == null || event.account == null) && event.title == 'BRCA Day') {
+                    //element.css('background-color', '#FF6347');
+                    element.css('background-color', '#fff');
+                    element.css('color', '#000');
                     element.css('border-color', '#FF6347');
-                }
-                else{
+                } else if (event.salesrep == null && event.title != 'BRCA Day') {
+                    //element.css('background-color', '#FF6347');
+                    element.css('background-color', '#fff');
+                    element.css('color', '#000');
+                    element.css('border-color', '#FF6347');
+                } else {
                     element.css('background-color', '#fff');
                     element.css('color', '#000');
                 }
@@ -287,10 +313,19 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
         // Whenever the user clicks on the "save" button
         $('#eventsave').on('click', function () {
+            var errorMsg = "";
+            if($("#salesrepopt").val() == ""){
+                errorMsg = "Please select Genetic Consultant"
+            }
             if ($("input[name='eventtype']:checked").val() == 1 && $('#accountopt').val() == 0) {
-                alert("Please select Account");
+                if(errorMsg) errorMsg += "\n";
+                errorMsg += "Please select Account";
+            }
+            if(errorMsg){
+                alert(errorMsg);
                 return false;
             }
+            
             var title = $("input[name='eventtype']:checked").parent('label').text();
             if ($('#eventstart').val() && ($('#salerepid').val() || $('#accountopt').val() != 0)) {
                 var start = dateFormat($('#eventstart').val(), "yyyy-mm-dd");
@@ -304,7 +339,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var city = $('#city_id').val() ? $('#city_id').val() : '';
                 var state = $('#state_id').val() ? $('#state_id').val() : '';
                 var zip = $('#zip_id').val() ? $('#zip_id').val() : '';
-                
+
                 var eventData = {
                     title: title,
                     start: start,
@@ -315,9 +350,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     full_name: full_name,
                     street1: street1,
                     street2: street2,
-                    city:city,
-                    state:state,
-                    zip:zip
+                    city: city,
+                    state: state,
+                    zip: zip
                 };
                 $.ajax({
                     url: "eventinsert.php",
@@ -338,8 +373,16 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
         // Whenever the user clicks on the "update" button
         $('#eventupdate').on('click', function () {
+            var errorMsg = "";
+            if($("#modalsalesrepopt").val() == "0"){
+                errorMsg = "Please select Genetic Consultant"
+            }
             if ($("input[name='modaleventtype']:checked").val() == 1 && $('#modalaccountopt').val() == 0) {
-                alert("Please select Account");
+                if(errorMsg) errorMsg += "\n";
+                errorMsg += "Please select Account";
+            }
+            if(errorMsg){
+                alert(errorMsg);
                 return false;
             }
             var title = $("input[name='modaleventtype']:checked").parent('label').text();
@@ -367,9 +410,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     full_name: full_name,
                     street1: street1,
                     street2: street2,
-                    city:city,
-                    state:state,
-                    zip:zip,
+                    city: city,
+                    state: state,
+                    zip: zip,
                     modalid: modalid,
                     modalhealthcareid: modalhealthcareid
                 };
@@ -391,7 +434,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 return false;
             }
         });
-        
+
         // cancel update
         $('#eventcancel').on('click', function () {
             var modal = document.getElementById('myModal');
@@ -559,217 +602,227 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             }
         }
     });
+
+    function sentenceCase(str) {
+        if ((str === null) || (str === ''))
+            return false;
+        else
+            str = str.toString();
+
+        return str.replace(/\w\S*/g, function (txt) {
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        });
+    }
 </script>
 <aside id="action_palette" >		
     <div class="box full">
         <h4 class="box_top">Add Event</h4>
-        <?php if($dataViewAccess) { ?>
-        <div class="boxtent scroller ">
-            <form id="filter_form" action="" method="post">	
-                <?php
-                $date_error = "";
+        <?php if ($dataViewAccess) { ?>
+            <div class="boxtent scroller ">
+                <form id="filter_form" action="" method="post">	
+                    <?php
+                    $date_error = "";
 
-                if (isset($_POST['search'])) {
-                    if (isset($error['from_date'])) {
-                        $date_error = " error";
-                    } elseif (strlen($_POST['from_date'])) {
-                        $date_error = " valid";
+                    if (isset($_POST['search'])) {
+                        if (isset($error['from_date'])) {
+                            $date_error = " error";
+                        } elseif (strlen($_POST['from_date'])) {
+                            $date_error = " valid";
+                        }
                     }
-                }
-                ?>
-                <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['from_date'])) && (strlen($_POST['from_date']))) ? " show-label" : ""; ?><?php echo $date_error; ?>">
-                    <label class="dynamic" for="event_date"><span>Event Date</span></label>
+                    ?>
+                    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['from_date'])) && (strlen($_POST['from_date']))) ? " show-label" : ""; ?><?php echo $date_error; ?>">
+                        <label class="dynamic" for="event_date"><span>Event Date</span></label>
 
-                    <div class="group">                       
-                        <input readonly class="datepicker" type="text" id="eventstart" name="eventstart" value="<?php echo ((!isset($_POST['clear'])) && isset($_POST['from_date']) && strlen($_POST['from_date'])) ? $_POST['from_date'] : ""; ?>" placeholder="Event Date">
+                        <div class="group">                       
+                            <input readonly class="datepicker" type="text" id="eventstart" name="eventstart" value="<?php echo ((!isset($_POST['clear'])) && isset($_POST['from_date']) && strlen($_POST['from_date'])) ? $_POST['from_date'] : ""; ?>" placeholder="Event Date">
 
-                        <p class="f_status">
-                            <span class=""><strong></strong></span>
-                        </p>
+                            <p class="f_status">
+                                <span class=""><strong></strong></span>
+                            </p>
+                        </div>
                     </div>
-                </div>
-                <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrepopt'])) && (strlen($_POST['salesrepopt']))) ? " show-label valid" : ""; ?>">
-                    <label class="dynamic" for="salesrepopt"><span>Genetic Consultant</span></label>
+                    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrepopt'])) && (strlen($_POST['salesrepopt']))) ? " show-label valid" : ""; ?>">
+                        <label class="dynamic" for="salesrepopt"><span>Genetic Consultant</span></label>
 
-                    <div class="group">
-                        <?php if ($role == 'Admin' || $role == 'Sales Manager') { ?>
+                        <div class="group">
+                            <?php if ($role == 'Admin' || $role == 'Sales Manager') { ?>
                                 <select id="salesrepopt" name="salesrepopt" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrepopt'])) && (strlen($_POST['salesrepopt']))) ? "" : "no-selection"; ?>">
-                                <option value="">Genetic Consultant</option>							
-                                <?php
-                                
-                                $salesreps = $db->query("SELECT * FROM tblsalesrep GROUP BY first_name");
-
-                                foreach ($salesreps as $salesrep) {
-                                    if($salesrep['first_name'] != "" || $salesrep['last_name'] != ""){
-                                    ?>
-                                    <option value="<?php echo $salesrep['Guid_user']; ?>"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrepopt']) && ($_POST['salesrepopt'] == $salesrep['Guid_user'])) ? " selected" : ""); ?>><?php echo $salesrep['first_name']." ".$salesrep['last_name']; ?></option>
+                                    <option value="">Genetic Consultant</option>							
                                     <?php
+                                    $salesreps = $db->query("SELECT * FROM tblsalesrep GROUP BY first_name");
+
+                                    foreach ($salesreps as $salesrep) {
+                                        if ($salesrep['first_name'] != "" || $salesrep['last_name'] != "") {
+                                            ?>
+                                            <option value="<?php echo $salesrep['Guid_salesrep']; ?>"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrepopt']) && ($_POST['salesrepopt'] == $salesrep['Guid_user'])) ? " selected" : ""); ?>><?php echo $salesrep['first_name'] . " " . $salesrep['last_name']; ?></option>
+                                            <?php
+                                        }
                                     }
+                                    ?>
+                                </select>
+
+                            <?php } ?>
+                            <?php if ($role == 'Sales Rep') { ?>
+                                <span><?php
+                        echo $salesRepDetails['first_name'] . " " . $salesRepDetails['last_name'];
+                                ?>
+                                </span>    
+                            <?php } ?>
+                            <input type="hidden" id="salerepid" value="<?php echo $salesRepDetails['Guid_salesrep']; ?>">
+
+                            <p class="f_status">
+                                <span class=""><strong></strong></span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['eventtype'])) && (strlen($_POST['eventtype']))) ? "valid" : ""; ?>" style="margin-top: 15px;">
+                        <div class="group">
+                            <div class="eventtype">
+                                <label style="padding-right: 11px;"><input type="radio" name="eventtype" value="1" checked>BRCA Day</label>
+                                <label><input type="radio" name="eventtype" value="2">Health Care Fair</label>
+                            </div><p class="f_status">
+                                <span class=""><strong></strong></span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class='f2 accounttype'>
+                        <div class="group">
+                            <select class="form-control" id="accountopt">
+                                <option value="0">Account</option>
+                                <?php
+                                foreach ($accountdt as $acct) {
+                                    ?>
+                                    <option value='<?php echo $acct['Guid_account']; ?>'><?php echo $acct['account'] . ' - ' . ucfirst(strtolower($acct['name'])); ?></option>
+                                    <?php
                                 }
                                 ?>
                             </select>
-
-                                <?php } ?>
-                                <?php if ($role == 'Sales Rep') { ?>
-                                    <span><?php
-                                                echo $salesRepDetails['first_name'] . " " . $salesRepDetails['last_name'];
-                                                ?>
-                                    </span>    
-                                    <?php } ?>
-                                <input type="hidden" id="salerepid" value="<?php echo $salesRepDetails['Guid_salesrep']; ?>">
-
-                        <p class="f_status">
-                            <span class=""><strong></strong></span>
-                        </p>
-                    </div>
-                </div>
-                <div class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['eventtype'])) && (strlen($_POST['eventtype']))) ? "valid" : ""; ?>" style="margin-top: 15px;">
-                    <div class="group">
-                        <div class="eventtype">
-                            <label style="padding-right: 11px;"><input type="radio" name="eventtype" value="1" checked>BRCA Day</label>
-                                            <label><input type="radio" name="eventtype" value="2">Health Care Fair</label>
-                                        </div><p class="f_status">
-                            <span class=""><strong></strong></span>
-                        </p>
-                    </div>
-                </div>
-                <div class='f2 accounttype'>
-                    <div class="group">
-                        <select class="form-control" id="accountopt">
-                            <option value="0">Account</option>
-                            <?php
-                            foreach ($accountdt as $acct) {
-                                ?>
-                                <option value='<?php echo $acct['Guid_account']; ?>'><?php echo $acct['account'] . ' - ' . ucfirst(strtolower($acct['name'])); ?></option>
-                                <?php
-                            }
-                            ?>
-                        </select>
-                    <p class="f_status">
+                            <p class="f_status">
                                 <span class=""><strong></strong></span>
                             </p>    
+                        </div>
                     </div>
-                </div>
-                <div class='f2 accounttype'> 
-                    <div class="group">
-                        <textarea class="form-control" rows="10" id="comment" placeholder="Comments"></textarea>
+                    <div class='f2 accounttype'> 
+                        <div class="group">
+                            <textarea class="form-control" rows="10" id="comment" placeholder="Comments"></textarea>
+                        </div> 
                     </div> 
-                </div> 
-                <div class="healthcare" style="display: none;">
-                                <div class="f2">
-                                <div class="group">
-                                    <!-- Full Name -->
-                                    <input type="text" class="form-control" id="full_name_id" name="full_name" placeholder="Full Name">
-                                    <p class="f_status">
-                                        <span class=""><strong></strong></span>
-                                    </p>
-                                </div> 
-                                </div>
-                                <div class="f2">
-                                <div class="group">
-                                    <!-- Street 1 -->
-                                        <input type="text" class="form-control" id="street1_id" name="street1" placeholder="Street address, P.O. box, company name, c/o">
-                                    <p class="f_status">
+                    <div class="healthcare" style="display: none;">
+                        <div class="f2">
+                            <div class="group">
+                                <!-- Full Name -->
+                                <input type="text" class="form-control" id="full_name_id" name="full_name" placeholder="Full Name">
+                                <p class="f_status">
                                     <span class=""><strong></strong></span>
-                                    </p>
-                                </div>  
-                                </div>
-                                <div class="f2">    
-                                <div class="group">    
-                                    <!-- Street 2 -->
-                                        <input type="text" class="form-control" id="street2_id" name="street2" placeholder="Apartment, suite, unit, building, floor, etc.">
-                                    <p class="f_status">
+                                </p>
+                            </div> 
+                        </div>
+                        <div class="f2">
+                            <div class="group">
+                                <!-- Street 1 -->
+                                <input type="text" class="form-control" id="street1_id" name="street1" placeholder="Street address, P.O. box, company name, c/o">
+                                <p class="f_status">
                                     <span class=""><strong></strong></span>
-                                    </p>
-                                </div>
-                                </div>
-                                <div class="f2">    
-                                <div class="group">
-                                    <!-- City-->
-                                        <input type="text" class="form-control" id="city_id" name="city" placeholder="City">
-                                    <p class="f_status">
+                                </p>
+                            </div>  
+                        </div>
+                        <div class="f2">    
+                            <div class="group">    
+                                <!-- Street 2 -->
+                                <input type="text" class="form-control" id="street2_id" name="street2" placeholder="Apartment, suite, unit, building, floor, etc.">
+                                <p class="f_status">
                                     <span class=""><strong></strong></span>
-                                    </p>    
-                                </div>
-                                </div>
-                                <div class="f2">    
-                                <div class="group">
-                                    <!-- State Button -->
-                                        <select class="form-control" id="state_id" name="state">
-                                            <option value="AL">Alabama</option>
-                                            <option value="AK">Alaska</option>
-                                            <option value="AZ">Arizona</option>
-                                            <option value="AR">Arkansas</option>
-                                            <option value="CA">California</option>
-                                            <option value="CO">Colorado</option>
-                                            <option value="CT">Connecticut</option>
-                                            <option value="DE">Delaware</option>
-                                            <option value="DC">District Of Columbia</option>
-                                            <option value="FL">Florida</option>
-                                            <option value="GA">Georgia</option>
-                                            <option value="HI">Hawaii</option>
-                                            <option value="ID">Idaho</option>
-                                            <option value="IL">Illinois</option>
-                                            <option value="IN">Indiana</option>
-                                            <option value="IA">Iowa</option>
-                                            <option value="KS">Kansas</option>
-                                            <option value="KY">Kentucky</option>
-                                            <option value="LA">Louisiana</option>
-                                            <option value="ME">Maine</option>
-                                            <option value="MD">Maryland</option>
-                                            <option value="MA">Massachusetts</option>
-                                            <option value="MI">Michigan</option>
-                                            <option value="MN">Minnesota</option>
-                                            <option value="MS">Mississippi</option>
-                                            <option value="MO">Missouri</option>
-                                            <option value="MT">Montana</option>
-                                            <option value="NE">Nebraska</option>
-                                            <option value="NV">Nevada</option>
-                                            <option value="NH">New Hampshire</option>
-                                            <option value="NJ">New Jersey</option>
-                                            <option value="NM">New Mexico</option>
-                                            <option value="NY">New York</option>
-                                            <option value="NC">North Carolina</option>
-                                            <option value="ND">North Dakota</option>
-                                            <option value="OH">Ohio</option>
-                                            <option value="OK">Oklahoma</option>
-                                            <option value="OR">Oregon</option>
-                                            <option value="PA">Pennsylvania</option>
-                                            <option value="RI">Rhode Island</option>
-                                            <option value="SC">South Carolina</option>
-                                            <option value="SD">South Dakota</option>
-                                            <option value="TN">Tennessee</option>
-                                            <option value="TX">Texas</option>
-                                            <option value="UT">Utah</option>
-                                            <option value="VT">Vermont</option>
-                                            <option value="VA">Virginia</option>
-                                            <option value="WA">Washington</option>
-                                            <option value="WV">West Virginia</option>
-                                            <option value="WI">Wisconsin</option>
-                                            <option value="WY">Wyoming</option>
-                                        </select>
-                                    <p class="f_status">
-                                    <span class=""><strong></strong></span>
-                                    </p>
-                                </div>
-                                </div>
-                                <div class="f2">    
-                                <div class="group">
-                                    <!-- Zip Code-->
-                                        <input type="text" class="form-control" id="zip_id" name="zip" placeholder="zip code">
-                                    <p class="f_status">
-                                    <span class=""><strong></strong></span>
-                                    </p>    
-                                </div>  
-                                </div>
+                                </p>
                             </div>
-                              
-                <button type="submit" id="eventsave" class="button filter half">Save</button> 
-                <button type="submit" name="clear" class="button cancel half"><strong>Clear</strong></button>
-            </form>
-            <!--********************   SEARCH BY PALETTE END    ******************** -->
+                        </div>
+                        <div class="f2">    
+                            <div class="group">
+                                <!-- City-->
+                                <input type="text" class="form-control" id="city_id" name="city" placeholder="City">
+                                <p class="f_status">
+                                    <span class=""><strong></strong></span>
+                                </p>    
+                            </div>
+                        </div>
+                        <div class="f2">    
+                            <div class="group">
+                                <!-- State Button -->
+                                <select class="form-control" id="state_id" name="state">
+                                    <option value="AL">Alabama</option>
+                                    <option value="AK">Alaska</option>
+                                    <option value="AZ">Arizona</option>
+                                    <option value="AR">Arkansas</option>
+                                    <option value="CA">California</option>
+                                    <option value="CO">Colorado</option>
+                                    <option value="CT">Connecticut</option>
+                                    <option value="DE">Delaware</option>
+                                    <option value="DC">District Of Columbia</option>
+                                    <option value="FL">Florida</option>
+                                    <option value="GA">Georgia</option>
+                                    <option value="HI">Hawaii</option>
+                                    <option value="ID">Idaho</option>
+                                    <option value="IL">Illinois</option>
+                                    <option value="IN">Indiana</option>
+                                    <option value="IA">Iowa</option>
+                                    <option value="KS">Kansas</option>
+                                    <option value="KY">Kentucky</option>
+                                    <option value="LA">Louisiana</option>
+                                    <option value="ME">Maine</option>
+                                    <option value="MD">Maryland</option>
+                                    <option value="MA">Massachusetts</option>
+                                    <option value="MI">Michigan</option>
+                                    <option value="MN">Minnesota</option>
+                                    <option value="MS">Mississippi</option>
+                                    <option value="MO">Missouri</option>
+                                    <option value="MT">Montana</option>
+                                    <option value="NE">Nebraska</option>
+                                    <option value="NV">Nevada</option>
+                                    <option value="NH">New Hampshire</option>
+                                    <option value="NJ">New Jersey</option>
+                                    <option value="NM">New Mexico</option>
+                                    <option value="NY">New York</option>
+                                    <option value="NC">North Carolina</option>
+                                    <option value="ND">North Dakota</option>
+                                    <option value="OH">Ohio</option>
+                                    <option value="OK">Oklahoma</option>
+                                    <option value="OR">Oregon</option>
+                                    <option value="PA">Pennsylvania</option>
+                                    <option value="RI">Rhode Island</option>
+                                    <option value="SC">South Carolina</option>
+                                    <option value="SD">South Dakota</option>
+                                    <option value="TN">Tennessee</option>
+                                    <option value="TX">Texas</option>
+                                    <option value="UT">Utah</option>
+                                    <option value="VT">Vermont</option>
+                                    <option value="VA">Virginia</option>
+                                    <option value="WA">Washington</option>
+                                    <option value="WV">West Virginia</option>
+                                    <option value="WI">Wisconsin</option>
+                                    <option value="WY">Wyoming</option>
+                                </select>
+                                <p class="f_status">
+                                    <span class=""><strong></strong></span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="f2">    
+                            <div class="group">
+                                <!-- Zip Code-->
+                                <input type="text" class="form-control" id="zip_id" name="zip" placeholder="zip code">
+                                <p class="f_status">
+                                    <span class=""><strong></strong></span>
+                                </p>    
+                            </div>  
+                        </div>
+                    </div>
 
-        </div>
+                    <button type="submit" id="eventsave" class="button filter half">Save</button> 
+                    <button type="submit" name="clear" class="button cancel half"><strong>Clear</strong></button>
+                </form>
+                <!--********************   SEARCH BY PALETTE END    ******************** -->
+
+            </div>
         <?php } ?>
     </div>    
 </aside>
@@ -777,14 +830,13 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 // Salesrep table
 $clause = " ORDER BY Guid_salesrep";
 $salesrep = $db->selectAll('tblsalesrep', $clause);
-
 ?>
 <main>
-    <?php if ($thisMessage != "") { ?>
+<?php if ($thisMessage != "") { ?>
         <section id="msg_display" class="show success">
             <h4><?php echo $thisMessage; ?></h4>
         </section>
-    <?php } ?>    
+<?php } ?>    
     <div class="box full visible ">  
         <section id="palette_top">
             <h4>             
@@ -808,10 +860,10 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                         <div class="form-group">
                                             <select class="form-control" id="salesrepfilter">
                                                 <option value="0">Genetic Consultant</option>
-                                                <?php
-                                                foreach ($salesrep as $srole) {
-                                                    if ($srole['first_name']) {
-                                                        ?>
+<?php
+foreach ($salesrep as $srole) {
+    if ($srole['first_name']) {
+        ?>
                                                         <option value='<?php echo $srole['Guid_salesrep']; ?>'><?php echo $srole['first_name'] . " " . $srole['last_name']; ?></option>
                                                         <?php
                                                     }
@@ -824,9 +876,9 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                         <div class="form-group">
                                             <select class="form-control" id="accountfilter">
                                                 <option value="0">Account</option>
-                                                <?php
-                                                foreach ($accountdt as $acct) {
-                                                    ?>
+<?php
+foreach ($accountdt as $acct) {
+    ?>
                                                     <option value='<?php echo $acct['Guid_account']; ?>'><?php echo $acct['account'] . ' - ' . ucfirst(strtolower($acct['name'])); ?></option>
                                                     <?php
                                                 }
@@ -864,15 +916,15 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                             </div>
                                         </div>
                                     </div>
-                                    <?php if ($role == 'Admin' || $role == 'Sales Manager') { ?>
+<?php if ($role == 'Admin' || $role == 'Sales Manager') { ?>
                                         <div class='col-md-2'>
                                             <div class="form-group">
                                                 <select class="form-control" id="modalsalesrepopt">
                                                     <option value="0">Genetic Consultant</option>
-                                                    <?php
-                                                    foreach ($salesrep as $srole) {
-                                                        if ($srole['first_name']) {
-                                                            ?>
+    <?php
+    foreach ($salesrep as $srole) {
+        if ($srole['first_name']) {
+            ?>
                                                             <option value='<?php echo $srole['Guid_salesrep']; ?>'><?php echo $srole['first_name'] . " " . $srole['last_name']; ?></option>
                                                             <?php
                                                         }
@@ -881,17 +933,17 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                                 </select>
                                             </div>
                                         </div>
-                                    <?php } ?>
+<?php } ?>
                                     <?php if ($role == 'Sales Rep') { ?>
                                         <div class='col-md-2'>
                                             <div class="form-group">
                                                 <span><?php
-                                                    echo $salesRepDetails['first_name'] . " " . $salesRepDetails['last_name'];
-                                                    ?>
+                                        echo $salesRepDetails['first_name'] . " " . $salesRepDetails['last_name'];
+                                        ?>
                                                 </span>    
                                             </div>
                                         </div>
-                                    <?php } ?>
+<?php } ?>
                                     <input type="hidden" id="modalsalerepid" value="<?php echo $salesRepDetails['Guid_salesrep']; ?>">
                                     <div class='col-md-2'>
                                         <div class="form-group">
@@ -907,24 +959,23 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                         <div class="form-group">
                                             <select class="form-control" id="modalaccountopt">
                                                 <option value="0">Account</option>
-                                                <?php
-                                                foreach ($accountdt as $acct) {
-                                                    ?>
+<?php
+foreach ($accountdt as $acct) {
+    ?>
                                                     <option value='<?php echo $acct['Guid_account']; ?>'><?php echo $acct['account'] . ' - ' . ucfirst(strtolower($acct['name'])); ?></option>
                                                     <?php
                                                 }
                                                 ?>
                                             </select>
                                         </div>
-                                    </div>
+                                    </div></div>
+                                <div class="row">
                                     <div class='col-md-2 modalaccounttype'> 
                                         <div class="form-group">
-                                            <textarea class="form-control" rows="10" id="modalcomment" placeholder="Comments"></textarea>
+                                            <textarea class="form-control" rows="10" id="modalcomment" placeholder="Comments" style="width:600px;"></textarea>
                                         </div> 
                                     </div>  
-                                    <button type="submit" id="eventupdate" class="btn btn-default">Update</button>
-                                    <button type="submit" id="eventcancel" class="btn btn-default">Cancel</button>
-                                    <button type="button" class="btn btn-danger" id="eventdelete" style="border-radius: 2em !important; margin: 7px 0;">Delete</button>
+                                    
                                 </div>
                                 <div class="row modalhealthcare" style="display: none;">
                                     <div class='col-md-4'>
@@ -1010,6 +1061,13 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                         </div>	
                                     </div>    
                                 </div>  
+                                    <div class="row">
+                                        <div class='col-md-10'>
+                                    <button type="button" id="eventupdate" class="btn btn-primary">Update</button>
+                                    <button type="button" id="eventcancel" class="btn btn-danger">Cancel</button>
+                                    <button type="button" class="btn btn-danger" id="eventdelete" style="border-radius: 2em !important; margin: 7px 0;">Delete</button>
+                                    </div>
+                                        </div>
                             </div>
                         </div>
 

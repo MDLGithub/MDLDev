@@ -1,0 +1,9 @@
+DB changes:
+
+UPDATE `brcadev`.`tblsalesrep` SET `color`='#f99d1b' WHERE `Guid_salesrep`='16';
+UPDATE `brcadev`.`tblsalesrep` SET `color`='#3869b3' WHERE `Guid_salesrep`='15';
+UPDATE `brcadev`.`tblsalesrep` SET `color`='#16a44a' WHERE `Guid_salesrep`='9';
+UPDATE `brcadev`.`tblsalesrep` SET `color`='#d4c038' WHERE `Guid_salesrep`='18';
+
+
+=================================================================================

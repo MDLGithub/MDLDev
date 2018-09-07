@@ -1,5 +1,7 @@
 <?php
 require_once('config.php');
+require_once ('functions_event.php');
+
 $salesRepId = isset($_REQUEST['salerepId'])? $_REQUEST['salerepId'] : 0;
 $accountId = isset($_REQUEST['accountId'])? $_REQUEST['accountId'] : 0;
 
@@ -23,7 +25,9 @@ foreach($result as $row)
   'zip' => $row['zip'],
   'healthcareid' => $row['healthcareid'], 
   'salesrepid' => $row['salesrepid'],   
-  'comments' => $row['comments']   
+  'accountid' => $row['accountid'],    
+  'comments' => $row['comments'],
+  'color' => $row['color']  
  );
 }
 echo json_encode($data);
