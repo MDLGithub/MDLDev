@@ -117,66 +117,51 @@ $(document).ready(function () {
 
 
 
-    $(".print").click(function (e) {
+    $(".print").click(function(e) {
 	e.preventDefault();
 
 	$('body').addClass('loading');
 
-	$("#pedigree > ul").css({
-	    '-webkit-transform': 'scale(1) translate(0%, 0%)',
-	    'transform': 'scale(1) translate(0%, 0%)'
-	});
-
-	// var selected_questionnaire = $(this).data("selected_questionnaire");
-	// var selected_date = $(this).data("selected_date");
-
-	// $("#selected_questionnaire").val(selected_questionnaire);
-	// $("#selected_date").val(selected_date);
-	// $("#patient_information").submit();
 	$.post("genreport.php", {selected_questionnaire: $(this).data("selected_questionnaire"), selected_date: $(this).data("selected_date")}, function (data, status) {
 	    $("#admin_print").html(data);
-
-	    resizeLine();
-
-	    var $el = $("#pedigree > ul");
-	    var elHeight = $el.outerHeight();
-	    var elWidth = $el.outerWidth();
-
-	    var wrapWidth = '302';
-	    var wrapHeight = '302';
-
-	    var scale2 = Math.min(
-		    wrapWidth / elWidth,
-		    wrapHeight / elHeight
-		    );
-
-
-	    $el.css({
-		'-webkit-transform': 'scale(' + scale2 + ') translate(0%, 0%)',
-		'transform': 'scale(' + scale2 + ') translate(0%, 0%)'
-	    });
-
-	    window.onafterprint = function() {
-		$(window).off('mousemove', window.onafterprint);
-		console.log('Print Dialog Closed..');
-		$('body').removeClass('loading');
-	    };
-
-	    $("#admin_print").printThis({
-		debug: false,
-		importCSS: false,
-		importStyle: false,
-		printContainer: false,
-		loadCSS: "style.min.css",
-		printDelay: 700,
-		base: "../../dev/"
-	    });
-
-	    setTimeout(function () {
-		$(window).one('mousemove', window.onafterprint);
-	    }, 1);
-
+	    scalePedigree();
 	});
+
+		$("#admin_print").printThis({
+	    debug: true,
+	    importCSS: false,
+	    importStyle: false,
+	    printContainer: false,
+	    loadCSS: "css/style.min.css",
+	    printDelay: 1000,
+			removeScripts: true,
+	    base: "/dev/login/assets/",
+			afterPrint: testFun
+	});
+
+		var interval = null;
+
+		function reload(){
+	    if(window_focus === true) {
+				$('body').removeClass('loading');
+				window.clearInterval(interval);
+	    }
+
+			if( /iPhone|iPad/i.test(navigator.userAgent) ) {
+				$('body').removeClass('loading');
+				window.clearInterval(interval);
+	    }
+
+		}
+
+		function testFun(){
+			if ( /^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+				interval = window.setInterval(reload, 500);
+			} else {
+				$('body').removeClass('loading');
+				window.clearInterval(interval);
+			}
+		}
     });
 
 	var window_focus;
