@@ -82,6 +82,21 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 $dob= date('Y-m-d h:i:s', strtotime($_POST['dob']));
                 updateTable($db, 'tblpatient', array('dob'=>$dob), array('Guid_user'=>$_GET['patient']));
             }
+            
+             //update patient table for reason and cpecimen collected values
+            $wherePatient = array('Guid_user'=>$_GET['patient']);
+            $patientData = array();
+            if(isset($_POST['specimen_collected'])&&$_POST['specimen_collected']!=""){
+                $patientData['specimen_collected']=$_POST['specimen_collected']; 
+            }
+            if(isset($_POST['Guid_reason'])&&$_POST['Guid_reason']!=""){
+                $patientData['Guid_reason']=$_POST['Guid_reason']; 
+            } else {
+                $patientData['Guid_reason']="";
+            }
+            if(!empty($patientData)){
+                $updatePatient = updateTable($db, 'tblpatient', $patientData, $wherePatient);
+            }
 
             //update mdl stats info 
             if(isset($_POST['mdl_number'])){
