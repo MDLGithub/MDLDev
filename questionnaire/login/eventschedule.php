@@ -163,7 +163,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $('#calendar').fullCalendar('refetchEvents');
 
         });
-
+        
         var calendar = $('#calendar').fullCalendar({
             header: {
                 left: 'prev,next today',
