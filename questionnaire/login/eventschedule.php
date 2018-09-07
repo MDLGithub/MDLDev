@@ -671,9 +671,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             <?php } ?>
                             <input type="hidden" id="salerepid" value="<?php echo $salesRepDetails['Guid_salesrep']; ?>">
 
-                            <p class="f_status">
-                                <span class=""><strong></strong></span>
-                            </p>
                         </div>
                     </div>
                     <div class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['eventtype'])) && (strlen($_POST['eventtype']))) ? "valid" : ""; ?>" style="margin-top: 15px;">
@@ -693,7 +690,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                                 <?php
                                 foreach ($accountdt as $acct) {
                                     ?>
-                                    <option value='<?php echo $acct['Guid_account']; ?>'><?php echo $acct['account'] . ' - ' . ucfirst(strtolower($acct['name'])); ?></option>
+                                    <option value='<?php echo $acct['Guid_account']; ?>'><?php echo $acct['account'] . ' - ' . ucwords(strtolower($acct['name'])); ?></option>
                                     <?php
                                 }
                                 ?>
@@ -879,7 +876,7 @@ foreach ($salesrep as $srole) {
 <?php
 foreach ($accountdt as $acct) {
     ?>
-                                                    <option value='<?php echo $acct['Guid_account']; ?>'><?php echo $acct['account'] . ' - ' . ucfirst(strtolower($acct['name'])); ?></option>
+                                                    <option value='<?php echo $acct['Guid_account']; ?>'><?php echo $acct['account'] . ' - ' . ucwords(strtolower($acct['name'])); ?></option>
                                                     <?php
                                                 }
                                                 ?>
@@ -962,7 +959,7 @@ foreach ($accountdt as $acct) {
 <?php
 foreach ($accountdt as $acct) {
     ?>
-                                                    <option value='<?php echo $acct['Guid_account']; ?>'><?php echo $acct['account'] . ' - ' . ucfirst(strtolower($acct['name'])); ?></option>
+                                                    <option value='<?php echo $acct['Guid_account']; ?>'><?php echo $acct['account'] . ' - ' . ucwords(strtolower($acct['name'])); ?></option>
                                                     <?php
                                                 }
                                                 ?>

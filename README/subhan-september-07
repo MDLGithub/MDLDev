@@ -7,3 +7,24 @@ UPDATE `brcadev`.`tblsalesrep` SET `color`='#d4c038' WHERE `Guid_salesrep`='18';
 
 
 =================================================================================
+
+FILES ADDED:
+
+1. /questionnaire/login/eventschedule/login/functions_event.php
+2. /questionnaire/login/eventschedule/images/icon_brca_day.png
+3. /questionnaire/login/eventschedule/images/icon_health_fair.png
+4. README/
+
+
+FILES UPDATED:
+
+1. /questionnaire/login/eventschedule/login/eventschedule.php
+2. /questionnaire/login/eventschedule/login/eventinsert.php
+3. /questionnaire/login/eventschedule/login/eventload.php
+4. /questionnaire/login/eventschedule/login/eventupdate.php
+5. /questionnaire/login/eventschedule/login/eventdelete.php
+6. /questionnaire/login/eventschedule/login/functions_event.php
+7. /questionnaire/login/eventschedule/images/icon_brca_day.png
+8. /questionnaire/login/eventschedule/images/icon_health_fair.png
+
+
