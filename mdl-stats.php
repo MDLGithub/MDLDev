@@ -76,7 +76,7 @@ require_once ('navbar.php');
 		<table id="tableHeaderFixed" class="pseudo_t table">
 		    <thead>
 			<tr>
-			    <th  class="actions">MDL#</th>
+			    <th>MDL#</th>
 			    <th>First Name</th>
 			    <th>Last Name</th>
 			    <th>Account</th>
@@ -84,6 +84,7 @@ require_once ('navbar.php');
 			    <th>Date Reported</th>
 			    <th>Insurance</th>
 			    <th>Patient</th>
+			    <th>Total</th>
 			    <!--<th class="noFilter actions text-center">Actions</th>-->
 			</tr>
 		    </thead>
@@ -98,11 +99,12 @@ require_once ('navbar.php');
 				<td><?php echo (!preg_match("/0{4}/" , $v['date_reported'])) ? date('n/j/Y', strtotime($v['date_reported'])) : ""; ?></td>
 				<td>$<?php echo formatMoney($v['insurance']); ?></td>
 				<td>$<?php echo formatMoney($v['patient']); ?></td>
+				<td>$<?php echo formatMoney($v['insurance']+$v['patient']); ?></td>
 			    </tr>
 			    <?php } ?>
-			</tbody>
-		    </table>
-		</div>
+		    </tbody>
+		</table>
+	    </div>
 
 	</div>
 

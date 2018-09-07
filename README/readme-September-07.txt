@@ -11,5 +11,8 @@ ALTER TABLE `tbl_mdl_status_log` DROP COLUMN mdl_number, DROP COLUMN COMMENT;
 patient-info.php
 ajaxHandler.php
 functions.php
+mdl-stats.php
+
 custom-styles.css
+
 scripts.js
