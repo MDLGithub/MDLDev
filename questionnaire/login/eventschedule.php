@@ -24,10 +24,10 @@ if (!in_array($role, $roles)) {
     Leave(SITE_URL . "/no-permission.php");
 }
 
-$salesRepDetails = $db->row("SELECT * FROM tblsalesrep WHERE Guid_user=:userid", array('userid' => $userID));
+$salesRepDetails = $db->row("SELECT * FROM tblsalesrep WHERE Guid_user=:userid ORDER BY first_name, last_name", array('userid' => $userID));
 
 // Account table
-$clause = " ORDER BY Guid_account";
+$clause = " ORDER BY account";
 $accountdt = $db->selectAll('tblaccount', $clause);
 
 $thisMessage = "";
@@ -64,7 +64,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     #datetimepicker2 input{ width: 100%; }
     #datetimepicker2 img{ position: absolute; top: 8px; right: 5px;}
     textarea.form-control{height: auto !important;}
-    .fc-event-container {padding: 10px 0 !important;}
+    .fc-event-container {padding: 5px 0 !important;}
 
     .fc-event {
         box-shadow:  0 0 .25em !important;
@@ -110,7 +110,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         cursor: pointer;
     }
     .evtcontent{ padding: 5px 5px; white-space: pre-wrap !important;}
-    .evttitle{font-weight: bold; color: #3a87ad; white-space: pre-wrap !important;}
+    .evttitle{font-weight: bold; color: #3a87ad; white-space: nowrap !important; overflow: hidden;text-overflow: ellipsis;}
+
+    .fc-month-view .evttitle, .fc-basicWeek-view .evttitle{width:105px;}
+    .fc-basic-view .fc-comments{width: 105px;}
+    .fc-comments{white-space: nowrap !important; overflow: hidden;text-overflow: ellipsis;}
 
     .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px;}
     .rightCircleicon2{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_health_fair.png"); background-repeat: no-repeat;background-size: 20px 20px;}
@@ -152,7 +156,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             if (salesrep != 0 || account != 0) {
                 cursource = 'eventload.php?salerepId=' + salesrep + '&accountId=' + account;
             }
-            
+
             $('#calendar').fullCalendar('removeEventSources');
             $('#calendar').fullCalendar('refetchEvents');
             if (salesrep == 0 && account == 0) {
@@ -163,18 +167,51 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $('#calendar').fullCalendar('refetchEvents');
 
         });
-        
+
+        // when summary button is clicked
+        $('#summary').on('click', function () {
+            var summarycursource = 'summaryeventload.php';
+
+            $('#calendar').fullCalendar('removeEventSources');
+            $('#calendar').fullCalendar('refetchEvents');
+            $('#calendar').fullCalendar('addEventSource', summarycursource);
+            $('#calendar').fullCalendar('refetchEvents');
+
+        });
+
+        // when detail button is clicked
+        $('#detail').on('click', function () {
+            var detailcursource = 'eventload.php';
+
+            $('#calendar').fullCalendar('removeEventSources');
+            $('#calendar').fullCalendar('refetchEvents');
+            $('#calendar').fullCalendar('addEventSource', detailcursource);
+            $('#calendar').fullCalendar('refetchEvents');
+        });
+
         var calendar = $('#calendar').fullCalendar({
             header: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'month,agendaWeek,agendaDay'
+                right: 'month,basicWeek,basicDay'
+            },
+            views: {
+                week: {
+                    titleFormat: 'MMMM D, YYYY',
+                    titleRangeSeparator: ' to ',
+                }
             },
             eventSources: cursource,
             selectable: true,
             selectHelper: true,
             editable: false,
             eventOverlap: false,
+            dayRender: function (date, cell) {
+                var today = new Date();
+                if (date._d.getDate() === today.getDate()) {
+                    // cell.css("background-color", "red");
+                }
+            },
             eventClick: function (event)
             {
                 var moment = $.datepicker.formatDate('yy-mm-dd', new Date());
@@ -215,28 +252,37 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     $("div.modalaccounttype").hide();
                     $("div.modalhealthcare").show();
                 }
-                modal.style.display = "block";
+                var today = new Date();
+                var currentDate = today.getDate();
+                var eventDate = $.fullCalendar.formatDate(event.start, "DD");
+                if (eventDate >= currentDate) {
+                    modal.style.display = "block";
+                }
+
             },
             eventMouseover: function (calEvent, jsEvent) {
-                var message = '';
-                if (calEvent.salesrep == null)
-                    message += 'SalesRep is not assigned';
-                if (calEvent.salesrep == null && calEvent.account == null)
-                    message += ' and ';
-                if (calEvent.account == null && calEvent.title == 'BRCA Day')
-                    message += 'Account Number is missing';
-                if (message != '') {
-                    var tooltip = '<div class="tooltipevent" style="padding:20px 20px;min-width:100px;min-height:100px;background:#FF4500;color:#000;position:absolute;z-index:10001;">' + message + '</div>';
-                    $("body").append(tooltip);
-                    $(this).mouseover(function (e) {
-                        $(this).css('z-index', 10000);
-                        $('.tooltipevent').fadeIn('500');
-                        $('.tooltipevent').fadeTo('10', 1.9);
-                    }).mousemove(function (e) {
-                        $('.tooltipevent').css('top', e.pageY + 10);
-                        $('.tooltipevent').css('left', e.pageX + 20);
-                    });
+                if (!calEvent.evtCnt) {
+                    var message = '';
+                    if (calEvent.salesrep == null)
+                        message += 'SalesRep is not assigned';
+                    if (calEvent.salesrep == null && calEvent.account == null)
+                        message += ' and ';
+                    if (calEvent.account == null && calEvent.title == 'BRCA Day')
+                        message += 'Account Number is missing';
+                    if (message != '') {
+                        var tooltip = '<div class="tooltipevent" style="padding:20px 20px;min-width:100px;min-height:100px;background:#FF4500;color:#000;position:absolute;z-index:10001;">' + message + '</div>';
+                        $("body").append(tooltip);
+                        $(this).mouseover(function (e) {
+                            $(this).css('z-index', 10000);
+                            $('.tooltipevent').fadeIn('500');
+                            $('.tooltipevent').fadeTo('10', 1.9);
+                        }).mousemove(function (e) {
+                            $('.tooltipevent').css('top', e.pageY + 10);
+                            $('.tooltipevent').css('left', e.pageX + 20);
+                        });
+                    }
                 }
+                
             },
 
             eventMouseout: function (calEvent, jsEvent) {
@@ -244,6 +290,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 $('.tooltipevent').remove();
             },
             eventRender: function (event, element, view) {
+                var today = new Date();
+                var currentDate = today.getDate();
+                var eventDate = $.fullCalendar.formatDate(event.start, "DD");
+
                 var time = $.fullCalendar.formatDate(event.start, "hh:mm a");
                 var logo = "";
                 var account = "";
@@ -259,7 +309,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var cmts = '';
 
                 var view = $('#calendar').fullCalendar('getView');
-                if (view.name == 'agendaWeek' && event.comments)
+                if (view.name == 'basicWeek' && event.comments)
                     cmts = '<div class="fc-comments">' + event.comments + '</div>'
 
                 var icon = '';
@@ -277,10 +327,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 if (event.color) {
                     borderColor = "border: 2px solid " + event.color + " !important";
                 }
-
-                var modifiedName = sentenceCase(name.substring(0, 10));
-                if (name.length > 10)
-                    modifiedName += "...";
+                /*
+                 var modifiedName = sentenceCase(name.substring(0, 15));
+                 if (name.length > 15)
+                 modifiedName += "...";
+                 */
+                var modifiedName = sentenceCase(name);
 
                 var content = '<a class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable" style="' + borderColor + '">' +
                         '<div class="fc-content evtcontent">' +
@@ -290,42 +342,78 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         '</div>' +
                         '</a>';
 
-                return $(content);
+                if (event.evtCnt) {
+                    $("#summary").css("background","linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");
+                    $("#detail").css("background","#90bcf7");
+                    var content = '<div class="fc-content evtcontent days-' + eventDate + '" style="padding: 0 20px;">';
+                    content += '<div><strong>' + event.evtCnt + '</strong></div>';
+                    content += '<div>Total</div>';
+                    content += '<div>Registered</div>';
+                    content += '<div>Completed</div>';
+                    content += '<div>Qualified</div>';
+                    content += '<div>Submitted</div>';
+                    content += '</div>';
+                    return $(content);
+                } else {
+                    $("#summary").css("background","#90bcf7");
+                    $("#detail").css("background","linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");
+                    if (eventDate < currentDate) {
+                        var content = '<a class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable days-' + eventDate + '"  style="' + borderColor + '">' +
+                                '<div class="fc-content evtcontent">' +
+                                '<div class="' + icon + '"></div>' +
+                                '<div class="fc-title evttitle">' + modifiedName + '</div>' +
+                                salesrep + cmts +
+                                '<div>9 | 6 | 3 | 1</div>' +
+                                '</div>' +
+                                '</a>';
+                        return $(content);
+                    } else {
+                        return $(content);
+                    }
+                }
+
+
             },
             eventAfterRender: function (event, element, view) {
-                if ((event.salesrep == null || event.account == null) && event.title == 'BRCA Day') {
-                    //element.css('background-color', '#FF6347');
-                    element.css('background-color', '#fff');
-                    element.css('color', '#000');
-                    element.css('border-color', '#FF6347');
-                } else if (event.salesrep == null && event.title != 'BRCA Day') {
-                    //element.css('background-color', '#FF6347');
-                    element.css('background-color', '#fff');
-                    element.css('color', '#000');
-                    element.css('border-color', '#FF6347');
-                } else {
-                    element.css('background-color', '#fff');
-                    element.css('color', '#000');
+                if (!event.evtCnt) {
+                    if ((event.salesrep == null || event.account == null) && event.title == 'BRCA Day') {
+                        //element.css('background-color', '#FF6347');
+                        element.css('background-color', '#fff');
+                        element.css('color', '#000');
+                        element.css('border-color', '#FF6347');
+                    } else if (event.salesrep == null && event.title != 'BRCA Day') {
+                        //element.css('background-color', '#FF6347');
+                        element.css('background-color', '#fff');
+                        element.css('color', '#000');
+                        element.css('border-color', '#FF6347');
+                    } else {
+                        element.css('background-color', '#fff');
+                        element.css('color', '#000');
+                    }
                 }
+                
             },
-
+            eventAfterAllRender: function (event, element, view) {
+                //$(".days-06:first").css("display", "block");
+            },
         });
 
         // Whenever the user clicks on the "save" button
         $('#eventsave').on('click', function () {
             var errorMsg = "";
-            if($("#salesrepopt").val() == ""){
+            if ($("#salesrepopt").val() == "") {
                 errorMsg = "Please select Genetic Consultant"
             }
             if ($("input[name='eventtype']:checked").val() == 1 && $('#accountopt').val() == 0) {
-                if(errorMsg) errorMsg += "\n";
+                if (errorMsg)
+                    errorMsg += "\n";
                 errorMsg += "Please select Account";
             }
-            if(errorMsg){
+            if (errorMsg) {
                 alert(errorMsg);
                 return false;
             }
-            
+
             var title = $("input[name='eventtype']:checked").parent('label').text();
             if ($('#eventstart').val() && ($('#salerepid').val() || $('#accountopt').val() != 0)) {
                 var start = dateFormat($('#eventstart').val(), "yyyy-mm-dd");
@@ -374,14 +462,15 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         // Whenever the user clicks on the "update" button
         $('#eventupdate').on('click', function () {
             var errorMsg = "";
-            if($("#modalsalesrepopt").val() == "0"){
+            if ($("#modalsalesrepopt").val() == "0") {
                 errorMsg = "Please select Genetic Consultant"
             }
             if ($("input[name='modaleventtype']:checked").val() == 1 && $('#modalaccountopt').val() == 0) {
-                if(errorMsg) errorMsg += "\n";
+                if (errorMsg)
+                    errorMsg += "\n";
                 errorMsg += "Please select Account";
             }
-            if(errorMsg){
+            if (errorMsg) {
                 alert(errorMsg);
                 return false;
             }
@@ -650,7 +739,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                                 <select id="salesrepopt" name="salesrepopt" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrepopt'])) && (strlen($_POST['salesrepopt']))) ? "" : "no-selection"; ?>">
                                     <option value="">Genetic Consultant</option>							
                                     <?php
-                                    $salesreps = $db->query("SELECT * FROM tblsalesrep GROUP BY first_name");
+                                    $salesreps = $db->query("SELECT * FROM tblsalesrep GROUP BY first_name  ORDER BY first_name, last_name");
 
                                     foreach ($salesreps as $salesrep) {
                                         if ($salesrep['first_name'] != "" || $salesrep['last_name'] != "") {
@@ -665,8 +754,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             <?php } ?>
                             <?php if ($role == 'Sales Rep') { ?>
                                 <span><?php
-                        echo $salesRepDetails['first_name'] . " " . $salesRepDetails['last_name'];
-                                ?>
+                                    echo $salesRepDetails['first_name'] . " " . $salesRepDetails['last_name'];
+                                    ?>
                                 </span>    
                             <?php } ?>
                             <input type="hidden" id="salerepid" value="<?php echo $salesRepDetails['Guid_salesrep']; ?>">
@@ -746,6 +835,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             <div class="group">
                                 <!-- State Button -->
                                 <select class="form-control" id="state_id" name="state">
+                                    <option value=""></option>
                                     <option value="AL">Alabama</option>
                                     <option value="AK">Alaska</option>
                                     <option value="AZ">Arizona</option>
@@ -825,15 +915,15 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 </aside>
 <?php
 // Salesrep table
-$clause = " ORDER BY Guid_salesrep";
+$clause = "  ORDER BY first_name, last_name";
 $salesrep = $db->selectAll('tblsalesrep', $clause);
 ?>
 <main>
-<?php if ($thisMessage != "") { ?>
+    <?php if ($thisMessage != "") { ?>
         <section id="msg_display" class="show success">
             <h4><?php echo $thisMessage; ?></h4>
         </section>
-<?php } ?>    
+    <?php } ?>    
     <div class="box full visible ">  
         <section id="palette_top">
             <h4>             
@@ -857,10 +947,10 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                         <div class="form-group">
                                             <select class="form-control" id="salesrepfilter">
                                                 <option value="0">Genetic Consultant</option>
-<?php
-foreach ($salesrep as $srole) {
-    if ($srole['first_name']) {
-        ?>
+                                                <?php
+                                                foreach ($salesrep as $srole) {
+                                                    if ($srole['first_name']) {
+                                                        ?>
                                                         <option value='<?php echo $srole['Guid_salesrep']; ?>'><?php echo $srole['first_name'] . " " . $srole['last_name']; ?></option>
                                                         <?php
                                                     }
@@ -873,9 +963,9 @@ foreach ($salesrep as $srole) {
                                         <div class="form-group">
                                             <select class="form-control" id="accountfilter">
                                                 <option value="0">Account</option>
-<?php
-foreach ($accountdt as $acct) {
-    ?>
+                                                <?php
+                                                foreach ($accountdt as $acct) {
+                                                    ?>
                                                     <option value='<?php echo $acct['Guid_account']; ?>'><?php echo $acct['account'] . ' - ' . ucwords(strtolower($acct['name'])); ?></option>
                                                     <?php
                                                 }
@@ -886,6 +976,12 @@ foreach ($accountdt as $acct) {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4" style="padding: 10px 0;">
+                        <button type="button" name="Detail" id="detail" class="button" style="float:left; background: #90bcf7;">Detail</button>
+                        <button type="button" name="Summary" id="summary" class="button" style="background: #90bcf7;">Summary</button>
                     </div>
                 </div>
                 <div id="calendar"></div>
@@ -913,15 +1009,15 @@ foreach ($accountdt as $acct) {
                                             </div>
                                         </div>
                                     </div>
-<?php if ($role == 'Admin' || $role == 'Sales Manager') { ?>
+                                    <?php if ($role == 'Admin' || $role == 'Sales Manager') { ?>
                                         <div class='col-md-2'>
                                             <div class="form-group">
                                                 <select class="form-control" id="modalsalesrepopt">
                                                     <option value="0">Genetic Consultant</option>
-    <?php
-    foreach ($salesrep as $srole) {
-        if ($srole['first_name']) {
-            ?>
+                                                    <?php
+                                                    foreach ($salesrep as $srole) {
+                                                        if ($srole['first_name']) {
+                                                            ?>
                                                             <option value='<?php echo $srole['Guid_salesrep']; ?>'><?php echo $srole['first_name'] . " " . $srole['last_name']; ?></option>
                                                             <?php
                                                         }
@@ -930,17 +1026,17 @@ foreach ($accountdt as $acct) {
                                                 </select>
                                             </div>
                                         </div>
-<?php } ?>
+                                    <?php } ?>
                                     <?php if ($role == 'Sales Rep') { ?>
                                         <div class='col-md-2'>
                                             <div class="form-group">
                                                 <span><?php
-                                        echo $salesRepDetails['first_name'] . " " . $salesRepDetails['last_name'];
-                                        ?>
+                                                    echo $salesRepDetails['first_name'] . " " . $salesRepDetails['last_name'];
+                                                    ?>
                                                 </span>    
                                             </div>
                                         </div>
-<?php } ?>
+                                    <?php } ?>
                                     <input type="hidden" id="modalsalerepid" value="<?php echo $salesRepDetails['Guid_salesrep']; ?>">
                                     <div class='col-md-2'>
                                         <div class="form-group">
@@ -956,9 +1052,9 @@ foreach ($accountdt as $acct) {
                                         <div class="form-group">
                                             <select class="form-control" id="modalaccountopt">
                                                 <option value="0">Account</option>
-<?php
-foreach ($accountdt as $acct) {
-    ?>
+                                                <?php
+                                                foreach ($accountdt as $acct) {
+                                                    ?>
                                                     <option value='<?php echo $acct['Guid_account']; ?>'><?php echo $acct['account'] . ' - ' . ucwords(strtolower($acct['name'])); ?></option>
                                                     <?php
                                                 }
@@ -972,7 +1068,7 @@ foreach ($accountdt as $acct) {
                                             <textarea class="form-control" rows="10" id="modalcomment" placeholder="Comments" style="width:600px;"></textarea>
                                         </div> 
                                     </div>  
-                                    
+
                                 </div>
                                 <div class="row modalhealthcare" style="display: none;">
                                     <div class='col-md-4'>
@@ -998,6 +1094,7 @@ foreach ($accountdt as $acct) {
                                     <div class='col-md-4'>
                                         <div class="form-group"> <!-- State Button -->
                                             <select class="form-control" id="modalstate_id" name="modalstate">
+                                                <option value=""></option>
                                                 <option value="AL">Alabama</option>
                                                 <option value="AK">Alaska</option>
                                                 <option value="AZ">Arizona</option>
@@ -1058,13 +1155,13 @@ foreach ($accountdt as $acct) {
                                         </div>	
                                     </div>    
                                 </div>  
-                                    <div class="row">
-                                        <div class='col-md-10'>
-                                    <button type="button" id="eventupdate" class="btn btn-primary">Update</button>
-                                    <button type="button" id="eventcancel" class="btn btn-danger">Cancel</button>
-                                    <button type="button" class="btn btn-danger" id="eventdelete" style="border-radius: 2em !important; margin: 7px 0;">Delete</button>
+                                <div class="row">
+                                    <div class='col-md-10'>
+                                        <button type="button" id="eventupdate" class="btn btn-primary">Update</button>
+                                        <button type="button" id="eventcancel" class="btn btn-danger">Cancel</button>
+                                        <button type="button" class="btn btn-danger" id="eventdelete" style="border-radius: 2em !important; margin: 7px 0;">Delete</button>
                                     </div>
-                                        </div>
+                                </div>
                             </div>
                         </div>
 
