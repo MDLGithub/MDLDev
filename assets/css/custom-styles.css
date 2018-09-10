@@ -550,12 +550,14 @@ input:checked + .slider:before {
 }
 
 /****** Gabby Johnson *********/
-.add-new-device{
+.add-new-device,
+.add-new-button{
     margin-bottom: 15px;
     font-size: 17px;
     color: #173d68;
     font-weight: bold;
-    width: 100px;
+    height: 40px;
+    min-width: 100px;
     background: linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%);
     border: 0;
     outline: 0;
@@ -568,6 +570,9 @@ input:checked + .slider:before {
     padding-right: 0.1em;
     padding-left: 0.1em;
     text-align: center;
+}
+.add-new-device{
+     width: 100px;
 }
 /* The switch - the box around the slider */
 .no-bg{

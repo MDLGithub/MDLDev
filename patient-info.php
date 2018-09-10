@@ -25,6 +25,10 @@ $dataViewAccess = isUserHasAnyAccess($roleIDs, $roleID, 'view');
 $isValid = TRUE;
 if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     $Guid_user = $_GET['patient'];
+    $patientInfoUrl = SITE_URL.'/patient-info.php?patient='.$Guid_user;
+    if( isset($_GET['account']) &&$_GET['account']!=""){
+	$patientInfoUrl .= '&account='.$_GET['account'];
+    }
 
     $sqlQualify = "SELECT q.Guid_qualify,q.Guid_user,q.insurance,q.other_insurance,q.Date_created,
 		    p.*, u.email
@@ -106,11 +110,14 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 	    if(isset($_POST['notes'])){
 		$mdlStatsData['notes']=$_POST['notes'];
 	    }
+	    if(isset($_POST['account'])){
+		$mdlStatsData['account']=$_POST['account'];
+	    }
 
 	    if($mdlInfo){ //update existing
 		$whereMdlSats = array('Guid_user'=>$_GET['patient']);
 		if($mdlStatsData){
-		    $updatePatient = updateTable($db, 'tbl_mdl_stats', $mdlStatsData, $whereMdlSats);
+		    $updateMdlStats = updateTable($db, 'tbl_mdl_stats', $mdlStatsData, $whereMdlSats);
 		}
 	    }else{ //insert new row
 		$mdlStatsData['Guid_user'] = $_GET['patient'];
@@ -181,24 +188,44 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		}
 	    }
 
-	    $url=SITE_URL."/patient-info.php?patient=$Guid_user&u";
+	    $url=$patientInfoUrl."&u";
 	    Leave($url);
 	}
     }
     //delete deductible log row
     if(isset($_GET['delete-deductible']) && $_GET['delete-deductible']!=""){
 	deleteByField($db,'tbl_deductable_log', 'Guid_deductable', $_GET['delete-deductible']);
-	$url=SITE_URL."/patient-info.php?patient=$Guid_user";
-	Leave($url);
+	Leave($patientInfoUrl);
     }
     //delete revenue row
     if(isset($_GET['delete-revenue']) && $_GET['delete-revenue']!=""){
 	deleteByField($db,'tbl_revenue', 'Guid_revenue', $_GET['delete-revenue']);
-	$url=SITE_URL."/patient-info.php?patient=$Guid_user";
-	Leave($url);
+	Leave($patientInfoUrl);
+    }
+    //delete revenue row
+    if(isset($_GET['delete-status-log']) && $_GET['delete-status-log']!=""){
+	deleteByField($db,'tbl_mdl_status_log', 'Guid_status_log', $_GET['delete-status-log']);
+	Leave($patientInfoUrl);
     }
 
  } ?>
+
+
+<?php
+    if(isset($_GET['account'])&&$_GET['account']!=""){
+	$accountQ = "SELECT a.account, a.name AS account_name, CONCAT(sr.first_name, ' ', sr.last_name) AS salesrep_name "
+		    . "FROM tblaccount a "
+		    . "LEFT JOIN tblaccountrep ar ON a.Guid_account=ar.Guid_account "
+		    . "LEFT JOIN tblsalesrep sr ON ar.Guid_salesrep = sr.Guid_salesrep "
+		    . "WHERE a.account = '" . $_GET['account'] . "'";
+	$accountInfo = $db->row($accountQ);
+	$providersQ = "SELECT CONCAT(first_name, ' ',last_name) AS provider_name FROM tblprovider WHERE account_id=".$_GET['account'];
+	$providers = $db->query($providersQ);
+    } else {
+	$accountInfo = FALSE;
+	$providers = FALSE;
+    }
+?>
 <?php require_once 'navbar.php'; ?>
 <main class="full-width">
 	<?php
@@ -236,13 +263,42 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 
 		<form id="mdlInfoForm" action="" method="POST" >
 			<input type="hidden" name="save" value="1"/>
+			<input type="hidden" name="account" value="<?php echo isset($_GET['account'])?$_GET['account']:$mdlInfo['account'] ?>"/>
 			<div class="row">
 			    <div class="col-md-6 pInfo">
 				<p><label>Date of Birth:</label><input type="text" name="dob" class="datepicker" value="<?php echo ($qualifyResult['dob']!="")?date("n/j/Y", strtotime($qualifyResult['dob'])):""; ?>" autocomplete="off" /></p>
 				<p><label>Email:</label> <input type="email" name="email" value="<?php echo $qualifyResult['email']; ?>" autocomplete="off"/> </p>
-				<p><label>Registration Date:</label> <?php echo date("n/j/Y h:m A", strtotime($qualifyResult['Date_created'])); ?></p>
-				<p><label>Insurance:</label> <?php echo $qualifyResult['insurance']; ?></p>
-				<p><label>Other Insurance:</label> <?php echo $qualifyResult['other_insurance']; ?></p>
+<!--                                <p><label>Registration Date:</label> <?php echo date("n/j/Y h:m A", strtotime($qualifyResult['Date_created'])); ?></p>-->
+				<p><label>Insurance:</label>
+				    <?php
+				    echo $qualifyResult['insurance'];
+				    if($qualifyResult['other_insurance']!="" && $qualifyResult['other_insurance']!="Other"){
+					echo " (".$qualifyResult['other_insurance'].")";
+				    }
+				    ?>
+				</p>
+				<?php if($accountInfo) { ?>
+				<p><label>Account: </label>
+				    <?php
+					echo $accountInfo['account'];
+					if($accountInfo['account_name']!=""){
+					    echo " - ".$accountInfo['account_name'];
+					}
+				    ?>
+				</p>
+				<p><label>Genetic Consultant: </label> <?php echo $accountInfo['salesrep_name']; ?></p>
+				<?php } ?>
+				<?php if($providers) {
+					echo "<p><label>Health Care Providers: </label>";
+					$providerStr = "";
+					foreach($providers as $k=>$v) {
+					    $providerStr .= $v['provider_name']."; ";
+					}
+					echo rtrim($providerStr, "; ");
+					echo "</p>";
+				    }
+				?>
+
 			    </div>
 			    <div class="col-md-6 pB-30">
 				<div class="row">
@@ -397,7 +453,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			<div id="statusLogs"  class="col-md-6">
 			    <h5>
 				Test Status Change Log:
-				<a title="Add New Test Status Log" class="pull-right" href="<?php echo SITE_URL."/patient-info.php?patient=".$Guid_user."&status_log=1";?>">
+				<a title="Add New Test Status Log" class="pull-right" href="<?php echo $patientInfoUrl."&status_log=1";?>">
 				    <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
 				</a>
 			    </h5>
@@ -405,15 +461,18 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			    <thead>
 				<th>Date</th>
 				<th>Status
-				    <a title="Add New Status"  href="<?php echo SITE_URL .'/patient-info.php?patient='.$Guid_user.'&manage_status=add'; ?>" >
+				    <?php if($role=='Admin'){ ?>
+				    <a title="Add New Status"  href="<?php echo $patientInfoUrl.'&manage_status=add'; ?>" >
 					<span class="fas fa-plus-circle" aria-hidden="true"></span>
 				    </a>
+				    <?php } ?>
 				</th>
+				<th>Actions</th>
 			    </thead>
 			    <tbody>
 				<?php
 				$patientID=$_GET['patient'];
-				$qStatusLog = 'SELECT sl.status_ids, sl.date '
+				$qStatusLog = 'SELECT sl.status_ids, sl.date, sl.Guid_status_log '
 					    . 'FROM tbl_mdl_status_log sl '
 					    . 'LEFT JOIN tblpatient p ON sl.Guid_patient=p.Guid_user '
 					    . 'WHERE sl.Guid_patient='.$patientID.' '
@@ -424,6 +483,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 				    <tr>
 					<td><?php echo date("n/j/Y", strtotime($v['date'])); ?></td>
 					<td><?php echo get_status_names( $db, unserialize($v['status_ids']) ); ?></td>
+					<td class="text-center">
+					    <a href="<?php echo $patientInfoUrl.'&delete-status-log='.$v['Guid_status_log']; ?>" onclick="javascript:confirmationDeleteStatusLog($(this));return false;" class="color-red">
+						<span class="far fa-trash-alt"></span>
+					    </a>
+					</td>
 				    </tr>
 				<?php } ?>
 			    </tbody>
@@ -435,7 +499,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			    <?php
 				$whereUser = array('Guid_user'=>$_GET['patient']);
 				$deductableLogs = $db->query('SELECT * FROM tbl_deductable_log WHERE Guid_user=:Guid_user', $whereUser);
-				$revenues = $db->query('SELECT * FROM tbl_revenue WHERE Guid_user=:Guid_user', $whereUser);
+
 			    ?>
 			    <h5>
 				Deductible Log:
@@ -473,7 +537,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 						<a data-id="<?php echo $v['Guid_deductable']; ?>" class="edit_deductable">
 						    <span class="fas fa-pencil-alt"></span>
 						</a>
-						<a href="<?php echo SITE_URL."/patient-info.php?patient=".$_GET['patient'].'&delete-deductible='.$v['Guid_deductable']; ?>" onclick="javascript:confirmationDeleteDeductible($(this));return false;" class="color-red">
+						<a href="<?php echo $patientInfoUrl.'&delete-deductible='.$v['Guid_deductable']; ?>" onclick="javascript:confirmationDeleteDeductible($(this));return false;" class="color-red">
 						    <span class="far fa-trash-alt"></span>
 						</a>
 						</div>
@@ -495,7 +559,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			<div id="revenue" class="col-md-6">
 			    <h5>
 				Revenue:
-				<a class="pull-right" id="add-revenue">
+				<a title="Add Revenue" class="pull-right" href="<?php echo $patientInfoUrl."&add_revenue=1";?>">
 				    <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
 				</a>
 			    </h5>
@@ -506,29 +570,29 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 				    <tr>
 					<th>Date Paid</th>
 					<th>Payor</th>
-					<th>Insurance $</th>
-					<th>Patient $</th>
+					<th>Amount $</th>
 					<th class="text-center actions">Action</th>
 				    </tr>
 				</thead>
 				<tbody>
 				    <?php
+				     $revenues = $db->query('SELECT r.*, p.name AS payor FROM tbl_revenue r LEFT JOIN tbl_mdl_payors p ON r.Guid_payor=p.Guid_payor WHERE Guid_user=:Guid_user', array('Guid_user'=>$_GET['patient']));
 				    $revSum = 0;
 				    foreach ($revenues as $k=>$v) {
-					$revSum += $v['insurance'];
-					$revSum += $v['patient'];
+					if($v['amount']!=""){
+					$revSum += $v['amount'];
+					}
 				    ?>
 				    <tr id="<?php echo $v['Guid_revenue']; ?>">
 					<td><span class="editable_date_payd"><?php echo (!preg_match("/0{4}/" , $v['date_paid'])) ? date('n/j/Y', strtotime($v['date_paid'])) : ""; ?></span></td>
 					<td><span class="editable_payor"><?php echo $v['payor']; ?></span></td>
-					<td>$<span class="editable_insurance"><?php echo formatMoney($v['insurance']); ?></span></td>
-					<td>$<span class="editable_patient"><?php echo formatMoney($v['patient']); ?></span></td>
+					<td>$<span class="editable_insurance"><?php echo formatMoney($v['amount']); ?></span></td>
 					<td class="text-center">
 					    <div class="action-btns">
 					    <a data-id="<?php echo $v['Guid_revenue']; ?>" class="edit_reveue">
 						<span class="fas fa-pencil-alt"></span>
 					    </a>
-					    <a href="<?php echo SITE_URL."/patient-info.php?patient=".$_GET['patient'].'&delete-revenue='.$v['Guid_revenue']; ?>" onclick="javascript:confirmationDeleteRevenue($(this));return false;" class="color-red">
+					    <a href="<?php echo $patientInfoUrl.'&delete-revenue='.$v['Guid_revenue']; ?>" onclick="javascript:confirmationDeleteRevenue($(this));return false;" class="color-red">
 						<span class="far fa-trash-alt"></span>
 					    </a>
 					    </div>
@@ -552,9 +616,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		    <div class="row actionButtons pB-30">
 			<div class="col-md-12">
 			    <button id="save-patient-info" name="save" type="submit" class="button btn-inline">Save</button>
-			    <button name="print" type="submit" class="button btn-inline">Print</button>
-			    <button name="email" type="submit" class="button btn-inline">Email</button>
-			 </div>
+			</div>
 		    </div>
 		</form>
 	    </div>
@@ -571,19 +633,109 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 
 
 <?php
+    if(isset($_POST['add_revenue'])){
+	$date_paid = ($_POST['date_paid'] != "")?date('Y-m-d h:i:s', strtotime($_POST['date_paid'])):"";
+	$revenueData=array(
+	    'Guid_user'=>$_POST['Guid_user'],
+	    'Guid_payor'=>$_POST['Guid_payor'],
+	    'amount'=>$_POST['amount'],
+	    'date_paid'=>$date_paid,
+	);
+	$insertRevenue = insertIntoTable($db, 'tbl_revenue', $revenueData);
+	if($insertRevenue['insertID']!=""){
+	    Leave($patientInfoUrl);
+	    //$message = "New Revenue Inserted.";
+	}
+    }
+?>
+<?php if(isset($_GET['add_revenue'])){ ?>
+<div id="manage-status-modal" class="modalBlock ">
+    <div class="contentBlock">
+	<a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>
+
+	<h5 class="title">
+	    Add Revenue
+	</h5>
+	<div class="content">
+	    <!--<div class="status-list">list here...</div>-->
+	    <div class="add-status-form">
+		<form action="" method="POST">
+		<h4 class="text-center"></h4>
+		<?php if(isset($message)){ ?>
+		    <div class="text-center success-text"><?php echo $message; ?></div>
+		<?php } ?>
+		<input type="hidden" name="Guid_user" value="<?php echo $_GET['patient']; ?>" />
+		<div class="">
+		    <input class="datepicker" autocomplete="off" id="date_paid" name="date_paid" type="text" value="" placeholder="Date">
+		</div>
+		<div class="f2  ">
+		    <label class="dynamic" for="Guid_payor"><span>Payor</span></label>
+		    <div class="group">
+			<select name="Guid_payor">
+			    <option value="">Select Payor</option>
+			    <?php
+			    $payors = $db->selectAll('tbl_mdl_payors', ' ORDER BY name DESC');
+			    foreach ($payors as $k=>$v){
+			    ?>
+			    <option value="<?php echo $v['Guid_payor']; ?>"><?php echo $v['name']; ?></option>
+			    <?php } ?>
+			</select>
+			<p class="f_status">
+			    <span class="status_icons"><strong></strong></span>
+			</p>
+		    </div>
+		</div>
+		<div class="f2  ">
+		    <label class="dynamic" for="Guid_cpt"><span>CPT Code</span></label>
+		    <div class="group">
+			<select name="Guid_cpt">
+			    <option value="">Select CPT Code</option>
+			    <?php
+			    $cpt_codes = $db->selectAll('tbl_mdl_cpt_code', ' ORDER BY code DESC');
+			    foreach ($cpt_codes as $k=>$v){
+			    ?>
+			    <option value="<?php echo $v['Guid_cpt']; ?>"><?php echo $v['code']; ?></option>
+			    <?php } ?>
+			</select>
+			<p class="f_status">
+			    <span class="status_icons"><strong></strong></span>
+			</p>
+		    </div>
+		</div>
+		<div class="f2 ">
+		    <label class="dynamic" for="amount"><span>Amount</span></label>
+		    <div class="group">
+			<input name="amount" placeholder="Amount" type="number" min="0.00" step="0.01">
+			<p class="f_status">
+			    <span class="status_icons"><strong></strong></span>
+			</p>
+		    </div>
+		</div>
+
+		 <div class="text-right pT-10">
+		    <button class="button btn-inline" name="add_revenue" type="submit" >Save</button>
+		    <!--<button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>-->
+		</div>
+		</form>
+	    </div>
+	</div>
+    </div>
+</div>
+<?php } ?>
+
+<?php
     if(isset($_POST['manage_status'])){
 	$statusData=array('parent_id'=>$_POST['parent_id'], 'status'=>$_POST['status'], 'order_by'=>$_POST['order_by']);
 	$insertStatus = insertIntoTable($db, 'tbl_mdl_status', $statusData);
 	if($insertStatus['insertID']!=""){
 	    $message = "New Status Inserted.";
-	    //Leave(SITE_URL."/patient-info.php?patient=".$_GET['patient']);
 	}
     }
 ?>
-<?php if(isset($_GET['manage_status'])){ ?>
+<?php if(isset($_GET['manage_status'])  && $role=='Admin'){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock">
-	<a class="close" href="<?php echo SITE_URL."/patient-info.php?patient=".$Guid_user; ?>">X</a>
+	<a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>
 
 	<h5 class="title">
 <!--            <a class="" id="open-new-status-form">
@@ -602,6 +754,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		<?php if(isset($message)){ ?>
 		    <div class="text-center success-text"><?php echo $message; ?></div>
 		<?php } ?>
+
 		<div class="f2 ">
 		    <label class="dynamic" for="status"><span>Status Name</span></label>
 		    <div class="group">
@@ -648,32 +801,26 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 
     if(isset($_POST['add_status_log'])){
 	$statusIDs = serialize($_POST['status']);
-	$statusLogData=array(
-		'status_ids'=>$statusIDs,
-		'Guid_patient'=>$Guid_user,
-
-	    );
-
-	 $statusLogData = array(
-			'status_ids' => $statusIDs,
-			'Guid_patient' => $_GET['patient'],
-			'recorded_by' => $_SESSION['user']['id'],
-			//'mdl_number' => $_POST['mdl_number'],
-			//'comment'=>$_POST['comment'],
-			'date' => date('Y-m-d h:i:s', strtotime($_POST['date']))
-		    );
+	$date=($_POST['date']!="")?date('Y-m-d h:i:s',strtotime($_POST['date'])):"";
+	$statusLogData = array(
+	    'status_ids' => $statusIDs,
+	    'Guid_patient' => $_GET['patient'],
+	    'recorded_by' => $_SESSION['user']['id'],
+	    'date' => $date,
+	    'Date_created'=>date('Y-m-d h:i:s', strtotime($_POST['date']))
+	);
 
 	$insertStatusLog = insertIntoTable($db, 'tbl_mdl_status_log', $statusLogData);
 	if($insertStatusLog['insertID']!=""){
 	    $message = "New Status Inserted.";
-	    Leave(SITE_URL."/patient-info.php?patient=".$_GET['patient']);
+	    Leave($patientInfoUrl);
 	}
     }
 ?>
 <?php if(isset($_GET['status_log'])){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock">
-	<a class="close" href="<?php echo SITE_URL."/patient-info.php?patient=".$Guid_user; ?>">X</a>
+	<a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>
 
 	<h5 class="title">
 	    Add Status Log
@@ -687,7 +834,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		    <div class="text-center success-text"><?php echo $message; ?></div>
 		<?php } ?>
 		<div class="">
-			<input required class="datepicker" autocomplete="off" id="status" name="date" type="text" value="" placeholder="Date">
+		    <input required class="datepicker" autocomplete="off" id="status" name="date" type="text" value="" placeholder="Date">
 		</div>
 		<div id="status-dropdowns-box">
 		    <?php echo get_status_dropdown($db, $parent_id='0'); ?>
