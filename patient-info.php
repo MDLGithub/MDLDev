@@ -705,7 +705,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		<div class="f2 ">
 		    <label class="dynamic" for="amount"><span>Amount</span></label>
 		    <div class="group">
-			<input name="amount" placeholder="Amount" type="number" min="0.00" step="0.01">
+			<input autocomplete="off" name="amount" placeholder="Amount" type="number" min="0.00" step="0.01">
 			<p class="f_status">
 			    <span class="status_icons"><strong></strong></span>
 			</p>
