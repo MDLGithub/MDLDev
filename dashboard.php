@@ -557,7 +557,7 @@ $num_estimates = $qualify_requests;
 		    ?>
 			    <tr data-id="<?php //echo $estimate_request['Guid_brcaestimate']; ?>" class="t_row">
 				    <td class="printSelectBlock text-center">
-					<?php if($qualify_request['qualified']=='Unknown'){ ?>
+					<?php if(isset($qualify_request['qualified']) && $qualify_request['qualified']=='Unknown'){ ?>
 					    <input name="markedRow[user][<?php echo $qualify_request['Guid_user']; ?>]" type="checkbox" class="print1 report1" data-prinatble="0" data-selected_questionnaire="<?php echo $qualify_request['Guid_qualify']; ?>" data-selected_date="<?php echo $qualify_request['date']; ?>" />
 					<?php } else { ?>
 					    <input name="markedRow[user][<?php echo $qualify_request['Guid_user']; ?>]" type="checkbox" class="print1 report1" data-prinatble="1" data-selected_questionnaire="<?php echo $qualify_request['Guid_qualify']; ?>" data-selected_date="<?php echo $qualify_request['date']; ?>" />
