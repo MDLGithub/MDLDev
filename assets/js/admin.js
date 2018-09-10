@@ -180,25 +180,33 @@ $(document).ready(function () {
         //var i = 0;
         var newArr = [];
         var searchIDs = $("input:checkbox:checked").map(function () {
-            newArr = [[$(this).data("selected_date"), $(this).data("selected_questionnaire")]];
+            newArr = [[$(this).data("selected_date"), $(this).data("selected_questionnaire"), $(this).data("prinatble")]];
             return newArr;
 
         }).toArray();
 
         console.log(searchIDs);
         var iCount = searchIDs.length;
+        var notPrintableMsg = "";
         for (var i = 0; i < iCount; i++) {
             var selected_questionnaire = searchIDs[i][1];
             var selected_date = searchIDs[i][0];
-
-            $.post("genreport.php", {selected_questionnaire: selected_questionnaire, selected_date: selected_date
-                        //searchIDs
-            }, function (data, status) { 
-                $("#admin_print").append(data);
-                scalePedigree();
-            });
+            var data_printable= searchIDs[i][2];
+            console.log(data_printable);
+            if(data_printable=='1'){
+                $.post("genreport.php", {selected_questionnaire: selected_questionnaire, selected_date: selected_date
+                //searchIDs
+                }, function (data, status) { 
+                    $("#admin_print").append(data);
+                    scalePedigree();
+                });
+            } else {
+                notPrintableMsg = "Unknown questionary can't be prented";
+            }            
         }
-
+        if(notPrintableMsg!=""){
+            alert(notPrintableMsg);
+        }
         $("#admin_print").printThis({
             debug: true,
             importCSS: false,
