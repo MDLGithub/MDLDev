@@ -32,7 +32,7 @@ function getEventSchedule($db,$salesRepId,$accountId){
 }
 
 function getSummaryEvents($db){
-    $query = "SELECT count(*) as evtCnt, DATE(start_event) as start_event FROM brcadev.tblevents GROUP BY DATE(start_event)";
+    $query = "SELECT count(*) as evtCnt, DATE(start_event) as start_event FROM tblevents GROUP BY DATE(start_event)";
     $result = $db->query($query);
     return $result;    
 }

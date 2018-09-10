@@ -202,7 +202,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             },
             views: {
                 week: {
-                  titleFormat: 'MMMM D, YYYY',
+                  titleFormat: '[Week of ] MMMM D, YYYY',
                   titleRangeSeparator: ' to ',
                 }
             },
@@ -748,7 +748,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             <div class="container">  
                 <div class="row">
                     <div class="col-md-4" style="padding: 10px 0;">
-                        <button type="button" name="Detail" id="detail" class="button" style="float:left; background: #90bcf7;">Detail</button>
+                        <button type="button" name="Detail" id="detail" class="button" style="float:left; background: #90bcf7; margin-right: 20px;">Detail</button>
                         <button type="button" name="Summary" id="summary" class="button" style="background: #90bcf7;">Summary</button>
                     </div>
                 </div>
