@@ -876,6 +876,18 @@ function confirmationDeleteRevenue(anchor){
     var conf = confirm('Are you sure you want to delete Revenue #'+$str[1]+'?');   
     if(conf)  window.location=anchor.attr("href");
 }
+function confirmationDeleteStatusLog(anchor){
+    $str = anchor.attr("href").split("&");
+    $str = $str[1].split("=");    
+    var conf = confirm('Are you sure you want to delete Test Status Log #'+$str[1]+'?');   
+    if(conf)  window.location=anchor.attr("href");
+}
+function confirmationDeleteUser(anchor){
+    $str = anchor.attr("href").split("&");
+    $str = $str[1].split("=");    
+    var conf = confirm('Are you sure you want to delete User #'+$str[1]+'?');   
+    if(conf)  window.location=anchor.attr("href");
+}
 
 
 

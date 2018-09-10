@@ -115,6 +115,22 @@ function isUser($db, $role){
     return FALSE;  
 }
 /**
+ * Delete User By given ID
+ * @param type $userID
+ * @return boolean
+ */
+function deleteUserByID($db, $userID){
+    deleteByField($db, 'tbladmins','Guid_user', $userID);
+    deleteByField($db, 'tblsalesrep','Guid_user', $userID);
+    deleteByField($db, 'tblprovider','Guid_user', $userID);
+    deleteByField($db, 'tblpatient','Guid_user', $userID);
+    //delete from roles
+    deleteByField($db, 'tbluserrole','Guid_user', $userID);
+    //delet from users table
+    deleteByField($db, 'tbluser','Guid_user', $userID);    
+    return TRUE;
+}
+/**
  * Get logged in user name, if not found take user type
  * used for menu to show "Welcome, username" message
  * @param type $db
@@ -389,9 +405,13 @@ function getUserDetails($db, $userRole, $userID){
         $q = "SELECT first_name, last_name, photo_filename FROM tblprovider";    
     } elseif ($userRole == 'Patient') {
         $q = "SELECT firstname as first_name, lastname as latst_name  FROM tblpatient";
-    }
-    if($q!=""){
+    } 
+   
+    if($q!=""){        
         $q .= " WHERE Guid_user=:Guid_user";
+        $userDetail = $db->row($q, array("Guid_user"=>$userID));
+    } else {
+        $q = "SELECT firstname as first_name, lastname as latst_name FROM tblpatient";
         $userDetail = $db->row($q, array("Guid_user"=>$userID));
     }
     

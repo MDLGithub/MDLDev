@@ -17,12 +17,136 @@ $role = $roleInfo['role'];
 if($role!="Admin"){
     Leave(SITE_URL."/no-permission.php");
 }
-$users = getUsersAndRoles($db);
+
+$userTables = array(
+    'admin'=>'tbladmins',
+    'patient'=>'tblpatient',
+    'salesrep'=>'tblsalesrep',
+    'tblprovider'=>'tblprovider'
+);
+$selectQ = "";$adminQ="";$patientsQ="";$salesrepsQ="";$providersQ="";
+foreach ($userTables as $k=>$v){
+    $selectQ = "SELECT u.Guid_user, u.status, uInfo.first_name, uInfo.last_name, u.email, r.role";
+
+    if($k=='patient'){
+        $selectQ = "SELECT u.Guid_user, u.status, uInfo.firstname AS first_name, uInfo.lastname AS last_name, u.email, r.role";
+    }
+    if($k=='admin'){
+        $roleID = '1'; 
+    } elseif ($k=='patient') {
+        $roleID = '3'; 
+    } elseif ($k=='salesrep') {
+       $roleID = '4 OR urole.Guid_role=5'; 
+    } elseif ($k=='tblprovider') {
+        $roleID = '2'; 
+    }    
+    
+    $selectQ .= " FROM $v uInfo
+                LEFT JOIN `tbluser` u ON uInfo.Guid_user=u.Guid_user
+                LEFT JOIN `tbluserrole` urole ON uInfo.Guid_user=urole.Guid_user AND urole.Guid_role=$roleID
+                LEFT JOIN `tblrole` r ON r.Guid_role=urole.Guid_role";
+    
+    if($k=='admin'){
+        $adminQ = $selectQ;
+    } elseif ($k=='patient') {
+        $patientsQ = $selectQ;
+    } elseif ($k=='salesrep') {
+        $salesrepsQ = $selectQ;
+    } elseif ($k=='tblprovider') {
+        $providersQ = $selectQ;
+    }
+}
+
+$query1 = ($adminQ!="")?$db->query($adminQ):array();
+$query2 = ($patientsQ!="")?$db->query($patientsQ):array();
+$query3 = ($salesrepsQ!="")?$db->query($salesrepsQ):array();
+$query4 = ($providersQ!="")?$db->query($providersQ):array();
+
+$users = array_merge($query1,$query2,$query3,$query4);
+
+
 $thisMessage="";
+
+if(isset($_GET['delete-user']) && $_GET['delete-user']!=""){
+    deleteUserByID($db, $_GET['delete-user']);    
+    Leave(SITE_URL."/user-management.php");
+}
 
 require_once ('navbar.php');
 ?>
-<main class="full-width">
+
+<!--SEARCH FORM BLOCK Start-->
+<aside id="action_palette" >		
+    <div class="box full">
+        <h4 class="box_top">Filters</h4>
+        
+        <div class="boxtent scroller ">
+            <form id="filter_form" action="" method="post">             
+<!--                <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['first_name'])) && (strlen(trim($_POST['first_name'])))) ? " show-label valid" : ""; ?>">
+                    <label class="dynamic" for="first_name"><span>First Name</span></label>
+
+                    <div class="group">
+                        <input id="first_name" name="first_name" type="text" value="<?php echo ((!isset($_POST['clear'])) && isset($_POST['first_name']) && strlen(trim($_POST['first_name']))) ? trim($_POST['first_name']) : ""; ?>" placeholder="First Name">
+
+                        <p class="f_status">
+                            <span class="status_icons"><strong></strong></span>
+                        </p>
+                    </div>
+                </div>-->
+                    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['Guid_role'])) && (strlen($_POST['Guid_role']))) ? " show-label valid" : ""; ?>">
+                        <label class="dynamic" for="Guid_role"><span>User Role</span></label>
+
+                        <div class="group">
+                            <select id="Guid_role" name="Guid_role" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['location'])) && (strlen($_POST['location']))) ? "" : "no-selection"; ?>">
+                                <option value="">User Role</option>							
+                                <?php
+                                $roles = $db->query("SELECT * FROM tblrole");
+
+                                foreach ($roles as $k=>$v) {
+                                    ?>
+                                    <option value="<?php echo $v['Guid_role']; ?>"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['Guid_role']) && ($_POST['Guid_role'] == $v['Guid_role'])) ? " selected" : ""); ?>><?php echo $v['role']; ?></option>
+                                    <?php
+                                }
+                                ?>
+                            </select>
+
+                            <p class="f_status">
+                                <span class="status_icons"><strong></strong></span>
+                            </p>
+                        </div>
+                    </div>
+                
+                    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['Guid_role'])) && (strlen($_POST['Guid_role']))) ? " show-label valid" : ""; ?>">
+                        <label class="dynamic" for="status"><span>Status</span></label>
+
+                        <div class="group">
+                            <select id="Guid_role" name="status" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['status'])) && (strlen($_POST['status']))) ? "" : "no-selection"; ?>">
+                                <option value="">Status</option>                                
+                                <option value="1" <?php echo ((!isset($_POST['clear'])) && (isset($_POST['status']) && ($_POST['status'] == $v['status'])) ? " selected" : ""); ?>>Active</option>
+                                <option value="0" <?php echo ((!isset($_POST['clear'])) && (isset($_POST['status']) && ($_POST['status'] == $v['status'])) ? " selected" : ""); ?>>Inactive</option>
+                              
+                            </select>
+
+                            <p class="f_status">
+                                <span class="status_icons"><strong></strong></span>
+                            </p>
+                        </div>
+                    </div>
+               
+
+                
+                <button id="filter" value="1" name="search" type="submit" class="button filter half"><strong>Search</strong></button>
+                <button type="submit" name="clear" class="button cancel half"><strong>Clear</strong></button>
+            </form>
+            <!--********************   SEARCH BY PALETTE END    ******************** -->
+
+        </div>
+    </div>    
+</aside>
+<!--SEARCH FORM BLOCK END-->
+
+
+<main >
     <?php 
     
     if(isset($_GET['update']) ){ 
@@ -46,10 +170,16 @@ require_once ('navbar.php');
         </section>
         <div class="scroller">  
             <div class="row">                   
-                <div class="col-md-12">
-                    <a class="add-new-device" href="<?php echo SITE_URL; ?>/user-management.php?action=add">
-                        <span class="fas fa-plus-circle" aria-hidden="true"></span> Add
+                <div class="col-md-7">
+                  
+                </div>               
+                <div class="col-md-5">                    
+                    <a class="add-new-button pull-right" href="<?php echo SITE_URL; ?>/user-management.php?action=add">
+                        <span class="fas fa-user-plus" aria-hidden="true"></span> Add 
                     </a>
+<!--                    <form action="" method="POST">
+                        <button name="show-duplicates" type="submit" value="1" class="pull-right button  add-new-button"><i class="fas fa-clone"></i> Show User Duplicates</button>
+                    </form>-->
                 </div>                 
             </div>               
             <div class="row">
@@ -57,23 +187,35 @@ require_once ('navbar.php');
                     <table id="dataTable" class="display" style="width:100%">
                         <thead>
                             <tr>
-                                <th  class="actions">ID</th>
+                                <th class="actions">#</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
                                 <th>Email</th>
                                 <th>Role</th>
+                                <th class="noFilter actions text-center">Status</th>
                                 <th class="noFilter actions text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($users as $user){ ?>
+                            <?php foreach ($users as $k=>$user){  ?>
                             <tr>
                                 <td><?php echo $user['Guid_user']; ?></td>
+                                <td><?php echo $user['first_name']; ?> </td>
+                                <td><?php echo $user['last_name']; ?></td>
                                 <td><?php echo $user['email']; ?></td>
-                                <td><?php echo $user['role']; ?></td>
+                                <td><?php echo isset($user['role'])?$user['role']:'Patient'; ?></td>
+                                <td class="text-center fs-20">
+                                    <?php if($user['status']=='1') {
+                                       echo "<span class='fas fa-user-check mn yes'></span>"; 
+                                    } else {
+                                        echo "<span class='fas fa-user-alt-slash mn no'></span>"; 
+                                    }?>
+                                </td>
                                 <td class="text-center">                                        
                                     <a href="<?php echo SITE_URL; ?>/user-management.php?action=update&id=<?php echo $user['Guid_user']; ?>">
                                         <span class="fas fa-pencil-alt" aria-hidden="true"></span>
                                     </a>                                       
-                                    <a onclick="javascript:confirmationDeleteUser($(this));return false;" href="<?php echo SITE_URL; ?>/user-management.php?delete=<?php echo $user['Guid_user']; ?>&id=<?php echo $user['Guid_user']; ?>">
+                                    <a onclick="javascript:confirmationDeleteUser($(this));return false;" href="<?php echo SITE_URL; ?>/user-management.php?delete-user=<?php echo $user['Guid_user']; ?>&id=<?php echo $user['Guid_user']; ?>">
                                         <span class="far fa-trash-alt" aria-hidden="true"></span> 
                                     </a>
                                 </td>
@@ -86,11 +228,9 @@ require_once ('navbar.php');
         </div>
     </div>
 </main>
+<button id="action_palette_toggle" class=""><i class="fa fa-2x fa-angle-left"></i></button>
 
-
-<?php 
-
-    
+<?php     
     $first_name = "";
     $last_name = "";
     $photo_filename = "";
@@ -99,6 +239,7 @@ require_once ('navbar.php');
     if(isset($_POST['save_user'])){
         extract($_POST);
         $userData['email'] = $email;
+        $userData['status'] = $status;
         
         if($_POST['password'] != ""){
             $userData['password'] = encode_password($password);
@@ -126,6 +267,7 @@ require_once ('navbar.php');
             //checking for email unique
             $isMailExists = $db->row("SELECT `email` FROM tbluser WHERE `email`='".$email."' ");
             if(!$isMailExists){
+                unset($userData['Guid_user']);
                 $userData['Date_created'] = date('Y-m-d H:i:s');             
                 $inserUser = insertIntoTable($db, 'tbluser', $userData);
                 if($inserUser['insertID']){
@@ -139,11 +281,13 @@ require_once ('navbar.php');
         }else{ //update
             $isMailExists = $db->row("SELECT `email` FROM tbluser WHERE `email`='".$email."' AND `Guid_user`<>$Guid_user");
             if(!$isMailExists){
-            $userData['Date_modified'] = date('Y-m-d H:i:s');
-            $whereUser = array('Guid_user'=>$Guid_user);
-            $updateUser = updateTable($db, 'tbluser', $userData, $whereUser);            
-            saveUserRole($db, $Guid_user, $Guid_role);
-            $result = TRUE;
+                $userData['Date_modified'] = date('Y-m-d H:i:s');
+                $whereUser = array('Guid_user'=>$Guid_user);
+                
+                $updateUser = updateTable($db, 'tbluser', $userData, $whereUser);            
+                saveUserRole($db, $Guid_user, $Guid_role);
+                
+                $result = TRUE;
             } else {
                 $message = "User with this email already exists.";
             }
@@ -171,13 +315,12 @@ require_once ('navbar.php');
     if(isset($_GET['action']) && $_GET['action'] !="" ){ 
         $userID = $_GET['id'];
         $user = getUserAndRole($db, $userID);        
-        $allRoles = $db->selectAll('tblrole', ' ORDER BY role ASC');  
-       
-        if($user['role']){
-            $userDetails = getUserDetails($db, $user['role'], $userID);
-            if($userDetails){
-                extract($userDetails);
-            }
+        $allRoles = $db->selectAll('tblrole', ' ORDER BY role ASC'); 
+        
+        $userDetails = getUserDetails($db, $user['role'], $userID);
+        
+        if($userDetails){
+            extract($userDetails);
         }
         if(isset($_POST)){
             $userDetails = $_POST;
@@ -186,8 +329,7 @@ require_once ('navbar.php');
                 $user['email'] = $email;
                 $user['role'] = $roleName;
                 
-            }
-            
+            }            
         }
     
         
@@ -203,7 +345,7 @@ require_once ('navbar.php');
         <form action="" method="POST" enctype="multipart/form-data"> 
             <div class="row">
                 
-                <input type="hidden" name="Guid_user" value="<?php echo $user['Guid_user']; ?>" />
+                <input type="hidden" name="Guid_user" value="<?php echo isset($user['Guid_user'])?$user['Guid_user']:''; ?>" />
                 
                 <div class="col-md-6 col-md-offset-3">
                    
@@ -228,11 +370,23 @@ require_once ('navbar.php');
                     <div class="f2 <?php echo ($user['role']!="")?"valid show-label":"";?>">
                         <label class="dynamic" for="reason_not"><span>User Roles</span></label>
                         <div class="group">
-                            <select id="user_type" name="Guid_role" class="no-selection">
+                            <select id="user_type" name="Guid_role" class="<?php echo ($user['role']=="")?'no-selection':''; ?> ">
                                 <option value="">User Roles</option>
                                 <?php foreach ($allRoles as $role){ ?>
                                     <option <?php echo ($user['role']==$role['role']) ? " selected": ""; ?> value="<?php echo $role['Guid_role']; ?>"><?php echo $role['role']; ?></option>   
                                 <?php } ?>
+                            </select>
+                            <p class="f_status">
+                                <span class="status_icons"><strong></strong></span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="f2 <?php echo ($user['status']!="")?"valid show-label":"";?>">
+                        <label class="dynamic" for="status"><span>Status</span></label>
+                        <div class="group">
+                            <select id="status" name="status">
+                                <option <?php echo ($user['status']=='1') ? " selected": ""; ?> value="1">Active</option>   
+                                <option <?php echo ($user['status']=='0') ? " selected": ""; ?> value="0">Inactive</option>   
                             </select>
                             <p class="f_status">
                                 <span class="status_icons"><strong></strong></span>
@@ -300,12 +454,13 @@ require_once ('navbar.php');
             fixedHeader: true,
             //searching: false,
             //lengthChange: false,
-            "pageLength": 50,
+            "pageLength": 25,
+            "order": [[ 4, "asc" ]],
             "aoColumnDefs": [
               { 
                   
                   //"bSortable": false, 
-                  "aTargets": [ 1 ] } 
+                  "aTargets": [ 4,5 ] } 
             ]
         });   
  
