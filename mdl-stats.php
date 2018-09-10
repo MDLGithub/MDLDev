@@ -20,10 +20,10 @@ if($role!="Admin"){
 }
 $users = getUsersAndRoles($db);
 
-$query = 'SELECT st.Guid_stats, u.Guid_user, u.email,
+$query = 'SELECT st.Guid_stats,  u.Guid_user, u.email,
 	p.Guid_patient, p.firstname AS first_name, p.lastname AS last_name,
 	st.mdl_number, st.Guid_user, st.date_reported, st.account,
-	r.amount,
+	r.amount, r.Guid_payor,
 	s.Guid_salesrep, s.first_name AS slaserep_fName, s.last_name AS salesrep_lName,
 	a.Guid_account, a.account, a.name
 	FROM tbl_mdl_stats st
@@ -60,8 +60,8 @@ require_once ('navbar.php');
 	    <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>
 	    <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
 	</section>
-	<p>Under construction</p>
-	<div id="app_data" class="home_scroller hidden">
+
+	<div id="app_data" class="home_scroller ">
 	    <?php if(isset($revenueTotal)){ ?>
 	    <div class="row">
 		<div class="col-md-12 text-right priceSum pR-30">
@@ -103,8 +103,8 @@ require_once ('navbar.php');
 				<td><?php echo $v['account']." ".$v['name']; ?></td>
 				<td><?php echo $v['slaserep_fName']." ".$v['salesrep_lName']; ?></td>
 				<td><?php echo (!preg_match("/0{4}/" , $v['date_reported'])) ? date('n/j/Y', strtotime($v['date_reported'])) : ""; ?></td>
-				<td>$<?php echo formatMoney($v['amount']); ?></td>
-				<td>$<?php echo formatMoney($v['amount']); ?></td>
+				<td>$<?php echo ($v['Guid_payor']=='1') ? formatMoney($v['amount']): formatMoney('0'); ?></td>
+				<td>$<?php echo ($v['Guid_payor']!='1') ? formatMoney($v['amount']): formatMoney('0'); ?></td>
 				<td>$<?php echo formatMoney($v['amount']); ?></td>
 			    </tr>
 			    <?php } ?>
