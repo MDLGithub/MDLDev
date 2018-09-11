@@ -2,9 +2,10 @@
 require_once('config.php');
 require_once ('functions_event.php');
 
-$startdate = $_POST['modalstart'] . " " . date("H:m:s");
-$enddate = $_POST['modalend'] . " " . date("H:m:s");
-
+//$startdate = $_POST['modalstart'] . " " . date("H:m:s");
+//$enddate = $_POST['modalend'] . " " . date("H:m:s");
+$startdate = $_POST['modalstart'];
+$enddate = $_POST['modalend'];
 if(isset($_POST['modalhealthcareid'])){
     $healthCare = array(
          'name' => $_POST['full_name'],
