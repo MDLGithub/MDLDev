@@ -9,6 +9,9 @@ body{
 .clearfix{
     clear: both;
 }
+.capitalize{
+    text-transform: capitalize!important;
+}
 .fs-28{
     font-size: 28px!important;
 }
@@ -1176,7 +1179,7 @@ table.dataTable thead .sorting {
     border-bottom: 1px solid;
     width: 170px;
     max-width: 90%;
-    min-width: 35%;
+    min-width: 50%;
     height: 27px;
 }
 .add-status-form .datepicker{
