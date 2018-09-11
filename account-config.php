@@ -88,10 +88,11 @@ if(isset($_POST['submit_account'])){
         if( ifAccountIDValid($_POST['account']) ){
             $insertAccount = insertIntoTable($db, 'tblaccount', $accountData);
             if(isset($insertAccount['insertID'])&& $insertAccount['insertID'] != ""){
-                $salesRepData = array(
+                $accountRepData = array(
                     'Guid_account' => $insertAccount['insertID'],
                     'Guid_salesrep' => $_POST['Guid_salesrep']
-                );                
+                );                  
+                $insertAccountRep = insertIntoTable($db, 'tblaccountrep', $accountRepData);                
             } 
             Leave(SITE_URL.'/account-config.php?insert');
         }else {
@@ -209,7 +210,7 @@ require_once ('navbar.php');
                                     <div class="f2 required <?php echo ($account!="" && $accountFieldMsg=="")?"valid show-label":"";?>">
                                         <label class="dynamic" for="account"><span>Account</span></label>
                                         <div class="group">
-                                            <input id="account" name="account" type="text" value="<?php echo $account; ?>" placeholder="Account" required="">
+                                            <input class="numberonly" id="account" name="account" type="text" value="<?php echo $account; ?>" placeholder="Account" required="">
                                             <p class="f_status">
                                                 <span class="status_icons"><strong>*</strong></span>
                                             </p>
