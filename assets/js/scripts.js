@@ -31,9 +31,22 @@ $(document).ready(function () {
 
 
     //$('.datepicker').datepicker({ dateFormat: 'm/d/yy' });
+    var opt = { showOn:'focus', dateFormat: 'm/d/yy' };
     $('body').on('click','.datepicker', function() {
-	$(this).datepicker('destroy').datepicker({showOn:'focus',dateFormat: 'm/d/yy'}).focus();
+       // $(this).datepicker('destroy').datepicker({showOn:'focus',dateFormat: 'm/d/yy'}).focus();
+       $(this).not('.hasDatePicker').datepicker(opt).focus();
     });
+
+    /*$('.datepicker').each(function(key, val) {
+	$(val).on('focusin', function() {
+	  $(this).not('.hasDatePicker').datepicker(opt);
+	});
+    });
+
+    //$('.datepicker').datepicker(opt); */
+
+
+    //number only fields
     $('body').delegate( ".numberonly", "input", function() {
 	var val = $(this).val();
 	$(this).val(val.replace(/\D/g,''));
