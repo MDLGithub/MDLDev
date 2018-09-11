@@ -974,8 +974,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <button type="button" name="Detail" id="detail" class="button" style="float:left; background: #90bcf7; margin-right: 20px;">Detail</button>
-                                        <button type="button" name="Summary" id="summary" class="button" style="background: #90bcf7;">Summary</button>
+                                        <button type="button" name="Detail" id="detail" class="info-button" style="float:left; background: #90bcf7; margin-right: 20px;">Detail</button>
+                                        <button type="button" name="Summary" id="summary" class="info-button" style="background: #90bcf7;">Summary</button>
                                     </div>
                                 </div>
                             </div>

@@ -46,6 +46,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 }
 ?>
 <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">-->
+<script src = "https://code.highcharts.com/highcharts.js"></script> 
 <link rel="stylesheet" href="assets/eventschedule/css/fullcalendar.css" />
 <link rel="stylesheet" href="assets/eventschedule/css/bootstrap-datetimepicker.min.css">
 <script src="assets/eventschedule/js/jquery.min.js"></script>
@@ -53,6 +54,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 <script src="assets/eventschedule/js/moment.min.js"></script>
 <script src="assets/eventschedule/js/fullcalendar.min.js"></script>
 <script src="assets/eventschedule/js/bootstrap-datetimepicker.min.js"></script>
+<script src="assets/eventschedule/js/myweekview.js"></script>
 <style>
     .col-md-1 { width: 10.333333% !important;}
     .container { max-width: 1358px !important;}
@@ -111,7 +113,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     }
     .evtcontent{ padding: 5px 5px; white-space: pre-wrap !important;}
     .evttitle{font-weight: bold; color: #3a87ad; white-space: nowrap !important; overflow: hidden;text-overflow: ellipsis;}
-    
+
     .fc-month-view .evttitle, .fc-basicWeek-view .evttitle{width:105px;}
     .fc-basic-view .fc-comments{width: 105px;}
     .fc-comments{white-space: nowrap !important; overflow: hidden;text-overflow: ellipsis;}
@@ -162,7 +164,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             if (salesrep != 0 || account != 0) {
                 cursource = 'eventload.php?salerepId=' + salesrep + '&accountId=' + account;
             }
-            
+
             $('#calendar').fullCalendar('removeEventSources');
             $('#calendar').fullCalendar('refetchEvents');
             if (salesrep == 0 && account == 0) {
@@ -173,7 +175,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $('#calendar').fullCalendar('refetchEvents');
 
         });
-        
+
         // when summary button is clicked
         $('#summary').on('click', function () {
             var summarycursource = 'summaryeventload.php';
@@ -194,7 +196,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $('#calendar').fullCalendar('addEventSource', detailcursource);
             $('#calendar').fullCalendar('refetchEvents');
         });
-        
+
         var calendar = $('#calendar').fullCalendar({
             header: {
                 left: 'prev,next today',
@@ -202,11 +204,13 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             },
             views: {
                 week: {
-                  titleFormat: '[Week of ] MMMM D, YYYY',
-                  titleRangeSeparator: ' to ',
+                    titleFormat: '[Week of ] MMMM D, YYYY',
+                    titleRangeSeparator: ' to ',
                 }
             },
             defaultView: 'basicWeek',
+            //defaultView: 'custom',
+            
             eventSources: cursource,
             selectable: true,
             selectHelper: true,
@@ -214,21 +218,21 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             dayRender: function (date, cell) {
                 var today = new Date();
                 var dd = today.getDate();
-                var mm = today.getMonth()+1; //January is 0!
+                var mm = today.getMonth() + 1; //January is 0!
 
                 var yyyy = today.getFullYear();
-                if(dd<10){
-                    dd='0'+dd;
-                } 
-                if(mm<10){
-                    mm='0'+mm;
-                } 
-                var today2 = dd+'-'+mm+'-'+yyyy;
+                if (dd < 10) {
+                    dd = '0' + dd;
+                }
+                if (mm < 10) {
+                    mm = '0' + mm;
+                }
+                var today2 = dd + '-' + mm + '-' + yyyy;
                 //var moment = $('#calendar').fullCalendar('getDate');
                 //alert(date.format('DD-MM-YYYY'))
                 //if (date._d.getDate() === today.getDate()) {
                 //if(moment.format("DD-MM-YYYY") === today ){
-                if(date.format('DD-MM-YYYY') === today2){
+                if (date.format('DD-MM-YYYY') === today2) {
 //                    cell.css("background", "linear-gradient(135deg, #aab9d4 25%, #ffffff 25%, #ffffff 50%, #aab9d4 50%, #aab9d4 75%, #ffffff 75%, #ffffff 100%)");
 //                    cell.css("background-size", "14.14px 14.14px");
                 }
@@ -303,7 +307,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         });
                     }
                 }
-                
+
             },
 
             eventMouseout: function (calEvent, jsEvent) {
@@ -364,8 +368,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         '</a>';
 
                 if (event.evtCnt) {
-                    $("#summary").css("background","linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");
-                    $("#detail").css("background","#90bcf7");
+                    $("#summary").css("background", "linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");
+                    $("#detail").css("background", "#90bcf7");
                     var content = '<div class="fc-content evtcontent days-' + eventDate + '" style="padding: 0 20px;">';
                     content += '<div><strong>' + event.evtCnt + '</strong></div>';
                     content += '<div>Total</div>';
@@ -376,8 +380,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     content += '</div>';
                     return $(content);
                 } else {
-                    $("#summary").css("background","#90bcf7");
-                    $("#detail").css("background","linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");
+                    $("#summary").css("background", "#90bcf7");
+                    $("#detail").css("background", "linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");
                     if (eventDate < currentDate) {
                         var content = '<a class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable days-' + eventDate + '"  style="' + borderColor + '">' +
                                 '<div class="fc-content evtcontent">' +
@@ -412,7 +416,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         element.css('color', '#000');
                     }
                 }
-                
+
             },
             eventAfterAllRender: function (event, element, view) {
                 //$(".days-06:first").css("display", "block");
@@ -422,18 +426,19 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         // Whenever the user clicks on the "save" button
         $('#eventsave').on('click', function () {
             var errorMsg = "";
-            if($("#salesrepopt").val() == ""){
+            if ($("#salesrepopt").val() == "") {
                 errorMsg = "Please select Genetic Consultant"
             }
             if ($("input[name='eventtype']:checked").val() == 1 && $('#accountopt').val() == 0) {
-                if(errorMsg) errorMsg += "\n";
+                if (errorMsg)
+                    errorMsg += "\n";
                 errorMsg += "Please select Account";
             }
-            if(errorMsg){
+            if (errorMsg) {
                 alert(errorMsg);
                 return false;
             }
-            
+
             var title = $("input[name='eventtype']:checked").parent('label').text();
             if ($('#eventstart').val() && ($('#salerepid').val() || $('#accountopt').val() != 0)) {
                 var start = dateFormat($('#eventstart').val(), "yyyy-mm-dd");
@@ -482,14 +487,15 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         // Whenever the user clicks on the "update" button
         $('#eventupdate').on('click', function () {
             var errorMsg = "";
-            if($("#modalsalesrepopt").val() == "0"){
+            if ($("#modalsalesrepopt").val() == "0") {
                 errorMsg = "Please select Genetic Consultant"
             }
             if ($("input[name='modaleventtype']:checked").val() == 1 && $('#modalaccountopt').val() == 0) {
-                if(errorMsg) errorMsg += "\n";
+                if (errorMsg)
+                    errorMsg += "\n";
                 errorMsg += "Please select Account";
             }
-            if(errorMsg){
+            if (errorMsg) {
                 alert(errorMsg);
                 return false;
             }
@@ -709,6 +715,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 modal.style.display = "none";
             }
         }
+
     });
 
     function sentenceCase(str) {
@@ -721,6 +728,121 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
         });
     }
+    $(function () {
+        var myChart = Highcharts.chart('stackedchartcontainer', {
+            colors: ['#5fcc24', '#50a821', '#347014', '#1c3f0a'],
+            credits: {
+                enabled: false
+            },
+            chart: {
+                type: 'column'
+            },
+
+            title: {
+                text: 'Top Genetic Consultant'
+            },
+
+            xAxis: {
+                categories: ['Brandon Franklin', 'Brendan Thompson', 'Larry Bozulic', 'Jason Collett', 'Me']
+            },
+
+            yAxis: {
+                allowDecimals: false,
+                min: 0,
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'top',
+                floating: true,
+                backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+                borderColor: 'none',
+                borderWidth: 0,
+                shadow: false
+            },
+            plotOptions: {
+                column: {
+                    stacking: 'normal',
+                    dataLabels: {
+                        color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
+                        style: {
+                            textShadow: '0 0 3px black'
+                        }
+                    }
+                }
+            },
+
+            series: [{
+                    name: 'Registered',
+                    data: [5, 3, 4, 7, 2],
+                    stack: 'salesrep'
+                }, {
+                    name: 'Completed',
+                    data: [3, 4, 4, 2, 5],
+                    stack: 'salesrep'
+                }, {
+                    name: 'Qualified',
+                    data: [2, 5, 6, 2, 1],
+                    stack: 'salesrep'
+                }, {
+                    name: 'Submitted',
+                    data: [3, 0, 4, 4, 3],
+                    stack: 'salesrep'
+                }]
+        });
+        
+        
+        // Build the chart
+        Highcharts.chart('piechartcontainer', {
+            credits: {
+                enabled: false
+            },
+          chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false,
+            type: 'pie'
+          },
+          title: {
+            text: 'Top Accounts'
+          },
+          tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+          },
+          plotOptions: {
+            pie: {
+              allowPointSelect: true,
+              cursor: 'pointer',
+              dataLabels: {
+                enabled: false
+              },
+              showInLegend: true
+            }
+          },
+          series: [{
+            name: 'Accounts',
+            colorByPoint: true,
+            data: [{
+              name: 'Women2Women',
+              y: 61.41,
+              sliced: true,
+              selected: true
+            }, {
+              name: 'OBGYN Office',
+              y: 11.84
+            }, {
+              name: 'One Way Gynecology',
+              y: 10.85
+            }, {
+              name: 'Lexington Associates',
+              y: 4.67
+            }, {
+              name: 'Kentuckyone Health Obstetrics And Gynecology - N Eagle Creek',
+              y: 4.18
+            }]
+          }]
+        });
+    });
 </script>
 <?php
 // Salesrep table
@@ -728,11 +850,11 @@ $clause = " ORDER BY Guid_salesrep";
 $salesrep = $db->selectAll('tblsalesrep', $clause);
 ?>
 <main class="full-width">
-<?php if ($thisMessage != "") { ?>
+    <?php if ($thisMessage != "") { ?>
         <section id="msg_display" class="show success">
             <h4><?php echo $thisMessage; ?></h4>
         </section>
-<?php } ?>    
+    <?php } ?>    
     <div class="box full visible ">  
         <section id="palette_top">
             <h4>             
@@ -748,12 +870,15 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             <div class="container">  
                 <div class="row">
                     <div class="col-md-4" style="padding: 10px 0;">
-                        <button type="button" name="Detail" id="detail" class="button" style="float:left; background: #90bcf7; margin-right: 20px;">Detail</button>
-                        <button type="button" name="Summary" id="summary" class="button" style="background: #90bcf7;">Summary</button>
+                        <button type="button" name="Detail" id="detail" class="info-button" style="float:left; background: #90bcf7; margin-right: 20px;">Detail</button>
+                        <button type="button" name="Summary" id="summary" class="info-button" style="background: #90bcf7;">Summary</button>
                     </div>
                 </div>
-                <div id="calendar"></div>
-
+                <div id="calendar" style="float:left; width:900px"></div>
+                <div id="piechartcontainer"  class="col-md-4" ></div>
+                <div id="stackedchartcontainer" class="col-md-4" ></div>
+                
+                </div>
             </div>
             <!-- The Modal -->
             <div id="myModal" class="schedulemodal">
@@ -777,15 +902,15 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                             </div>
                                         </div>
                                     </div>
-<?php if ($role == 'Admin' || $role == 'Sales Manager') { ?>
+                                    <?php if ($role == 'Admin' || $role == 'Sales Manager') { ?>
                                         <div class='col-md-2'>
                                             <div class="form-group">
                                                 <select class="form-control" id="modalsalesrepopt">
                                                     <option value="0">Genetic Consultant</option>
-    <?php
-    foreach ($salesrep as $srole) {
-        if ($srole['first_name']) {
-            ?>
+                                                    <?php
+                                                    foreach ($salesrep as $srole) {
+                                                        if ($srole['first_name']) {
+                                                            ?>
                                                             <option value='<?php echo $srole['Guid_salesrep']; ?>'><?php echo $srole['first_name'] . " " . $srole['last_name']; ?></option>
                                                             <?php
                                                         }
@@ -794,17 +919,17 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                                 </select>
                                             </div>
                                         </div>
-<?php } ?>
+                                    <?php } ?>
                                     <?php if ($role == 'Sales Rep') { ?>
                                         <div class='col-md-2'>
                                             <div class="form-group">
                                                 <span><?php
-                                        echo $salesRepDetails['first_name'] . " " . $salesRepDetails['last_name'];
-                                        ?>
+                                                    echo $salesRepDetails['first_name'] . " " . $salesRepDetails['last_name'];
+                                                    ?>
                                                 </span>    
                                             </div>
                                         </div>
-<?php } ?>
+                                    <?php } ?>
                                     <input type="hidden" id="modalsalerepid" value="<?php echo $salesRepDetails['Guid_salesrep']; ?>">
                                     <div class='col-md-2'>
                                         <div class="form-group">
@@ -820,9 +945,9 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                         <div class="form-group">
                                             <select class="form-control" id="modalaccountopt">
                                                 <option value="0">Account</option>
-<?php
-foreach ($accountdt as $acct) {
-    ?>
+                                                <?php
+                                                foreach ($accountdt as $acct) {
+                                                    ?>
                                                     <option value='<?php echo $acct['Guid_account']; ?>'><?php echo $acct['account'] . ' - ' . ucwords(strtolower($acct['name'])); ?></option>
                                                     <?php
                                                 }
@@ -836,7 +961,7 @@ foreach ($accountdt as $acct) {
                                             <textarea class="form-control" rows="10" id="modalcomment" placeholder="Comments" style="width:600px;"></textarea>
                                         </div> 
                                     </div>  
-                                    
+
                                 </div>
                                 <div class="row modalhealthcare" style="display: none;">
                                     <div class='col-md-4'>
@@ -922,13 +1047,13 @@ foreach ($accountdt as $acct) {
                                         </div>	
                                     </div>    
                                 </div>  
-                                    <div class="row">
-                                        <div class='col-md-10'>
-                                    <button type="button" id="eventupdate" class="btn btn-primary">Update</button>
-                                    <button type="button" id="eventcancel" class="btn btn-danger">Cancel</button>
-                                    <button type="button" class="btn btn-danger" id="eventdelete" style="border-radius: 2em !important; margin: 7px 0;">Delete</button>
+                                <div class="row">
+                                    <div class='col-md-10'>
+                                        <button type="button" id="eventupdate" class="btn btn-primary">Update</button>
+                                        <button type="button" id="eventcancel" class="btn btn-danger">Cancel</button>
+                                        <button type="button" class="btn btn-danger" id="eventdelete" style="border-radius: 2em !important; margin: 7px 0;">Delete</button>
                                     </div>
-                                        </div>
+                                </div>
                             </div>
                         </div>
 
