@@ -402,8 +402,9 @@ if($role == 'Physician'){
 }
 
 $where  .= " AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%test%' "
-        . "AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE 'John Doe' "
-        . "AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE 'Jane Doe'";
+        . "AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Smith%' "
+        . "AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Doe%' "
+        . "AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%Jane Doe%'";
 
 if($role == "Sales Rep"){
     
