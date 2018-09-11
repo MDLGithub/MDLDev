@@ -5,7 +5,7 @@ ALTER TABLE `tbl_revenue` ADD COLUMN `Guid_cpt` INT(11) DEFAULT NULL AFTER `Guid
 patient-info.php
 
 custom-styles.css
-
+scripts.js
 
 
 
