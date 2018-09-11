@@ -269,7 +269,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 				<p><label>Date of Birth:</label><input type="text" name="dob" class="datepicker" value="<?php echo ($qualifyResult['dob']!="")?date("n/j/Y", strtotime($qualifyResult['dob'])):""; ?>" autocomplete="off" /></p>
 				<p><label>Email:</label> <input type="email" name="email" value="<?php echo $qualifyResult['email']; ?>" autocomplete="off"/> </p>
 <!--                                <p><label>Registration Date:</label> <?php echo date("n/j/Y h:m A", strtotime($qualifyResult['Date_created'])); ?></p>-->
-				<p><label>Insurance:</label>
+				<p class="capitalize"><label>Insurance:</label>
 				    <?php
 				    echo $qualifyResult['insurance'];
 				    if($qualifyResult['other_insurance']!="" && $qualifyResult['other_insurance']!="Other"){
@@ -570,13 +570,19 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 				    <tr>
 					<th>Date Paid</th>
 					<th>Payor</th>
+					<th>CPT</th>
 					<th>Amount $</th>
 					<th class="text-center actions">Action</th>
 				    </tr>
 				</thead>
 				<tbody>
 				    <?php
-				     $revenues = $db->query('SELECT r.*, p.name AS payor FROM tbl_revenue r LEFT JOIN tbl_mdl_payors p ON r.Guid_payor=p.Guid_payor WHERE Guid_user=:Guid_user', array('Guid_user'=>$_GET['patient']));
+				    $revenueQ = 'SELECT r.*, p.name AS payor, cpt.code '
+					    . 'FROM tbl_revenue r '
+					    . 'LEFT JOIN tbl_mdl_payors p ON r.Guid_payor=p.Guid_payor '
+					    . 'LEFT JOIN tbl_mdl_cpt_code cpt ON r.Guid_cpt=cpt.Guid_cpt '
+					    . 'WHERE Guid_user=:Guid_user';
+				    $revenues = $db->query($revenueQ, array('Guid_user'=>$_GET['patient']));
 				    $revSum = 0;
 				    foreach ($revenues as $k=>$v) {
 					if($v['amount']!=""){
@@ -584,12 +590,13 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					}
 				    ?>
 				    <tr id="<?php echo $v['Guid_revenue']; ?>">
-					<td><span class="editable_date_payd"><?php echo (!preg_match("/0{4}/" , $v['date_paid'])) ? date('n/j/Y', strtotime($v['date_paid'])) : ""; ?></span></td>
-					<td><span class="editable_payor"><?php echo $v['payor']; ?></span></td>
-					<td>$<span class="editable_insurance"><?php echo formatMoney($v['amount']); ?></span></td>
+					<td><?php echo (!preg_match("/0{4}/" , $v['date_paid'])) ? date('n/j/Y', strtotime($v['date_paid'])) : ""; ?></td>
+					<td><?php echo $v['payor']; ?></td>
+					<td><?php echo $v['code']; ?></td>
+					<td>$<?php echo formatMoney($v['amount']); ?></td>
 					<td class="text-center">
 					    <div class="action-btns">
-					    <a data-id="<?php echo $v['Guid_revenue']; ?>" class="edit_reveue">
+					    <a href="<?php echo $patientInfoUrl.'&edit_revenue='.$v['Guid_revenue']; ?>" class="">
 						<span class="fas fa-pencil-alt"></span>
 					    </a>
 					    <a href="<?php echo $patientInfoUrl.'&delete-revenue='.$v['Guid_revenue']; ?>" onclick="javascript:confirmationDeleteRevenue($(this));return false;" class="color-red">
@@ -633,22 +640,37 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 
 
 <?php
-    if(isset($_POST['add_revenue'])){
+    if(isset($_POST['manage_revenue'])){
 	$date_paid = ($_POST['date_paid'] != "")?date('Y-m-d h:i:s', strtotime($_POST['date_paid'])):"";
 	$revenueData=array(
 	    'Guid_user'=>$_POST['Guid_user'],
 	    'Guid_payor'=>$_POST['Guid_payor'],
+	    'Guid_cpt'=>$_POST['Guid_cpt'],
 	    'amount'=>$_POST['amount'],
-	    'date_paid'=>$date_paid,
+	    'date_paid'=>$date_paid
 	);
-	$insertRevenue = insertIntoTable($db, 'tbl_revenue', $revenueData);
-	if($insertRevenue['insertID']!=""){
+	if(isset($_POST['Guid_revenue']) && $_POST['Guid_revenue']!=""){ //update
+	    $where = array('Guid_revenue'=>$_POST['Guid_revenue']);
+	    $updateRevenue = updateTable($db, 'tbl_revenue', $revenueData, $where);
 	    Leave($patientInfoUrl);
-	    //$message = "New Revenue Inserted.";
+	} else { //insert
+	    $insertRevenue = insertIntoTable($db, 'tbl_revenue', $revenueData);
+	    if($insertRevenue['insertID']!=""){
+		Leave($patientInfoUrl);
+	    }
 	}
     }
+    if(isset($_GET['edit_revenue'])&&$_GET['edit_revenue']!=""){
+       $getRevenueQ = 'SELECT r.*, p.name AS payor, cpt.code '
+		    . 'FROM tbl_revenue r '
+		    . 'LEFT JOIN tbl_mdl_payors p ON r.Guid_payor=p.Guid_payor '
+		    . 'LEFT JOIN tbl_mdl_cpt_code cpt ON r.Guid_cpt=cpt.Guid_cpt '
+		    . 'WHERE Guid_revenue=:Guid_revenue';
+	$revenueRow = $db->row($getRevenueQ, array('Guid_revenue'=>$_GET['edit_revenue']));
+	extract($revenueRow);
+    }
 ?>
-<?php if(isset($_GET['add_revenue'])){ ?>
+<?php if(isset($_GET['add_revenue']) || (isset($_GET['edit_revenue'])&&$_GET['edit_revenue']!="") ){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock">
 	<a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>
@@ -665,19 +687,20 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		    <div class="text-center success-text"><?php echo $message; ?></div>
 		<?php } ?>
 		<input type="hidden" name="Guid_user" value="<?php echo $_GET['patient']; ?>" />
+		<input type="hidden" name="Guid_revenue" value="<?php echo (isset($Guid_revenue)&&$Guid_revenue!="")?$Guid_revenue:""; ?>" />
 		<div class="">
-		    <input class="datepicker" autocomplete="off" id="date_paid" name="date_paid" type="text" value="" placeholder="Date">
+		    <input value="<?php echo (isset($date_paid)&&$date_paid!="")?date("n/j/Y",strtotime($date_paid)):"" ?>" class="datepicker" autocomplete="off" id="date_paid" name="date_paid" type="text" placeholder="Date">
 		</div>
-		<div class="f2  ">
+		<div class="f2 <?php echo (isset($Guid_payor)&&$Guid_payor!="")? "valid show-label":"" ?> ">
 		    <label class="dynamic" for="Guid_payor"><span>Payor</span></label>
 		    <div class="group">
 			<select name="Guid_payor">
-			    <option value="">Select Payor</option>
+			    <option value=" ">Select Payor</option>
 			    <?php
 			    $payors = $db->selectAll('tbl_mdl_payors', ' ORDER BY name DESC');
 			    foreach ($payors as $k=>$v){
 			    ?>
-			    <option value="<?php echo $v['Guid_payor']; ?>"><?php echo $v['name']; ?></option>
+			    <option <?php echo (isset($Guid_payor)&&$Guid_payor==$v['Guid_payor'])?" selected":""; ?> value="<?php echo $v['Guid_payor']; ?>"><?php echo $v['name']; ?></option>
 			    <?php } ?>
 			</select>
 			<p class="f_status">
@@ -685,16 +708,16 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			</p>
 		    </div>
 		</div>
-		<div class="f2  ">
+		<div class="f2 <?php echo (isset($Guid_cpt)&&$Guid_cpt!="")? "valid show-label":"" ?> ">
 		    <label class="dynamic" for="Guid_cpt"><span>CPT Code</span></label>
 		    <div class="group">
 			<select name="Guid_cpt">
-			    <option value="">Select CPT Code</option>
+			    <option value=" ">Select CPT Code</option>
 			    <?php
 			    $cpt_codes = $db->selectAll('tbl_mdl_cpt_code', ' ORDER BY code DESC');
 			    foreach ($cpt_codes as $k=>$v){
 			    ?>
-			    <option value="<?php echo $v['Guid_cpt']; ?>"><?php echo $v['code']; ?></option>
+			    <option <?php echo (isset($Guid_cpt)&&$Guid_cpt==$v['Guid_cpt'])?" selected":""; ?> value="<?php echo $v['Guid_cpt']; ?>"><?php echo $v['code']; ?></option>
 			    <?php } ?>
 			</select>
 			<p class="f_status">
@@ -702,10 +725,10 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			</p>
 		    </div>
 		</div>
-		<div class="f2 ">
-		    <label class="dynamic" for="amount"><span>Amount</span></label>
+		<div class="f2 <?php echo (isset($amount)&&$amount!="")? "valid show-label":"" ?>">
+		    <label class="dynamic" for="amount"><span>Amount $</span></label>
 		    <div class="group">
-			<input autocomplete="off" name="amount" placeholder="Amount" type="number" min="0.00" step="0.01">
+			<input value="<?php echo isset($amount)? $amount: ""; ?>" autocomplete="off" name="amount" placeholder="Amount $" type="number" min="0.00" step="0.01">
 			<p class="f_status">
 			    <span class="status_icons"><strong></strong></span>
 			</p>
@@ -713,7 +736,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		</div>
 
 		 <div class="text-right pT-10">
-		    <button class="button btn-inline" name="add_revenue" type="submit" >Save</button>
+		    <button class="button btn-inline" name="manage_revenue" type="submit" >Save</button>
 		    <!--<button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>-->
 		</div>
 		</form>
