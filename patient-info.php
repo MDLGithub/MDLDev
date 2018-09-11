@@ -396,7 +396,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                             <?php } ?>
                                         </td>
                                         <td class="<?php echo $qualifyedClass;?>"><?php echo $v['qualified']; ?></td>
-                                        <td><?php echo date("n/j/Y h:m:s A", strtotime($v['Date_created'])); ?></td> 
+                                        <td><?php echo date("n/j/Y h:i:s A", strtotime($v['Date_created'])); ?></td> 
                                         <td>
                                             <p>
                                                 <?php 
