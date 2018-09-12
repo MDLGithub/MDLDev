@@ -113,7 +113,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .evttitle{font-weight: bold; color: #3a87ad; white-space: nowrap !important; overflow: hidden;text-overflow: ellipsis;}
 
     .fc-month-view .evttitle, .fc-basicWeek-view .evttitle{width:105px;}
-    .fc-basic-view .fc-comments{width: 105px;}
+    .fc-basicWeek-view .fc-comments{width: 105px;}
     .fc-comments{white-space: nowrap !important; overflow: hidden;text-overflow: ellipsis;}
 
     .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px;}
@@ -169,7 +169,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         });
 
         // when summary button is clicked
-        $('#summary').on('click', function () {
+        $('#summary').on('click touchstart', function () {
             var summarycursource = 'summaryeventload.php';
 
             $('#calendar').fullCalendar('removeEventSources');
@@ -180,7 +180,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         });
 
         // when detail button is clicked
-        $('#detail').on('click', function () {
+        $('#detail').on('click touchstart', function () {
             var detailcursource = 'eventload.php';
 
             $('#calendar').fullCalendar('removeEventSources');
@@ -309,6 +309,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var cmts = '';
 
                 var view = $('#calendar').fullCalendar('getView');
+                if(view.name == 'basicDay'){
+                    cmts = '<div class="fc-number">' + event.account + '</div>'
+                    cmts += '<div class="fc-logo">' + event.logo + '</div>'
+                    cmts += '<div class="fc-comments">' + event.comments + '</div>'
+                }
                 if (view.name == 'basicWeek' && event.comments)
                     cmts = '<div class="fc-comments">' + event.comments + '</div>'
 
@@ -363,7 +368,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                                 '<div class="' + icon + '"></div>' +
                                 '<div class="fc-title evttitle">' + modifiedName + '</div>' +
                                 salesrep + cmts +
-                                '<div>9 | 6 | 3 | 1</div>' +
+                                '<div><span class="silhouette">9 <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark">6 <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">3 <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">1 <img src="assets/eventschedule/icons/flask_icon.png"></span></div>' +
                                 '</div>' +
                                 '</a>';
                         return $(content);
@@ -399,7 +404,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         });
 
         // Whenever the user clicks on the "save" button
-        $('#eventsave').on('click', function () {
+        $('#eventsave').on('click touchstart', function () {
             var errorMsg = "";
             if ($("#salesrepopt").val() == "") {
                 errorMsg = "Please select Genetic Consultant"
@@ -460,7 +465,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         });
 
         // Whenever the user clicks on the "update" button
-        $('#eventupdate').on('click', function () {
+        $('#eventupdate').on('click touchstart', function () {
             var errorMsg = "";
             if ($("#modalsalesrepopt").val() == "0") {
                 errorMsg = "Please select Genetic Consultant"
@@ -476,8 +481,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             }
             var title = $("input[name='modaleventtype']:checked").parent('label').text();
             if ($('#modaleventstart').val() && ($('#modalsalerepid').val() || $('#modalaccountopt').val() != 0)) {
+                /*
                 var start = dateFormat($('#modaleventstart').val(), "yyyy-mm-dd");
                 var end = dateFormat($('#modaleventstart').val(), "yyyy-mm-dd");
+                */
+                var start = $('#modaleventstart').val();
+                var end = $('#modaleventstart').val();
                 var accountId = $('#modalaccountopt').val();
                 var salesrepId = $('#modalsalerepid').val() ? $('#modalsalerepid').val() : 0;
                 var comments = $('#modalcomment').val();
@@ -525,13 +534,13 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         });
 
         // cancel update
-        $('#eventcancel').on('click', function () {
+        $('#eventcancel').on('click touchstart', function () {
             var modal = document.getElementById('myModal');
             modal.style.display = "none";
         });
 
         // Whenever the user clicks on the "delete" button
-        $('#eventdelete').on('click', function () {
+        $('#eventdelete').on('click touchstart', function () {
             var modalid = $('#modalid').val();
             if (confirm("Are you sure you want to remove it?"))
             {
@@ -750,6 +759,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                                     }
                                     ?>
                                 </select>
+                                <p class="f_status">
+                                    <span class=""><strong></strong></span>
+                                </p>
 
                             <?php } ?>
                             <?php if ($role == 'Sales Rep') { ?>
@@ -835,7 +847,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             <div class="group">
                                 <!-- State Button -->
                                 <select class="form-control" id="state_id" name="state">
-                                    <option value=""></option>
+                                    <option value="">State</option>
                                     <option value="AL">Alabama</option>
                                     <option value="AK">Alaska</option>
                                     <option value="AZ">Arizona</option>
@@ -1046,7 +1058,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                             </div>
                                         </div>
                                     </div> 
-                                    <div class='col-md-2 modalaccounttype'>
+                                    <div class='col-md-5 modalaccounttype'>
                                         <div class="form-group">
                                             <select class="form-control" id="modalaccountopt">
                                                 <option value="0">Account</option>
@@ -1061,7 +1073,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                         </div>
                                     </div></div>
                                 <div class="row">
-                                    <div class='col-md-2 modalaccounttype'> 
+                                    <div class='col-md-5 modalaccounttype'> 
                                         <div class="form-group">
                                             <textarea class="form-control" rows="10" id="modalcomment" placeholder="Comments" style="width:600px;"></textarea>
                                         </div> 
@@ -1092,7 +1104,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                     <div class='col-md-4'>
                                         <div class="form-group"> <!-- State Button -->
                                             <select class="form-control" id="modalstate_id" name="modalstate">
-                                                <option value=""></option>
+                                                <option value="">State</option>
                                                 <option value="AL">Alabama</option>
                                                 <option value="AK">Alaska</option>
                                                 <option value="AZ">Arizona</option>
@@ -1174,7 +1186,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
 <script>
     $(function () {
         $('#modaleventstart').datepicker({
-            dateFormat: "mm/dd/yy",
+            //dateFormat: "mm/dd/yy",
+            dateFormat: "yy-mm-dd",
             showOn: 'both',
             buttonImageOnly: true,
             buttonImage: 'http://jqueryui.com/resources/demos/datepicker/images/calendar.gif'
