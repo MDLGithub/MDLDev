@@ -4,8 +4,6 @@ ob_start();
 require_once('config.php');
 require_once('settings.php');
 require_once('header.php');
-require_once ('navbar.php');
-require_once ('functions_event.php');
 
 if (!login_check($db)) {
     Leave(SITE_URL);
@@ -14,6 +12,11 @@ if (isset($_GET['logout'])) {
     logout();
     Leave(SITE_URL);
 }
+
+require_once ('navbar.php');
+require_once ('functions_event.php');
+
+
 
 $roles = array('Admin', 'Sales Rep', 'Sales Manager');
 
@@ -122,6 +125,22 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 <script>
 
     $(document).ready(function () {
+        var salereps = $('#salerepid').val();
+        if(salereps){
+            $('#accountopt option').remove();
+            $('#accountopt').html('<option value="0">Account</option>');
+            $.ajax({
+                type : 'POST',
+                data : 'salerepId='+ salereps,
+                dataType: 'json',
+                url : 'accountselection.php',
+                success : function(data){
+                    $.each(data, function(k, v) {
+                        if(v.id) $('#accountopt').append('<option value="' + v.id + '">' + v.name + '</option>');
+                    });
+                }
+            });
+        }    
         $(".f2").width('95%');
         $("input[name='eventtype']").click(function () {
             var evtType = $(this).val();
@@ -228,7 +247,20 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 }
                 $('#myModal').find('#modaleventstart').val(start);
                 $("#modalsalesrepopt").val(event.salesrepid);
-                $("#modalaccountopt").val(event.accountid);
+                $('#modalaccountopt option').remove();
+                $('#modalaccountopt').html('<option value="0">Account</option>');
+                $.ajax({
+                    type : 'POST',
+                    data : 'salerepId='+ event.salesrepid,
+                    dataType: 'json',
+                    url : 'accountselection.php',
+                    success : function(data){
+                        $.each(data, function(k, v) {
+                            if(v.id) $('#modalaccountopt').append('<option value="' + v.id + '">' + v.name + '</option>');
+                        });
+                        $("#modalaccountopt").val(event.accountid);
+                    }
+                });
                 //$("#modalsalesrepopt option:contains(" + event.salesrep + ")").attr('selected', 'selected');
                 //$("#modalaccountopt option:contains(" + event.account + ")").attr('selected', 'selected');
                 $("#modalcomment").val(event.comments);
@@ -470,7 +502,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             if ($("#modalsalesrepopt").val() == "0") {
                 errorMsg = "Please select Genetic Consultant"
             }
-            if ($("input[name='modaleventtype']:checked").val() == 1 && $('#modalaccountopt').val() == 0) {
+            if ($("input[name='modaleventtype']:checked").val() == 1 && ($('#modalaccountopt').val() == 0 || $('#modalaccountopt').val() == null )) {
                 if (errorMsg)
                     errorMsg += "\n";
                 errorMsg += "Please select Account";
@@ -562,9 +594,39 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         });
 
         $('#salesrepopt').on('change', function () {
+                $('#accountopt option').remove();
+                $('#accountopt').html('<option value="0">Account</option>');
+                $.ajax({
+                    type : 'POST',
+                    data : 'salerepId='+ this.value,
+                    dataType: 'json',
+                    url : 'accountselection.php',
+                    success : function(data){
+                        $.each(data, function(k, v) {
+                            if(v.id) $('#accountopt').append('<option value="' + v.id + '">' + v.name + '</option>');
+                        });
+
+
+                    }
+                });
             $('#salerepid').val(this.value);
         });
         $('#modalsalesrepopt').on('change', function () {
+            $('#modalaccountopt option').remove();
+            $('#modalaccountopt').html('<option value="0">Account</option>');
+            $.ajax({
+                type : 'POST',
+                data : 'salerepId='+ this.value,
+                dataType: 'json',
+                url : 'accountselection.php',
+                success : function(data){
+                    $.each(data, function(k, v) {
+                        if(v.id) $('#modalaccountopt').append('<option value="' + v.id + '">' + v.name + '</option>');
+                    });
+
+
+                }
+            });
             $('#modalsalerepid').val(this.value);
         });
 
@@ -1019,7 +1081,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                             </div>
                                         </div>
                                     </div>
-                                    <?php if ($role == 'Admin' || $role == 'Sales Manager') { ?>
+                                    <?php //if ($role == 'Admin' || $role == 'Sales Manager') { ?>
                                         <div class='col-md-2'>
                                             <div class="form-group">
                                                 <select class="form-control" id="modalsalesrepopt">
@@ -1036,16 +1098,16 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                                 </select>
                                             </div>
                                         </div>
-                                    <?php } ?>
+                                    <?php // } ?>
                                     <?php if ($role == 'Sales Rep') { ?>
-                                        <div class='col-md-2'>
+                                        <!--<div class='col-md-2'>
                                             <div class="form-group">
                                                 <span><?php
                                                     echo $salesRepDetails['first_name'] . " " . $salesRepDetails['last_name'];
                                                     ?>
                                                 </span>    
                                             </div>
-                                        </div>
+                                        </div>-->
                                     <?php } ?>
                                     <input type="hidden" id="modalsalerepid" value="<?php echo $salesRepDetails['Guid_salesrep']; ?>">
                                     <div class='col-md-2'>
