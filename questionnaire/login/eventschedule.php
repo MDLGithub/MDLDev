@@ -1248,7 +1248,6 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
 <script>
     $(function () {
         $('#modaleventstart').datepicker({
-            //dateFormat: "mm/dd/yy",
             dateFormat: "yy-mm-dd",
             showOn: 'both',
             buttonImageOnly: true,
