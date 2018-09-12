@@ -53,6 +53,63 @@ function generateTokenString(){
 
    return $str;
 }
+function escape($str){
+    switch (gettype($str))
+    {
+	case 'string' : $str = addslashes(stripslashes($str));
+	break;
+	case 'boolean' : $str = ($str === FALSE) ? 0 : 1;
+	break;
+	default : $str = ($str === NULL) ? 'NULL' : $str;
+	break;
+    }
+
+    return $str;
+}
+function Clean($str) {
+    if (is_array($str)) {
+	$return = array();
+	foreach ($str as $k => $v) {
+	    $return[Clean($k)] = Clean($v);
+	}
+	return $return;
+    } else {
+	$str = @trim($str);
+	if (get_magic_quotes_gpc()) {
+	    $str = stripslashes($str);
+	}
+	return mres($str);
+    }
+}
+function CleanXSS($str) {
+    if (is_array($str)) {
+	$return = array();
+	foreach ($str as $k => $v) {
+	    $return[CleanXSS($k)] = CleanXSS($v);
+	}
+	return $return;
+    } else {
+	$str = @trim($str);
+	$str = preg_replace('#<script(.*?)>(.*?)</script(.*?)>#is', '', $str);
+	$str = preg_replace('#<style(.*?)>(.*?)</style(.*?)>#is', '', $str);
+	if (get_magic_quotes_gpc()) {
+	    $str = stripslashes($str);
+	}
+	return mres($str);
+    }
+}
+function mres($value) {
+    $search = array("\\", "\x00", "\n", "\r", "'", '"', "\x1a");
+    $replace = array("\\\\", "\\0", "\\n", "\\r", "\'", '\"', "\\Z");
+
+    //return str_replace($search, $replace, $value);
+    return $value;
+}
+function remove_accent($str) {
+    $a = array('À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'Æ', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', 'Î', 'Ï', 'Ð', 'Ñ', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', 'Ø', 'Ù', 'Ú', 'Û', 'Ü', 'Ý', 'ß', 'à', 'á', 'â', 'ã', 'ä', 'å', 'æ', 'ç', 'è', 'é', 'ê', 'ë', 'ì', 'í', 'î', 'ï', 'ñ', 'ò', 'ó', 'ô', 'õ', 'ö', 'ø', 'ù', 'ú', 'û', 'ü', 'ý', 'ÿ', 'Ā', 'ā', 'Ă', 'ă', 'Ą', 'ą', 'Ć', 'ć', 'Ĉ', 'ĉ', 'Ċ', 'ċ', 'Č', 'č', 'Ď', 'ď', 'Đ', 'đ', 'Ē', 'ē', 'Ĕ', 'ĕ', 'Ė', 'ė', 'Ę', 'ę', 'Ě', 'ě', 'Ĝ', 'ĝ', 'Ğ', 'ğ', 'Ġ', 'ġ', 'Ģ', 'ģ', 'Ĥ', 'ĥ', 'Ħ', 'ħ', 'Ĩ', 'ĩ', 'Ī', 'ī', 'Ĭ', 'ĭ', 'Į', 'į', 'İ', 'ı', 'Ĳ', 'ĳ', 'Ĵ', 'ĵ', 'Ķ', 'ķ', 'Ĺ', 'ĺ', 'Ļ', 'ļ', 'Ľ', 'ľ', 'Ŀ', 'ŀ', 'Ł', 'ł', 'Ń', 'ń', 'Ņ', 'ņ', 'Ň', 'ň', 'ŉ', 'Ō', 'ō', 'Ŏ', 'ŏ', 'Ő', 'ő', 'Œ', 'œ', 'Ŕ', 'ŕ', 'Ŗ', 'ŗ', 'Ř', 'ř', 'Ś', 'ś', 'Ŝ', 'ŝ', 'Ş', 'ş', 'Š', 'š', 'Ţ', 'ţ', 'Ť', 'ť', 'Ŧ', 'ŧ', 'Ũ', 'ũ', 'Ū', 'ū', 'Ŭ', 'ŭ', 'Ů', 'ů', 'Ű', 'ű', 'Ų', 'ų', 'Ŵ', 'ŵ', 'Ŷ', 'ŷ', 'Ÿ', 'Ź', 'ź', 'Ż', 'ż', 'Ž', 'ž', 'ſ', 'ƒ', 'Ơ', 'ơ', 'Ư', 'ư', 'Ǎ', 'ǎ', 'Ǐ', 'ǐ', 'Ǒ', 'ǒ', 'Ǔ', 'ǔ', 'Ǖ', 'ǖ', 'Ǘ', 'ǘ', 'Ǚ', 'ǚ', 'Ǜ', 'ǜ', 'Ǻ', 'ǻ', 'Ǽ', 'ǽ', 'Ǿ', 'ǿ');
+    $b = array('A', 'A', 'A', 'A', 'A', 'A', 'AE', 'C', 'E', 'E', 'E', 'E', 'I', 'I', 'I', 'I', 'D', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'U', 'U', 'U', 'U', 'Y', 's', 'a', 'a', 'a', 'a', 'a', 'a', 'ae', 'c', 'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i', 'n', 'o', 'o', 'o', 'o', 'o', 'o', 'u', 'u', 'u', 'u', 'y', 'y', 'A', 'a', 'A', 'a', 'A', 'a', 'C', 'c', 'C', 'c', 'C', 'c', 'C', 'c', 'D', 'd', 'D', 'd', 'E', 'e', 'E', 'e', 'E', 'e', 'E', 'e', 'E', 'e', 'G', 'g', 'G', 'g', 'G', 'g', 'G', 'g', 'H', 'h', 'H', 'h', 'I', 'i', 'I', 'i', 'I', 'i', 'I', 'i', 'I', 'i', 'IJ', 'ij', 'J', 'j', 'K', 'k', 'L', 'l', 'L', 'l', 'L', 'l', 'L', 'l', 'l', 'l', 'N', 'n', 'N', 'n', 'N', 'n', 'n', 'O', 'o', 'O', 'o', 'O', 'o', 'OE', 'oe', 'R', 'r', 'R', 'r', 'R', 'r', 'S', 's', 'S', 's', 'S', 's', 'S', 's', 'T', 't', 'T', 't', 'T', 't', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'W', 'w', 'Y', 'y', 'Y', 'Z', 'z', 'Z', 'z', 'Z', 'z', 's', 'f', 'O', 'o', 'U', 'u', 'A', 'a', 'I', 'i', 'O', 'o', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'A', 'a', 'AE', 'ae', 'O', 'o');
+    return str_replace($a, $b, $str);
+}
 /**
 *   Return page url
 */
@@ -1058,7 +1115,7 @@ function get_status_names($db, $statusIds=array()){
 }
 
 function get_status_dropdown($db, $parent='0') {
-    $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
+    $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." AND visibility='1' ORDER BY order_by ASC, Guid_status ASC");
 
     $content = '<div class="f2  ">
 		    <div class="group">
@@ -1126,6 +1183,72 @@ function get_option_of_nested_status($db, $parent = 0,  $level = '') {
 		$content .= get_option_of_nested_status( $db, $status['Guid_status'], $level . "-&nbsp;" );
 	    }
 	    $content .= '</option>';
+	}
+    }
+
+    return $content;
+}
+
+function get_stats_info($db, $statusID){
+    $q = "SELECT * FROM `tbl_mdl_stats` WHERE Guid_status=:Guid_status";
+    $stats = $db->query($q, array('Guid_status'=>$statusID));
+    $result['count'] = 0;
+    if(!empty($stats)){
+	$result['count'] = count($stats);
+	$result['info'] = $stats;
+    }
+
+    return $result;
+}
+function get_status_table_rows($db, $parent = 0) {
+    $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
+
+    $content = '';
+    if ( $statuses ) {
+	foreach ( $statuses as $status ) {
+	    $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
+	    $stats = get_stats_info($db, $status['Guid_status']);
+	    if($stats['count']!=0){
+		$optionClass = '';
+		if ( !empty($checkCildren) ) {
+		    $optionClass = 'has_sub';
+		}
+		$content .= "<tr id='".$status['Guid_status']."' class='parent ".$optionClass."'>";
+		$content .= "<td class='text-left'><span>".$status['status'].'</span></td>';
+		$content .= '<td><a href="">'.$stats['count'].'</a></td>';
+		if ( !empty($checkCildren) ) {
+		    $content .= get_status_child_rows( $db, $status['Guid_status'], "&nbsp;" );
+		}
+		$content .= "</tr>";
+	    }
+	}
+    }
+
+
+    return $content;
+}
+function get_status_child_rows($db, $parent = 0,  $level = '') {
+    $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
+    if ( $statuses ) {
+	$content ='';
+	$prefix = 0;
+	foreach ( $statuses as $status ) {
+	    $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
+	    $optionClass = '';
+	    $stats = get_stats_info($db, $status['Guid_status']);
+	    if($stats['count']!=0){
+		if ( !empty($checkCildren) ) {
+		    $optionClass = 'parent has_sub';
+		}
+		$content .= "<tr id='".$status['Guid_status']."' data-parent-id='".$parent."' class='sub ".$optionClass."'>";
+		$content .= "<td class='text-left'><span>".$level . " " .$status['status'].'</span></td>';
+		$content .= '<td><a href="">'.$stats['count']. '</a></td>';
+		if ( !empty($checkCildren) ) {
+		    $prefix .= '&nbsp;';
+		    $content .= get_status_child_rows( $db, $status['Guid_status'], $level . "&nbsp;" );
+		}
+		 $content .= "</tr>";
+	    }
 	}
     }
 

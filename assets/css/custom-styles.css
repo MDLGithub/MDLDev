@@ -12,6 +12,9 @@ body{
 .capitalize{
     text-transform: capitalize!important;
 }
+.wh-100{
+    width: 100px!important;
+}
 .fs-28{
     font-size: 28px!important;
 }
@@ -64,8 +67,19 @@ body{
     width: 35px !important;
     height: 35px !important;
 }
+.text-center{
+    text-align: center!important;
+}
 .text-center .btn{
     margin: 0 auto;
+}
+.title-st1{
+    display: block;
+    float: none;
+    text-align: center;
+    font-size: 28px;
+    margin: 10px 0 30px 0;
+    background: none;
 }
 .hideVisibility{
     visibility: hidden;
@@ -1263,5 +1277,89 @@ span.editable_patient{
 
 /*gabby 9/4/18*/
 button[name="search"] > strong{
-	padding-left:5%;
+    padding-left:5%;
+}
+
+/*Horizontal filters*/
+.h-filters{
+    display: inline-block;
+}
+.h-filters button[type="submit"]{
+    display: inline-block!important;
+    height: 30px;
+    min-width: 50px;
+}
+.h-filters input,
+.h-filters select{
+    border: 1px solid #999;
+    height: 30px;
+}
+.h-filters button[type="submit"],
+.h-filters input,
+.h-filters select,
+.h-filters label{
+    float: left;
+}
+.h-filters select{
+    padding: 5px 30px 8px 10px;
+    border: 1px solid #e8e8e8;
+    outline: none;
+    height: 35px;
+}
+.h-filters input.date{
+    padding: 0 5px;
+    width: 170px;
+    max-width: 100%;
+    padding: 5px 30px 8px 10px;
+    border: 1px solid #e8e8e8;
+    outline: none;
+    background: url(../images/dates_icon.svg) 0 0 no-repeat;
+    background-size: 22px auto;
+    background-position: 95% 50%;
+    margin: 0 10px 0 3px;
+    height: 35px;
+}
+.h-filters label{
+    margin: 0 3px 0 0;
+    height: 30px;
+    line-height: 1.9em;
+}
+.h-filters select{
+    margin-right: 10px;
+}
+.stats-table td{
+    border-top: 1px solid #ffffff !important;
+}
+.stats-table tr.parent {
+    background: #e2e2e2;
+}
+.stats-table tr.sub {
+    background: #f2f2f2;
+    display:none;
+}
+.stats-table tr.has_sub span{
+    cursor: pointer;
+    position: relative;
+    padding-left: 15px;
+}
+.stats-table tr.has_sub span::after {
+    content: "";
+    position: absolute;
+    z-index: 2;
+    top: 9px;
+    left: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 5px 0 5px 6px;
+    border-color: transparent transparent transparent #1c487b;
+    transform-origin: center;
+    transition: transform .3s .2s;
+}
+.stats-table tr.has_sub span.opened::after{
+    border-width: 6px 5px 0 5px;
+    border-color: #1c487b transparent transparent transparent;
+}
+.stats-table tr.show{
+     display: table-row;
 }

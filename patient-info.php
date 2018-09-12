@@ -38,9 +38,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		    WHERE q.Guid_user=:Guid_user";
     $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$Guid_user));
 
-    $mdlInfoQ = "SELECT * FROM tbl_mdl_stats stats "
-		. "LEFT JOIN tbl_mdl_status status ON stats.Guid_status = status.Guid_status "
-		. "WHERE stats.Guid_user=:Guid_user";
+    $mdlInfoQ = "SELECT * FROM tbl_mdl_number WHERE Guid_user=:Guid_user";
     $mdlInfo = $db->row($mdlInfoQ, array('Guid_user'=>$Guid_user));
 
     $Guid_qualify = $qualifyResult['Guid_qualify'];
@@ -102,29 +100,40 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		$updatePatient = updateTable($db, 'tblpatient', $patientData, $wherePatient);
 	    }
 
-	    //update mdl stats info
+	    //Update MDL# info
 	    if(isset($_POST['mdl_number'])){
-		$mdlStatsData['mdl_number']=$_POST['mdl_number'];
-
+		$mdlNumberData['mdl_number']=$_POST['mdl_number'];
 	    }
-	    if(isset($_POST['notes'])){
-		$mdlStatsData['notes']=$_POST['notes'];
+	    if(isset($_POST['comment'])){
+		$mdlNumberData['comment']= escape(CleanXSS($_POST['comment']));
 	    }
-	    if(isset($_POST['account'])){
-		$mdlStatsData['account']=$_POST['account'];
-	    }
-
-	    if($mdlInfo){ //update existing
-		$whereMdlSats = array('Guid_user'=>$_GET['patient']);
-		if($mdlStatsData){
-		    $updateMdlStats = updateTable($db, 'tbl_mdl_stats', $mdlStatsData, $whereMdlSats);
+	    if(!empty($mdlInfo)){//update existing mdl number info
+		$whereMdlNum = array('Guid_user'=>$_GET['patient']);
+		if($mdlNumberData){
+		   updateTable($db, 'tbl_mdl_number', $mdlNumberData, $whereMdlNum);
 		}
-	    }else{ //insert new row
-		$mdlStatsData['Guid_user'] = $_GET['patient'];
-		if($mdlStatsData){
-		    $inserMdlStats = insertIntoTable($db, 'tbl_mdl_stats', $mdlStatsData);
+	    } else {//insert mdl number info
+		if($mdlNumberData){
+		   insertIntoTable($db, 'tbl_mdl_number', $mdlNumberData);
 		}
 	    }
+
+	    //update mdl stats info
+//            if(isset($_POST['account'])){
+//                $mdlStatsData['account']=$_POST['account'];
+//            }
+//
+//            if($mdlInfo){ //update existing
+//
+//                if($mdlStatsData){
+//                    $updateMdlStats = updateTable($db, 'tbl_mdl_stats', $mdlStatsData, $whereMdlSats);
+//                }
+//            }else{ //insert new row
+//                $mdlStatsData['Guid_user'] = $_GET['patient'];
+//                if($mdlStatsData){
+//                    $inserMdlStats = insertIntoTable($db, 'tbl_mdl_stats', $mdlStatsData);
+//                }
+//            }
 
 	    //add revenue data if exists
 	    if(isset($_POST['revenueAdd']) && !empty($_POST['revenueAdd'])){
@@ -213,7 +222,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 
 <?php
     if(isset($_GET['account'])&&$_GET['account']!=""){
-	$accountQ = "SELECT a.account, a.name AS account_name, CONCAT(sr.first_name, ' ', sr.last_name) AS salesrep_name "
+	$accountQ = "SELECT a.Guid_account, a.account, a.name AS account_name, sr.Guid_salesrep, CONCAT(sr.first_name, ' ', sr.last_name) AS salesrep_name "
 		    . "FROM tblaccount a "
 		    . "LEFT JOIN tblaccountrep ar ON a.Guid_account=ar.Guid_account "
 		    . "LEFT JOIN tblsalesrep sr ON ar.Guid_salesrep = sr.Guid_salesrep "
@@ -348,7 +357,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					</p>
 					<p>
 					    <label>Comment:</label>
-					    <textarea autocomplete="off" name="notes"><?php echo isset($mdlInfo['notes'])?$mdlInfo['notes']:""; ?></textarea>
+					    <textarea autocomplete="off" name="comment"><?php echo isset($_POST['comment'])?$_POST['comment']:$mdlInfo['comment']; ?></textarea>
 					</p>
 				    </div>
 				</div>
@@ -506,6 +515,10 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 				<a class="pull-right" id="add-deductable-log">
 				    <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
 				</a>
+				<a class="pull-right  mR-10" id="add-patient-deductable">
+				    <span class="fas fa-plus-circle" aria-hidden="true"></span>  Deductible
+				</a>
+
 			    </h5>
 			    <div class="deductable-form">
 
@@ -825,6 +838,25 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     if(isset($_POST['add_status_log'])){
 	$statusIDs = serialize($_POST['status']);
 	$date=($_POST['date']!="")?date('Y-m-d h:i:s',strtotime($_POST['date'])):"";
+
+	$Guid_patient = $qualifyResult['Guid_patient'];
+	$statsData = array(
+	    'Guid_patient'=> $Guid_patient,
+	    'Guid_account' => $accountInfo['Guid_account'],
+	    'Guid_salesrep' => $accountInfo['Guid_salesrep'],
+	    'Guid_user' => $_POST['Guid_user'],
+	    'Date_reported'=>$date
+	);
+	$statusArr = $_POST['status'];
+	$insertStats['insertID'] = "";
+	//delete old statuses and record new ones
+	deleteByField($db, 'tbl_mdl_stats', 'Guid_patient', $Guid_patient);
+	foreach ($statusArr as $k => $v) {
+	    $statsData['Guid_status'] = $v;
+	    $insertStats = insertIntoTable($db, 'tbl_mdl_stats', $statsData);
+	}
+
+
 	$statusLogData = array(
 	    'status_ids' => $statusIDs,
 	    'Guid_patient' => $_GET['patient'],
@@ -832,11 +864,12 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 	    'date' => $date,
 	    'Date_created'=>date('Y-m-d h:i:s', strtotime($_POST['date']))
 	);
-
-	$insertStatusLog = insertIntoTable($db, 'tbl_mdl_status_log', $statusLogData);
-	if($insertStatusLog['insertID']!=""){
-	    $message = "New Status Inserted.";
-	    Leave($patientInfoUrl);
+	if($insertStats['insertID']!=""){
+	    $insertStatusLog = insertIntoTable($db, 'tbl_mdl_status_log', $statusLogData);
+	    if($insertStatusLog['insertID']!=""){
+		$message = "New Status Inserted.";
+		Leave($patientInfoUrl);
+	    }
 	}
     }
 ?>
@@ -856,6 +889,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		<?php if(isset($message)){ ?>
 		    <div class="text-center success-text"><?php echo $message; ?></div>
 		<?php } ?>
+		<input type="hidden" name="Guid_user" value="<?php echo $_GET['patient']; ?>" />
 		<div class="">
 		    <input required class="datepicker" autocomplete="off" id="status" name="date" type="text" value="" placeholder="Date">
 		</div>

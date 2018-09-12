@@ -1,5 +1,6 @@
 $(document).ready(function () {
     $('.phone_us').mask('(000) 000-0000');
+    $('.date').mask("00/00/0000", {placeholder: "__/__/____"});
 
     //formatting number to currency
     Number.prototype.formatMoney = function(c, d, t){
@@ -28,30 +29,18 @@ $(document).ready(function () {
 	}
     });
 
-
-
-    //$('.datepicker').datepicker({ dateFormat: 'm/d/yy' });
+    //show calendar on click to input with .datepicker class
     var opt = { showOn:'focus', dateFormat: 'm/d/yy' };
     $('body').on('click','.datepicker', function() {
        // $(this).datepicker('destroy').datepicker({showOn:'focus',dateFormat: 'm/d/yy'}).focus();
        $(this).not('.hasDatePicker').datepicker(opt).focus();
     });
 
-    /*$('.datepicker').each(function(key, val) {
-	$(val).on('focusin', function() {
-	  $(this).not('.hasDatePicker').datepicker(opt);
-	});
-    });
-
-    //$('.datepicker').datepicker(opt); */
-
-
     //number only fields
     $('body').delegate( ".numberonly", "input", function() {
 	var val = $(this).val();
 	$(this).val(val.replace(/\D/g,''));
     });
-
 
     /**
      * MDL# allow only input 7 digits
@@ -72,6 +61,9 @@ $(document).ready(function () {
 	    }
 	}
     });
+    /**
+     * MDL# validation
+     */
     $( "form#mdlInfoForm" ).submit(function( event ) {
 	if ($(".mdlnumber").hasClass('error')) {
 	    event.preventDefault();
@@ -80,7 +72,9 @@ $(document).ready(function () {
 	    return;
 	}
     });
-
+    /*
+     * validate forms, don't allow submit if there is an error
+     */
     $( "form" ).submit(function( event ) {
 	if ($(".f2").hasClass('error')) {
 	    event.preventDefault();
@@ -117,10 +111,11 @@ $(document).ready(function () {
 	}else{
 	    $("#action_palette_toggle i").removeClass('fa-angle-right').addClass('fa-angle-left');
 	}
-
-
     });
-
+    /**
+     *  Homepage Print All toggle
+     *  check or uncheck all checkboxes on click to #selectAllPrintOptions
+     */
     $("#selectAllPrintOptions").change(function() {
 	if(this.checked) {
 	    $('.printSelectBlock .print1').prop('checked', true);
@@ -132,7 +127,9 @@ $(document).ready(function () {
 	    $('#switchLabel').text('Select All');
 	}
     });
-
+    /**
+     * Close modal box
+     */
     $('.closeModal').on('click', function(e){
 	e.preventDefault();
 	$('.modalBlock').removeClass('show').addClass('hidden');
@@ -213,7 +210,6 @@ $(document).ready(function () {
 	    });
 	}
     });
-
 
     /**
      * Homepage Filter
@@ -374,7 +370,6 @@ $(document).ready(function () {
 	    }
 	});
     });
-
 
 
     /**
@@ -624,6 +619,7 @@ $(document).ready(function () {
 	    } );
 	}
     } );
+
     //don't sort tabel column on click to this input
     $('.dataTableFilterInput').on('click', function (e) {
 	 e.stopPropagation();
@@ -826,7 +822,14 @@ $(document).ready(function () {
 	$('#deductable-table .priceSum').before(formData);
     });
 
-
+    /**
+     * Stats page parent - sub carusel
+     */
+    $('.stats-table .parent').on('click', function(e){
+	var id = $(this).attr('id');
+	$('[data-parent-id="'+id+'"]').toggleClass('show');
+	$(this).find('span').toggleClass('opened');
+    });
 
 });
 
