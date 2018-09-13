@@ -451,7 +451,7 @@ function getRole($db, $userID){
     $result = $db->row($query, array("Guid_user"=>$userID));
     return $result;
 }
-function getUserDetails($db, $userRole, $userID){
+function getUserDetails($db, $userRole, $userID, $patientID=""){
     $userDetail = "";
     $q = "";
     if($userRole == 'Admin'){
@@ -461,15 +461,17 @@ function getUserDetails($db, $userRole, $userID){
     } elseif ($userRole == 'Physician') {
         $q = "SELECT first_name, last_name, photo_filename FROM tblprovider";    
     } elseif ($userRole == 'Patient') {
-        $q = "SELECT firstname as first_name, lastname as latst_name  FROM tblpatient";
+        $q = "SELECT firstname as first_name, lastname as last_name FROM tblpatient";
     } 
-   
+    
     if($q!=""){        
         $q .= " WHERE Guid_user=:Guid_user";
         $userDetail = $db->row($q, array("Guid_user"=>$userID));
-    } else {
-        $q = "SELECT firstname as first_name, lastname as latst_name FROM tblpatient";
-        $userDetail = $db->row($q, array("Guid_user"=>$userID));
+    } else {//when patient is not exists on users table
+        if($patientID!=""){
+            $q = "SELECT firstname as first_name, lastname as last_name FROM tblpatient  WHERE Guid_patient=:Guid_patient";
+            $userDetail = $db->row($q, array("Guid_patient"=>$patientID));
+        }
     }
     
     return $userDetail;    
