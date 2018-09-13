@@ -476,7 +476,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 				    </a>
 				    <?php } ?>
 				</th>
-				<th>Actions</th>
+				<?php if($role=='Admin'){ ?><th>Actions</th><?php } ?>
 			    </thead>
 			    <tbody>
 				<?php
@@ -492,11 +492,13 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 				    <tr>
 					<td><?php echo date("n/j/Y", strtotime($v['date'])); ?></td>
 					<td><?php echo get_status_names( $db, unserialize($v['status_ids']) ); ?></td>
+					<?php if($role=='Admin'){ ?>
 					<td class="text-center">
 					    <a href="<?php echo $patientInfoUrl.'&delete-status-log='.$v['Guid_status_log']; ?>" onclick="javascript:confirmationDeleteStatusLog($(this));return false;" class="color-red">
 						<span class="far fa-trash-alt"></span>
 					    </a>
 					</td>
+					<?php } ?>
 				    </tr>
 				<?php } ?>
 			    </tbody>

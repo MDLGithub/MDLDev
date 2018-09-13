@@ -2,4 +2,6 @@
 
 
 /*Updated Files*/
+patient-info.php
+
 admin.js
