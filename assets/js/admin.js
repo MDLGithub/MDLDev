@@ -172,27 +172,35 @@ $(document).ready(function () {
 		window_focus = false;
 	});
 
-	//$("#bulkPrint").click(function (event) {
+    //$("#bulkPrint").click(function (event) {
     $("#bulkPrint").on('click', function () {
         //event.preventDefault();
-		$('body').addClass('loading');
-        $("#admin_print").html('');
-        //var i = 0;
+        
         var newArr = [];
         var searchIDs = $("input:checkbox:checked").map(function () {
             newArr = [[$(this).data("selected_date"), $(this).data("selected_questionnaire"), $(this).data("prinatble")]];
             return newArr;
-
         }).toArray();
-
-        console.log(searchIDs);
+        
         var iCount = searchIDs.length;
         var notPrintableMsg = "";
+        var pritableCount = 0;
+        for (var i = 0; i < iCount; i++) {            
+            var data_printable= searchIDs[i][2];
+            if(data_printable=='1'){
+                pritableCount++;
+            }
+        }
+        
+        if(pritableCount>0){
+            $('body').addClass('loading');
+            $("#admin_print").html('');
+        }
+        
         for (var i = 0; i < iCount; i++) {
             var selected_questionnaire = searchIDs[i][1];
             var selected_date = searchIDs[i][0];
             var data_printable= searchIDs[i][2];
-            console.log(data_printable);
             if(data_printable=='1'){
                 $.post("genreport.php", {selected_questionnaire: selected_questionnaire, selected_date: selected_date
                 //searchIDs
@@ -201,48 +209,48 @@ $(document).ready(function () {
                     scalePedigree();
                 });
             } else {
-                notPrintableMsg = "Unknown questionary can't be prented";
+                notPrintableMsg = "The summary report for questionnaires with Unknown medical necessity result cannot be printed.";
             }            
         }
         if(notPrintableMsg!=""){
             alert(notPrintableMsg);
         }
-        $("#admin_print").printThis({
-            debug: true,
-            importCSS: false,
-            importStyle: false,
-            printContainer: false,
-            loadCSS: "css/style.min.css",
-            printDelay: 1000,
-			removeScripts: true,
-            base: "/dev/login/assets/",
-			afterPrint: testFun
-        });
+        if(pritableCount>0){
+            $("#admin_print").printThis({
+                debug: true,
+                importCSS: false,
+                importStyle: false,
+                printContainer: false,
+                loadCSS: "css/style.min.css",
+                printDelay: 1000,
+                            removeScripts: true,
+                base: "/dev/login/assets/",
+                            afterPrint: testFun
+            });
+        }
 		
-		var interval = null;
+        var interval = null;
 		
-		function reload(){
+        function reload(){
             if(window_focus === true) {
-				$('body').removeClass('loading');
-				window.clearInterval(interval);
-            }
-			
-			if( /iPhone|iPad/i.test(navigator.userAgent) ) {
-				$('body').removeClass('loading');
-				window.clearInterval(interval);
-            }
-			
-		}
+                $('body').removeClass('loading');
+                window.clearInterval(interval);
+            }			
+            if( /iPhone|iPad/i.test(navigator.userAgent) ) {
+                $('body').removeClass('loading');
+                window.clearInterval(interval);
+            }			
+        }
 		
-		function testFun(){
-			if ( /^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
-				interval = window.setInterval(reload, 500);
-			} else {
-				$('body').removeClass('loading');
-				window.clearInterval(interval);
-			}
-		}
-		return false;
+        function testFun(){
+            if ( /^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+                interval = window.setInterval(reload, 500);
+            } else {
+                $('body').removeClass('loading');
+                window.clearInterval(interval);
+            }
+        }
+        return false;
     });
 	
 	function scalePedigree(){
