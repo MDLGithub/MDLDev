@@ -107,13 +107,16 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 	    if(isset($_POST['comment'])){
 		$mdlNumberData['comment']= escape(CleanXSS($_POST['comment']));
 	    }
+	    $mdlNumberData['Guid_user'] = $_GET['patient'];
 	    if(!empty($mdlInfo)){//update existing mdl number info
 		$whereMdlNum = array('Guid_user'=>$_GET['patient']);
 		if($mdlNumberData){
 		   updateTable($db, 'tbl_mdl_number', $mdlNumberData, $whereMdlNum);
 		}
 	    } else {//insert mdl number info
+
 		if($mdlNumberData){
+
 		   insertIntoTable($db, 'tbl_mdl_number', $mdlNumberData);
 		}
 	    }
