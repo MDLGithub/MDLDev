@@ -1,6 +1,6 @@
 $(document).ready(function () {
     $('.phone_us').mask('(000) 000-0000');
-    $('.date').mask("00/00/0000", {placeholder: "__/__/____"});
+    $('.h-filters .date').mask("00/00/0000", {placeholder: "__/__/____"});
     
     //formatting number to currency
     Number.prototype.formatMoney = function(c, d, t){
