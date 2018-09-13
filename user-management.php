@@ -296,9 +296,15 @@ require_once ('navbar.php');
 	    if(!$isMailExists){
 		$userData['Date_modified'] = date('Y-m-d H:i:s');
 		$whereUser = array('Guid_user'=>$Guid_user);
-
-		$updateUser = updateTable($db, 'tbluser', $userData, $whereUser);
-		saveUserRole($db, $Guid_user, $Guid_role);
+		//check if role is changed, then move all data to that user by role table and remove previous
+		$prevRole = $db->row('SELECT Guid_role FROM `tbluserrole` WHERE Guid_user=:Guid_user', $whereUser);
+		if($prevRole['Guid_role'] == $Guid_role){
+		    $updateUser = updateTable($db, 'tbluser', $userData, $whereUser);
+		    saveUserRole($db, $Guid_user, $Guid_role);
+		} else { // need to move user info data to proper table and delete prev
+		    //under development
+		    $movingUser = moveUserData($db,$userData,$Guid_role,$prevRole,$Guid_user);
+		}
 
 		$result = TRUE;
 	    } else {

@@ -847,7 +847,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 	    'Guid_account' => $accountInfo['Guid_account'],
 	    'Guid_salesrep' => $accountInfo['Guid_salesrep'],
 	    'Guid_user' => $_POST['Guid_user'],
-	    'Date_reported'=>$date
+	    'date_reported'=>$date
 	);
 	$statusArr = $_POST['status'];
 	$insertStats['insertID'] = "";

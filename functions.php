@@ -288,7 +288,7 @@ function isUserHasAccess($db, $accessKey, $userID){
     if($roleKey == 'Admin'){
 	return TRUE;
     }
-    $query = "SELECT * FROM `tblaccessbyroles` WHERE key_id=:key";
+    $query = "SELECT * FROM `tbl_mdl_options` WHERE key_id=:key";
     $accessRole = $db->row($query, array("key"=>$accessKey));
     if(isset($accessRole['role_ids'])){
 	$accessRoleIDs = unserialize($accessRole['role_ids']);
@@ -384,17 +384,15 @@ function saveTableAccessRole($db, $data){
 	    if( getAccessRoleByKey($tableKey) ){
 		//update option
 		$updateData = array('role_ids'=>serialize($saveData), 'type'=>'table');
-		updateTable($db,'tblaccessbyroles', $updateData, array('key_id'=>$tableKey));
+		updateTable($db,'tbl_mdl_options', $updateData, array('key_id'=>$tableKey));
 
 	    }else{
 		//insert option
 		$insertData = array('key_id'=>$tableKey, 'role_ids'=>serialize($saveData), 'type'=>'table');
-		insertIntoTable($db, 'tblaccessbyroles', $insertData);
+		insertIntoTable($db, 'tbl_mdl_options', $insertData);
 	    }
 	}
     }
-
-
 }
 function savePageAccessRole($db, $data){
     extract($data);
@@ -414,17 +412,21 @@ function savePageAccessRole($db, $data){
 	    if( getAccessRoleByKey($pageKey) ){
 		//update option
 		$updateData = array('role_ids'=>serialize($saveData), 'type'=>'page');
-		updateTable($db,'tblaccessbyroles', $updateData, array('key_id'=>$pageKey));
+		updateTable($db,'tbl_mdl_options', $updateData, array('key_id'=>$pageKey));
 
 	    }else{
 		//insert option
 		$insertData = array('key_id'=>$pageKey, 'role_ids'=>serialize($saveData), 'type'=>'page');
-		insertIntoTable($db, 'tblaccessbyroles', $insertData);
+		insertIntoTable($db, 'tbl_mdl_options', $insertData);
 	    }
 	}
     }
+}
+function getOption($db, $key){
+    $query = "SELECT * FROM `tbl_mdl_options` WHERE key_id=:key_id";
+    $result = $db->row($query, array('key_id'=>$key));
 
-
+    return $result;
 }
 function getUsersAndRoles($db){
     $query = "SELECT u.*, r.* FROM `tbluser` u
@@ -753,7 +755,7 @@ function ifDeviceSerialValid($serial_number, $deviceID=NULL){
 
 function getAccessRoleByKey($keyID){
     $db = new Db(DB_SERVER, DB_NAME, DB_USER, DB_PASSWORD);
-    $query = "SELECT * FROM `tblaccessbyroles` WHERE key_id=:key";
+    $query = "SELECT * FROM `tbl_mdl_options` WHERE key_id=:key";
     $row = $db->row($query, array("key"=>$keyID));
     return $row;
 }
@@ -1176,6 +1178,7 @@ function get_status_dropdown($db, $parent='0') {
 
     return $content;
 }
+
 function get_nested_status_dropdown($db, $parent = 0) {
     $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
 
@@ -1200,7 +1203,7 @@ function get_nested_status_dropdown($db, $parent = 0) {
 
     return $content;
 }
-function get_option_of_nested_status($db, $parent = 0,  $level = '') {
+function get_option_of_nested_status($db, $parent = 0,  $level = '', $checkboxes=FALSE) {
     $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
     if ( $statuses ) {
 	$content ='';
@@ -1213,13 +1216,22 @@ function get_option_of_nested_status($db, $parent = 0,  $level = '') {
 	    if ( !empty($checkCildren) ) {
 		$optionClass = 'has_sub';
 	    }
-	    $content .= "<option value='".$status['Guid_status']."' class='".$optionClass."'>".$level . " " .$status['status'];
-
+	    if($checkboxes){
+		$content .= $level."<input type='checkbox' name=stauses[] value='".$status['Guid_status']."' class='".$optionClass."'> " .$status['status'].'</br>';
+	    }else{
+		$content .= "<option value='".$status['Guid_status']."' class='".$optionClass."'>".$level . " " .$status['status'];
+	    }
 	    if ( !empty($checkCildren) ) {
 		$prefix .= '-';
-		$content .= get_option_of_nested_status( $db, $status['Guid_status'], $level . "-&nbsp;" );
+		if(!$checkboxes){
+		    $content .= get_option_of_nested_status( $db, $status['Guid_status'], $level . "-&nbsp;" );
+		} else {
+		    $content .= get_option_of_nested_status( $db, $status['Guid_status'], $level . "-&nbsp;", TRUE);
+		}
 	    }
-	    $content .= '</option>';
+	    if(!$checkboxes){
+		$content .= '</option>';
+	    }
 	}
     }
 
