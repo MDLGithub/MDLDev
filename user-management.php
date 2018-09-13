@@ -29,7 +29,7 @@ foreach ($userTables as $k=>$v){
     $selectQ = "SELECT u.Guid_user, u.status, uInfo.first_name, uInfo.last_name, u.email, r.role";
 
     if($k=='patient'){
-	$selectQ = "SELECT u.Guid_user, u.status, uInfo.firstname AS first_name, uInfo.lastname AS last_name, u.email, r.role";
+	$selectQ = "SELECT u.Guid_user, u.status, uInfo.Guid_patient, uInfo.firstname AS first_name, uInfo.lastname AS last_name, u.email, r.role";
     }
     if($k=='admin'){
 	$roleID = '1';
@@ -57,13 +57,13 @@ foreach ($userTables as $k=>$v){
     }
 }
 
+
 $query1 = ($adminQ!="")?$db->query($adminQ):array();
 $query2 = ($patientsQ!="")?$db->query($patientsQ):array();
 $query3 = ($salesrepsQ!="")?$db->query($salesrepsQ):array();
 $query4 = ($providersQ!="")?$db->query($providersQ):array();
 
 $users = array_merge($query1,$query2,$query3,$query4);
-
 
 $thisMessage="";
 
@@ -212,7 +212,17 @@ require_once ('navbar.php');
 				    }?>
 				</td>
 				<td class="text-center">
-				    <a href="<?php echo SITE_URL; ?>/user-management.php?action=update&id=<?php echo $user['Guid_user']; ?>">
+				    <?php
+					$editUrl = "";
+					if($user['Guid_user'] != ""){
+					    $editUrl = '&id='.$user['Guid_user'];
+					} else {
+					    if(isset($user['Guid_patient'])){
+						$editUrl = '&id='.$user['Guid_user'].'&patient_id='.$user['Guid_patient'];
+					    }
+					}
+				    ?>
+				    <a href="<?php echo SITE_URL; ?>/user-management.php?action=update<?php echo $editUrl; ?>">
 					<span class="fas fa-pencil-alt" aria-hidden="true"></span>
 				    </a>
 				    <a onclick="javascript:confirmationDeleteUser($(this));return false;" href="<?php echo SITE_URL; ?>/user-management.php?delete-user=<?php echo $user['Guid_user']; ?>&id=<?php echo $user['Guid_user']; ?>">
@@ -261,6 +271,9 @@ require_once ('navbar.php');
 		$userData['user_type'] = 'salesmgr';
 		$roleName = 'Sales Manager';
 	    }
+	}else{
+	    $userData['user_type'] = 'patient';
+	    $roleName = 'Patient';
 	}
 
 	if($Guid_user == ""){ //insert User
@@ -316,8 +329,8 @@ require_once ('navbar.php');
 	$userID = $_GET['id'];
 	$user = getUserAndRole($db, $userID);
 	$allRoles = $db->selectAll('tblrole', ' ORDER BY role ASC');
-
-	$userDetails = getUserDetails($db, $user['role'], $userID);
+	$patientID = isset($_GET['patient_id'])?$_GET['patient_id']:"";
+	$userDetails = getUserDetails($db, $user['role'], $userID, $patientID);
 
 	if($userDetails){
 	    extract($userDetails);
@@ -367,13 +380,14 @@ require_once ('navbar.php');
 			    </p>
 			</div>
 		    </div>
-		    <div class="f2 <?php echo ($user['role']!="")?"valid show-label":"";?>">
+		    <div class="f2 required <?php echo ($user['role']!="")?"valid show-label":"";?>">
 			<label class="dynamic" for="reason_not"><span>User Roles</span></label>
 			<div class="group">
-			    <select id="user_type" name="Guid_role" class="<?php echo ($user['role']=="")?'no-selection':''; ?> ">
+			    <?php $selUserRole = isset($_POST['user_type'])?$_POST['user_type']:$user['role'];?>
+			    <select required id="user_type" name="Guid_role" class="<?php echo ($user['role']=="")?'no-selection':''; ?> ">
 				<option value="">User Roles</option>
 				<?php foreach ($allRoles as $role){ ?>
-				    <option <?php echo ($user['role']==$role['role']) ? " selected": ""; ?> value="<?php echo $role['Guid_role']; ?>"><?php echo $role['role']; ?></option>
+				    <option <?php echo ($selUserRole==$role['role']) ? " selected": ""; ?> value="<?php echo $role['Guid_role']; ?>"><?php echo $role['role']; ?></option>
 				<?php } ?>
 			    </select>
 			    <p class="f_status">
@@ -381,38 +395,42 @@ require_once ('navbar.php');
 			    </p>
 			</div>
 		    </div>
-		    <div class="f2 <?php echo ($user['status']!="")?"valid show-label":"";?>">
+		    <div class="f2 required <?php echo ($user['status']!="")?"valid show-label":"";?>">
 			<label class="dynamic" for="status"><span>Status</span></label>
 			<div class="group">
-			    <select id="status" name="status">
-				<option <?php echo ($user['status']=='1') ? " selected": ""; ?> value="1">Active</option>
-				<option <?php echo ($user['status']=='0') ? " selected": ""; ?> value="0">Inactive</option>
+			    <?php $userStatus = isset($_POST['status'])?$_POST['status']:$user['status'];?>
+			    <select required id="status" name="status">
+				<option value="">Status</option>
+				<option <?php echo ($userStatus=='1') ? " selected": ""; ?> value="1">Active</option>
+				<option <?php echo ($userStatus=='0') ? " selected": ""; ?> value="0">Inactive</option>
 			    </select>
 			    <p class="f_status">
 				<span class="status_icons"><strong></strong></span>
 			    </p>
 			</div>
 		    </div>
-		    <div class="f2 <?php echo ($user['email']!="")?"valid show-label":"";?>">
+		    <div class="f2 required <?php echo ($user['email']!="")?"valid show-label":"";?>">
 			<label class="dynamic" for="email"><span>Email</span></label>
 			<div class="group">
-			    <input name="email" value="<?php echo $user['email']; ?>" type="text" class="form-control" id="email" placeholder="Email">
+			    <input required="" name="email" value="<?php echo $user['email']; ?>" type="text" class="form-control" id="email" placeholder="Email">
 			    <p class="f_status">
 				<span class="status_icons"><strong>*</strong></span>
 			    </p>
 			</div>
 		    </div>
 
-		    <div class="f2">
+		    <?php $passRequred = isset($_GET['add'])?' required':''; ?>
+		    <div class="f2 <?php echo $passRequred; ?> ">
 			<label class="dynamic" for="password"><span>Password</span></label>
 			<div class="group">
-			    <input name="password" type="password" class="form-control" id="password" placeholder="Password">
+			    <input <?php echo $passRequred; ?> name="password" type="password" class="form-control" id="password" placeholder="Password">
 			    <p class="f_status">
 				<span class="status_icons"><strong>*</strong></span>
 			    </p>
 			</div>
 		    </div>
-		    <?php if(!$user['role']==NULL && $role != 'Patient') { //For patients we dont have photo field in DB ?>
+
+		    <?php if($user['role']==NULL && $role != 'Patient') { //For patients we dont have photo field in DB ?>
 		    <div class="row">
 			<div class="col-md-10">
 			    <div class="f2 <?php echo ($photo_filename!="")?"valid show-label":"";?>">
