@@ -530,6 +530,41 @@ function saveUserDetails($db, $Guid_user, $Guid_role, $userDetails){
     }
 
 }
+/**
+ * Move user to proper table if user role is changed
+ * @param type $db
+ * @param type $thisRole
+ * @param type $prevRole
+ */
+//this function under development
+function moveUserData($db,$userData,$thisRole,$prevRole,$Guid_user,$Guid_patient=''){
+    var_dump($userData);die;
+    if($thisRole != $prevRole){
+
+	if($thisRole=='1'){ //Admin
+
+	} elseif ($thisRole=='2') { //Physician
+
+	} elseif ($thisRole=='3') { //Patient
+
+	} elseif ($thisRole=='4' || $prevRole=='5') { //Sales Rep OR Sales Manager
+
+	}
+
+	if($prevRole=='1'){ //Admin
+
+	} elseif ($prevRole=='2') { //Physician
+
+	} elseif ($prevRole=='3') { //Patient
+
+	} elseif ($prevRole=='4' || $prevRole=='5') { //Sales Rep OR Sales Manager
+
+	}
+
+
+    }
+    return FALSE;
+}
 
 function verify_input(&$error) {
 	if (strlen($_POST['from_date']) && (!strlen($_POST['to_date']))) {
@@ -1217,7 +1252,7 @@ function get_status_table_rows($db, $parent = 0) {
 		}
 		$content .= "<tr id='".$status['Guid_status']."' class='parent ".$optionClass."'>";
 		$content .= "<td class='text-left'><span>".$status['status'].'</span></td>';
-		$content .= '<td><a href="">'.$stats['count'].'</a></td>';
+		$content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].'">'.$stats['count'].'</a></td>';
 		if ( !empty($checkCildren) ) {
 		    $content .= get_status_child_rows( $db, $status['Guid_status'], "&nbsp;" );
 		}
@@ -1244,7 +1279,7 @@ function get_status_child_rows($db, $parent = 0,  $level = '') {
 		}
 		$content .= "<tr id='".$status['Guid_status']."' data-parent-id='".$parent."' class='sub ".$optionClass."'>";
 		$content .= "<td class='text-left'><span>".$level . " " .$status['status'].'</span></td>';
-		$content .= '<td><a href="">'.$stats['count']. '</a></td>';
+		$content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].'">'.$stats['count']. '</a></td>';
 		if ( !empty($checkCildren) ) {
 		    $prefix .= '&nbsp;';
 		    $content .= get_status_child_rows( $db, $status['Guid_status'], $level . "&nbsp;" );
