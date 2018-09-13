@@ -27,7 +27,10 @@ foreach($result as $row)
   'salesrepid' => $row['salesrepid'],   
   'accountid' => $row['accountid'],    
   'comments' => $row['comments'],
-  'color' => $row['color']  
+  'color' => $row['color'],
+  'registeredCnt' => $row['registeredCnt'],
+  'qualifiedCnt' => $row['qualifiedCnt'],
+  'completedCnt' => $row['completedCnt']   
  );
 }
 echo json_encode($data);

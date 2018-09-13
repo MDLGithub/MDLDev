@@ -9,6 +9,9 @@ foreach($result as $row)
  $data[] = array(
   'evtCnt'   => $row['evtCnt'],
   'start'   => $row['start_event'],
+  'registeredCnt' => $row['registeredCnt'],
+  'qualifiedCnt' => $row['qualifiedCnt'],
+  'completedCnt' => $row['completedCnt']   
   );
 }
 

@@ -121,6 +121,18 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
     .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px;}
     .rightCircleicon2{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_health_fair.png"); background-repeat: no-repeat;background-size: 20px 20px;}
+    .numberCircle {
+        border-radius: 50%;
+        behavior: url(PIE.htc); /* remove if you don't care about IE8 */
+        width: 16px;
+        height: 66px;
+        padding: 8px;
+
+        background: #ccc;
+        border: 2px solid #666;
+        color: #fff;
+        text-align: center;
+        }
 </style>
 <script>
 
@@ -342,9 +354,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
                 var view = $('#calendar').fullCalendar('getView');
                 if(view.name == 'basicDay'){
-                    cmts = '<div class="fc-number">' + event.account + '</div>'
-                    cmts += '<div class="fc-logo">' + event.logo + '</div>'
-                    cmts += '<div class="fc-comments">' + event.comments + '</div>'
+                    cmts = '<div class="fc-number">' + event.account + '</div>';
+                    if(event.logo) cmts += '<div class="fc-logo"><img src="../images/practice/' + event.logo + '" /></div>';
+                    if(event.comments) cmts += '<div class="fc-comments">' + event.comments + '</div>';
                 }
                 if (view.name == 'basicWeek' && event.comments)
                     cmts = '<div class="fc-comments">' + event.comments + '</div>'
@@ -369,6 +381,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                  if (name.length > 15)
                  modifiedName += "...";
                  */
+                
                 var modifiedName = sentenceCase(name);
 
                 var content = '<a class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable" style="' + borderColor + '">' +
@@ -383,12 +396,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     $("#summary").css("background","linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");
                     $("#detail").css("background","#90bcf7");
                     var content = '<div class="fc-content evtcontent days-' + eventDate + '" style="padding: 0 20px;">';
-                    content += '<div><strong>' + event.evtCnt + '</strong></div>';
-                    content += '<div>Total</div>';
-                    content += '<div>Registered</div>';
-                    content += '<div>Completed</div>';
-                    content += '<div>Qualified</div>';
-                    content += '<div>Submitted</div>';
+                    content += '<div style="padding: 10px 0 10px 127px;"><span class="numberCircle">' + event.evtCnt + '</span></div>';
+                    content += '<div>Registered <span style="float:right">' + event.registeredCnt + '</span></div>';
+                    content += '<div>Completed <span style="float:right">' + event.qualifiedCnt + '</span></div>';
+                    content += '<div>Qualified <span style="float:right">' + event.completedCnt + '</span></div>';
+                    content += '<div>Submitted <span style="float:right">0</span></div>';
                     content += '</div>';
                     return $(content);
                 } else {
@@ -400,7 +412,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                                 '<div class="' + icon + '"></div>' +
                                 '<div class="fc-title evttitle">' + modifiedName + '</div>' +
                                 salesrep + cmts +
-                                '<div><span class="silhouette">9 <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark">6 <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">3 <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">1 <img src="assets/eventschedule/icons/flask_icon.png"></span></div>' +
+                                '<div><span class="silhouette">' + event.registeredCnt + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ event.qualifiedCnt + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ event.completedCnt + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">0 <img src="assets/eventschedule/icons/flask_icon.png"></span></div>' +
                                 '</div>' +
                                 '</a>';
                         return $(content);
@@ -432,6 +444,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             },
             eventAfterAllRender: function (event, element, view) {
                 //$(".days-06:first").css("display", "block");
+                $("td.fc-event-container").each(function() {
+                    //$(this).removeAttr('rowspan');
+                });
             },
         });
 
@@ -978,8 +993,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         </div>
                     </div>
 
-                    <button type="submit" id="eventsave" class="button filter half">Save</button> 
-                    <button type="submit" name="clear" class="button cancel half"><strong>Clear</strong></button>
+                    <button type="submit" id="eventsave" class="button filter half" style="cursor: pointer;">Save</button> 
+                    <button type="submit" name="clear" class="button cancel half" style="cursor: pointer;"><strong>Clear</strong></button>
                 </form>
                 <!--********************   SEARCH BY PALETTE END    ******************** -->
 
@@ -1073,7 +1088,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                 <div class="row">
                                     <div class='col-md-2'>
                                         <div class="form-group">
-                                            <div class='input-group date' id='datetimepicker2'>
+                                            <div class='input-group modaldate' id='datetimepicker2'>
                                                 <input type='text' id="modaleventstart" class="form-control" placeholder="Event Date" />
                                                 <span class="input-group-addon">
                                                     <span class="glyphicon glyphicon-calendar"></span>
@@ -1229,9 +1244,9 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                 </div>  
                                 <div class="row">
                                     <div class='col-md-10'>
-                                        <button type="button" id="eventupdate" class="btn btn-primary">Update</button>
-                                        <button type="button" id="eventcancel" class="btn btn-danger">Cancel</button>
-                                        <button type="button" class="btn btn-danger" id="eventdelete" style="border-radius: 2em !important; margin: 7px 0;">Delete</button>
+                                        <button type="button" id="eventupdate" class="btn btn-primary" style="cursor: pointer;">Update</button>
+                                        <button type="button" id="eventcancel" class="btn btn-danger" style="cursor: pointer;">Cancel</button>
+                                        <button type="button" class="btn btn-danger" id="eventdelete" style="border-radius: 2em !important; margin: 7px 0;" style="cursor: pointer;">Delete</button>
                                     </div>
                                 </div>
                             </div>

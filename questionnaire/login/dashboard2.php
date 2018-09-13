@@ -59,7 +59,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 <script src="assets/eventschedule/js/myweekview.js"></script>
 <style>
     .col-md-1 { width: 10.333333% !important;}
-    .container { max-width: 1358px !important;}
+    .container { max-width: 100% !important;}
     #datetimepicker1{ position: relative; width: 172px; }
     #datetimepicker1 input{ width: 100%; }
     #datetimepicker1 img{ position: absolute; top: 8px; right: 5px;}
@@ -68,7 +68,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     #datetimepicker2 input{ width: 100%; }
     #datetimepicker2 img{ position: absolute; top: 8px; right: 5px;}
     textarea.form-control{height: auto !important;}
-    .fc-event-container {padding: 10px 0 !important;}
+    .fc-event-container {padding: 5px 0 !important;}
 
     .fc-event {
         box-shadow:  0 0 .25em !important;
@@ -122,12 +122,18 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
     .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px;}
     .rightCircleicon2{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_health_fair.png"); background-repeat: no-repeat;background-size: 20px 20px;}
-    /*
-    .fc-unthemed td.fc-today{
-        background: linear-gradient(135deg, #aab9d4 25%, #ffffff 25%, #ffffff 50%, #aab9d4 50%, #aab9d4 75%, #ffffff 75%, #ffffff 100%)  !important;
-        background-size: 14.14px 14.14px !important;
-    }
-    */
+    .numberCircle {
+        border-radius: 50%;
+        behavior: url(PIE.htc); /* remove if you don't care about IE8 */
+        width: 16px;
+        height: 66px;
+        padding: 8px;
+
+        background: #ccc;
+        border: 2px solid #666;
+        color: #fff;
+        text-align: center;
+        }
 </style>
 <script>
 
@@ -373,12 +379,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     $("#summary").css("background", "linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");
                     $("#detail").css("background", "#90bcf7");
                     var content = '<div class="fc-content evtcontent days-' + eventDate + '" style="padding: 0 20px;">';
-                    content += '<div><strong>' + event.evtCnt + '</strong></div>';
-                    content += '<div>Total</div>';
-                    content += '<div>Registered</div>';
-                    content += '<div>Completed</div>';
-                    content += '<div>Qualified</div>';
-                    content += '<div>Submitted</div>';
+                    content += '<div style="padding: 10px 0 10px 127px;"><span class="numberCircle">' + event.evtCnt + '</span></div>';
+                    content += '<div>Registered <span style="float:right">' + event.registeredCnt + '</span></div>';
+                    content += '<div>Completed <span style="float:right">' + event.qualifiedCnt + '</span></div>';
+                    content += '<div>Qualified <span style="float:right">' + event.completedCnt + '</span></div>';
+                    content += '<div>Submitted <span style="float:right">0</span></div>';
                     content += '</div>';
                     return $(content);
                 } else {
@@ -390,7 +395,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                                 '<div class="' + icon + '"></div>' +
                                 '<div class="fc-title evttitle">' + modifiedName + '</div>' +
                                 salesrep + cmts +
-                                '<div><span class="silhouette">9 <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark">6 <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">3 <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">1 <img src="assets/eventschedule/icons/flask_icon.png"></span></div>' +
+                                '<div><span class="silhouette">' + event.registeredCnt + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ event.qualifiedCnt + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ event.completedCnt + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">0 <img src="assets/eventschedule/icons/flask_icon.png"></span></div>' +
                                 '</div>' +
                                 '</a>';
                         return $(content);
@@ -874,13 +879,31 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
         </section>
         <div class="scroller event-schedule">
             <div class="container">  
+<!--                <table>
+                    <tr>
+                        <td>BRCA Days</td>
+                        <td>0</td>
+                        <td>Registered</td>
+                        <td>0</td>
+                        <td>Completed</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>Events</td>
+                        <td>0</td>
+                        <td>Qualified</td>
+                        <td>0</td>
+                        <td>Submitted</td>
+                        <td>0</td>
+                    </tr>
+                </table>    -->
                 <div class="row">
                     <div class="col-md-4" style="padding: 10px 0;">
                         <button type="button" name="Detail" id="detail" class="info-button" style="float:left; background: #90bcf7; margin-right: 20px;">Detail</button>
                         <button type="button" name="Summary" id="summary" class="info-button" style="background: #90bcf7;">Summary</button>
                     </div>
                 </div>
-                <div id="calendar" style="float:left; width:900px"></div>
+                <div id="calendar"></div>
                 <div id="piechartcontainer"  class="col-md-4" ></div>
                 <div id="stackedchartcontainer" class="col-md-4" ></div>
                 
