@@ -26,6 +26,7 @@ if($_GET['get_patient_ids']){
     foreach ($patientEmptyIds as $k=>$v){
         $getPatient = $db->row("SELECT Guid_patient FROM `tblpatient` WHERE Guid_user=:Guid_user", array('Guid_user'=>$v['Guid_user']));
         $patientID = $getPatient['Guid_patient'];
+        updateTable($db, 'tbl_mdl_stats', array('Guid_patient'=>$patientID), array('Guid_user'=>$v['Guid_user']));
         var_dump("Guid_patient: ".$patientID."; Guid_user: ".$v['Guid_user']);
     }
 }//remove it after all tests
@@ -47,7 +48,7 @@ $initQ = 'SELECT s.Guid_status,  s.Guid_user, p.Guid_patient, p.firstname, p.las
         LEFT JOIN `tblpatient` p ON s.Guid_patient=p.Guid_patient
         LEFT JOIN `tblaccount` a ON s.Guid_account=a.Guid_account
         LEFT JOIN `tblsalesrep` srep ON s.Guid_salesrep=srep.Guid_salesrep
-        WHERE s.Guid_status=:Guid_status AND  s.Guid_user NOT IN('.$testUserIds.')';
+        WHERE s.Guid_status=:Guid_status AND  s.Guid_user NOT IN('.$testUserIds.') AND s.Guid_patient<>"0"';
 if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
     $initData=$db->query($initQ, array('Guid_status'=>$_GET['status_id']));
 } else {
