@@ -121,13 +121,9 @@ if(isset($_GET['field_id']) && $_GET['field_id']!=""){
         
     }
 }
-$mdlConfigData = array();
+
 if(isset($_POST['add_stat_config'])){
-    foreach ($_POST['label'] as $k=>$v){
-        $mdlConfigData['stat_details'][$k]['label'] = $v;
-        $mdlConfigData['stat_details'][$k]['status'] = $_POST['stauses'];
-    }
-    setOption($db, 'stat_details', $mdlConfigData);
+    var_dump($_POST);die;
 }
 
 ?>
@@ -152,7 +148,7 @@ if(isset($_POST['add_stat_config'])){
                     <div class="f2 ">
                         <label class="dynamic" for="custom_field_name"><span>Custom Field Name</span></label>
                         <div class="group">
-                            <input value="<?php echo isset($_POST['custom_field_name'])?$_POST['custom_field_name']:$stConfigInfo['label']; ?>" type="text" autocomplete="off" id="custom_field_name" name="label[<?php echo isset($_GET['field_id'])?$_GET['field_id']:""; ?>]" placeholder="Custom Field Name">
+                            <input value="<?php echo isset($_POST['custom_field_name'])?$_POST['custom_field_name']:$stConfigInfo['label']; ?>" type="text" autocomplete="off" id="custom_field_name" name="<?php echo isset($_GET['field_id'])?$_GET['field_id']:""; ?>" placeholder="Custom Field Name">
                             <p class="f_status">
                                 <span class="status_icons"><strong></strong></span>
                             </p>

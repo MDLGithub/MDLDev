@@ -428,17 +428,6 @@ function getOption($db, $key){
     
     return $result;    
 }
-function setOption($db, $key, $val){
-    //check if key exists
-    $checkKey = getOption($db, $key);
-    if($checkKey){ //update existing
-        $where = array('key_id'=>$key);
-        updateTable($db, 'tbl_mdl_options', $val, $where);
-    } else { //insert new key and value
-        insertIntoTable($db, 'tbl_mdl_options', array($key=>$val));
-    }
-}
-
 function getUsersAndRoles($db){
     $query = "SELECT u.*, r.* FROM `tbluser` u
                 LEFT JOIN `tbluserrole` urole ON u.Guid_user=urole.Guid_user
@@ -1248,42 +1237,21 @@ function get_option_of_nested_status($db, $parent = 0,  $level = '', $checkboxes
    
     return $content;
 }
-/**
- * Get Stats info
- * @param type $db
- * @param type $statusID
- * @return type array ('count'=>5, 'info'=>array())
- */
+
 function get_stats_info($db, $statusID){
-    //exclude test users
-    $testUserIds = getTestUserIDs($db);    
-    $q = "SELECT * FROM `tbl_mdl_stats` WHERE Guid_status=:Guid_status AND Guid_user NOT IN(".$testUserIds.")";
+    $q = "SELECT * FROM `tbl_mdl_stats` WHERE Guid_status=:Guid_status";
     $stats = $db->query($q, array('Guid_status'=>$statusID));
     $result['count'] = 0;
     if(!empty($stats)){
         $result['count'] = count($stats);
         $result['info'] = $stats;
-    }    
+    }
+    
     return $result;
 }
-/**
- * Get Mark as test user ids
- * @param type $db
- * @return type String 11,55,22,45
- */
-function getTestUserIDs($db){
-    $getTestUsers = $db->query("SELECT Guid_user FROM `tbl_ss_qualify` WHERE mark_as_test=:mark_as_test GROUP BY Guid_user", array('mark_as_test'=>'1'));
-    $testUserIds = "";
-    foreach ($getTestUsers as $k=>$v){
-        $testUserIds .= $v['Guid_user'].', ';
-    }
-    $testUserIds = rtrim($testUserIds, ', ');
-    
-    return $testUserIds;
-}
-
-function get_status_table_rows($db, $parent = 0) {    
+function get_status_table_rows($db, $parent = 0) {
     $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
+    
     $content = '';    
     if ( $statuses ) {
         foreach ( $statuses as $status ) {  
