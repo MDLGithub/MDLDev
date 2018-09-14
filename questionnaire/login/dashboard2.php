@@ -47,8 +47,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     verify_input($error);
 }
 ?>
-<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">-->
-<script src = "https://code.highcharts.com/highcharts.js"></script> 
+<link href="assets/eventschedule/kendoUI/styles/kendo.common.min.css" rel="stylesheet">
+<link href="assets/eventschedule/kendoUI/styles/kendo.rtl.min.css" rel="stylesheet">
+<link href="assets/eventschedule/kendoUI/styles/kendo.default.min.css" rel="stylesheet">
+<link href="assets/eventschedule/kendoUI/styles/kendo.default.mobile.min.css" rel="stylesheet">
+
 <link rel="stylesheet" href="assets/eventschedule/css/fullcalendar.css" />
 <link rel="stylesheet" href="assets/eventschedule/css/bootstrap-datetimepicker.min.css">
 <script src="assets/eventschedule/js/jquery.min.js"></script>
@@ -57,6 +60,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 <script src="assets/eventschedule/js/fullcalendar.min.js"></script>
 <script src="assets/eventschedule/js/bootstrap-datetimepicker.min.js"></script>
 <script src="assets/eventschedule/js/myweekview.js"></script>
+
+<script src="assets/eventschedule/kendoUI/js/jszip.min.js"></script>
+<script src="assets/eventschedule/kendoUI/js/kendo.all.min.js"></script>
 <style>
     .col-md-1 { width: 10.333333% !important;}
     .container { max-width: 100% !important;}
@@ -138,6 +144,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 <script>
 
     $(document).ready(function () {
+        createChart();
         $(".f2").width('95%');
         $("input[name='eventtype']").click(function () {
             var evtType = $(this).val();
@@ -427,6 +434,172 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             },
             eventAfterAllRender: function (event, element, view) {
                 //$(".days-06:first").css("display", "block");
+                var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
+                var inputparam = {
+                    userid: <?php echo $userID; ?>,
+                    startdate: start
+                };
+                $('#mebrcacnt').html('0');
+                $('#meeventcnt').html('0');
+                $('#meregcnt').html('0'); 
+                $('#mequalcnt').html('0');
+                $('#mecomcnt').html('0');
+
+                $('#topbrcacnt').html('0');
+                $('#topeventcnt').html('0');
+                $('#topregcnt').html('0');
+                $('#topqualcnt').html('0');
+                $('#topcomcnt').html('0');
+                
+                $.ajax({
+                    type : 'POST',
+                    data : inputparam,
+                    dataType: 'json',
+                    url : 'mebrcacount.php',
+                    success : function(data){
+                        $.each(data, function(k, v) {
+                            if(v.mebrcacount) $('#mebrcacnt').html(v.mebrcacount);
+                        });
+                    }
+                });
+                $.ajax({
+                    type : 'POST',
+                    data : inputparam,
+                    dataType: 'json',
+                    url : 'topbrcacount.php',
+                    success : function(data){
+                        $.each(data, function(k, v) {
+                            if(v.topbrcacount) $('#topbrcacnt').html(v.topbrcacount);
+                        });
+                    }
+                });
+                
+                $.ajax({
+                    type : 'POST',
+                    data : inputparam,
+                    dataType: 'json',
+                    url : 'meeventcount.php',
+                    success : function(data){
+                        $.each(data, function(k, v) {
+                            if(v.meeventcount) $('#meeventcnt').html(v.meeventcount);
+                        });
+                    }
+                });
+                $.ajax({
+                    type : 'POST',
+                    data : inputparam,
+                    dataType: 'json',
+                    url : 'topeventcount.php',
+                    success : function(data){
+                        $.each(data, function(k, v) {
+                            if(v.topeventcount) $('#topeventcnt').html(v.topeventcount);
+                        });
+                    }
+                });
+                
+                $.ajax({
+                    type : 'POST',
+                    data : inputparam,
+                    dataType: 'json',
+                    url : 'meregisteredcount.php',
+                    success : function(data){
+                        $.each(data, function(k, v) {
+                            if(v.meregisteredcount) $('#meregcnt').html(v.meregisteredcount);
+                        });
+                    }
+                });
+                $.ajax({
+                    type : 'POST',
+                    data : inputparam,
+                    dataType: 'json',
+                    url : 'mequalifiedcount.php',
+                    success : function(data){
+                        
+                        $.each(data, function(k, v) {
+                            if(v.mequalifiedcount) $('#mequalcnt').html(v.mequalifiedcount);
+                        });
+                    }
+                });
+                $.ajax({
+                    type : 'POST',
+                    data : inputparam,
+                    dataType: 'json',
+                    url : 'mecompletedcount.php',
+                    success : function(data){
+                        $.each(data, function(k, v) {
+                            if(v.mecompletedcount) $('#mecomcnt').html(v.mecompletedcount);
+                        });
+                    }
+                });
+                $.ajax({
+                    type : 'POST',
+                    data : inputparam,
+                    dataType: 'json',
+                    url : 'topregisteredcount.php',
+                    success : function(data){
+                        $.each(data, function(k, v) {
+                            if(v.topregisteredcount) $('#topregcnt').html(v.topregisteredcount);
+                        });
+                    }
+                });
+                $.ajax({
+                    type : 'POST',
+                    data : inputparam,
+                    dataType: 'json',
+                    url : 'topqualifiedcount.php',
+                    success : function(data){
+                        $.each(data, function(k, v) {
+                            if(v.topqualifiedcount) $('#topqualcnt').html(v.topqualifiedcount);
+                        });
+                    }
+                });
+                $.ajax({
+                    type : 'POST',
+                    data : inputparam,
+                    dataType: 'json',
+                    url : 'topcompletedcount.php',
+                    success : function(data){
+                        $.each(data, function(k, v) {
+                            if(v.topcompletedcount) $('#topcomcnt').html(v.topcompletedcount);
+                        });
+                    }
+                });
+                
+                $.ajax({
+                    type : 'POST',
+                    data : inputparam,
+                    dataType: 'json',
+                    url : 'topgenetic.php',
+                    success : function(returndata){
+                    var chart = $("#chart").data("kendoChart");
+                    var catr = returndata.categories;
+                    chart.setOptions({
+                        series: returndata.series,
+                        categoryAxis: {
+                            categories: catr}
+                    });
+                    chart.refresh();
+                    }
+                });
+                
+                $.ajax({
+                    type : 'POST',
+                    data : inputparam,
+                    dataType: 'json',
+                    url : 'topaccounts.php',
+                    success : function(returndata){
+                        console.log(JSON.stringify(returndata))
+                    var chart = $("#piechart").data("kendoChart");
+                    chart.setOptions({
+                        series: [returndata],
+                    });
+                    chart.refresh();
+                    }
+                });
+                
+                
+                
+                
             },
         });
 
@@ -739,121 +912,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
         });
     }
-    $(function () {
-        var myChart = Highcharts.chart('stackedchartcontainer', {
-            colors: ['#5fcc24', '#50a821', '#347014', '#1c3f0a'],
-            credits: {
-                enabled: false
-            },
-            chart: {
-                type: 'column'
-            },
-
-            title: {
-                text: 'Top Genetic Consultant'
-            },
-
-            xAxis: {
-                categories: ['Brandon Franklin', 'Brendan Thompson', 'Larry Bozulic', 'Jason Collett', 'Me']
-            },
-
-            yAxis: {
-                allowDecimals: false,
-                min: 0,
-            },
-            legend: {
-                layout: 'vertical',
-                align: 'right',
-                verticalAlign: 'top',
-                floating: true,
-                backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
-                borderColor: 'none',
-                borderWidth: 0,
-                shadow: false
-            },
-            plotOptions: {
-                column: {
-                    stacking: 'normal',
-                    dataLabels: {
-                        color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
-                        style: {
-                            textShadow: '0 0 3px black'
-                        }
-                    }
-                }
-            },
-
-            series: [{
-                    name: 'Registered',
-                    data: [5, 3, 4, 7, 2],
-                    stack: 'salesrep'
-                }, {
-                    name: 'Completed',
-                    data: [3, 4, 4, 2, 5],
-                    stack: 'salesrep'
-                }, {
-                    name: 'Qualified',
-                    data: [2, 5, 6, 2, 1],
-                    stack: 'salesrep'
-                }, {
-                    name: 'Submitted',
-                    data: [3, 0, 4, 4, 3],
-                    stack: 'salesrep'
-                }]
-        });
-        
-        
-        // Build the chart
-        Highcharts.chart('piechartcontainer', {
-            credits: {
-                enabled: false
-            },
-          chart: {
-            plotBackgroundColor: null,
-            plotBorderWidth: null,
-            plotShadow: false,
-            type: 'pie'
-          },
-          title: {
-            text: 'Top Accounts'
-          },
-          tooltip: {
-            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-          },
-          plotOptions: {
-            pie: {
-              allowPointSelect: true,
-              cursor: 'pointer',
-              dataLabels: {
-                enabled: false
-              },
-              showInLegend: true
-            }
-          },
-          series: [{
-            name: 'Accounts',
-            colorByPoint: true,
-            data: [{
-              name: 'Women2Women',
-              y: 61.41,
-              sliced: true,
-              selected: true
-            }, {
-              name: 'OBGYN Office',
-              y: 11.84
-            }, {
-              name: 'One Way Gynecology',
-              y: 10.85
-            }, {
-              name: 'Lexington Associates',
-              y: 4.67
-            }, {
-              name: 'Kentuckyone Health Obstetrics And Gynecology - N Eagle Creek',
-              y: 4.18
-            }]
-          }]
-        });
-    });
+    
 </script>
 <?php
 // Salesrep table
@@ -878,25 +937,24 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
         </section>
         <div class="scroller event-schedule">
-            <div class="container">  
-<!--                <table>
-                    <tr>
-                        <td>BRCA Days</td>
-                        <td>0</td>
-                        <td>Registered</td>
-                        <td>0</td>
-                        <td>Completed</td>
-                        <td>0</td>
-                    </tr>
-                    <tr>
-                        <td>Events</td>
-                        <td>0</td>
-                        <td>Qualified</td>
-                        <td>0</td>
-                        <td>Submitted</td>
-                        <td>0</td>
-                    </tr>
-                </table>    -->
+            <div class="container"> 
+                <div class="header" style="font-weight:bold;padding-left: 14px;">This Week's Stats</div>
+                <div class="row">
+                    <div class="col-md-1">BRCA Days</div>
+                    <div class="col-md-2"><span id="mebrcacnt" style="padding: 10px 30px;">0</span><span id="topbrcacnt">0</span></div>
+                    <div class="col-md-1">Registered</div>
+                    <div class="col-md-2"><span id="meregcnt" style="padding: 10px 30px;">0</span><span id="topregcnt">0</span></div>
+                    <div class="col-md-1">Completed</div>
+                    <div class="col-md-2"><span id="mecomcnt" style="padding: 10px 30px;">0</span><span id="topcomcnt">0</span></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-1">Events</div>
+                    <div class="col-md-2"><span id="meeventcnt" style="padding: 10px 30px;">0</span><span id="topeventcnt">0</span></div>
+                    <div class="col-md-1">Qualified</div>
+                    <div class="col-md-2"><span id="mequalcnt" style="padding: 10px 30px;">0</span><span id="topqualcnt">0</span></div>
+                    <div class="col-md-1">Submitted</div>
+                    <div class="col-md-2"><span id="mesubcnt" style="padding: 10px 30px;">0</span><span id="topsubcnt">0</span></div>
+                </div>
                 <div class="row">
                     <div class="col-md-4" style="padding: 10px 0;">
                         <button type="button" name="Detail" id="detail" class="info-button" style="float:left; background: #90bcf7; margin-right: 20px;">Detail</button>
@@ -904,9 +962,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     </div>
                 </div>
                 <div id="calendar"></div>
-                <div id="piechartcontainer"  class="col-md-4" ></div>
-                <div id="stackedchartcontainer" class="col-md-4" ></div>
-                
+                <div id="chart"  class="col-md-6" ></div>
+                <div id="piechart"  class="col-md-6" ></div>
                 </div>
             </div>
             <!-- The Modal -->
@@ -1105,5 +1162,64 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
         });
     });
 </script>
+<script>
+        function createChart() {
+            $("#chart").kendoChart({
+                title: {
+                    text: "Top Genetic Consultants"
+                },
+                legend: {
+                    visible: false
+                },
+                seriesDefaults: {
+                    type: "column",
+                    stack: true
+                },
+                valueAxis: {
+                    max: 50,
+                    line: {
+                        visible: false
+                    },
+                    minorGridLines: {
+                        visible: true
+                    }
+                },
+                categoryAxis: {
+                    //categories: [1952, 1956, 1960, 1964, 1968],
+                    majorGridLines: {
+                        visible: false
+                    }
+                },
+                tooltip: {
+                    visible: true,
+                    template: "#= series.name #: #= value #"
+                }
+            });
+            
+            $("#piechart").kendoChart({
+                title: {
+                    text: "Top Accounts"
+                },
+                legend: {
+                   position: "top"
+                },
+                seriesDefaults: {
+                    labels: {
+                        template: "#= category # - #= kendo.format('{0:P}', percentage)#",
+                        position: "outsideEnd",
+                        visible: true,
+                        background: "transparent"
+                    }
+                },
+                tooltip: {
+                    visible: true,
+                    template: "#= category # - #= kendo.format('{0:P}', percentage) #"
+                }
+            });
+        }
+
+       // $(document).ready(createChart);
+       // $(document).bind("kendo:skinChange", createChart);
+    </script>
 <?php require_once 'scripts.php'; ?>
 <?php require_once 'footer.php'; ?>

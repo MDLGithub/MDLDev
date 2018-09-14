@@ -113,7 +113,9 @@ function getMeRegistered($db,$userId,$date){
             . "INNER JOIN tblaccount tblacc ON tblqf.account_number = tblacc.account "
             . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
             . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
-            . "WHERE tblsrep.Guid_user = 613 AND DATE(tblqf.Date_created) = '2018-07-26'";
+            . "WHERE tblsrep.Guid_user =:userid AND YEARWEEK(tblqf.Date_created) = YEARWEEK(:datecreated)";
+    $result = $db->query($query, array("userid"=>$userId,"datecreated"=>$date));
+    return $result;  
         
 }
 
