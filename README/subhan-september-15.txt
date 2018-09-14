@@ -1,0 +1,28 @@
+FILES ADDED:
+
+1. /questionnaire/login/dashboard2.php
+2. /questionnaire/login/topaccounts.php
+3. /questionnaire/login/topgenetic.php
+4. /questionnaire/login/topeventcount.php
+5. /questionnaire/login/meeventcount.php
+6. /questionnaire/login/topbrcacount.php
+7. /questionnaire/login/mebrcacount.php
+8. /questionnaire/login/topregisteredcount.php
+9. /questionnaire/login/topcompletedcount.php
+10. /questionnaire/login/topqualifiedcount.php
+11. /questionnaire/login/mecompletedcount.php
+12. /questionnaire/login/mequalifiedcount.php
+13. /questionnaire/login/meregisteredcount.php
+14. /questionnaire/login/functions_event.php
+15. /questionnaire/login/eventschedule.php
+16. /questionnaire/login/summaryeventload.php
+17. /questionnaire/login/eventload.php
+18. /questionnaire/login/eventupdate.php
+19. /questionnaire/login/eventdelete.php
+20. /questionnaire/login/eventinsert.php
+21.  /questionnaire/login/salesrep.php
+22.  /questionnaire/login/accountselection.php
+23.  /questionnaire/login/assets/eventschedule/*
+
+
+
