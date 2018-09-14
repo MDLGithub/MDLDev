@@ -55,6 +55,7 @@ if (isset($_POST['generate_url_config']) && $_POST['generate_url_config']=='1'){
 
     extract($_POST);
 
+    //$reqLocations = array('D', 'F', 'L', 'DE');
     $reqLocations = array('D', 'F', 'L', 'DE');
     if($role=='Sales Rep' && $dv=='' && in_array($lc, $reqLocations)){
 	$isValid = FALSE;
@@ -63,11 +64,12 @@ if (isset($_POST['generate_url_config']) && $_POST['generate_url_config']=='1'){
     }
     $accountNumber = $_POST['an'];
     $hasAccountProviders = $db->query("SELECT Guid_provider FROM tblprovider WHERE account_id=:account_id", array('account_id'=>$accountNumber));
-
-    if(empty($hasAccountProviders)){
-	$isValid = FALSE;
-	$generateUrlLink = "";
-	$accountMessage = "<div class='error-text'>Selected account doesn't have providers.</div>";
+    if($lc!="F"){
+	if(empty($hasAccountProviders)){
+	    $isValid = FALSE;
+	    $generateUrlLink = "";
+	    $accountMessage = "<div class='error-text'>Selected account doesn't have providers.</div>";
+	}
     }
     if(isset($_POST['previous']) && $_POST['previous'] != ""){
 	$generateUrlLink = $urlPrev;
