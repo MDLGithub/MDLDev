@@ -16,6 +16,5 @@ functions.php
 mdl-stats.php
 mdl-stat-details.php
 mdl-stats-old-migrations.php
-mdl-stat-details-config.php
 
 admin.js
