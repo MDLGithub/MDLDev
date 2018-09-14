@@ -107,9 +107,15 @@ require_once ('navbar.php');
                         </thead>
                         <tbody>
                             <?php foreach ($initData as $k=>$v){ ?>
+                            <?php 
+                                $patientInfoUrl = SITE_URL.'/patient-info.php?patient='.$v['Guid_user']; 
+                                if($v['account_number'] && $v['account_number']!=''){
+                                    $patientInfoUrl .= '&account='.$v['account_number'];
+                                }
+                            ?>
                             <tr class="text-left">                                
-                                <td><?php echo $v['firstname'];?></td>                              
-                                <td><?php echo $v['lastname'];?></td>                              
+                                <td><a href="<?php echo $patientInfoUrl; ?>"><?php echo $v['firstname'];?></a></td>                              
+                                <td><a href="<?php echo $patientInfoUrl; ?>"><?php echo $v['lastname'];?></a></td>                              
                                 <td><?php echo $v['account_number'];?></td>                              
                                 <td><?php echo $v['salesrep'];?></td>                              
                             </tr>
