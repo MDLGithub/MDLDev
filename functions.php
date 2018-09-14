@@ -1257,7 +1257,7 @@ function get_option_of_nested_status($db, $parent = 0,  $level = '', $checkboxes
 function get_stats_info($db, $statusID){
     //exclude test users
     $testUserIds = getTestUserIDs($db);
-    $q = "SELECT * FROM `tbl_mdl_stats` WHERE Guid_status=:Guid_status AND Guid_user NOT IN(".$testUserIds.")";
+    $q = "SELECT * FROM `tbl_mdl_stats` WHERE Guid_status=:Guid_status AND Guid_user NOT IN(".$testUserIds.") AND Guid_patient<>'0' ";
     $stats = $db->query($q, array('Guid_status'=>$statusID));
     $result['count'] = 0;
     if(!empty($stats)){
