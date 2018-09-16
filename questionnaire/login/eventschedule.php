@@ -133,6 +133,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         color: #fff;
         text-align: center;
         }
+    #calendar .fc-body td {vertical-align: top !important;}  
+    .fc-event-container > a {min-height: 65px;}
 </style>
 <script>
 
