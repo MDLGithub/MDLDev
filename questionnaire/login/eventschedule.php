@@ -58,12 +58,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 <script src="assets/eventschedule/js/bootstrap-datetimepicker.min.js"></script>
 <style>
     .col-md-1 { width: 10.333333% !important;}
-    .container { max-width: 1358px !important;}
+    .container { max-width: 100% !important;}
     #datetimepicker1{ position: relative; width: 172px; }
     #datetimepicker1 input{ width: 100%; }
     #datetimepicker1 img{ position: absolute; top: 8px; right: 5px;}
 
-    #datetimepicker2{ position: relative; width: 172px; }
+    #datetimepicker2{ position: relative; /* width: 172px; */ }
     #datetimepicker2 input{ width: 100%; }
     #datetimepicker2 img{ position: absolute; top: 8px; right: 5px;}
     textarea.form-control{height: auto !important;}
@@ -115,8 +115,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .evtcontent{ padding: 5px 5px; white-space: pre-wrap !important;}
     .evttitle{font-weight: bold; color: #3a87ad; white-space: nowrap !important; overflow: hidden;text-overflow: ellipsis;}
 
-    .fc-month-view .evttitle, .fc-basicWeek-view .evttitle{width:105px;}
-    .fc-basicWeek-view .fc-comments{width: 105px;}
+    .fc-month-view .evttitle, .fc-basicWeek-view .evttitle{width:90%;}
+    .fc-basicWeek-view .fc-comments{width: 90%;}
     .fc-comments{white-space: nowrap !important; overflow: hidden;text-overflow: ellipsis;}
 
     .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px;}
@@ -259,7 +259,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     $('#updateEvent').find('input, textarea, button, select').prop("disabled", true);
                     ;
                 }
-                $('#myModal').find('#modaleventstart').val(start);
+                var frmstart = $.fullCalendar.formatDate(event.start, "MM/DD/Y");
+                $('#myModal').find('#modaleventstart').val(frmstart);
                 $("#modalsalesrepopt").val(event.salesrepid);
                 $('#modalaccountopt option').remove();
                 $('#modalaccountopt').html('<option value="0">Account</option>');
@@ -533,9 +534,15 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 /*
                 var start = dateFormat($('#modaleventstart').val(), "yyyy-mm-dd");
                 var end = dateFormat($('#modaleventstart').val(), "yyyy-mm-dd");
-                */
+                
                 var start = $('#modaleventstart').val();
                 var end = $('#modaleventstart').val();
+            
+                */
+                    
+                var start = moment($('#modaleventstart').val()).format("YYYY-MM-DD");
+                var end = moment($('#modaleventstart').val()).format("YYYY-MM-DD");   
+                
                 var accountId = $('#modalaccountopt').val();
                 var salesrepId = $('#modalsalerepid').val() ? $('#modalsalerepid').val() : 0;
                 var comments = $('#modalcomment').val();
@@ -1265,10 +1272,10 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
 <script>
     $(function () {
         $('#modaleventstart').datepicker({
-            dateFormat: "yy-mm-dd",
+            dateFormat: "mm/dd/yy",
             showOn: 'both',
             buttonImageOnly: true,
-            buttonImage: 'http://jqueryui.com/resources/demos/datepicker/images/calendar.gif'
+            buttonImage: 'assets/eventschedule/images/calendar.gif'
         });
     });
 </script>

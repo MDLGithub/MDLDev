@@ -70,7 +70,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     #datetimepicker1 input{ width: 100%; }
     #datetimepicker1 img{ position: absolute; top: 8px; right: 5px;}
 
-    #datetimepicker2{ position: relative; width: 172px; }
+    #datetimepicker2{ position: relative; /* width: 172px; */}
     #datetimepicker2 input{ width: 100%; }
     #datetimepicker2 img{ position: absolute; top: 8px; right: 5px;}
     textarea.form-control{height: auto !important;}
@@ -122,8 +122,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .evtcontent{ padding: 5px 5px; white-space: pre-wrap !important;}
     .evttitle{font-weight: bold; color: #3a87ad; white-space: nowrap !important; overflow: hidden;text-overflow: ellipsis;}
 
-    .fc-month-view .evttitle, .fc-basicWeek-view .evttitle{width:105px;}
-    .fc-basic-view .fc-comments{width: 105px;}
+    .fc-month-view .evttitle, .fc-basicWeek-view .evttitle{width:90%;}
+    .fc-basic-view .fc-comments{width: 90%;}
     .fc-comments{white-space: nowrap !important; overflow: hidden;text-overflow: ellipsis;}
 
     .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px;}
@@ -142,6 +142,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         }
     #calendar .fc-body td {vertical-align: top !important;}  
     .fc-event-container > a {min-height: 65px;}    
+    #mebrcacnt,#meregcnt,#mecomcnt,#meeventcnt,#mequalcnt,#mesubcnt{color:blue}
+    #topbrcacnt,#topregcnt,#topcomcnt,#topeventcnt,#topqualcnt,#topsubcnt{color:#edba23;}
+    .icondown:after{content:url('assets/eventschedule/icons/red_arrow.png')}
+    .iconup:after{content:url('assets/eventschedule/icons/green_arrow.png')}
+    .iconsame:after{content:url('assets/eventschedule/icons/star_icon.png')}
 </style>
 <script>
 
@@ -268,7 +273,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     $('#updateEvent').find('input, textarea, button, select').prop("disabled", true);
                     ;
                 }
-                $('#myModal').find('#modaleventstart').val(start);
+                var frmstart = $.fullCalendar.formatDate(event.start, "MM/DD/Y");
+                $('#myModal').find('#modaleventstart').val(frmstart);
                 $("#modalsalesrepopt").val(event.salesrepid);
                 $("#modalaccountopt").val(event.accountid);
                 //$("#modalsalesrepopt option:contains(" + event.salesrep + ")").attr('selected', 'selected');
@@ -472,9 +478,25 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     success : function(data){
                         $.each(data, function(k, v) {
                             if(v.topbrcacount) $('#topbrcacnt').html(v.topbrcacount);
+                            $('#mebrcacnt').removeClass('iconup icondown iconsame');
+                            if($('#mebrcacnt').html() != 0 && $('#topbrcacnt').html() != 0){
+                                if($('#mebrcacnt').html() < $('#topbrcacnt').html()) $('#mebrcacnt').addClass('icondown');
+                                if($('#mebrcacnt').html() > $('#topbrcacnt').html()) $('#mebrcacnt').addClass('iconup');
+                                if($('#mebrcacnt').html() == $('#topbrcacnt').html()) $('#mebrcacnt').addClass('iconsame');
+                            }
                         });
+                    },
+                    error: function(){
+                        $('#mebrcacnt').removeClass('iconup icondown iconsame');
+                        if($('#mebrcacnt').html() != 0 && $('#topbrcacnt').html() != 0){
+                            if($('#mebrcacnt').html() < $('#topbrcacnt').html()) $('#mebrcacnt').addClass('icondown');
+                            if($('#mebrcacnt').html() > $('#topbrcacnt').html()) $('#mebrcacnt').addClass('iconup');
+                            if($('#mebrcacnt').html() == $('#topbrcacnt').html()) $('#mebrcacnt').addClass('iconsame');
+                        }    
                     }
                 });
+                
+                
                 
                 $.ajax({
                     type : 'POST',
@@ -495,7 +517,20 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     success : function(data){
                         $.each(data, function(k, v) {
                             if(v.topeventcount) $('#topeventcnt').html(v.topeventcount);
+                            
+                            $('#meeventcnt').removeClass('iconup icondown iconsame');
+                            if($('#meeventcnt').html() < $('#topeventcnt').html()) $('#meeventcnt').addClass('icondown');
+                            if($('#meeventcnt').html() > $('#topeventcnt').html()) $('#meeventcnt').addClass('iconup');
+                            if($('#meeventcnt').html() == $('#topeventcnt').html()) $('#meeventcnt').addClass('iconsame');
                         });
+                    },
+                    error: function(){
+                        $('#meeventcnt').removeClass('iconup icondown iconsame');
+                        if($('#meeventcnt').html() != 0 && $('#topeventcnt').html() != 0){
+                            if($('#meeventcnt').html() < $('#topeventcnt').html()) $('#meeventcnt').addClass('icondown');
+                            if($('#meeventcnt').html() > $('#topeventcnt').html()) $('#meeventcnt').addClass('iconup');
+                            if($('#meeventcnt').html() == $('#topeventcnt').html()) $('#meeventcnt').addClass('iconsame');
+                        }    
                     }
                 });
                 
@@ -516,7 +551,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     dataType: 'json',
                     url : 'mequalifiedcount.php',
                     success : function(data){
-                        
                         $.each(data, function(k, v) {
                             if(v.mequalifiedcount) $('#mequalcnt').html(v.mequalifiedcount);
                         });
@@ -541,7 +575,19 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     success : function(data){
                         $.each(data, function(k, v) {
                             if(v.topregisteredcount) $('#topregcnt').html(v.topregisteredcount);
+                            $('#meregcnt').removeClass('iconup icondown iconsame');
+                            if($('#meregcnt').html() < $('#topregcnt').html()) $('#meregcnt').addClass('icondown');
+                            if($('#meregcnt').html() > $('#topregcnt').html()) $('#meregcnt').addClass('iconup');
+                            if($('#meregcnt').html() == $('#topregcnt').html()) $('#meregcnt').addClass('iconsame');
                         });
+                    },
+                    error: function(){ 
+                        $('#meregcnt').removeClass('iconup icondown iconsame');
+                        if($('#meregcnt').html() != 0 && $('#topregcnt').html() != 0){
+                            if($('#meregcnt').html() < $('#topregcnt').html()) $('#meregcnt').addClass('icondown');
+                            if($('#meregcnt').html() > $('#topregcnt').html()) $('#meregcnt').addClass('iconup');
+                            if($('#meregcnt').html() == $('#topregcnt').html()) $('#meregcnt').addClass('iconsame');
+                        }   
                     }
                 });
                 $.ajax({
@@ -552,7 +598,20 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     success : function(data){
                         $.each(data, function(k, v) {
                             if(v.topqualifiedcount) $('#topqualcnt').html(v.topqualifiedcount);
+                            
+                            $('#mequalcnt').removeClass('iconup icondown iconsame');
+                            if($('#mequalcnt').html() < $('#topqualcnt').html()) $('#mequalcnt').addClass('icondown');
+                            if($('#mequalcnt').html() > $('#topqualcnt').html()) $('#mequalcnt').addClass('iconup');
+                            if($('#mequalcnt').html() == $('#topqualcnt').html()) $('#mequalcnt').addClass('iconsame');
                         });
+                    },
+                    error: function(){ 
+                        $('#mequalcnt').removeClass('iconup icondown iconsame');
+                        if($('#mequalcnt').html() != 0 && $('#topqualcnt').html() != 0){
+                            if($('#mequalcnt').html() < $('#topqualcnt').html()) $('#mequalcnt').addClass('icondown');
+                            if($('#mequalcnt').html() > $('#topqualcnt').html()) $('#mequalcnt').addClass('iconup');
+                            if($('#mequalcnt').html() == $('#topqualcnt').html()) $('#mequalcnt').addClass('iconsame');
+                        }   
                     }
                 });
                 $.ajax({
@@ -563,7 +622,20 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     success : function(data){
                         $.each(data, function(k, v) {
                             if(v.topcompletedcount) $('#topcomcnt').html(v.topcompletedcount);
+                            
+                            $('#mecomcnt').removeClass('iconup icondown iconsame');
+                            if($('#mecomcnt').html() < $('#topcomcnt').html()) $('#mecomcnt').addClass('icondown');
+                            if($('#mecomcnt').html() > $('#topcomcnt').html()) $('#mecomcnt').addClass('iconup');
+                            if($('#mecomcnt').html() == $('#topcomcnt').html()) $('#mecomcnt').addClass('iconsame');
                         });
+                    },
+                    error: function(){ 
+                        $('#mecomcnt').removeClass('iconup icondown iconsame');
+                        if($('#mecomcnt').html() != 0 && $('#topcomcnt').html() != 0){
+                            if($('#mecomcnt').html() < $('#topcomcnt').html()) $('#mecomcnt').addClass('icondown');
+                            if($('#mecomcnt').html() > $('#topcomcnt').html()) $('#mecomcnt').addClass('iconup');
+                            if($('#mecomcnt').html() == $('#topcomcnt').html()) $('#mecomcnt').addClass('iconsame');
+                        }   
                     }
                 });
                 
@@ -686,9 +758,15 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 /*
                 var start = dateFormat($('#modaleventstart').val(), "yyyy-mm-dd");
                 var end = dateFormat($('#modaleventstart').val(), "yyyy-mm-dd");
-                */
+                
                 var start = $('#modaleventstart').val();
                 var end = $('#modaleventstart').val();
+            
+                */
+                    
+                var start = moment($('#modaleventstart').val()).format("YYYY-MM-DD");
+                var end = moment($('#modaleventstart').val()).format("YYYY-MM-DD");    
+                    
                 var accountId = $('#modalaccountopt').val();
                 var salesrepId = $('#modalsalerepid').val() ? $('#modalsalerepid').val() : 0;
                 var comments = $('#modalcomment').val();
@@ -940,7 +1018,9 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
         </section>
         <div class="scroller event-schedule">
             <div class="container"> 
-                <div class="header" style="font-weight:bold;padding-left: 14px;">This Week's Stats</div>
+                <div class="header" style="font-weight:bold;padding-left: 14px; width:80%">
+                    <span style="color:blue;font-weight: bold;padding-right: 10px;">Me</span><span style="color:#edba23;font-weight: bold;">Top Performer</span>
+                </div>
                 <div class="row">
                     <div class="col-md-1">BRCA Days</div>
                     <div class="col-md-2"><span id="mebrcacnt" style="padding: 10px 30px;">0</span><span id="topbrcacnt">0</span></div>
@@ -1029,7 +1109,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                             </div>
                                         </div>
                                     </div> 
-                                    <div class='col-md-2 modalaccounttype'>
+                                    <div class='col-md-5 modalaccounttype'>
                                         <div class="form-group">
                                             <select class="form-control" id="modalaccountopt">
                                                 <option value="0">Account</option>
@@ -1156,11 +1236,10 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
 <script>
     $(function () {
         $('#modaleventstart').datepicker({
-            //dateFormat: "mm/dd/yy",
-            dateFormat: "yy-mm-dd",
+            dateFormat: "mm/dd/yy",
             showOn: 'both',
             buttonImageOnly: true,
-            buttonImage: 'http://jqueryui.com/resources/demos/datepicker/images/calendar.gif'
+            buttonImage: 'assets/eventschedule/images/calendar.gif'
         });
     });
 </script>
