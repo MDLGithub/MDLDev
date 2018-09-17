@@ -479,11 +479,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         $.each(data, function(k, v) {
                             if(v.topbrcacount) $('#topbrcacnt').html(v.topbrcacount);
                             $('#mebrcacnt').removeClass('iconup icondown iconsame');
-                            if($('#mebrcacnt').html() != 0 && $('#topbrcacnt').html() != 0){
-                                if($('#mebrcacnt').html() < $('#topbrcacnt').html()) $('#mebrcacnt').addClass('icondown');
-                                if($('#mebrcacnt').html() > $('#topbrcacnt').html()) $('#mebrcacnt').addClass('iconup');
-                                if($('#mebrcacnt').html() == $('#topbrcacnt').html()) $('#mebrcacnt').addClass('iconsame');
-                            }
+                            if($('#mebrcacnt').html() < $('#topbrcacnt').html()) $('#mebrcacnt').addClass('icondown');
+                            if($('#mebrcacnt').html() > $('#topbrcacnt').html()) $('#mebrcacnt').addClass('iconup');
+                            if($('#mebrcacnt').html() == $('#topbrcacnt').html()) $('#mebrcacnt').addClass('iconsame');
                         });
                     },
                     error: function(){
