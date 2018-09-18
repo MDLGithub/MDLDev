@@ -617,6 +617,23 @@ function getUrlConfigurations($db, $userID){
 
     return $urlConfigs;
 }
+function updatePatientStatusID($db, $Guid_patient){
+    //SELECT statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date`
+    $q  =   "SELECT statuses.Guid_status
+	    FROM `tbl_mdl_status` statuses
+	    LEFT JOIN `tbl_mdl_status_log` statuslogs
+	    ON statuses.`Guid_status`= statuslogs.`Guid_status`
+	    WHERE `visibility`='1'
+	    AND statuslogs.`Guid_status_log`<>''
+	    AND parent_id='0'
+	    AND statuslogs.Guid_patient=$Guid_patient
+	    ORDER BY statuslogs.`Date` DESC, statuslogs.`order_by` DESC";
+    $result = $db->row($q);
+
+    updateTable($db, 'tblpatient', array('Guid_status'=>$result['Guid_status']), array('Guid_patient'=>$Guid_patient));
+
+    return $result['Guid_status'];
+}
 
 function get_active_providers($db, $field, $id){
     $queryProviders = "SELECT * FROM tblprovider WHERE $field=:id";
@@ -1167,6 +1184,7 @@ function get_status_names($db, $Guid_status, $Guid_user, $Log_group){
 	    $ids .= $v.', ';
 	}
 	$ids = rtrim($ids, ', ');
+	//var_dump("SELECT Guid_status, status FROM tbl_mdl_status WHERE Guid_status IN($ids)");
 	$statuses = $db->query("SELECT Guid_status, status FROM tbl_mdl_status WHERE Guid_status IN($ids)");
 	foreach ($statuses as $k=>$v){
 	    if($k==0 ){

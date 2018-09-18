@@ -203,7 +203,9 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     }
     //delete revenue row
     if(isset($_GET['delete-status-log']) && $_GET['delete-status-log']!=""){
+	$Guid_patient = $qualifyResult['Guid_patient'];
 	deleteByField($db,'tbl_mdl_status_log', 'Guid_status_log', $_GET['delete-status-log']);
+	updatePatientStatusID($db, $Guid_patient);
 	Leave($patientInfoUrl);
     }
 
@@ -875,10 +877,13 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 	    //delete old log
 	    deleteByField($db, 'tbl_mdl_status_log', 'Log_group', $LogGroup);
 	    saveStatusLog($db, $statusIDs, $statusLogData);
+	    //update last status id in patient table too
+	    updatePatientStatusID($db, $Guid_patient);
 	    Leave($patientInfoUrl);
 	} else {
 	    //insert log
 	    saveStatusLog($db, $statusIDs, $statusLogData);
+	    updatePatientStatusID($db, $Guid_patient);
 	    Leave($patientInfoUrl);
 	}
 
