@@ -711,15 +711,53 @@ $(document).ready(function () {
     //specimen checkbox actions
     $('#specimen input').on('click', function() {
 	var specimen = this.value;
-	console.log(specimen);
 	if(specimen=='No'){
 	    $('#select-reson').removeClass('hidden');
 	    $('#pLogs, #mdlInfoBox').addClass('hidden');
 	}
 	if(specimen=='Yes'){
-	    $('#select-reson, #specimenRadioBox').addClass('hidden');
-	    $('#pLogs, #mdlInfoBox').removeClass('hidden');
+	    $('#specimen').addClass('show-modal');
+	    //$('#select-reson, #specimenRadioBox').addClass('hidden');
+	    //$('#pLogs, #mdlInfoBox').removeClass('hidden');
 	}
+    });
+
+    $('#cancel-specimen-collected').on('click', function(){
+	 $('#specimen').removeClass('show-modal');
+	 $('#specimen-collected-cbox').prop('checked', false);
+    });
+    $('#save-specimen-collected').on('click', function(){
+	var dateVal = $('#specimen .datepicker').val();
+	var redirectUrl = $('#redirectUrl').val();
+	var Guid_user = $('#Guid_user').val();
+	var account = $('#account').val();
+	$('#specimen .datepicker').removeClass('error-border');
+	if(dateVal == ""){
+	    $('#specimen .datepicker').addClass('error-border');
+	} else {
+	    //save spacimen collected into logs
+	    var ajaxUrl = baseUrl+'/ajaxHandler.php';
+	    $.ajax( ajaxUrl , {
+		type: 'POST',
+		data: {
+		   save_specimen_into_logs: '1',
+		   date: dateVal,
+		   Guid_user: Guid_user,
+		   account: account
+		},
+		success: function(response) {
+		    var result = JSON.parse(response);
+		    console.log(result);
+		    window.location.replace(redirectUrl);
+		},
+		error: function() {
+		    console.log('0');
+		}
+	    });
+	}
+    });
+    $('#add-patient-deductable').on('click', function(){
+	$('#total-deductible').toggleClass('hidden');
     });
 
     //edit_text

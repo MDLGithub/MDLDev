@@ -106,8 +106,8 @@ function mres($value) {
     return $value;
 }
 function remove_accent($str) {
-    $a = array('À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'Æ', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', 'Î', 'Ï', 'Ð', 'Ñ', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', 'Ø', 'Ù', 'Ú', 'Û', 'Ü', 'Ý', 'ß', 'à', 'á', 'â', 'ã', 'ä', 'å', 'æ', 'ç', 'è', 'é', 'ê', 'ë', 'ì', 'í', 'î', 'ï', 'ñ', 'ò', 'ó', 'ô', 'õ', 'ö', 'ø', 'ù', 'ú', 'û', 'ü', 'ý', 'ÿ', 'Ā', 'ā', 'Ă', 'ă', 'Ą', 'ą', 'Ć', 'ć', 'Ĉ', 'ĉ', 'Ċ', 'ċ', 'Č', 'č', 'Ď', 'ď', 'Đ', 'đ', 'Ē', 'ē', 'Ĕ', 'ĕ', 'Ė', 'ė', 'Ę', 'ę', 'Ě', 'ě', 'Ĝ', 'ĝ', 'Ğ', 'ğ', 'Ġ', 'ġ', 'Ģ', 'ģ', 'Ĥ', 'ĥ', 'Ħ', 'ħ', 'Ĩ', 'ĩ', 'Ī', 'ī', 'Ĭ', 'ĭ', 'Į', 'į', 'İ', 'ı', 'Ĳ', 'ĳ', 'Ĵ', 'ĵ', 'Ķ', 'ķ', 'Ĺ', 'ĺ', 'Ļ', 'ļ', 'Ľ', 'ľ', 'Ŀ', 'ŀ', 'Ł', 'ł', 'Ń', 'ń', 'Ņ', 'ņ', 'Ň', 'ň', 'ŉ', 'Ō', 'ō', 'Ŏ', 'ŏ', 'Ő', 'ő', 'Œ', 'œ', 'Ŕ', 'ŕ', 'Ŗ', 'ŗ', 'Ř', 'ř', 'Ś', 'ś', 'Ŝ', 'ŝ', 'Ş', 'ş', 'Š', 'š', 'Ţ', 'ţ', 'Ť', 'ť', 'Ŧ', 'ŧ', 'Ũ', 'ũ', 'Ū', 'ū', 'Ŭ', 'ŭ', 'Ů', 'ů', 'Ű', 'ű', 'Ų', 'ų', 'Ŵ', 'ŵ', 'Ŷ', 'ŷ', 'Ÿ', 'Ź', 'ź', 'Ż', 'ż', 'Ž', 'ž', 'ſ', 'ƒ', 'Ơ', 'ơ', 'Ư', 'ư', 'Ǎ', 'ǎ', 'Ǐ', 'ǐ', 'Ǒ', 'ǒ', 'Ǔ', 'ǔ', 'Ǖ', 'ǖ', 'Ǘ', 'ǘ', 'Ǚ', 'ǚ', 'Ǜ', 'ǜ', 'Ǻ', 'ǻ', 'Ǽ', 'ǽ', 'Ǿ', 'ǿ');
-    $b = array('A', 'A', 'A', 'A', 'A', 'A', 'AE', 'C', 'E', 'E', 'E', 'E', 'I', 'I', 'I', 'I', 'D', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'U', 'U', 'U', 'U', 'Y', 's', 'a', 'a', 'a', 'a', 'a', 'a', 'ae', 'c', 'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i', 'n', 'o', 'o', 'o', 'o', 'o', 'o', 'u', 'u', 'u', 'u', 'y', 'y', 'A', 'a', 'A', 'a', 'A', 'a', 'C', 'c', 'C', 'c', 'C', 'c', 'C', 'c', 'D', 'd', 'D', 'd', 'E', 'e', 'E', 'e', 'E', 'e', 'E', 'e', 'E', 'e', 'G', 'g', 'G', 'g', 'G', 'g', 'G', 'g', 'H', 'h', 'H', 'h', 'I', 'i', 'I', 'i', 'I', 'i', 'I', 'i', 'I', 'i', 'IJ', 'ij', 'J', 'j', 'K', 'k', 'L', 'l', 'L', 'l', 'L', 'l', 'L', 'l', 'l', 'l', 'N', 'n', 'N', 'n', 'N', 'n', 'n', 'O', 'o', 'O', 'o', 'O', 'o', 'OE', 'oe', 'R', 'r', 'R', 'r', 'R', 'r', 'S', 's', 'S', 's', 'S', 's', 'S', 's', 'T', 't', 'T', 't', 'T', 't', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'W', 'w', 'Y', 'y', 'Y', 'Z', 'z', 'Z', 'z', 'Z', 'z', 's', 'f', 'O', 'o', 'U', 'u', 'A', 'a', 'I', 'i', 'O', 'o', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'A', 'a', 'AE', 'ae', 'O', 'o');
+    $a = array('À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'Æ', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', 'Î', 'Ï', 'Ð', 'Ñ', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', 'Ø', 'Ù', 'Ú', 'Û', 'Ü', 'Ý', 'ß', 'à', 'á', 'â', 'ã', 'ä', 'å', 'æ', 'ç', 'è', 'é', 'ê', 'ë', 'ì', 'í', 'î', 'ï', 'ñ', 'ò', 'ó', 'ô', 'õ', 'ö', 'ø', 'ù', 'ú', 'û', 'ü', 'ý', 'ÿ', 'Ā', 'ā', 'Ă', 'ă', 'Ą', 'ą', 'Ć', 'ć', 'Ĉ', 'ĉ', 'Ċ', 'ċ', 'Č', 'č', 'Ď', 'ď', 'Đ', 'đ', 'Ē', 'ē', 'Ĕ', 'ĕ', 'Ė', 'ė', 'Ę', 'ę', 'Ě', 'ě', 'Ĝ', 'ĝ', 'Ğ', 'ğ', 'Ġ', 'ġ', 'Ģ', 'ģ', 'Ĥ', 'ĥ', 'Ħ', 'ħ', 'Ĩ', 'ĩ', 'Ī', 'ī', 'Ĭ', 'ĭ', 'Į', 'į', 'İ', 'ı', 'Ĳ', 'ĳ', 'Ĵ', 'ĵ', 'Ķ', 'ķ', 'Ĺ', 'ĺ', 'Ļ', 'ļ', 'Ľ', 'ľ', 'Ŀ', 'ŀ', 'Ł', 'ł', 'Ń', 'ń', 'Ņ', 'ņ', 'Ň', 'ň', 'ŉ', 'Ō', 'ō', 'Ŏ', 'ŏ', 'Ő', 'ő', 'Œ', 'œ', 'Ŕ', 'ŕ', 'Ŗ', 'ŗ', 'Ř', 'ř', 'Ś', 'ś', 'Ŝ', 'ŝ', 'Ş', 'ş', 'Š', 'š', 'Ţ', 'ţ', 'Ť', 'ť', 'Ŧ', 'ŧ', 'Ũ', 'ũ', 'Ū', 'ū', 'Ŭ', 'ŭ', 'Ů', 'ů', 'Ű', 'ű', 'Ų', 'ų', 'Ŵ', 'ŵ', 'Ŷ', 'ŷ', 'Ÿ', 'Ź', 'ź', 'Ż', 'ż', 'Ž', 'ž', 'ſ', 'ƒ', 'Ơ', 'ơ', 'Ư', 'ư', 'Ǎ', 'ǎ', 'Ǐ', 'ǐ', 'Ǒ', 'ǒ', 'Ǔ', 'ǔ', 'Ǖ', 'ǖ', 'Ǘ', 'ǘ', 'Ǚ', 'ǚ', 'Ǜ', 'ǜ', 'Ǻ', 'ǻ', 'Ǽ', 'ǽ', 'Ǿ', 'ǿ', '‘');
+    $b = array('A', 'A', 'A', 'A', 'A', 'A', 'AE', 'C', 'E', 'E', 'E', 'E', 'I', 'I', 'I', 'I', 'D', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'U', 'U', 'U', 'U', 'Y', 's', 'a', 'a', 'a', 'a', 'a', 'a', 'ae', 'c', 'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i', 'n', 'o', 'o', 'o', 'o', 'o', 'o', 'u', 'u', 'u', 'u', 'y', 'y', 'A', 'a', 'A', 'a', 'A', 'a', 'C', 'c', 'C', 'c', 'C', 'c', 'C', 'c', 'D', 'd', 'D', 'd', 'E', 'e', 'E', 'e', 'E', 'e', 'E', 'e', 'E', 'e', 'G', 'g', 'G', 'g', 'G', 'g', 'G', 'g', 'H', 'h', 'H', 'h', 'I', 'i', 'I', 'i', 'I', 'i', 'I', 'i', 'I', 'i', 'IJ', 'ij', 'J', 'j', 'K', 'k', 'L', 'l', 'L', 'l', 'L', 'l', 'L', 'l', 'l', 'l', 'N', 'n', 'N', 'n', 'N', 'n', 'n', 'O', 'o', 'O', 'o', 'O', 'o', 'OE', 'oe', 'R', 'r', 'R', 'r', 'R', 'r', 'S', 's', 'S', 's', 'S', 's', 'S', 's', 'T', 't', 'T', 't', 'T', 't', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'W', 'w', 'Y', 'y', 'Y', 'Z', 'z', 'Z', 'z', 'Z', 'z', 's', 'f', 'O', 'o', 'U', 'u', 'A', 'a', 'I', 'i', 'O', 'o', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'A', 'a', 'AE', 'ae', 'O', 'o', '\'');
     return str_replace($a, $b, $str);
 }
 /**
@@ -1140,15 +1140,24 @@ function formatMoney($number){
     return $newNum;
 }
 
-function get_status_names($db, $statusIds=array()){
+function get_status_names($db, $Guid_status, $Guid_user, $Log_group){
     $statusStr = "";
     $ids = "";
+    $statusIds = array();
+    //first $Guid_status is parent so we need it in first item of array
+    array_push($statusIds, $Guid_status);
+
+    $nestedIDs = get_nested_status_ids($db, $Guid_status, $Guid_user, $Log_group);
+
+    foreach($nestedIDs as $k=>$v){
+	array_push($statusIds, $v['Guid_status']);
+    }
     if(!empty($statusIds)){
 	foreach ($statusIds as $k=>$v){
 	    $ids .= $v.', ';
 	}
 	$ids = rtrim($ids, ', ');
-	$statuses = $db->query("SELECT Guid_status,status FROM tbl_mdl_status WHERE Guid_status IN($ids)");
+	$statuses = $db->query("SELECT Guid_status, status FROM tbl_mdl_status WHERE Guid_status IN($ids)");
 	foreach ($statuses as $k=>$v){
 	    if($k==0 ){
 		$statusStr .= $v['status'];
@@ -1162,6 +1171,110 @@ function get_status_names($db, $statusIds=array()){
     }
     $statusStr = rtrim($statusStr, ', ');
     return $statusStr;
+}
+
+function get_nested_status_ids($db, $Guid_status, $Guid_user, $Log_group) {
+
+    $statusIDS = array();
+    $statuses = $db->query("SELECT sl.Guid_status FROM tbl_mdl_status_log sl
+			    LEFT JOIN tblpatient p ON sl.Guid_patient=p.Guid_user
+			    Left Join tbl_mdl_status s ON sl.Guid_status=s.Guid_status
+			    WHERE sl.Guid_user=$Guid_user AND s.parent_id=$Guid_status AND Log_group=$Log_group");
+
+    if ( $statuses ) {
+	array_push($statusIDS, $statuses['0']);
+	foreach ( $statuses as $status ) {
+	    $parentID = $status['Guid_status'];
+	    $checkCildren = $db->query("SELECT sl.Guid_status FROM tbl_mdl_status_log sl
+			    LEFT JOIN tblpatient p ON sl.Guid_patient=p.Guid_user
+			    Left Join tbl_mdl_status s ON sl.Guid_status=s.Guid_status
+			    WHERE sl.Guid_user=$Guid_user  AND s.parent_id=$parentID  AND Log_group=$Log_group");
+
+
+	    if ( !empty($checkCildren) ) {
+		array_push($statusIDS, $checkCildren['0']);
+		get_nested_status_ids( $db, $status['Guid_status'], $Guid_user, $Log_group);
+	    }
+	}
+    }
+    return $statusIDS;
+    //return $statusesIDs;
+}
+
+
+function get_selected_log_dropdown($db, $Log_group, $parent="0") {
+    $selectedStatuses = $db->query("SELECT Guid_status FROM tbl_mdl_status_log WHERE `Log_group`= ".$Log_group);
+    $content = "";
+    foreach ($selectedStatuses as $k => $v){
+	$getParent = $db->row("SELECT parent_id FROM tbl_mdl_status WHERE Guid_status=:Guid_status", array('Guid_status'=>$v['Guid_status']));
+	$statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$getParent['parent_id']." AND visibility='1' ORDER BY order_by ASC, Guid_status ASC");
+	$content .= '<div class="f2 valid ">
+			<div class="group">
+			    <select data-parent="'.$parent.'" required class="status-dropdown" name="status[]" id="">
+				<option value="0">Select Status</option>';
+				    if ( $statuses ) {
+					foreach ( $statuses as $status ) {
+					    $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
+
+					    $optionClass = '';
+					    if ( !empty($checkCildren) ) {
+						$optionClass = 'has_sub_menu';
+					    }
+					    $selected = isStatusSelected($status['Guid_status'],$selectedStatuses) ? " selected": "";
+					    $content .= "<option ".$selected." value='".$status['Guid_status']."' class='".$optionClass."'>".$status['status'];
+
+					    $content .= '</option>';
+					}
+				    }
+	$content .= '</select><p class="f_status"><span class="status_icons"><strong></strong></span>';
+	$content .= '</p></div></div>';
+    }
+    return $content;
+}
+
+function isStatusSelected($status, $selectedStatuses){
+    foreach ($selectedStatuses as $k=>$v){
+	 if($status == $v['Guid_status']){
+	    return TRUE;
+	}
+    }
+
+    return FALSE;
+}
+
+function saveStatusLog($db,$statusIDs, $statusLogData){
+    $i = 1;
+    foreach ($statusIDs as $k=>$status){
+	$statusLogData ['Guid_status'] = $status;
+
+	if($i==1){
+	    $insertStatusLog = insertIntoTable($db, 'tbl_mdl_status_log', $statusLogData);
+	    $insertID = $insertStatusLog['insertID'];
+	    if($insertID!=""){
+		$LogGroupID=$insertID;
+		$LogGroupData['Log_group']=$insertID;
+		$where['Guid_status_log']=$insertID;
+		//setting first insert id as a log group id
+		updateTable($db, 'tbl_mdl_status_log', $LogGroupData, $where);
+	    }
+	    $i++;
+	} else {
+	    //after first insert seting first insert id as logGroupID
+	    $statusLogData['Log_group']=$LogGroupID;
+	    $insertStatusLog = insertIntoTable($db, 'tbl_mdl_status_log', $statusLogData);
+	}
+    }
+    //updating last Guid_status with last date in patients table
+    //get last status by Date and order_by
+    if($LogGroupID){
+	saveLastUpdatedStatusId($db, $statusLogData['Guid_patient']);
+    }
+}
+
+function saveLastUpdatedStatusId($db, $Guid_patient){
+    $lastStatus = $db->row("SELECT * FROM `tbl_mdl_status_log` WHERE Guid_patient=$Guid_patient ORDER BY `Date` DESC, `order_by` DESC LIMIT 1 ");
+    $Guid_status = $lastStatus['Guid_status'];
+    updateTable($db, 'tblpatient', array('Guid_status'=>$Guid_status), array('Guid_patient'=>$Guid_patient));
 }
 
 function get_status_dropdown($db, $parent='0') {
@@ -1249,24 +1362,6 @@ function get_option_of_nested_status($db, $parent = 0,  $level = '', $checkboxes
     return $content;
 }
 /**
- * Get Stats info
- * @param type $db
- * @param type $statusID
- * @return type array ('count'=>5, 'info'=>array())
- */
-function get_stats_info($db, $statusID){
-    //exclude test users
-    $testUserIds = getTestUserIDs($db);
-    $q = "SELECT * FROM `tbl_mdl_stats` WHERE Guid_status=:Guid_status AND Guid_user NOT IN(".$testUserIds.") AND Guid_patient<>'0' ";
-    $stats = $db->query($q, array('Guid_status'=>$statusID));
-    $result['count'] = 0;
-    if(!empty($stats)){
-	$result['count'] = count($stats);
-	$result['info'] = $stats;
-    }
-    return $result;
-}
-/**
  * Get Mark as test user ids
  * @param type $db
  * @return type String 11,55,22,45
@@ -1281,9 +1376,38 @@ function getTestUserIDs($db){
 
     return $testUserIds;
 }
+/**
+ * Get Stats info
+ * @param type $db
+ * @param type $statusID
+ * @return type array ('count'=>5, 'info'=>array())
+ */
+function get_stats_info($db, $statusID){
+    //exclude test users
+    $testUserIds = getTestUserIDs($db);
+    $q = "SELECT statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date`
+	    FROM `tbl_mdl_status` statuses
+	    LEFT JOIN `tbl_mdl_status_log` statuslogs
+	    ON statuses.`Guid_status`= statuslogs.`Guid_status`
+	    WHERE `visibility`='1'
+	    AND statuslogs.`Guid_status_log`<>''
+	    AND statuslogs.Guid_status= $statusID
+	    AND statuslogs.Guid_user NOT IN(".$testUserIds.")
+	    AND statuslogs.Guid_patient<>'0'
+	    ORDER BY statuslogs.`Date` DESC, statuslogs.`order_by` ASC ";
+
+    $stats = $db->query($q);
+    $result['count'] = 0;
+    if(!empty($stats)){
+	$result['count'] = count($stats);
+	$result['info'] = $stats;
+    }
+    return $result;
+}
 
 function get_status_table_rows($db, $parent = 0) {
-    $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
+    $statusQ = "SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by DESC, Guid_status DESC";
+    $statuses = $db->query($statusQ);
     $content = '';
     if ( $statuses ) {
 	foreach ( $statuses as $status ) {
@@ -1305,11 +1429,10 @@ function get_status_table_rows($db, $parent = 0) {
 	}
     }
 
-
     return $content;
 }
 function get_status_child_rows($db, $parent = 0,  $level = '') {
-    $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
+    $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent."  ORDER BY order_by DESC, Guid_status DESC");
     if ( $statuses ) {
 	$content ='';
 	$prefix = 0;
@@ -1334,4 +1457,146 @@ function get_status_child_rows($db, $parent = 0,  $level = '') {
     }
 
     return $content;
+}
+
+
+function get_status_table_rows___($db, $parent = 0) {
+    $q ='SELECT statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date`
+	FROM `tbl_mdl_status` statuses
+	LEFT JOIN `tbl_mdl_status_log` statuslogs
+	ON statuses.`Guid_status`= statuslogs.`Guid_status`
+	WHERE `visibility`="1"
+	AND statuslogs.`Guid_status_log`<>""
+	AND parent_id="'.$parent.'"
+	ORDER BY statuslogs.`Date` DESC, statuslogs.`order_by` DESC';
+
+    $statuses = $db->query($q);
+    $content  = "";
+
+    if(!empty($statuses)){
+	foreach ($statuses as $k=>$v){
+	    $qChild ='SELECT statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date`
+	    FROM `tbl_mdl_status` statuses
+	    LEFT JOIN `tbl_mdl_status_log` statuslogs
+	    ON statuses.`Guid_status`= statuslogs.`Guid_status`
+	    WHERE `visibility`="1"
+	    AND statuslogs.`Guid_status_log`<>""
+	    AND parent_id="'.$v['Guid_status'].'"
+	    ORDER BY statuslogs.`Date` DESC, statuslogs.`order_by`  DESC';
+	    $checkChildren = $db->query($qChild);
+
+	    $optionClass = '';
+	    if ( !empty($checkChildren) ) {
+		$optionClass = 'has_sub';
+
+	    }
+	    $content .= "<tr id='".$v['Guid_status']."' class='parent ".$optionClass."'>";
+	    $content .= "<td class='text-left'><span>".$v['status'].'</span></td>';
+	    $content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$v['Guid_status'].'">'.$v['Guid_patient'].'</a></td>';
+	    if ( !empty($checkChildren) ) {
+		$content .= get_status_child_rows( $db, $v['Guid_status'],"&nbsp;" );
+	    }
+	    $content .= "</tr>";
+	}
+    }
+
+    return $content;
+}
+
+function get_status_child_rows__($db, $parent = 0,  $level = '') {
+
+    $q ='SELECT statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date`
+	FROM `tbl_mdl_status` statuses
+	LEFT JOIN `tbl_mdl_status_log` statuslogs
+	ON statuses.`Guid_status`= statuslogs.`Guid_status`
+	WHERE `visibility`="1"
+	AND statuslogs.`Guid_status_log`<>""
+	AND parent_id="'.$parent.'"
+	ORDER BY statuslogs.`Date` DESC, statuslogs.`order_by` DESC';
+    $statuses = $db->query($q);
+
+    $content = "";
+    if ( !empty($statuses) ) {
+	$prefix = 0;
+	foreach ( $statuses as $status ) {
+	    $qChild = 'SELECT statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date`
+			FROM `tbl_mdl_status` statuses
+			LEFT JOIN `tbl_mdl_status_log` statuslogs
+			ON statuses.`Guid_status`= statuslogs.`Guid_status`
+			WHERE `visibility`="1"
+			AND statuslogs.`Guid_status_log`<>""
+			AND parent_id="'.$status['Guid_status'].'"
+			ORDER BY statuslogs.`Date` DESC, statuslogs.`order_by`  DESC';
+	    $checkCildren = $db->query($qChild);
+	    $optionClass = '';
+
+
+	    if ( !empty($checkCildren) ) {
+		$optionClass = 'parent has_sub';
+	    }
+	    $content .= "<tr id='".$status['Guid_status']."' data-parent-id='".$parent."' class='sub ".$optionClass."'>";
+	    $content .= "<td class='text-left'><span>".$level . " " .$status['status'].'</span></td>';
+	    $content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].'">hhhh</a></td>';
+	    if ( !empty($checkCildren) ) {
+		$prefix .= '&nbsp;';
+		$content .= get_status_child_rows( $db, $status['Guid_status'], $level . "&nbsp;" );
+	    }
+	    $content .= "</tr>";
+
+	}
+    }
+
+    return $content;
+}
+
+function get_status_table_rows_($db, $parent = 0) {
+
+    $q ='SELECT count(*) AS count, statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date` FROM `tbl_mdl_status` statuses
+	LEFT JOIN `tbl_mdl_status_log` statuslogs
+	ON statuses.`Guid_status`= statuslogs.`Guid_status`
+	WHERE `visibility`="1"
+	AND statuslogs.`Guid_status_log`<>""
+	AND parent_id="'.$parent.'"
+	ORDER BY statuslogs.`Date`, statuslogs.`order_by` DESC';
+    $statuses = $db->query($q);
+
+    $content = '';
+    if ( $statuses ) {
+	foreach ( $statuses as $status ) {
+	    $q ='SELECT count(*) AS count, statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date` FROM `tbl_mdl_status` statuses
+		LEFT JOIN `tbl_mdl_status_log` statuslogs
+		ON statuses.`Guid_status`= statuslogs.`Guid_status`
+		WHERE `visibility`="1"
+		AND statuslogs.`Guid_status_log`<>""
+
+		AND parent_id="'.$status['Guid_status'].'"
+		ORDER BY statuslogs.`Date`, statuslogs.`order_by` DESC';
+	    $checkCildren = $db->query($q);
+
+	    if( isset($status['count']) && $status['count']!=0){
+		$optionClass = '';
+		if ( !empty($checkCildren) ) {
+		    $optionClass = 'has_sub';
+		}
+		$content .= "<tr id='".$status['Guid_status']."' class='parent ".$optionClass."'>";
+		$content .= "<td class='text-left'><span>".$status['status'].'</span></td>';
+		$content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].'">'.$status['count'].'</a></td>';
+		if ( !empty($checkCildren) ) {
+		    $content .= get_status_child_rows( $db, $status['Guid_status'], "&nbsp;" );
+		}
+		$content .= "</tr>";
+	    }
+	}
+    }
+
+    return $content;
+}
+
+function getStatusName($db, $Guid_status){
+    $name ="";
+    $status = $db->row("SELECT `status` FROM tbl_mdl_status WHERE Guid_status=:Guid_status", array('Guid_status'=>$Guid_status));
+    if($status){
+	$name = $status['status'];
+    }
+    return $name;
 }

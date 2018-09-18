@@ -66,6 +66,7 @@ body{
 .wh-35{
     width: 35px !important;
     height: 35px !important;
+    min-width: auto !important;
 }
 .text-center{
     text-align: center!important;
@@ -77,8 +78,8 @@ body{
     display: block;
     float: none;
     text-align: center;
-    font-size: 28px;
-    margin: 10px 0 30px 0;
+    font-size: 25px;
+    margin: 10px 0 35px 0;
     background: none;
 }
 .hideVisibility{
@@ -670,7 +671,7 @@ input:checked + .slider:before {
 }
 #action_palette .box {
     border-radius: 0 6em 0 0;
-    padding: 5em 0 .9em .9em;
+    padding: 4em 0 .9em .9em;
     transform: translateZ(0);
 }
 #action_palette_toggle{
@@ -713,7 +714,7 @@ textarea.form-control {
     height: 42px!important;
 }
 .addPlusIconBox{
-    margin-top: 35px;
+    margin-top: 15px;
     font-size: 28px;
 }
 .addPlusIconBox .add-new-device{
@@ -1176,7 +1177,9 @@ table.dataTable thead .sorting {
     margin-bottom: 25px;
 }
 #patient-info-box h5 {
-    margin-bottom: 6px;
+    margin-bottom: 7px;
+    display: inline-block;
+    width: 100%;
 }
 #patient-info-box .pInfo label {
     min-width: 210px;
@@ -1199,7 +1202,21 @@ table.dataTable thead .sorting {
     min-width: 50%;
     height: 27px;
 }
-.add-status-form .datepicker{
+#deductable-log h5 input[type="number"]{
+    float: right;
+    max-width: 50%;
+    min-width: 140px;
+    width: 140px;
+    margin-right: 10px;
+    margin-left: 4px;
+    height: 23px;
+}
+#total-deductible{
+    text-align: right;
+    font-weight: normal;
+}
+.add-status-form .datepicker,
+.add-status-form .order_by{
     border-bottom: 1px solid;
     margin: 15px 0;
     border: 2px solid #b9b9b9;
@@ -1362,4 +1379,49 @@ button[name="search"] > strong{
 }
 .stats-table tr.show{
      display: table-row;
+}
+#specimenRadioBox #specimen{
+    position: relative;
+}
+#specimenRadioBox #specimen.show-modal:after{
+    content: "";
+    position: fixed;
+    background: #000000ba;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+
+}
+#specimenRadioBox .pick-date{
+    display: none;
+}
+#specimenRadioBox .show-modal .pick-date{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 350px;
+    padding: 10px;
+    background: #fff;
+    z-index: 200;
+    display: block;
+}
+#specimenRadioBox .show-modal .pick-date label{
+    float: left;
+    margin: 0;
+}
+#specimenRadioBox .show-modal .pick-date .datepicker{
+    border: 1px solid;
+    background: #fff;
+    width: 100px;
+    float: left;
+    margin-left: 10px;
+}
+#specimenRadioBox  .show-modal button.btn-specimen.btn-inline {
+    min-width: auto;
+    height: auto;
+    margin: 0 0 0 10px;
+    padding: 2px 10px;
+    font-size: 15px;
 }
