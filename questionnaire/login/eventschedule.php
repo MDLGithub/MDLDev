@@ -454,7 +454,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         });
 
         // Whenever the user clicks on the "save" button
-        $('#eventsave').on('click touchstart', function () {
+        var clickEventType=((document.ontouchstart!==null)?'click':'touchstart');
+        //alert(clickEventType);
+        $('#eventsave').bind(clickEventType, function () {
             var errorMsg = "";
             if ($("#salesrepopt").val() == "") {
                 errorMsg = "Please select Genetic Consultant"
@@ -515,7 +517,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         });
 
         // Whenever the user clicks on the "update" button
-        $('#eventupdate').on('click touchstart', function () {
+        $('#eventupdate').bind(clickEventType, function () {
             var errorMsg = "";
             if ($("#modalsalesrepopt").val() == "0") {
                 errorMsg = "Please select Genetic Consultant"
@@ -590,13 +592,13 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         });
 
         // cancel update
-        $('#eventcancel').on('click touchstart', function () {
+        $('#eventcancel').bind(clickEventType, function () {
             var modal = document.getElementById('myModal');
             modal.style.display = "none";
         });
 
         // Whenever the user clicks on the "delete" button
-        $('#eventdelete').on('click touchstart', function () {
+        $('#eventdelete').bind(clickEventType, function () {
             var modalid = $('#modalid').val();
             if (confirm("Are you sure you want to remove it?"))
             {
@@ -618,6 +620,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         });
 
         $('#salesrepopt').on('change', function () {
+                var selec = $('#accountopt option:selected').val();
                 $('#accountopt option').remove();
                 $('#accountopt').html('<option value="0">Account</option>');
                 $.ajax({
@@ -627,7 +630,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     url : 'accountselection.php',
                     success : function(data){
                         $.each(data, function(k, v) {
-                            if(v.id) $('#accountopt').append('<option value="' + v.id + '">' + v.name + '</option>');
+                            if(selec == v.id) var selected = 'selected';
+                            if(v.id) $('#accountopt').append('<option value="' + v.id + '" '+ selected + '>' + v.name + '</option>');
                         });
 
 
@@ -636,6 +640,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $('#salerepid').val(this.value);
         });
         $('#modalsalesrepopt').on('change', function () {
+            var selec = $('#modalaccountopt option:selected').val();
             $('#modalaccountopt option').remove();
             $('#modalaccountopt').html('<option value="0">Account</option>');
             $.ajax({
@@ -645,13 +650,108 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 url : 'accountselection.php',
                 success : function(data){
                     $.each(data, function(k, v) {
-                        if(v.id) $('#modalaccountopt').append('<option value="' + v.id + '">' + v.name + '</option>');
+                        if(selec == v.id) var selected = 'selected';
+                        if(v.id) $('#modalaccountopt').append('<option value="' + v.id + '" '+ selected + '>' + v.name + '</option>');
                     });
 
 
                 }
             });
             $('#modalsalerepid').val(this.value);
+        });
+        
+        $('#accountopt').on('change', function () {
+                var selec = $('#salesrepopt option:selected').val();
+                $('#salesrepopt option').remove();
+                $('#salesrepopt').html('<option value="">Genetic Consultant</option>');
+                $.ajax({
+                    type : 'POST',
+                    data : 'accountId='+ this.value,
+                    dataType: 'json',
+                    url : 'salesrepselection.php',
+                    success : function(data){
+                        $.each(data, function(k, v) {
+                            if(selec == v.id) var selected = 'selected';
+                            if(v.id) $('#salesrepopt').append('<option value="' + v.id + '" '+ selected + '>' + v.name + '</option>');
+                        });
+
+
+                    }
+                });
+                
+                var accountName =  $('#accountopt option:selected').text();
+                var accountIdArr = accountName.split("-");
+                var accountId = accountIdArr[0];
+                if(accountId != 'Account'){
+                    var ajaxUrl = baseUrl+'/ajaxHandler.php';
+                    $.ajax( ajaxUrl , {
+                        type: 'POST',
+                        data: {
+                           get_account_info: '1',
+                           account_id: accountId
+                        },
+                        success: function(response) {
+                            var result = JSON.parse(response);
+                            var accountData = result['accountInfo'];
+                            var providers = result['providers']
+                            if(providers.length == 0){
+                                if(!confirm("No Provider in this Account. Do you want to continue?")){
+                                    $("#accountopt").val('0');
+                                }    
+                            }    
+                        },
+                        error: function() {
+                            alert('0');
+                        }
+                    });
+                }    
+        });
+        
+        $('#modalaccountopt').on('change', function () {
+                var selec = $('#modalsalesrepopt option:selected').val();
+                $('#modalsalesrepopt option').remove();
+                $('#modalsalesrepopt').html('<option value="">Genetic Consultant</option>');
+                $.ajax({
+                    type : 'POST',
+                    data : 'accountId='+ this.value,
+                    dataType: 'json',
+                    url : 'salesrepselection.php',
+                    success : function(data){
+                        $.each(data, function(k, v) {
+                            if(selec == v.id) var selected = 'selected';
+                            if(v.id) $('#modalsalesrepopt').append('<option value="' + v.id + '" '+ selected + '>' + v.name + '</option>');
+                        });
+
+
+                    }
+                });
+                
+                var accountName =  $('#modalaccountopt option:selected').text();
+                var accountIdArr = accountName.split("-");
+                var accountId = accountIdArr[0];
+                if(accountId != 'Account'){
+                    var ajaxUrl = baseUrl+'/ajaxHandler.php';
+                    $.ajax( ajaxUrl , {
+                        type: 'POST',
+                        data: {
+                           get_account_info: '1',
+                           account_id: accountId
+                        },
+                        success: function(response) {
+                            var result = JSON.parse(response);
+                            var accountData = result['accountInfo'];
+                            var providers = result['providers']
+                            if(providers.length == 0){
+                                if(!confirm("No Provider in this Account. Do you want to continue?")){
+                                    $("#modalaccountopt").val('0');
+                                }    
+                            }    
+                        },
+                        error: function() {
+                            alert('0');
+                        }
+                    });
+                } 
         });
 
         var dateFormat = function () {

@@ -1,30 +1,32 @@
 <?php
 require_once('config.php');
 
+$datecreated = isset($_REQUEST['startdate'])? $_REQUEST['startdate'] : 0;
+
 $query = "SELECT sp.Guid_salesrep, CONCAT(sp.first_name, ' ', sp.last_name) as salerepname, "
             . "(SELECT  count(*) FROM tblqualify tblqf "
                         . "INNER JOIN tblaccount tblacc ON tblqf.account_number = tblacc.account "
                         . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
                         . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
-                        . "WHERE tblsrep.Guid_salesrep = sp.Guid_salesrep) as registeredCnt, "
+                        . "WHERE tblsrep.Guid_salesrep = sp.Guid_salesrep AND YEARWEEK(tblqf.Date_created)=YEARWEEK(:datecreated1) ) as registeredCnt, "
                 . "(SELECT count(*) FROM tbl_ss_qualify tblqfss "
                         . "LEFT JOIN tblqualify tblqf ON tblqfss.Guid_qualify = tblqf.Guid_qualify "
                         . "INNER JOIN tblaccount tblacc ON tblqf.account_number = tblacc.account "
                         . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
                         . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
                         . "WHERE tblsrep.Guid_salesrep = sp.Guid_salesrep "
-                        . "AND tblqfss.qualified = 'Yes') as qualifiedCnt, "
+                        . "AND tblqfss.qualified = 'Yes' AND YEARWEEK(tblqf.Date_created)=YEARWEEK(:datecreated2) ) as qualifiedCnt, "
                 . "(SELECT count(*) FROM tbl_ss_qualify tblqfss "
                         . "LEFT JOIN tblqualify tblqf ON tblqfss.Guid_qualify = tblqf.Guid_qualify "
                         . "INNER JOIN tblaccount tblacc ON tblqf.account_number = tblacc.account "
                         . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
                         . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
                         . "WHERE tblsrep.Guid_salesrep = sp.Guid_salesrep "
-                        . "AND tblqfss.qualified IN ('Yes','No','Unknown')) as completedCnt "
+                        . "AND tblqfss.qualified IN ('Yes','No','Unknown') AND YEARWEEK(tblqf.Date_created)=YEARWEEK(:datecreated3) ) as completedCnt "
             . "FROM tblsalesrep sp "
             . "GROUP BY sp.Guid_salesrep  ORDER BY registeredCnt DESC LIMIT 5";
 
-$result = $db->query($query);
+$result = $db->query($query,array("datecreated1"=>$datecreated,"datecreated2"=>$datecreated,"datecreated3"=>$datecreated));
 
 foreach($result as $row){
     
@@ -36,15 +38,15 @@ foreach($result as $row){
 $data = array( 'series' => array ( [
                                 'name'=> "Registered",
                                 'data'=> $registered,
-                                'color'=> "#f3ac32"
+                                'color'=> "#bce273"
                            ],[
                                 'name'=> "Qualified",
                                 'data'=> $qualified,
-                                'color'=> "#b8b8b8"
+                                'color'=> "#5b870a"
                             ],[
                                 'name'=> "Completed",
                                 'data'=> $completed,
-                                'color'=> "#bb6e36"
+                                'color'=> "#263805"
                             ]
                            ),
                 'categories' => $salereps 

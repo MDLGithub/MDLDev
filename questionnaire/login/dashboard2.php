@@ -231,6 +231,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 }
             },
             defaultView: 'basicWeek',
+            handleWindowResize: true,
+            contentHeight: 400,            
             //defaultView: 'custom',
             
             eventSources: cursource,
@@ -676,7 +678,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         });
 
         // Whenever the user clicks on the "save" button
-        $('#eventsave').on('click touchstart', function () {
+        var clickEventType=((document.ontouchstart!==null)?'click':'touchstart');
+        $('#eventsave').bind(clickEventType, function () {
             var errorMsg = "";
             if ($("#salesrepopt").val() == "") {
                 errorMsg = "Please select Genetic Consultant"
@@ -737,7 +740,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         });
 
         // Whenever the user clicks on the "update" button
-        $('#eventupdate').on('click touchstart', function () {
+        $('#eventupdate').bind(clickEventType, function () {
             var errorMsg = "";
             if ($("#modalsalesrepopt").val() == "0") {
                 errorMsg = "Please select Genetic Consultant"
@@ -812,13 +815,13 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         });
 
         // cancel update
-        $('#eventcancel').on('click touchstart', function () {
+        $('#eventcancel').bind(clickEventType, function () {
             var modal = document.getElementById('myModal');
             modal.style.display = "none";
         });
 
         // Whenever the user clicks on the "delete" button
-        $('#eventdelete').on('click touchstart', function () {
+        $('#eventdelete').bind(clickEventType, function () {
             var modalid = $('#modalid').val();
             if (confirm("Are you sure you want to remove it?"))
             {
@@ -843,7 +846,71 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $('#salerepid').val(this.value);
         });
         $('#modalsalesrepopt').on('change', function () {
+            var selec = $('#modalaccountopt option:selected').val();
+            $('#modalaccountopt option').remove();
+            $('#modalaccountopt').html('<option value="0">Account</option>');
+            $.ajax({
+                type : 'POST',
+                data : 'salerepId='+ this.value,
+                dataType: 'json',
+                url : 'accountselection.php',
+                success : function(data){
+                    $.each(data, function(k, v) {
+                        if(selec == v.id) var selected = 'selected';
+                        if(v.id) $('#modalaccountopt').append('<option value="' + v.id + '" '+ selected + '>' + v.name + '</option>');
+                    });
+
+
+                }
+            });
             $('#modalsalerepid').val(this.value);
+        });
+        
+        $('#modalaccountopt').on('change', function () {
+                var selec = $('#modalsalesrepopt option:selected').val();
+                $('#modalsalesrepopt option').remove();
+                $('#modalsalesrepopt').html('<option value="">Genetic Consultant</option>');
+                $.ajax({
+                    type : 'POST',
+                    data : 'accountId='+ this.value,
+                    dataType: 'json',
+                    url : 'salesrepselection.php',
+                    success : function(data){
+                        $.each(data, function(k, v) {
+                            if(selec == v.id) var selected = 'selected';
+                            if(v.id) $('#modalsalesrepopt').append('<option value="' + v.id + '" '+ selected + '>' + v.name + '</option>');
+                        });
+
+
+                    }
+                });
+                
+                var accountName =  $('#modalaccountopt option:selected').text();
+                var accountIdArr = accountName.split("-");
+                var accountId = accountIdArr[0];
+                if(accountId != 'Account'){
+                    var ajaxUrl = baseUrl+'/ajaxHandler.php';
+                    $.ajax( ajaxUrl , {
+                        type: 'POST',
+                        data: {
+                           get_account_info: '1',
+                           account_id: accountId
+                        },
+                        success: function(response) {
+                            var result = JSON.parse(response);
+                            var accountData = result['accountInfo'];
+                            var providers = result['providers']
+                            if(providers.length == 0){
+                                if(!confirm("No Provider in this Account. Do you want to continue?")){
+                                    $("#modalaccountopt").val('0');
+                                }    
+                            }    
+                        },
+                        error: function() {
+                            alert('0');
+                        }
+                    });
+                } 
         });
 
         var dateFormat = function () {
@@ -1248,25 +1315,25 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     text: "Top Genetic Consultants"
                 },
                 legend: {
-                    visible: false
+                    //visible: false
                 },
                 seriesDefaults: {
                     type: "column",
                     stack: true
                 },
                 valueAxis: {
-                    max: 50,
+                    max: 500,
                     line: {
-                        visible: false
+                       //visible: false
                     },
                     minorGridLines: {
-                        visible: true
+                        //visible: true
                     }
                 },
                 categoryAxis: {
                     //categories: [1952, 1956, 1960, 1964, 1968],
                     majorGridLines: {
-                        visible: false
+                        //visible: false
                     }
                 },
                 tooltip: {
@@ -1280,13 +1347,13 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     text: "Top Accounts"
                 },
                 legend: {
-                   position: "top"
+                   position: "left"
                 },
                 seriesDefaults: {
                     labels: {
                         template: "#= category # - #= kendo.format('{0:P}', percentage)#",
-                        position: "outsideEnd",
-                        visible: true,
+                        //position: "outsideEnd",
+                        //visible: true,
                         background: "transparent"
                     }
                 },
