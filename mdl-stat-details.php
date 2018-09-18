@@ -21,12 +21,12 @@ if($role!="Admin"){
 $users = getUsersAndRoles($db);
 
 //this is just for test, will remove it later
-if($_GET['get_patient_ids']){
-    $patientEmptyIds = $db->query("SELECT Guid_stats, Guid_patient, Guid_user FROM `tbl_mdl_stats` WHERE Guid_patient='0'");
+if(isset($_GET['get_patient_ids'])){
+    $patientEmptyIds = $db->query("SELECT * FROM `tbl_mdl_status_log` WHERE Guid_patient='0'");
     foreach ($patientEmptyIds as $k=>$v){
 	$getPatient = $db->row("SELECT Guid_patient FROM `tblpatient` WHERE Guid_user=:Guid_user", array('Guid_user'=>$v['Guid_user']));
 	$patientID = $getPatient['Guid_patient'];
-	updateTable($db, 'tbl_mdl_stats', array('Guid_patient'=>$patientID), array('Guid_user'=>$v['Guid_user']));
+	//updateTable($db, 'tbl_mdl_stats', array('Guid_patient'=>$patientID), array('Guid_user'=>$v['Guid_user']));
 	var_dump("Guid_patient: ".$patientID."; Guid_user: ".$v['Guid_user']);
     }
 }//remove it after all tests

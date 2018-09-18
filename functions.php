@@ -172,6 +172,16 @@ function isUser($db, $role){
     return FALSE;
 }
 /**
+ * Deactivate User by user id
+ * @param type $db
+ * @param type $Guid_user
+ * @return boolean
+ */
+function deactivateUser($db, $Guid_user){
+    updateTable($db, 'tbluser', array('status'=>'0'), array('Guid_user'=>$Guid_user));
+    return TRUE;
+}
+/**
  * Delete User By given ID
  * @param type $userID
  * @return boolean

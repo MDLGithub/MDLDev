@@ -48,8 +48,11 @@ if (isset($_GET['delete']) && $_GET['delete'] != '') {
     if(!isFieldVisibleByRole($isActionAdd, $roleID)) {
 	Leave(SITE_URL.'/salesreps.php');
     }
-    deleteByField($db, 'tblsalesrep', 'Guid_salesrep', $_GET['delete']);
-    Leave(SITE_URL.'/salesreps.php');
+    if(isset($_GET['user']) && $_GET['user']!=""){
+	deactivateUser($db, $_GET['user']);
+	//deleteByField($db, 'tblsalesrep', 'Guid_salesrep', $_GET['delete']);
+	Leave(SITE_URL.'/salesreps.php');
+    }
 }
 if( isset($_POST['cancel_manage_salesrep'])){
     Leave(SITE_URL.'/salesreps.php');
@@ -123,10 +126,11 @@ if( isset($_POST['manage_salesrep'])){
 	}
     }
 }
-$salesreps = $db->selectAll('tblsalesrep');
+//$salesreps = $db->selectAll('tblsalesrep');
 $accounts = $db->selectAll('tblaccount');
 $tblproviders = $db->selectAll('tblprovider');
 $states = $db->selectAll('tblstates');
+$salesreps = $db->query("SELECT srep.*, u.`status` FROM tblsalesrep srep LEFT JOIN `tbluser` u ON srep.`Guid_user`=u.`Guid_user` WHERE u.`status`='1'");
 
 require_once ('navbar.php');
 ?>
@@ -478,7 +482,7 @@ require_once ('navbar.php');
 					    </a>
 					    <?php } ?>
 					    <?php if(isFieldVisibleByRole($isActionDelete, $roleID)) {?>
-					    <a onclick="javascript:confirmationDeleteSalesReps($(this));return false;" href="?delete=<?php echo $v['Guid_salesrep'] ?>&id=<?php echo $v['Guid_salesrep']; ?>">
+					    <a onclick="javascript:confirmationDeleteSalesReps($(this));return false;" href="?delete=<?php echo $v['Guid_salesrep'] ?>&id=<?php echo $v['Guid_salesrep']; ?>&user=<?php echo $v['Guid_user']; ?>">
 						<span class="far fa-trash-alt"></span>
 					    </a>
 					    <?php } ?>

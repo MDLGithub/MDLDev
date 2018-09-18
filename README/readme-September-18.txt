@@ -36,3 +36,6 @@ devicesInventory.php
 functions.php
 mdl-stat-details.php
 patient-info.php
+
+accounts.php
+salesreps.php

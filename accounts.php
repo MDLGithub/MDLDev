@@ -35,8 +35,11 @@ extract($accountActive);
 
 
 if (isset($_GET['delete']) && $_GET['delete'] != '') {
-   deleteRowByField($db, 'tblprovider', array('Guid_provider'=>$_GET['delete']));
-   Leave(SITE_URL.'/accounts.php?account_id='.$_GET['account-id']);
+   //deleteRowByField($db, 'tblprovider', array('Guid_provider'=>$_GET['delete']));
+    if(isset($_GET['user-id'])&&$_GET['user-id']!=""){
+	deactivateUser($db, $_GET['user-id']);
+	Leave(SITE_URL.'/accounts.php?account_id='.$_GET['account-id']);
+    }
 }
 if( isset($_POST['cancel_manage_provider'])){
     Leave(SITE_URL.'/accounts.php?account_id='.$_GET['account_id']);
@@ -220,7 +223,10 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
 			    </thead>
 			    <tbody>
 			    <?php
-				$accountProviders = get_active_providers($db, 'account_id', $account);
+				//$accountProviders = get_active_providers($db, 'account_id', $account);
+				$prQuery = "SELECT pr.*, u.status FROM tblprovider pr LEFT JOIN tbluser u ON u.`Guid_user`=pr.`Guid_user` WHERE account_id=$account AND u.status='1'";
+				$accountProviders = $db->query($prQuery);
+
 				if($accountProviders !=''){
 				    foreach ($accountProviders as $k=>$v){
 					$providerGuid=$v['Guid_provider'];
@@ -239,7 +245,7 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
 					<a href="<?php echo SITE_URL."/accounts.php?account_id=$Guid_account&provider_guid=$providerGuid"; ?>">
 					    <span class="fas fa-pencil-alt" aria-hidden="true"></span>
 					</a>
-					<a onclick="javascript:confirmationDeleteProvider($(this));return false;" href="?delete=<?php echo $providerGuid ?>&provider-id=<?php echo $v['provider_id']; ?>&account-id=<?php echo $Guid_account; ?>">
+					<a onclick="javascript:confirmationDeleteProvider($(this));return false;" href="?delete=<?php echo $providerGuid ?>&provider-id=<?php echo $v['provider_id']; ?>&account-id=<?php echo $Guid_account; ?>&user-id=<?php echo $v['Guid_user']; ?>">
 					    <span class="far fa-trash-alt" aria-hidden="true"></span>
 					</a>
 				    </td>
