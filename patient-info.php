@@ -527,13 +527,15 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <a class="pull-right" id="add-deductable-log">
                                     <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
                                 </a>  
+                                <?php if(!$qualifyResult['total_deductible']){ ?>
                                 <a class="pull-right  mR-10" id="add-patient-deductable">
                                     <span class="fas fa-plus-circle" aria-hidden="true"></span>  Deductible
                                 </a>  
-                                
-                                <span id="total-deductible" class="hidden pull-right">
+                                <?php } ?>
+                                <span id="total-deductible" class="<?php echo (!$qualifyResult['total_deductible'])?"hidden":"";?> pull-right">
                                     $<input value="<?php echo ($qualifyResult['total_deductible']!="")?$qualifyResult['total_deductible']:""; ?>" name="total_deductible" placeholder="Total Deductible" type="number" min="0.00" step="0.01">
                                 </span>
+                                
                             </h5>
                             <div class="deductable-form">
                                 
@@ -913,12 +915,9 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 <input type="hidden" name="Guid_status_log" value="<?php echo (isset($_GET['log_id'])&&$_GET['log_id']!="")?$_GET['log_id']:""; ?>" />
                 <input type="hidden" name="Guid_user" value="<?php echo $_GET['patient']; ?>" />
                 
-                <div class="col-md-8">
+                <div class="col-md-12">
                     <input required class="datepicker" autocomplete="off" id="status" name="date" type="text" value="<?php echo (isset($logRow['Date'])&&$logRow['Date']!="") ? date('n/j/Y', strtotime($logRow['Date'])) : "" ?>" placeholder="Date">
-                </div>
-                <div class="col-md-4">
-                    <input class="order_by" autocomplete="off" id="" name="order_by" type="number" value="<?php echo (isset($logRow['order_by'])&&$logRow['order_by']!="")?$logRow['order_by']:""; ?>" placeholder="Order">
-                </div>                
+                </div>               
                 <div class="col-md-12 clearfix" id="status-dropdowns-box">                                            
                     <?php 
                         if(isset($_GET['log_id']) && $_GET['log_id']!="" ){
