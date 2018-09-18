@@ -148,6 +148,8 @@ input:focus, select:focus, textarea:focus, button:focus {
     position: relative;
     z-index: 2;
     overflow: hidden;
+    margin-bottom: 0;
+    line-height: 1;
 }
 
 .f2 .dynamic > span {
@@ -174,9 +176,9 @@ input:focus, select:focus, textarea:focus, button:focus {
     font-weight: 600;
     padding: 0px 0px 0px .875em;
     width: 100%;
-    height: 2.625em;
+    height: 2.3em;
     max-width: 100%;
-    line-height: 1.438em;
+    line-height: 1.3em;
 }
 
 .f2 input:focus, .f2 select:focus, .f2 input:focus + .f_status, .f2 select:focus + .f_status {

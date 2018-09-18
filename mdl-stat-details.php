@@ -44,7 +44,7 @@ $initLabels = array(
 $initQ = 'SELECT s.Guid_status,  s.Guid_user, p.Guid_patient, p.firstname, p.lastname, 
 	a.account AS account_number, a.name AS account_name, 
 	CONCAT(srep.`first_name`, " " ,srep.`last_name`) AS salesrep  
-        FROM `tbl_mdl_stats` s 
+        FROM `tbl_mdl_status_log` s 
         LEFT JOIN `tblpatient` p ON s.Guid_patient=p.Guid_patient
         LEFT JOIN `tblaccount` a ON s.Guid_account=a.Guid_account
         LEFT JOIN `tblsalesrep` srep ON s.Guid_salesrep=srep.Guid_salesrep
@@ -92,7 +92,7 @@ require_once ('navbar.php');
         </section> 
       
         <div id="app_data" class="scroller "> 
-            <h1 class="title-st1">MDL Status Details</h1>
+            <h1 class="title-st1">Status: <?php echo getStatusName($db, $_GET['status_id']); ?></h1>
             <?php if(isset($_GET['status_id']) && $_GET['status_id']!=""){ ?>
             <div class="row ">
                 <div class="col-md-12 text-center">

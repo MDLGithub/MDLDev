@@ -250,7 +250,7 @@ require_once ('navbar.php');
                                                     <option>Select Device</option>
                                                       <?php 
                                                         foreach ($getDevices as $key => $v) { 
-                                                            $selected = ($deviceid == $v['deviceid']) ? ' selected' : '';
+                                                            $selected = (isset($deviceid)&&$deviceid == $v['deviceid']) ? ' selected' : '';
                                                             ?>
                                                         <option <?php echo $selected; ?> value="<?php echo $v['deviceid']; ?>"><?php echo $v['device_name']; ?></option>     
                                                         <?php }?>

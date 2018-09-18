@@ -20,6 +20,50 @@ if(isset($_POST['get_account_provider']) && $_POST['get_account_provider']=='1')
 if(isset($_POST['status_dropdown']) && $_POST['status_dropdown']=='1'){
     __status_dropdown($db, $_POST['parent_id']);
 }
+if(isset($_POST['save_specimen_into_logs'])){
+    save_specimen_into_logs($db, $_POST['date'], $_POST['Guid_user'], $_POST['account']);
+}
+
+//save save_specimen_into_logs
+function save_specimen_into_logs($db, $date, $Guid_user, $account){
+    if($account && $account!=""){
+        $accountQ = "SELECT a.Guid_account, a.account, a.name AS account_name, "
+                    . "sr.Guid_salesrep, sr.first_name AS salesrep_fname, sr.last_name AS salesrep_lname, CONCAT(sr.first_name, ' ', sr.last_name) AS salesrep_name "
+                    . "FROM tblaccount a "
+                    . "LEFT JOIN tblaccountrep ar ON a.Guid_account=ar.Guid_account "
+                    . "LEFT JOIN tblsalesrep sr ON ar.Guid_salesrep = sr.Guid_salesrep "
+                    . "WHERE a.account = '" . $account . "'";
+        $accountInfo = $db->row($accountQ);
+        $statusLogData = array(
+            'Guid_account' => $accountInfo['Guid_account'],
+            'account' => $accountInfo['account'],
+            'Guid_salesrep' => $accountInfo['Guid_salesrep'],
+            'salesrep_fname' => $accountInfo['salesrep_fname'],
+            'salesrep_lname' => $accountInfo['salesrep_lname']
+        );
+    }
+    $statusLogData['Guid_user'] = $Guid_user;
+    $statusLogData['Guid_status'] = '1';
+    
+    $patient = $db->row("SELECT * FROM tblpatient WHERE Guid_user=:Guid_user", array('Guid_user'=>$Guid_user));
+    $statusLogData['Guid_patient'] = $patient['Guid_patient'];    
+    
+    $statusLogData['Recorded_by'] = $_SESSION['user']['id'];                
+    $statusLogData['Date'] = ($date!="")?date('Y-m-d h:i:s',strtotime($date)):"";
+    $statusLogData['Date_created'] = date('Y-m-d h:i:s');
+    
+    //get log group if exists
+    $logRow = $db->row("SELECT * FROM tbl_mdl_status_log WHERE Guid_user=:Guid_user", array('Guid_user'=>$Guid_user));
+    if(!empty($logRow)){        
+        $insert = insertIntoTable($db, 'tbl_mdl_status_log', $statusLogData);
+        if($insert['insertID']){
+            updateTable($db, 'tbl_mdl_status_log', array('Log_group'=>$insert['insertID']), array('Guid_status_log'=>$insert['insertID']));
+            updateTable($db, 'tblpatient', array('specimen_collected'=>'Yes'), array('Guid_patient'=>$patient['Guid_patient']));
+        }
+    }        
+    echo json_encode(array('log_data'=>$statusLogData));
+    exit();    
+}
 
 //get status dropdown
 function __status_dropdown($db, $parent) {

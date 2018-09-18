@@ -61,6 +61,7 @@ if(isset($_POST['submit_account'])){
     $accountData = $_POST;    
     $accountData['phone_number'] = cleanString($phone_number);
     $accountData['fax'] = cleanString($fax);    
+    $accountData['name'] = remove_accent($name);    
     unset($accountData['submit_account']);
     unset($accountData['Guid_account']);
     unset($accountData['Guid_salesrep']);            
