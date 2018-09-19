@@ -204,7 +204,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     //delete status log row and update lats status log id in patients table
     if(isset($_GET['delete-status-log']) && $_GET['delete-status-log']!=""){
 	$Guid_patient = $qualifyResult['Guid_patient'];
-	deleteByField($db,'tbl_mdl_status_log', 'Guid_status_log', $_GET['delete-status-log']);
+	deleteByField($db,'tbl_mdl_status_log', 'Log_group', $_GET['group']);
 	updateCurrentStatusID($db, $Guid_patient);
 	Leave($patientInfoUrl);
     }
@@ -500,7 +500,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 						<a href="<?php echo $patientInfoUrl."&status_log=edit&log_id=".$v['Guid_status_log'];?>" class="">
 						    <span class="fas fa-pencil-alt"></span>
 						</a>
-						<a href="<?php echo $patientInfoUrl.'&delete-status-log='.$v['Guid_status_log']; ?>" onclick="javascript:confirmationDeleteStatusLog($(this));return false;" class="color-red">
+						<a href="<?php echo $patientInfoUrl.'&delete-status-log='.$v['Guid_status_log'].'&group='.$v['Log_group']; ?>" onclick="javascript:confirmationDeleteStatusLog($(this));return false;" class="color-red">
 						    <span class="far fa-trash-alt"></span>
 						</a>
 					    </div>
