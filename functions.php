@@ -1416,11 +1416,8 @@ function get_stats_info($db, $statusID, $hasChildren=FALSE){
             FROM `tbl_mdl_status` statuses
             LEFT JOIN `tbl_mdl_status_log` statuslogs
             ON statuses.`Guid_status`= statuslogs.`Guid_status`
-            WHERE `visibility`='1'";
-    //if(!$hasChildren){
-        $q .=   "AND statuslogs.`currentstatus`='Y'";
-    //}
-    $q .=   "AND statuslogs.`Guid_status_log`<>'' 
+            WHERE  statuslogs.`currentstatus`='Y'
+            AND statuslogs.`Guid_status_log`<>'' 
             AND statuslogs.Guid_status= $statusID 
             AND statuslogs.Guid_user NOT IN(".$testUserIds.")            
             AND statuslogs.Guid_patient<>'0' 
