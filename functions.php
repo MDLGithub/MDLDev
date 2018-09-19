@@ -1277,10 +1277,6 @@ function saveStatusLog($db,$statusIDs, $statusLogData){
 	    $insertStatusLog = insertIntoTable($db, 'tbl_mdl_status_log', $statusLogData);
 	}
     }
-    //updating last Guid_status with last date in patients table
-    //get last status by Date and order_by
-
-
 }
 
 function updateCurrentStatusID($db, $Guid_patient){
@@ -1435,7 +1431,7 @@ function get_stats_info($db, $statusID, $hasChildren=FALSE){
 function get_status_table_rows($db, $parent = 0) {
     $statusQ = "SELECT * FROM tbl_mdl_status "
 	    . "WHERE `parent_id` = ".$parent." "
-	    . "ORDER BY order_by DESC, Guid_status DESC";
+	    . "ORDER BY order_by ASC";
     $statuses = $db->query($statusQ);
     $content = '';
     if ( $statuses ) {
