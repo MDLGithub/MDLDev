@@ -3,21 +3,8 @@ ob_start();
 require_once('config.php');
 require_once('settings.php');
 require_once('header.php');
-if (!login_check($db)) {
-    Leave(SITE_URL);
-}
-if (isset($_GET['logout'])) {
-    logout();
-    Leave(SITE_URL);
-}
 
 $userID = $_SESSION['user']["id"];
-$roleInfo = getRole($db, $userID);
-$role = $roleInfo['role'];
-
-if($role!="Admin"){
-    Leave(SITE_URL."/no-permission.php");
-}
 
 if(isset($_GET['migrate']) && $_GET['migrate']=='1'){
     $oldStats = "";
@@ -28,7 +15,9 @@ if(isset($_GET['migrate']) && $_GET['migrate']=='1'){
     if($oldStats!=""){
         foreach ($oldStats as $k=>$v){
             
-            $Guid_patient = $v['Guid_patient'];            
+            $Guid_patient = $v['Guid_patient'];
+            $patient = $db->row("SELECT Guid_user FROM `tblpatient` WHERE Guid_patient=$Guid_patient");
+            $Guid_user= $patient['Guid_user'];
             
             $query = "SELECT q.*, p.* FROM tbl_ss_qualify q 
                      LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user 
@@ -52,7 +41,7 @@ if(isset($_GET['migrate']) && $_GET['migrate']=='1'){
             
             
             $statusLogData = array(
-                'Guid_user' => $patientInfo['Guid_user'],
+                'Guid_user' => $Guid_user,
                 'Guid_patient'=> $Guid_patient,
                 'Guid_account' => $accountInfo['Guid_account'],
                 'account' => $accountInfo['account'],
