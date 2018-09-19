@@ -59,6 +59,7 @@ function save_specimen_into_logs($db, $date, $Guid_user, $account){
     if($insert['insertID']){
         updateTable($db, 'tbl_mdl_status_log', array('Log_group'=>$insert['insertID']), array('Guid_status_log'=>$insert['insertID']));
         updateTable($db, 'tblpatient', array('specimen_collected'=>'Yes'), array('Guid_patient'=>$patient['Guid_patient']));
+        updateCurrentStatusID($db, $patient['Guid_patient']);
     }   
     
     echo json_encode(array('log_data'=>$statusLogData));

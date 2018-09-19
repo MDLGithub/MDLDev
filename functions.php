@@ -617,23 +617,6 @@ function getUrlConfigurations($db, $userID){
  
     return $urlConfigs;
 }
-function updatePatientStatusID($db, $Guid_patient){
-    //SELECT statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date` 
-    $q  =   "SELECT statuses.Guid_status 
-            FROM `tbl_mdl_status` statuses
-            LEFT JOIN `tbl_mdl_status_log` statuslogs
-            ON statuses.`Guid_status`= statuslogs.`Guid_status`
-            WHERE `visibility`='1' 
-            AND statuslogs.`Guid_status_log`<>''
-            AND parent_id='0'
-            AND statuslogs.Guid_patient=$Guid_patient
-            ORDER BY statuslogs.`Date` DESC, statuslogs.`order_by` DESC";
-    $result = $db->row($q);
-    
-    updateTable($db, 'tblpatient', array('Guid_status'=>$result['Guid_status']), array('Guid_patient'=>$Guid_patient));
-    
-    return $result['Guid_status'];
-}
 
 function get_active_providers($db, $field, $id){
     $queryProviders = "SELECT * FROM tblprovider WHERE $field=:id";
@@ -1185,7 +1168,7 @@ function get_status_names($db, $Guid_status, $Guid_user, $Log_group){
         }
         $ids = rtrim($ids, ', ');
         //var_dump("SELECT Guid_status, status FROM tbl_mdl_status WHERE Guid_status IN($ids)");
-        $statuses = $db->query("SELECT Guid_status, status FROM tbl_mdl_status WHERE Guid_status IN($ids)");
+        $statuses = $db->query("SELECT Guid_status, status FROM tbl_mdl_status WHERE Guid_status IN($ids) ");
         foreach ($statuses as $k=>$v){
             if($k==0 ){
                 $statusStr .= $v['status'];
@@ -1204,10 +1187,12 @@ function get_status_names($db, $Guid_status, $Guid_user, $Log_group){
 function get_nested_status_ids($db, $Guid_status, $Guid_user, $Log_group) {
    
     $statusIDS = array();
-    $statuses = $db->query("SELECT sl.Guid_status FROM tbl_mdl_status_log sl 
+    $statQ = "SELECT sl.Guid_status FROM tbl_mdl_status_log sl 
                             LEFT JOIN tblpatient p ON sl.Guid_patient=p.Guid_user 
                             Left Join tbl_mdl_status s ON sl.Guid_status=s.Guid_status
-                            WHERE sl.Guid_user=$Guid_user AND s.parent_id=$Guid_status AND Log_group=$Log_group");  
+                            WHERE sl.Guid_user=$Guid_user AND s.parent_id=$Guid_status AND Log_group=$Log_group";
+    //var_dump($statQ);
+    $statuses = $db->query($statQ);  
     
     if ( $statuses ) {         
         array_push($statusIDS, $statuses['0']);
@@ -1294,15 +1279,27 @@ function saveStatusLog($db,$statusIDs, $statusLogData){
     }   
     //updating last Guid_status with last date in patients table
     //get last status by Date and order_by
-    if($LogGroupID){        
-        saveLastUpdatedStatusId($db, $statusLogData['Guid_patient']);
-    }           
+     
+               
 }
 
-function saveLastUpdatedStatusId($db, $Guid_patient){
-    $lastStatus = $db->row("SELECT * FROM `tbl_mdl_status_log` WHERE Guid_patient=$Guid_patient ORDER BY `Date` DESC, `order_by` DESC LIMIT 1 ");
-    $Guid_status = $lastStatus['Guid_status'];
-    updateTable($db, 'tblpatient', array('Guid_status'=>$Guid_status), array('Guid_patient'=>$Guid_patient));
+function updateCurrentStatusID($db, $Guid_patient){
+    //SELECT statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date` 
+    $q  =   "SELECT * 
+            FROM `tbl_mdl_status` statuses
+            LEFT JOIN `tbl_mdl_status_log` statuslogs
+            ON statuses.`Guid_status`= statuslogs.`Guid_status`
+            WHERE statuses.`visibility`='1' 
+            AND statuslogs.`Guid_status_log`<>''
+            AND statuses.parent_id='0'
+            AND statuslogs.Guid_patient=$Guid_patient
+            ORDER BY statuslogs.`Date` DESC, statuses.order_by DESC LIMIT 1";
+    $result = $db->row($q);
+ 
+    updateTable($db, 'tbl_mdl_status_log', array('currentstatus'=>'N'), array('Guid_patient'=>$Guid_patient));
+    updateTable($db, 'tbl_mdl_status_log', array('currentstatus'=>'Y'), array('Guid_status_log'=>$result['Guid_status_log']));
+    
+    return $result['Guid_status_log'];
 }
 
 function get_status_dropdown($db, $parent='0') {
@@ -1410,19 +1407,24 @@ function getTestUserIDs($db){
  * @param type $statusID
  * @return type array ('count'=>5, 'info'=>array())
  */
-function get_stats_info($db, $statusID){
+function get_stats_info($db, $statusID, $hasChildren=FALSE){
     //exclude test users
     $testUserIds = getTestUserIDs($db);    
-    $q = "SELECT statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date` 
+    $q = "SELECT statuses.*, statuslogs.`Guid_status_log`, 
+            statuslogs.`Guid_patient`, statuslogs.`Log_group`, 
+            statuses.`order_by`, statuslogs.`Date` 
             FROM `tbl_mdl_status` statuses
             LEFT JOIN `tbl_mdl_status_log` statuslogs
             ON statuses.`Guid_status`= statuslogs.`Guid_status`
-            WHERE `visibility`='1'
-            AND statuslogs.`Guid_status_log`<>'' 
+            WHERE `visibility`='1'";
+    if(!$hasChildren){
+        $q .=   "AND statuslogs.`currentstatus`='Y'";
+    }
+    $q .=   "AND statuslogs.`Guid_status_log`<>'' 
             AND statuslogs.Guid_status= $statusID 
-            AND statuslogs.Guid_user NOT IN(".$testUserIds.") 
+            AND statuslogs.Guid_user NOT IN(".$testUserIds.")            
             AND statuslogs.Guid_patient<>'0' 
-            ORDER BY statuslogs.`Date` DESC, statuslogs.`order_by` ASC ";
+            ORDER BY statuslogs.`Date` DESC, statuses.`order_by` DESC";
    
     $stats = $db->query($q);
     $result['count'] = 0;
@@ -1434,18 +1436,21 @@ function get_stats_info($db, $statusID){
 }
 
 function get_status_table_rows($db, $parent = 0) {    
-    $statusQ = "SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by DESC, Guid_status DESC";
+    $statusQ = "SELECT * FROM tbl_mdl_status "
+            . "WHERE `parent_id` = ".$parent." "
+            . "ORDER BY order_by DESC, Guid_status DESC";
     $statuses = $db->query($statusQ);
     $content = '';    
     if ( $statuses ) {
         foreach ( $statuses as $status ) {  
-            $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
-            $stats = get_stats_info($db, $status['Guid_status']);
+            $checkCildren = $db->query("SELECT * FROM tbl_mdl_status "
+                    . "WHERE `parent_id` = ".$status['Guid_status']);
+            $stats = get_stats_info($db, $status['Guid_status'], FALSE);
             if($stats['count']!=0){
                 $optionClass = '';
                 if ( !empty($checkCildren) ) { 
                     $optionClass = 'has_sub';                 
-                }    
+                } 
                 $content .= "<tr id='".$status['Guid_status']."' class='parent ".$optionClass."'>";
                 $content .= "<td class='text-left'><span>".$status['status'].'</span></td>';            
                 $content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].'">'.$stats['count'].'</a></td>';
@@ -1467,7 +1472,7 @@ function get_status_child_rows($db, $parent = 0,  $level = '') {
         foreach ( $statuses as $status ) { 
             $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
             $optionClass = '';  
-            $stats = get_stats_info($db, $status['Guid_status']);
+            $stats = get_stats_info($db, $status['Guid_status'], TRUE);
             if($stats['count']!=0){
                 if ( !empty($checkCildren) ) { 
                     $optionClass = 'parent has_sub';   
@@ -1496,7 +1501,7 @@ function get_status_table_rows___($db, $parent = 0) {
         WHERE `visibility`="1" 
         AND statuslogs.`Guid_status_log`<>""
         AND parent_id="'.$parent.'"     
-        ORDER BY statuslogs.`Date` DESC, statuslogs.`order_by` DESC';
+        ORDER BY statuslogs.`Date` DESC, statuses.`order_by` DESC';
     
     $statuses = $db->query($q);
     $content  = "";
@@ -1510,7 +1515,7 @@ function get_status_table_rows___($db, $parent = 0) {
             WHERE `visibility`="1" 
             AND statuslogs.`Guid_status_log`<>""
             AND parent_id="'.$v['Guid_status'].'"           
-            ORDER BY statuslogs.`Date` DESC, statuslogs.`order_by`  DESC';
+            ORDER BY statuslogs.`Date` DESC, statuses.`order_by`  DESC';
             $checkChildren = $db->query($qChild);
             
             $optionClass = '';

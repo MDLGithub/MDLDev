@@ -201,11 +201,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         deleteByField($db,'tbl_revenue', 'Guid_revenue', $_GET['delete-revenue']);
         Leave($patientInfoUrl);
     }
-    //delete revenue row
+    //delete status log row and update lats status log id in patients table
     if(isset($_GET['delete-status-log']) && $_GET['delete-status-log']!=""){
         $Guid_patient = $qualifyResult['Guid_patient'];        
         deleteByField($db,'tbl_mdl_status_log', 'Guid_status_log', $_GET['delete-status-log']);
-        updatePatientStatusID($db, $Guid_patient);
+        updateCurrentStatusID($db, $Guid_patient);
         Leave($patientInfoUrl);
     }
   
@@ -268,27 +268,22 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         <input type="hidden" name="account" value="<?php echo isset($_GET['account'])?$_GET['account']:$mdlInfo['account'] ?>"/>
                         <div class="row">
                             <div class="col-md-6 pInfo">
-                                <p><label>Date of Birth:</label><input type="text" name="dob" class="datepicker" value="<?php echo ($qualifyResult['dob']!="")?date("n/j/Y", strtotime($qualifyResult['dob'])):""; ?>" autocomplete="off" /></p>
-                                <p><label>Email:</label> <input type="email" name="email" value="<?php echo $qualifyResult['email']; ?>" autocomplete="off"/> </p>
-<!--                                <p><label>Registration Date:</label> <?php echo date("n/j/Y h:m A", strtotime($qualifyResult['Date_created'])); ?></p>-->
-                                <p class="capitalize"><label>Insurance:</label> 
-                                    <?php 
-                                    echo $qualifyResult['insurance'];
-                                    if($qualifyResult['other_insurance']!="" && $qualifyResult['other_insurance']!="Other"){
-                                        echo " (".$qualifyResult['other_insurance'].")";
-                                    }
-                                    ?>                                    
+                                <p><label>Date of Birth: </label><input type="text" name="dob" class="datepicker" value="<?php echo ($qualifyResult['dob']!="")?date("n/j/Y", strtotime($qualifyResult['dob'])):""; ?>" autocomplete="off" /></p>
+                                <p><label>Email: </label><input type="email" name="email" value="<?php echo $qualifyResult['email']; ?>" autocomplete="off"/> </p>
+                                <p class="capitalize"><label>Insurance: </label><?php echo $qualifyResult['insurance'];
+                                                                                        if($qualifyResult['other_insurance']!="" && $qualifyResult['other_insurance']!="Other"){
+                                                                                            echo " (".$qualifyResult['other_insurance'].")";
+                                                                                        }
+                                                                                ?>                                  
                                 </p>
                                 <?php if($accountInfo) { ?>
-                                <p><label>Account: </label> 
-                                    <?php 
-                                        echo $accountInfo['account'];
-                                        if($accountInfo['account_name']!=""){
-                                            echo " - ".$accountInfo['account_name'];
-                                        }
-                                    ?>
+                                <p><label>Account: </label><?php echo $accountInfo['account'];
+                                                                if($accountInfo['account_name']!=""){
+                                                                    echo " - ".$accountInfo['account_name'];
+                                                                }
+                                                            ?>
                                 </p>
-                                <p><label>Genetic Consultant: </label> <?php echo $accountInfo['salesrep_name']; ?></p>
+                                <p><label>Genetic Consultant: </label><?php echo $accountInfo['salesrep_name']; ?></p>
                                 <?php } ?>
                                 <?php if($providers) { 
                                         echo "<p><label>Health Care Providers: </label>";
@@ -323,7 +318,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                                     <input id="redirectUrl" type="hidden" value="<?php echo $patientInfoUrl; ?>" />
                                                     <input id="Guid_user" type="hidden" value="<?php echo $_GET['patient']; ?>" />
                                                     <input id="account" type="hidden" value="<?php echo isset($_GET['account'])?$_GET['account']:""; ?>" />
-                                                    <input type="text" class="datepicker">
+                                                    <input type="text" class="datepicker" value="<?php echo date('n/j/Y'); ?>">
                                                     <button id="save-specimen-collected" class="btn btn-specimen btn-inline" type="button">OK</button>
                                                     <button id="cancel-specimen-collected" class="btn btn-specimen btn-inline" type="button">Cancel</button>
                                                 </div>
@@ -480,7 +475,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                     </a>
                                     <?php } ?>
                                 </th>
-                                <?php if($role=='Admin'){ ?><th>Action</th><?php } ?>
+                                <?php if($role=='Admin'){ ?><th class="text-center wh-100">Action</th><?php } ?>
                             </thead>
                             <tbody>
                                 <?php 
@@ -490,7 +485,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                             . 'LEFT JOIN tblpatient p ON sl.Guid_patient=p.Guid_user '
                                             . 'LEFT JOIN tbl_mdl_status s ON sl.Guid_status=s.Guid_status '
                                             . 'WHERE sl.Guid_user='.$patientID.'  AND s.parent_id="0" '
-                                            . 'Order BY date DESC';
+                                            . 'ORDER BY sl.date DESC, s.order_by DESC';
+                                
                                 $ststusLogs = $db->query($qStatusLog);
                                 foreach ($ststusLogs as $k=>$v){ 
                                 ?>
@@ -547,7 +543,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                             <th>Date Checked</th>
                                             <th>Checked By</th>
                                             <th>Deductible $</th>
-                                            <th class="text-center actions">Action</th>
+                                            <th class="text-center wh-100">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -602,7 +598,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                         <th>Payor</th>
                                         <th>CPT</th>
                                         <th>Amount $</th>
-                                        <th class="text-center actions">Action</th>
+                                        <th class="text-center wh-100">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -865,7 +861,6 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
             'Guid_salesrep' => $accountInfo['Guid_salesrep'],
             'salesrep_fname' => $accountInfo['salesrep_fname'],
             'salesrep_lname' => $accountInfo['salesrep_lname'],
-            'order_by' => $_POST['order_by'],
             'Recorded_by' => $_SESSION['user']['id'],                
             'Date'=>$date,
             'Date_created'=>date('Y-m-d h:i:s')
@@ -880,12 +875,12 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
             deleteByField($db, 'tbl_mdl_status_log', 'Log_group', $LogGroup);
             saveStatusLog($db, $statusIDs, $statusLogData);
             //update last status id in patient table too
-            updatePatientStatusID($db, $Guid_patient);
+            updateCurrentStatusID($db, $Guid_patient);
             Leave($patientInfoUrl);
         } else {
             //insert log
             saveStatusLog($db, $statusIDs, $statusLogData);
-            updatePatientStatusID($db, $Guid_patient);
+            updateCurrentStatusID($db, $Guid_patient);
             Leave($patientInfoUrl);
         }   
        
@@ -916,7 +911,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 <input type="hidden" name="Guid_user" value="<?php echo $_GET['patient']; ?>" />
                 
                 <div class="col-md-12">
-                    <input required class="datepicker" autocomplete="off" id="status" name="date" type="text" value="<?php echo (isset($logRow['Date'])&&$logRow['Date']!="") ? date('n/j/Y', strtotime($logRow['Date'])) : "" ?>" placeholder="Date">
+                    <input required class="datepicker" autocomplete="off" id="status" name="date" type="text" value="<?php echo (isset($logRow['Date'])&&$logRow['Date']!="") ? date('n/j/Y', strtotime($logRow['Date'])) : date('n/j/Y'); ?>" placeholder="Date">
                 </div>               
                 <div class="col-md-12 clearfix" id="status-dropdowns-box">                                            
                     <?php 
