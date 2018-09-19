@@ -20,8 +20,6 @@ if($role!="Admin"){
 }
 $users = getUsersAndRoles($db);
 
-
-
 require_once ('navbar.php');
 ?>
 

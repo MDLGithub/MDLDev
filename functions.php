@@ -1297,7 +1297,7 @@ function updateCurrentStatusID($db, $Guid_patient){
     $result = $db->row($q);
  
     updateTable($db, 'tbl_mdl_status_log', array('currentstatus'=>'N'), array('Guid_patient'=>$Guid_patient));
-    updateTable($db, 'tbl_mdl_status_log', array('currentstatus'=>'Y'), array('Guid_status_log'=>$result['Guid_status_log']));
+    updateTable($db, 'tbl_mdl_status_log', array('currentstatus'=>'Y'), array('Log_group'=>$result['Log_group']));
     
     return $result['Guid_status_log'];
 }
@@ -1417,9 +1417,9 @@ function get_stats_info($db, $statusID, $hasChildren=FALSE){
             LEFT JOIN `tbl_mdl_status_log` statuslogs
             ON statuses.`Guid_status`= statuslogs.`Guid_status`
             WHERE `visibility`='1'";
-    if(!$hasChildren){
+    //if(!$hasChildren){
         $q .=   "AND statuslogs.`currentstatus`='Y'";
-    }
+    //}
     $q .=   "AND statuslogs.`Guid_status_log`<>'' 
             AND statuslogs.Guid_status= $statusID 
             AND statuslogs.Guid_user NOT IN(".$testUserIds.")            
@@ -1628,17 +1628,13 @@ function get_status_table_rows_($db, $parent = 0) {
 function getStatusName($db, $Guid_status, $parent){
     $name =""; $parentName="";
     $status = $db->row("SELECT `status` FROM tbl_mdl_status WHERE Guid_status=:Guid_status", array('Guid_status'=>$Guid_status));
-    
     if($parent != ""){
         $parentRow = $db->row("SELECT `status` FROM tbl_mdl_status WHERE Guid_status=:Guid_status", array('Guid_status'=>$parent));
         $name .= $parentRow['status']." - ";
-    }
-    
+    }    
     if($status){
         $name .= $status['status'];
     }
     
-    
- 
     return $name;
 }

@@ -49,7 +49,7 @@ $initQ = 'SELECT s.Guid_status,  s.Guid_user, p.Guid_patient, p.firstname, p.las
         LEFT JOIN `tblaccount` a ON s.Guid_account=a.Guid_account
         LEFT JOIN `tblsalesrep` srep ON s.Guid_salesrep=srep.Guid_salesrep
         WHERE s.Guid_status=:Guid_status 
-       
+        AND s.currentstatus="Y"
         AND s.Guid_user NOT IN('.$testUserIds.') 
         AND s.Guid_patient<>"0"';
 if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
