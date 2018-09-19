@@ -69,17 +69,21 @@ if(isset($_GET['migrate']) && $_GET['migrate']=='1'){
             
             if($Guid_user && !empty($v['status_ids'])){
                 $statusIDs = unserialize($v['status_ids']);    
-               
+                $i=1;
                 foreach ($statusIDs as $key => $status) {                    
                     $statusLogData['Guid_status'] = $status;
                     $insert = insertIntoTable($db, 'tbl_mdl_status_log', $statusLogData);
+                    if($i=='1'){
+                        $Log_group = $insert['insertID'];
+                    }
                     if($insert['insertID']){
-                        updateTable($db, 'tbl_mdl_status_log', array('Log_group'=>$insert['insertID']), array('Guid_status_log'=>$insert['insertID']));
+                        updateTable($db, 'tbl_mdl_status_log', array('Log_group'=>$Log_group), array('Guid_status_log'=>$insert['insertID']));
                         if($status=='1'){
                             updateTable($db, 'tblpatient', array('specimen_collected'=>'Yes'), array('Guid_patient'=>$Guid_patient));
                         }
                         updateCurrentStatusID($db, $Guid_patient);
-                    } 
+                    }
+                    $i++;
                 }
             }
           
