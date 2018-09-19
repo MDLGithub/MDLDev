@@ -1479,7 +1479,7 @@ function get_status_child_rows($db, $parent = 0,  $level = '') {
                 }  
                 $content .= "<tr id='".$status['Guid_status']."' data-parent-id='".$parent."' class='sub ".$optionClass."'>";
                 $content .= "<td class='text-left'><span>".$level . " " .$status['status'].'</span></td>';
-                $content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].'">'.$stats['count']. '</a></td>';
+                $content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].'&parent='.$parent.'">'.$stats['count']. '</a></td>';
                 if ( !empty($checkCildren) ) {
                     $prefix .= '&nbsp;';
                     $content .= get_status_child_rows( $db, $status['Guid_status'], $level . "&nbsp;" );
@@ -1625,11 +1625,20 @@ function get_status_table_rows_($db, $parent = 0) {
     return $content;
 }
 
-function getStatusName($db, $Guid_status){
-    $name ="";
+function getStatusName($db, $Guid_status, $parent){
+    $name =""; $parentName="";
     $status = $db->row("SELECT `status` FROM tbl_mdl_status WHERE Guid_status=:Guid_status", array('Guid_status'=>$Guid_status));
-    if($status){
-        $name = $status['status'];
+    
+    if($parent != ""){
+        $parentRow = $db->row("SELECT `status` FROM tbl_mdl_status WHERE Guid_status=:Guid_status", array('Guid_status'=>$parent));
+        $name .= $parentRow['status']." - ";
     }
+    
+    if($status){
+        $name .= $status['status'];
+    }
+    
+    
+ 
     return $name;
 }

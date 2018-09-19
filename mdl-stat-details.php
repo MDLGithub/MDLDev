@@ -49,7 +49,7 @@ $initQ = 'SELECT s.Guid_status,  s.Guid_user, p.Guid_patient, p.firstname, p.las
         LEFT JOIN `tblaccount` a ON s.Guid_account=a.Guid_account
         LEFT JOIN `tblsalesrep` srep ON s.Guid_salesrep=srep.Guid_salesrep
         WHERE s.Guid_status=:Guid_status 
-        AND s.currentstatus="Y" 
+       
         AND s.Guid_user NOT IN('.$testUserIds.') 
         AND s.Guid_patient<>"0"';
 if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
@@ -95,7 +95,8 @@ require_once ('navbar.php');
         </section> 
       
         <div id="app_data" class="scroller "> 
-            <h1 class="title-st1">Status: <?php echo getStatusName($db, $_GET['status_id']); ?></h1>
+            <?php $parent = isset($_GET['parent'])?$_GET['parent']:""; ?>
+            <h1 class="title-st1">Status: <?php echo getStatusName($db, $_GET['status_id'], $parent); ?></h1>
             <?php if(isset($_GET['status_id']) && $_GET['status_id']!=""){ ?>
             <div class="row ">
                 <div class="col-md-12 text-center">
