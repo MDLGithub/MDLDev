@@ -22,13 +22,6 @@ $accessRole = getAccessRoleByKey('home');
 $roleIDs = unserialize($accessRole['role_ids']);
 $dataViewAccess = isUserHasAnyAccess($roleIDs, $roleID, 'view');
 
-//remove after testttttttttttttttt *************************************
-if(isset($_GET['empty-log'])&&$_GET['empty-log']!=""){
-    $db->query("TRUNCATE TABLE tbl_mdl_status_log;");
-}
-//**********************************************************************
-
-
 $isValid = TRUE;
 if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     $Guid_user = $_GET['patient'];
