@@ -221,7 +221,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		    . "LEFT JOIN tblsalesrep sr ON ar.Guid_salesrep = sr.Guid_salesrep "
 		    . "WHERE a.account = '" . $_GET['account'] . "'";
 	$accountInfo = $db->row($accountQ);
-	$providersQ = "SELECT CONCAT(first_name, ' ',last_name) AS provider_name FROM tblprovider WHERE account_id=".$_GET['account'];
+	$accountID = $_GET['account'];
+	$providersQ = "SELECT CONCAT(first_name, ' ',last_name) AS provider_name FROM tblprovider pr LEFT JOIN tbluser u ON u.`Guid_user`=pr.`Guid_user` WHERE account_id=$accountID AND u.status='1'";
 	$providers = $db->query($providersQ);
     } else {
 	$accountInfo = FALSE;
