@@ -280,7 +280,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 				<?php if($accountInfo) { ?>
 				<p><label>Account: </label><?php echo $accountInfo['account'];
 								if($accountInfo['account_name']!=""){
-								    echo " - ".$accountInfo['account_name'];
+								    echo " - ". ucwords(strtolower($accountInfo['account_name']));
 								}
 							    ?>
 				</p>
