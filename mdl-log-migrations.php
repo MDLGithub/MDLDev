@@ -3,8 +3,22 @@ ob_start();
 require_once('config.php');
 require_once('settings.php');
 require_once('header.php');
+if (!login_check($db)) {
+    Leave(SITE_URL);
+}
+if (isset($_GET['logout'])) {
+    logout();
+    Leave(SITE_URL);
+}
 
 $userID = $_SESSION['user']["id"];
+$roleInfo = getRole($db, $userID);
+$role = $roleInfo['role'];
+
+if($role!="Admin"){
+    Leave(SITE_URL."/no-permission.php");
+}
+
 
 if(isset($_GET['migrate']) && $_GET['migrate']=='1'){
     $oldStats = "";
@@ -53,27 +67,26 @@ if(isset($_GET['migrate']) && $_GET['migrate']=='1'){
                 'Date_created'=>date('Y-m-d h:i:s')
             );
             
-            if(!empty($v['status_ids'])){
-                $statusIDs = unserialize($v['status_ids']);
-                foreach ($statusIDs as $key => $value) {
-                    $statusLogData['Log_group'] = "";
-                    $statusLogData['Guid_status'] = $value;
-                    $statusLogData['currentstatus'] = "";
+            if($Guid_user && !empty($v['status_ids'])){
+                $statusIDs = unserialize($v['status_ids']);    
+               
+                foreach ($statusIDs as $key => $status) {                    
+                    $statusLogData['Guid_status'] = $status;
+                    $insert = insertIntoTable($db, 'tbl_mdl_status_log', $statusLogData);
+                    if($insert['insertID']){
+                        updateTable($db, 'tbl_mdl_status_log', array('Log_group'=>$insert['insertID']), array('Guid_status_log'=>$insert['insertID']));
+                        if($status=='1'){
+                            updateTable($db, 'tblpatient', array('specimen_collected'=>'Yes'), array('Guid_patient'=>$Guid_patient));
+                        }
+                        updateCurrentStatusID($db, $Guid_patient);
+                    } 
                 }
             }
-           
-
-
-
-            //$newStats = insertIntoTable($db, 'tbl_mdl_stats', $newStatsData);
-            var_dump($statusLogData);
-
-
-
+          
+            print_r($statusLogData);
+            
         }
-    }
-    
-    
+    }   
 }
 
 
