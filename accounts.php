@@ -16,7 +16,7 @@ $userID = $_SESSION['user']["id"];
 $roleInfo = getRole($db, $userID);
 $roleID = $roleInfo['Guid_role'];
 $accessRole = getAccessRoleByKey('account');
-$roleIDs = unserialize($accessRole['role_ids']);
+$roleIDs = unserialize($accessRole['value']);
 $dataViewAccess = isUserHasAnyAccess($roleIDs, $roleID, 'view');
 
 

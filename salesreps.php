@@ -15,7 +15,7 @@ $userID = $_SESSION['user']["id"];
 $roleInfo = getRole($db, $userID);
 $roleID = $roleInfo['Guid_role'];
 $accessRole = getAccessRoleByKey('salesreps');
-$roleIDs = unserialize($accessRole['role_ids']);
+$roleIDs = unserialize($accessRole['value']);
 $dataViewAccess = isUserHasAnyAccess($roleIDs, $roleID, 'view');
 
 $isFNameView = isset($roleIDs['first_name']['view'])?$roleIDs['first_name']['view']:"";

@@ -19,7 +19,7 @@ $role = $roleInfo['role'];
 $default_account = "";
 
 $accessRole = getAccessRoleByKey('home');
-$roleIDs = unserialize($accessRole['role_ids']);
+$roleIDs = unserialize($accessRole['value']);
 $dataViewAccess = isUserHasAnyAccess($roleIDs, $roleID, 'view');
 
 $isValid = TRUE;
@@ -469,8 +469,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			    <table class="table">
 			    <thead>
 				<th>Date</th>
-				<th>Status
+				<th>Statuses &nbsp;&nbsp;
 				    <?php if($role=='Admin'){ ?>
+				    <a title="Edit Statuses"  href="<?php echo $patientInfoUrl.'&manage_status=edit'; ?>" >
+					<span class="fas fa-pencil-alt" aria-hidden="true"></span>
+				    </a>
 				    <a title="Add New Status"  href="<?php echo $patientInfoUrl.'&manage_status=add'; ?>" >
 					<span class="fas fa-plus-circle" aria-hidden="true"></span>
 				    </a>
@@ -782,18 +785,18 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 	}
     }
 ?>
-<?php if(isset($_GET['manage_status'])  && $role=='Admin'){ ?>
+<?php if(isset($_GET['manage_status']) && $_GET['manage_status']=='add' && $role=='Admin'){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock">
 	<a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>
 
 	<h5 class="title">
-<!--            <a class="" id="open-new-status-form">
+	    <!-- <a class="" id="open-new-status-form">
 		<span class="fas fa-plus-circle" aria-hidden="true"></span>  Add New
 	    </a>&nbsp;&nbsp;
 	    <a class="" id="opent-status-list">
 		<span class="fas fa-list " aria-hidden="true"></span> List Statuses
-	    </a>-->
+	    </a> -->
 	    Add New Status
 	</h5>
 	<div class="content">
@@ -847,8 +850,69 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 </div>
 <?php } ?>
 
-<?php
 
+<?php
+if(isset($_POST['edit_statuses'])){
+    if(isset($_POST['status']['Guid_status'])){
+	$statusIDS = $_POST['status']['Guid_status'];
+	$statusNames = $_POST['status']['name'];
+	$statusOrder = $_POST['status']['order'];
+	$statusVisibility = $_POST['status']['visibility'];
+	$count = count($statusIDS);
+	foreach ($statusIDS as $k => $statusID) {
+	    $whereEditStatus = array('Guid_status'=>$statusID);
+	    $editStatusData = array(
+		'status' => $statusNames[$k],
+		'visibility' => $statusVisibility[$k],
+		'order_by' => $statusOrder[$k]
+	    );
+
+	    updateTable($db, 'tbl_mdl_status', $editStatusData, $whereEditStatus);
+	}
+    }
+}
+
+?>
+
+<?php if(isset($_GET['manage_status']) && $_GET['manage_status']=='edit' && $role=='Admin'){ ?>
+<div id="manage-status-modal" class="modalBlock editStausesModal">
+    <div class="contentBlock">
+	<a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>
+
+	<h5 class="title">
+	    Edit Statuses
+	</h5>
+	<div class="content">
+	    <!--<div class="status-list">list here...</div>-->
+	    <div class="edit-status-form">
+		<form action="" method="POST">
+
+		    <table class="table">
+			<thead>
+			    <tr>
+				<th class="status_name">Status Name</th>
+				<th>Order</th>
+				<th>Visibility</th>
+			    </tr>
+			</thead>
+			<tbody>
+			    <?php echo get_nested_ststus_editable_rows($db); ?>
+			</tbody>
+		    </table>
+
+
+		    <div class="text-right pT-10">
+		       <button class="button btn-inline" name="edit_statuses" type="submit" >Save</button>
+		       <a href="<?php echo $patientInfoUrl; ?>" class="btn-inline btn-cancel">Cancel</a>
+		   </div>
+		</form>
+	    </div>
+	</div>
+    </div>
+</div>
+<?php } ?>
+
+<?php
     if(isset($_POST['manage_status_log'])){
 	$statusIDs = $_POST['status'];
 	$date=($_POST['date']!="")?date('Y-m-d h:i:s',strtotime($_POST['date'])):"";

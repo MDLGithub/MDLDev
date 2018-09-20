@@ -19,7 +19,7 @@ $role = $roleInfo['role'];
 $default_account = "";
 
 $accessRole = getAccessRoleByKey('home');
-$roleIDs = unserialize($accessRole['role_ids']);
+$roleIDs = unserialize($accessRole['value']);
 $dataViewAccess = isUserHasAnyAccess($roleIDs, $roleID, 'view');
 
 if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to_date']))) {

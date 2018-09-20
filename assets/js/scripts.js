@@ -128,6 +128,18 @@ $(document).ready(function () {
 	}
     });
     /**
+     * Check all checkboxes on click to select All checkbox
+     * by given data-id
+     */
+    $('.checkAll').change(function() {
+	var dataID = $(this).attr('data-id');
+	if(this.checked) {
+	    $('#'+dataID+' input[type="checkbox"]').prop('checked', true);
+	}else{
+	    $('#'+dataID+' input[type="checkbox"]').prop('checked', false);
+	}
+    });
+    /**
      * Close modal box
      */
     $('.closeModal').on('click', function(e){

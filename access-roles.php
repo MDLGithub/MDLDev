@@ -84,20 +84,28 @@ $thisMessage = "";
 if(isset($_POST['submit_config_tables'])){
     extract($_POST);
     $data = $_POST;
+    $data['table_id']=$_GET['tableid'];
+    unset($data['submit_config_tables']);
+
     foreach ($tables as $tableKey=>$tableVal){
-	unset($tableVal['tableName']);
-	foreach ($tableVal as $fieldKey=>$fieldVal ) {
-	    if(!array_key_exists($tableKey, $data['role']) ){
-		$data['role'][$tableKey] = array();
+	if($tableKey==$data['table_id']){
+	    unset($tableVal['tableName']);
+	    foreach ($tableVal as $fieldKey=>$fieldVal ) {
+		if(isset($data['role'])){
+		    if(!array_key_exists($tableKey, $data['role']) ){
+			$data['role'][$tableKey] = array();
+		    }
+		}else{
+		    $data['role'][$tableKey] = array();
+		}
 	    }
 	}
     }
-    unset($data['submit_config_tables']);
-    if(isset($data['role'])){
-	if(saveTableAccessRole($db, $data['role'])){
-	    $thisMessage = "Changes have been saved";
-	}
+
+    if(saveTableAccessRole($db, $data['role'])){
+	$thisMessage = "Changes have been saved";
     }
+
 }
 
 
