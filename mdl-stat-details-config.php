@@ -55,6 +55,10 @@ $labels = array(
 );
 $statsConfigUrl= SITE_URL.'/mdl-stat-details-config.php';
 
+
+$configOptions = getOption($db, 'stat_details_config');
+$optionVal = unserialize($configOptions['value']);
+
 require_once ('navbar.php');
 ?>
 
@@ -81,7 +85,8 @@ require_once ('navbar.php');
                         <thead>
                             <tr>
                                 <th>Fields/Custom Name</th>
-                                <th>Assign Status</th>
+                                <th>Assigned Status</th>
+                                <th>Assigned Roles</th>
                                 <th class="wh-100">Actions</th>
                             </tr>
                         </thead>
@@ -89,6 +94,9 @@ require_once ('navbar.php');
                             <?php foreach ($labels as $k=>$v){ ?>
                             <tr>
                                 <td><?php echo $v; ?></td>
+                                <td>
+                                    asa 
+                                </td>
                                 <td>
                                     asa 
                                 </td>
@@ -117,28 +125,59 @@ $stConfigInfo = array();
 $stConfigInfo['label'] = "";
 if(isset($_GET['field_id']) && $_GET['field_id']!=""){
     $stConfig = getOption($db, 'mdl_stat_configs');
+    
     if(!empty($stConfig)){
         
     }
 }
 $mdlConfigData = array();
 if(isset($_POST['add_stat_config'])){
-    foreach ($_POST['label'] as $k=>$v){
-        $mdlConfigData['stat_details'][$k]['label'] = $v;
-        $mdlConfigData['stat_details'][$k]['status'] = $_POST['stauses'];
+    $mdlConfigData = array();
+    $rolesData = array();
+    $statusData = array();    
+    if(isset($_POST['roles']) && !empty($_POST['roles'])){
+        foreach ($_POST['roles'] as $k=>$v){
+            $rolesData[] = $k;
+        }
     }
-    setOption($db, 'stat_details', $mdlConfigData);
+    if(isset($_POST['stauses']) && !empty($_POST['stauses'])){
+        $statusData = $_POST['stauses'];
+    }
+    
+    foreach ($_POST['label'] as $k=>$v){
+        if($v != ""){
+            $mdlConfigData[$k]['label'] = $v;        
+        }
+        if(!empty($statusData)){
+            $mdlConfigData[$k]['statuses'] = $statusData;
+        }
+        if(!empty($rolesData)){
+            $mdlConfigData[$k]['roles'] = $rolesData;
+        }
+    }    
+    if(!empty($mdlConfigData)){
+        $key = 'stat_details_config';        
+        setOption($db, $key, serialize($mdlConfigData), 'columns' );
+    }    
 }
 
 ?>
 
-<?php if(isset($_GET['field_id'])){ ?>
+<?php 
+if(isset($_GET['field_id'])){
+    $fieldId = $_GET['field_id'];
+    
+    
+    $fieldOptions = $optionVal[$fieldId];
+    
+    $fieldConfigTitle = (isset($fieldOptions['label'])&&$fieldOptions['label']!="")?$fieldOptions['label'] : $labels[$fieldId];
+?>
 <div id="manage-status-modal" class="modalBlock ">
-    <div class="contentBlock">
+    <div class="contentBlock manageStatsModal">
         <a class="close" href="<?php echo $statsConfigUrl; ?>">X</a>        
         
         <h5 class="title">
-            Add Status To The Field
+            Config field - <?php echo $fieldConfigTitle; ?>
         </h5>
         <div class="content">
             <!--<div class="status-list">list here...</div>-->
@@ -148,25 +187,52 @@ if(isset($_POST['add_stat_config'])){
                     <?php if(isset($message)){ ?>
                         <div class="text-center success-text"><?php echo $message; ?></div>
                     <?php } ?> 
-                    
-                    <div class="f2 ">
-                        <label class="dynamic" for="custom_field_name"><span>Custom Field Name</span></label>
-                        <div class="group">
-                            <input value="<?php echo isset($_POST['custom_field_name'])?$_POST['custom_field_name']:$stConfigInfo['label']; ?>" type="text" autocomplete="off" id="custom_field_name" name="label[<?php echo isset($_GET['field_id'])?$_GET['field_id']:""; ?>]" placeholder="Custom Field Name">
-                            <p class="f_status">
-                                <span class="status_icons"><strong></strong></span>
-                            </p>
+                        <div class="row">
+                            <div class="col-md-12 clearfix">
+                                <div class="f2 ">
+                                    <label class="dynamic" for="custom_field_name"><span>Custom Field Name</span></label>
+                                    <div class="group">
+                                        <input value="<?php echo isset($_POST['custom_field_name'])?$_POST['custom_field_name']:$fieldConfigTitle; ?>" type="text" autocomplete="off" id="custom_field_name" name="label[<?php echo isset($_GET['field_id'])?$_GET['field_id']:""; ?>]" placeholder="Custom Field Name">
+                                        <p class="f_status">
+                                            <span class="status_icons"><strong></strong></span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stat-config-title">
+                                    <label>Select Statuses</label>
+                                    <span class="pull-right"><input data-id="statuses-dropdowns-box" class="checkAll" type="checkbox" /> All</span>
+                                </div>
+                                <div id="statuses-dropdowns-box"> 
+                                    <?php echo get_option_of_nested_status($db,0,'',TRUE); ?>                            
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stat-config-title">
+                                    <label>Select Roles</label>
+                                    <span class="pull-right"><input class="checkAll" data-id="roles-dropdown-box" type="checkbox" /> All </span>
+                                </div>
+                                <div id="roles-dropdown-box">
+                                    <?php $roles = $db->selectAll('tblrole'); ?>
+                                    <?php foreach ($roles as $key => $role) { ?>
+                                        <p><input type="checkbox" name="roles[<?php echo $role['Guid_role']; ?>]" > <?php echo $role['role']; ?></p>
+                                    <?php }?>
+                                </div>
+                            </div>
+                            <div class="col-md-12 clearfix">
+                                <div class="text-right pT-10">
+                                    <button class="button btn-inline" name="add_stat_config" type="submit" >Save</button>
+                                    <!--<button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>-->                   
+                                </div>
+                            </div>
+                            
                         </div>
-                    </div>
-                    <div id="status-dropdowns-box">   
-                        <label>Select Statuses</label><br/>
-                        <?php echo get_option_of_nested_status($db,0,'',TRUE); ?>                            
-                    </div>              
+                    
+                    
+                                  
 
-                     <div class="text-right pT-10">
-                        <button class="button btn-inline" name="add_stat_config" type="submit" >Save</button>
-                        <!--<button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>-->                   
-                    </div>
+                     
                 </form>
             </div>
         </div>

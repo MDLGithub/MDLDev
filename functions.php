@@ -300,8 +300,8 @@ function isUserHasAccess($db, $accessKey, $userID){
     }    
     $query = "SELECT * FROM `tbl_mdl_options` WHERE key_id=:key";
     $accessRole = $db->row($query, array("key"=>$accessKey));
-    if(isset($accessRole['role_ids'])){
-        $accessRoleIDs = unserialize($accessRole['role_ids']);
+    if(isset($accessRole['value'])){
+        $accessRoleIDs = unserialize($accessRole['value']);
         $accessRoleIDs = explode(';', $accessRoleIDs['ids']);
         if(in_array($roleID, $accessRoleIDs)){
             return TRUE;
@@ -313,7 +313,7 @@ function isUserHasAccess($db, $accessKey, $userID){
 
 function isCheckedRoleTableCheckbox($tableID, $fieldKey, $roelID, $action){    
     $accessRole = getAccessRoleByKey($tableID);    
-    $roleIds = unserialize($accessRole['role_ids']);
+    $roleIds = unserialize($accessRole['value']);
     //var_dump($roleIds);
     $ids = array();
     if($roleIds) {  
@@ -333,7 +333,7 @@ function isCheckedRoleTableCheckbox($tableID, $fieldKey, $roelID, $action){
 
 function isChecked($pageKey, $roelID, $action){    
     $accessRole = getAccessRoleByKey($pageKey); 
-    $roleIds = unserialize($accessRole['role_ids']);   
+    $roleIds = unserialize($accessRole['value']);   
     $ids = array();
     if($roleIds) {     
         if(isset($roleIds[$action])){
@@ -378,31 +378,30 @@ function saveTableAccessRole($db, $data){
     extract($data); 
     $actions = array('view', 'add', 'edit', 'delete');
     foreach ($data as $tableKey => $tableFields){
-        if(!empty($tableFields)){
-            $saveData = array(); 
-            foreach ($tableFields as $fieldK=>$fieldV){
-                foreach ($actions as $k=>$action){
-                    $roleIds= "";
-                    if(isset($fieldV[$action]) && !empty($fieldV[$action])){
-                        foreach ($fieldV[$action] as $k=>$v) {
-                            $roleIds .= $k.";";
-                        }
+        $saveData = array(); 
+        foreach ($tableFields as $fieldK=>$fieldV){
+            foreach ($actions as $k=>$action){
+                $roleIds= "";
+                if(isset($fieldV[$action]) && !empty($fieldV[$action])){
+                    foreach ($fieldV[$action] as $k=>$v) {
+                        $roleIds .= $k.";";
                     }
-                    $saveData[$fieldK][$action] = rtrim($roleIds, ';');
                 }
-            }            
-            if( getAccessRoleByKey($tableKey) ){ 
-                //update option
-                $updateData = array('role_ids'=>serialize($saveData), 'type'=>'table');
-                updateTable($db,'tbl_mdl_options', $updateData, array('key_id'=>$tableKey));         
+                $saveData[$fieldK][$action] = rtrim($roleIds, ';');
+            }
+        }            
+        if( getAccessRoleByKey($tableKey) ){ 
+            //update option
+            $updateData = array('value'=>serialize($saveData), 'type'=>'table');
+            updateTable($db,'tbl_mdl_options', $updateData, array('key_id'=>$tableKey));         
 
-            }else{ 
-                //insert option
-                $insertData = array('key_id'=>$tableKey, 'role_ids'=>serialize($saveData), 'type'=>'table');
-                insertIntoTable($db, 'tbl_mdl_options', $insertData);
-            } 
-        }
+        }else{ 
+            //insert option
+            $insertData = array('key_id'=>$tableKey, 'value'=>serialize($saveData), 'type'=>'table');
+            insertIntoTable($db, 'tbl_mdl_options', $insertData);
+        } 
     }
+    
 }
 function savePageAccessRole($db, $data){
     extract($data);   
@@ -421,12 +420,12 @@ function savePageAccessRole($db, $data){
             }        
             if( getAccessRoleByKey($pageKey) ){ 
                 //update option
-                $updateData = array('role_ids'=>serialize($saveData), 'type'=>'page');
+                $updateData = array('value'=>serialize($saveData), 'type'=>'page');
                 updateTable($db,'tbl_mdl_options', $updateData, array('key_id'=>$pageKey));         
 
             }else{ 
                 //insert option
-                $insertData = array('key_id'=>$pageKey, 'role_ids'=>serialize($saveData), 'type'=>'page');
+                $insertData = array('key_id'=>$pageKey, 'value'=>serialize($saveData), 'type'=>'page');
                 insertIntoTable($db, 'tbl_mdl_options', $insertData);
             } 
         }
@@ -438,14 +437,14 @@ function getOption($db, $key){
     
     return $result;    
 }
-function setOption($db, $key, $val){
+function setOption($db, $key, $val, $type='page'){
     //check if key exists
     $checkKey = getOption($db, $key);
     if($checkKey){ //update existing
         $where = array('key_id'=>$key);
-        updateTable($db, 'tbl_mdl_options', $val, $where);
+        updateTable($db, 'tbl_mdl_options', array('key_id'=>$key,'value'=>$val,'type'=>$type), $where);
     } else { //insert new key and value
-        insertIntoTable($db, 'tbl_mdl_options', array($key=>$val));
+        insertIntoTable($db, 'tbl_mdl_options', array('key_id'=>$key,'value'=>$val,'type'=>$type));
     }
 }
 
@@ -1382,6 +1381,49 @@ function get_option_of_nested_status($db, $parent = 0,  $level = '', $checkboxes
    
     return $content;
 }
+
+function get_nested_ststus_editable_rows($db, $parent = 0, $level = '') {
+    $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
+    $content = "";
+    if ( $statuses ) {
+        $content ='';
+        $prefix = 0;
+        
+        foreach ( $statuses as $status ) {  
+            echo "<tr>";
+            $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
+            $optionClass = '';
+           
+            if ( !empty($checkCildren) ) { 
+                $optionClass = 'has_sub';   
+            }         
+            
+            $content .= "<td  class='".$optionClass."'>".$level . " ";
+            $content .= "<input type='hidden' name=status[Guid_status][] value='".$status['Guid_status']."' />";
+            $content .= "<input type='text' name=status[name][] value='".$status['status']."' />";
+            $content .= '</td>';
+            $selectedY = ($status['visibility']=='1') ? " selected" : "";
+            $selectedN = ($status['visibility']=='0') ? " selected" : "";
+            $content .= "<td><input type='number' name='status[order][]' value='".$status['order_by']."' ></td>";
+            $content .= "<td><select name='status[visibility][]'>
+                                <option ".$selectedY." value='1'>Yes</option>
+                                <option ".$selectedN." value='0'>No</option>
+                            </select>
+                        </td>";
+            $content .= "</tr>";
+            if ( !empty($checkCildren) ) {
+                $prefix .= '-';
+            $prefix .= '-';
+            
+                $content .= get_nested_ststus_editable_rows( $db, $status['Guid_status'], $level . "-&nbsp;" );
+            }
+        }
+        
+    }
+   
+    return $content;
+}
+
 /**
  * Get Mark as test user ids
  * @param type $db
