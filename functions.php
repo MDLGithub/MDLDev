@@ -1429,15 +1429,32 @@ function get_nested_ststus_editable_rows($db, $parent = 0, $level = '') {
  * @param type $db
  * @return type String 11,55,22,45
  */
-function getTestUserIDs($db){
+function getMarkedTestUserIDs($db){
     $getTestUsers = $db->query("SELECT Guid_user FROM `tbl_ss_qualify` WHERE mark_as_test=:mark_as_test GROUP BY Guid_user", array('mark_as_test'=>'1'));
-    $testUserIds = "";
+    $userIds = "";
     foreach ($getTestUsers as $k=>$v){
-	$testUserIds .= $v['Guid_user'].', ';
+	$userIds .= $v['Guid_user'].', ';
     }
-    $testUserIds = rtrim($testUserIds, ', ');
+    $markedTestUserIds = rtrim($userIds, ', ');
+
+    return $markedTestUserIds;
+}
+
+function getTestUserIDs($db){
+    $q = "SELECT p.Guid_user FROM tblpatient p
+	    WHERE CONCAT(p.firstname, ' ', p.lastname) LIKE '%test%'
+	    OR CONCAT(p.firstname, ' ', p.lastname) LIKE '%John Smith%'
+	    OR CONCAT(p.firstname, ' ', p.lastname) LIKE '%John Doe%'
+	    OR CONCAT(p.firstname, ' ', p.lastname) LIKE '%Jane Doe%' ";
+    $getTestUsers = $db->query($q);
+    $userIds = "";
+    foreach ($getTestUsers as $k=>$v){
+	$userIds .= $v['Guid_user'].', ';
+    }
+    $testUserIds = rtrim($userIds, ', ');
 
     return $testUserIds;
+
 }
 /**
  * Get Stats info
@@ -1447,7 +1464,9 @@ function getTestUserIDs($db){
  */
 function get_stats_info($db, $statusID, $hasChildren=FALSE){
     //exclude test users
+    $markedTestUserIds = getMarkedTestUserIDs($db);
     $testUserIds = getTestUserIDs($db);
+    //$testUserIds = '';
     $q = "SELECT statuses.*, statuslogs.`Guid_status_log`,
 	    statuslogs.`Guid_patient`, statuslogs.`Log_group`,
 	    statuses.`order_by`, statuslogs.`Date`
@@ -1456,9 +1475,14 @@ function get_stats_info($db, $statusID, $hasChildren=FALSE){
 	    ON statuses.`Guid_status`= statuslogs.`Guid_status`
 	    WHERE  statuslogs.`currentstatus`='Y'
 	    AND statuslogs.`Guid_status_log`<>''
-	    AND statuslogs.Guid_status= $statusID
-	    AND statuslogs.Guid_user NOT IN(".$testUserIds.")
-	    AND statuslogs.Guid_patient<>'0'
+	    AND statuslogs.Guid_status=$statusID ";
+    if($markedTestUserIds!=""){
+    $q .=  "AND statuslogs.Guid_user NOT IN(".$markedTestUserIds.") ";
+    }
+    if($testUserIds!=""){
+    $q .=  "AND statuslogs.Guid_user NOT IN(".$testUserIds.") ";
+    }
+    $q .=  "AND statuslogs.Guid_patient<>'0'
 	    ORDER BY statuslogs.`Date` DESC, statuses.`order_by` DESC";
 
     $stats = $db->query($q);
