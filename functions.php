@@ -1149,6 +1149,8 @@ function formatMoney($number){
     return $newNum;
 }
 
+
+
 function get_status_names($db, $Guid_status, $Guid_user, $Log_group){
     $statusStr = "";
     $ids = "";
@@ -1361,7 +1363,16 @@ function get_option_of_nested_status($db, $parent = 0,  $level = '', $checkboxes
                 $optionClass = 'has_sub';   
             }         
             if($checkboxes){
-                $content .= $level."<input type='checkbox' name=stauses[] value='".$status['Guid_status']."' class='".$optionClass."'> " .$status['status'].'</br>';
+                //used for mdl-stat-details-config.php config field popup status select list
+                $getOption = getOption($db, 'stat_details_config');
+                $fieldId = $_GET['field_id'];
+                $fieldOptions = unserialize($getOption['value']);
+                $thisStatuses = isset($fieldOptions[$fieldId]['statuses'])? $fieldOptions[$fieldId]['statuses'] : "";
+                $isSelected = "";
+                if(isset($fieldOptions[$fieldId])){
+                    $isSelected = in_array($status['Guid_status'], $thisStatuses)? " checked": "";
+                }                
+                $content .= $level."<input ".$isSelected." type='checkbox' name=stauses[] value='".$status['Guid_status']."' class='".$optionClass."'> " .$status['status'].'</br>';
             }else{
                 $content .= "<option value='".$status['Guid_status']."' class='".$optionClass."'>".$level . " " .$status['status'];
             }
@@ -1696,4 +1707,20 @@ function getStatusName($db, $Guid_status, $parent){
     }
     
     return $name;
+}
+function getStatusParentNames($db, $Guid_status){
+    $status = $db->row("SELECT `status` FROM tbl_mdl_status WHERE Guid_status=:Guid_status AND parent_id='0' ", array('Guid_status'=>$Guid_status));
+    $names = "";
+    if($status){
+        $names .= $status['status'];
+    }    
+    return $names;
+}
+function getRoleName($db, $roleID){
+    $role = $db->row("SELECT role FROM `tblrole` WHERE Guid_role=:Guid_role", array('Guid_role'=>$roleID));
+    $names = "";
+    if($role){
+        $names .= $role['role'];
+    }    
+    return $names;
 }
