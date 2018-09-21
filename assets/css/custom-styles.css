@@ -1453,3 +1453,13 @@ button[name="search"] > strong{
     border: 1px solid #999;
     width: 90%;
 }
+#patient-info-box .markTest{
+    padding-top: 10px;
+    display: inline-block;
+}
+#patient-info-box .markTest input[type='checkbox']{
+    width: 16px;
+    height: 16px;
+    float: left;
+    margin-right: 6px;
+}
