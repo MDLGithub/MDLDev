@@ -393,18 +393,20 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					    </thead>
 					    <tbody>
 						<?php //note_id
-						    $nQ =  "SELECT n.*, p.firstname, p.lastname, cat.name AS category FROM `tbl_mdl_note` n
+						    $nQ =  "SELECT n.*, p.firstname, p.lastname, cat.name AS category
+							    FROM `tbl_mdl_note` n
 							    LEFT JOIN `tblpatient` p ON n.Guid_user=p.Guid_user
 							    LEFT JOIN `tbl_mdl_note_category` cat ON n.Guid_note_category=cat.Guid_note_category
 							    WHERE n.Guid_user=:Guid_user";
 						    $notes = $db->query($nQ, array('Guid_user'=>$_GET['patient']));
 
 						    foreach ($notes as $k=>$v) {
+							$userInfo = getUserFullInfo($db, $v['Recorded_by']);
 						?>
 						    <tr>
 							<td><?php echo date("n/j/Y", strtotime($v['Date'])); ?></td>
 							<td><?php echo $v['category']; ?></td>
-							<td><?php echo $v['firstname']." ".$v['lastname']; ?></td>
+							<td><?php echo $userInfo['first_name']." ".$userInfo['last_name']; ?></td>
 							<td><?php echo $v['Comment']; ?></td>
 							<?php if($role=='Admin'){ ?>
 							    <td class="text-center">
