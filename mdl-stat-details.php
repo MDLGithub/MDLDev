@@ -96,7 +96,12 @@ require_once ('navbar.php');
       
         <div id="app_data" class="scroller "> 
             <?php $parent = isset($_GET['parent'])?$_GET['parent']:""; ?>
-            <h1 class="title-st1">Status: <?php echo getStatusName($db, $_GET['status_id'], $parent); ?></h1>
+            <h1 class="title-st1">
+                Status: <?php echo getStatusName($db, $_GET['status_id'], $parent); ?>
+                <a class="pull-right" href="<?php echo SITE_URL."/mdl-stat-details-config.php"?>"  style="font-size:30px; margin-right: 30px;">
+                    <i class="fas fa-cogs "></i>
+                </a>
+            </h1>
             <?php if(isset($_GET['status_id']) && $_GET['status_id']!=""){ ?>
             <div class="row ">
                 <div class="col-md-12 text-center">

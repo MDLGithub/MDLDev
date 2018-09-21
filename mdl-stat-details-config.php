@@ -9,7 +9,7 @@ if (!login_check($db)) {
 if (isset($_GET['logout'])) {
     logout();
     Leave(SITE_URL);
-}  
+}
 
 $userID = $_SESSION['user']["id"];
 $roleInfo = getRole($db, $userID);
