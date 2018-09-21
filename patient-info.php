@@ -1200,7 +1200,7 @@ if(isset($_POST['edit_categories'])){
 	$noteLogData = array(
 	    'Guid_note_category'=> $_POST['Guid_note_category'],
 	    'Guid_user' => $_POST['Guid_user'],
-	    'Recorder_by' => $_SESSION['user']['id'],
+	    'Recorded_by' => $_SESSION['user']['id'],
 	    'Comment' => $_POST['comment'],
 	    'Date'=>$date
 	);
