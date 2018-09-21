@@ -720,10 +720,12 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     </div>
                     <div class="row actionButtons pB-30">
                         <div class="col-md-12">
+                            <?php if($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager' ){ ?>
                             <span class="pull-left markTest"> 
                                 <input <?php echo $ssQualifyResult['0']['mark_as_test']=='1'?' checked': ''; ?> id="mark-as-test" type="checkbox" name="mark_as_test" value="1" /> 
                                 <label for="mark-as-test">Mark As Test</label>
                             </span>
+                            <?php } ?>
                             <button id="save-patient-info" name="save" type="submit" class="button btn-inline pull-right">Save</button>
                         </div>
                     </div>
