@@ -14,6 +14,7 @@ if (isset($_GET['logout'])) {
 $userID = $_SESSION['user']["id"];
 $roleInfo = getRole($db, $userID);
 $role = $roleInfo['role'];
+$roleID = $roleInfo['Guid_role'];
 
 if($role!="Admin"){
     Leave(SITE_URL."/no-permission.php");
@@ -41,13 +42,16 @@ $initLabels = array(
     'salesrep'=>'Sales Rep',
 );
 
-$initQ = 'SELECT s.Guid_status,  s.Guid_user, p.Guid_patient, p.firstname, p.lastname, 
+$initQ = 'SELECT s.Guid_status, s.Guid_user, s.Date, s.Date_created, p.Guid_patient, 
+        p.firstname, p.lastname, 
 	a.account AS account_number, a.name AS account_name, 
+        num.mdl_number,
 	CONCAT(srep.`first_name`, " " ,srep.`last_name`) AS salesrep  
         FROM `tbl_mdl_status_log` s 
         LEFT JOIN `tblpatient` p ON s.Guid_patient=p.Guid_patient
         LEFT JOIN `tblaccount` a ON s.Guid_account=a.Guid_account
         LEFT JOIN `tblsalesrep` srep ON s.Guid_salesrep=srep.Guid_salesrep
+        Left JOIN `tbl_mdl_number` num ON s.Guid_user=num.Guid_user
         WHERE s.Guid_status=:Guid_status 
         AND s.currentstatus="Y"
         AND s.Guid_user NOT IN('.$testUserIds.') 
@@ -76,6 +80,8 @@ $labels = array(
     'location'=>'Location'
 );
 
+$configOptions = getOption($db, 'stat_details_config');
+$optionVal = unserialize($configOptions['value']);
 
 require_once ('navbar.php');
 ?>
@@ -108,10 +114,20 @@ require_once ('navbar.php');
                     <table class="table">
                         <thead>
                             <tr>
-                            <?php foreach ($initLabels as $k=>$v){ ?>
-                                <th>
-                                    <?php echo $v;?>
-                                </th>
+                            <?php foreach ($labels as $k=>$v){ ?>                                
+                                <?php 
+                                $isVisibleForStatus = isFieldVisibleForStatus($db, $k, $_GET['status_id']);
+                                $isVisibleForRole = isFieldVisibleForRole($db, $k, $roleID);
+                                if($isVisibleForStatus&&$isVisibleForRole){
+                                    echo '<th>';
+                                    if(isset($optionVal[$k]['label'])){
+                                        echo $optionVal[$k]['label']; 
+                                    } else {
+                                        echo $v;
+                                    } 
+                                    echo '</th>';
+                                }
+                                ?>
                             <?php } ?>
                             </tr>
                         </thead>
@@ -123,11 +139,67 @@ require_once ('navbar.php');
                                     $patientInfoUrl .= '&account='.$v['account_number'];
                                 }
                             ?>
-                            <tr class="text-left">                                
+                            <tr class="text-left"> 
+                                
+                                <?php if(isFieldVisibleForStatus($db, 'mdl_number', $_GET['status_id']) && isFieldVisibleForRole($db, 'mdl_number', $roleID)){ ?>
+                                <td><?php echo $v['mdl_number'];?></td> 
+                                <?php } ?>
+                                
+                                <?php if(isFieldVisibleForStatus($db, 'first_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'first_name', $roleID)){ ?>
                                 <td><a href="<?php echo $patientInfoUrl; ?>"><?php echo $v['firstname'];?></a></td>                              
+                                <?php } ?>
+                                
+                                <?php if(isFieldVisibleForStatus($db, 'last_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'last_name', $roleID)){ ?>
                                 <td><a href="<?php echo $patientInfoUrl; ?>"><?php echo $v['lastname'];?></a></td>                              
+                                <?php } ?>
+                                
+                                <?php if(isFieldVisibleForStatus($db, 'account', $_GET['status_id']) && isFieldVisibleForRole($db, 'account', $roleID)){ ?>
                                 <td><?php echo $v['account_number'];?></td>                              
+                                <?php } ?>
+                                
+                                <?php if(isFieldVisibleForStatus($db, 'account_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'account_name', $roleID)){ ?>
+                                <td><?php echo $v['account_name']; ?></td>                              
+                                <?php } ?>
+                                
+                                <?php if(isFieldVisibleForStatus($db, 'salesrep', $_GET['status_id']) && isFieldVisibleForRole($db, 'salesrep', $roleID)){ ?>
                                 <td><?php echo $v['salesrep'];?></td>                              
+                                <?php } ?>
+                                
+                                <?php if(isFieldVisibleForStatus($db, 'date', $_GET['status_id']) && isFieldVisibleForRole($db, 'date', $roleID)){ ?>
+                                <td><?php echo date("n/j/Y", strtotime($v['Date'])); ?></td>                              
+                                <?php } ?>
+                                
+                                <?php if(isFieldVisibleForStatus($db, 'date_accessioned', $_GET['status_id']) && isFieldVisibleForRole($db, 'date_accessioned', $roleID)){ ?>
+                                <td>???</td>   
+                                <?php } ?>
+                                
+                                <?php if(isFieldVisibleForStatus($db, 'date_reported', $_GET['status_id']) && isFieldVisibleForRole($db, 'date_reported', $roleID)){ ?>
+                                <td><?php echo date("n/j/Y", strtotime($v['Date_created'])); ?></td>                              
+                                <?php } ?>
+                                
+                                <?php if(isFieldVisibleForStatus($db, 'insurance_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'insurance_paid', $roleID)){ ?>
+                                <td>??</td>  
+                                <?php } ?>
+                                
+                                <?php if(isFieldVisibleForStatus($db, 'patient_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'patient_paid', $roleID)){ ?>
+                                <td>??</td>
+                                <?php } ?>
+                                
+                                <?php if(isFieldVisibleForStatus($db, 'total_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'total_paid', $roleID)){ ?>
+                                <td>??</td> 
+                                <?php } ?>
+                                
+                                <?php if(isFieldVisibleForStatus($db, 'insurance_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'insurance_name', $roleID)){ ?>
+                                <td>??</td> 
+                                <?php } ?>
+                                
+                                <?php if(isFieldVisibleForStatus($db, 'test_ordered', $_GET['status_id']) && isFieldVisibleForRole($db, 'test_ordered', $roleID)){ ?>
+                                <td>??</td> 
+                                <?php } ?>
+                                
+                                <?php if(isFieldVisibleForStatus($db, 'location', $_GET['status_id']) && isFieldVisibleForRole($db, 'location', $roleID)){ ?>
+                                <td>??</td> 
+                                <?php } ?>
                             </tr>
                             <?php } ?>
                         </tbody>

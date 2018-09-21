@@ -1724,3 +1724,43 @@ function getRoleName($db, $roleID){
     }    
     return $names;
 }
+/**
+ * Checking if field status assigned for given field
+ * Statuses configurable from MDL details config page(mdl-stat-details-config.php) 
+ * Returns True if status assigned to that field 
+ * @param type $db
+ * @param type $fieldID
+ * @param type $statusID
+ * @return boolean
+ */
+function isFieldVisibleForStatus($db, $fieldID, $statusID){
+    $configOptions = getOption($db, 'stat_details_config');
+    $optionVal = unserialize($configOptions['value']);
+    if(isset($optionVal[$fieldID]['statuses']) && !empty($optionVal[$fieldID]['statuses'])){
+        if(in_array($statusID, $optionVal[$fieldID]['statuses'])){
+            return TRUE;
+        }     
+        return FALSE;
+    }
+    return FALSE;    
+}
+/**
+ * Checking if role assigned for given filed
+ * Roles configurable from MDL details config page(mdl-stat-details-config.php) 
+ * Returns True if role assigned to that field 
+ * @param type $db
+ * @param type $fieldID
+ * @param type $roleID
+ * @return boolean
+ */
+function isFieldVisibleForRole($db, $fieldID, $roleID){
+    $configOptions = getOption($db, 'stat_details_config');
+    $optionVal = unserialize($configOptions['value']);    
+    if(isset($optionVal[$fieldID]['roles']) && !empty($optionVal[$fieldID]['roles'])){
+        if(in_array($roleID, $optionVal[$fieldID]['roles'])){
+            return TRUE;
+        }     
+        return FALSE;
+    }
+    return FALSE;    
+}
