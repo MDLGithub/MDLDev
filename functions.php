@@ -1712,7 +1712,7 @@ function getStatusParentNames($db, $Guid_status){
     $status = $db->row("SELECT `status` FROM tbl_mdl_status WHERE Guid_status=:Guid_status AND parent_id='0' ", array('Guid_status'=>$Guid_status));
     $names = "";
     if($status){
-        $names .= $status['status'];
+        $names .= $status['status'].'; ';
     }    
     return $names;
 }

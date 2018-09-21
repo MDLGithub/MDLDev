@@ -132,10 +132,10 @@ $(document).ready(function () {
             importCSS: false,
             importStyle: false,
             printContainer: false,
-            loadCSS: "dev/style.min.css",
+            loadCSS: "/dev/style.min.css",
             printDelay: 1000,
 			removeScripts: true,
-            base: "/dev/login/assets/",
+            base: "https://www.mdlab.com",
 			afterPrint: testFun
         });
 		
@@ -223,7 +223,7 @@ $(document).ready(function () {
                 printContainer: false,
                 loadCSS: "/dev/style.min.css",
                 printDelay: 1000,
-                            removeScripts: true,
+                removeScripts: true,
                 base: "https://www.mdlab.com",
                             afterPrint: testFun
             });
