@@ -30,11 +30,13 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 	$patientInfoUrl .= '&account='.$_GET['account'];
     }
 
-    $sqlQualify = "SELECT q.Guid_qualify,q.Guid_user,q.insurance,q.other_insurance,q.Date_created,
+    $sqlQualify = "SELECT q.Guid_qualify,q.Guid_user,q.insurance,q.other_insurance,q.Date_created,q.provider_id,
+		    CONCAT(prov.first_name,' ',prov.last_name) provider,
 		    p.*, u.email
 		    FROM tblqualify q
 		    LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user
 		    LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user
+		    LEFT JOIN tblprovider prov ON prov.Guid_provider = q.provider_id
 		    WHERE q.Guid_user=:Guid_user";
     $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$Guid_user));
 
@@ -233,12 +235,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		    . "LEFT JOIN tblsalesrep sr ON ar.Guid_salesrep = sr.Guid_salesrep "
 		    . "WHERE a.account = '" . $_GET['account'] . "'";
 	$accountInfo = $db->row($accountQ);
-	$accountID = $_GET['account'];
-	$providersQ = "SELECT CONCAT(first_name, ' ',last_name) AS provider_name FROM tblprovider pr LEFT JOIN tbluser u ON u.`Guid_user`=pr.`Guid_user` WHERE account_id=$accountID AND u.status='1'";
-	$providers = $db->query($providersQ);
     } else {
 	$accountInfo = FALSE;
-	$providers = FALSE;
     }
 ?>
 <?php require_once 'navbar.php'; ?>
@@ -298,16 +296,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 				</p>
 				<p><label>Genetic Consultant: </label><?php echo $accountInfo['salesrep_name']; ?></p>
 				<?php } ?>
-				<?php if($providers) {
-					echo "<p><label>Health Care Providers: </label>";
-					$providerStr = "";
-					foreach($providers as $k=>$v) {
-					    $providerStr .= $v['provider_name']."; ";
-					}
-					echo rtrim($providerStr, "; ");
-					echo "</p>";
-				    }
-				?>
+				<p><label>Health Care Providers: </label><?php echo $qualifyResult['provider']; ?>
 
 			    </div>
 			    <div class="col-md-6 pB-30">
