@@ -111,7 +111,7 @@ require_once ('navbar.php');
 	    <?php if(isset($_GET['status_id']) && $_GET['status_id']!=""){ ?>
 	    <div class="row ">
 		<div class="col-md-12 text-center">
-		    <table class="table">
+		    <table id="dataTable" class="table">
 			<thead>
 			    <tr>
 			    <?php foreach ($labels as $k=>$v){ ?>
@@ -218,5 +218,15 @@ require_once ('navbar.php');
 
 
 <?php require_once('scripts.php');?>
+<script type="text/javascript">
+    if ($('#dataTable').length ) {
+	var table = $('#dataTable').DataTable({
+	    orderCellsTop: true,
+	    fixedHeader: true,
+	    //searching: false,
+	    lengthChange: false
+	});
+    }
+</script>
 
 <?php require_once('footer.php');?>
