@@ -1369,7 +1369,7 @@ function get_option_of_nested_status($db, $parent = 0,  $level = '', $checkboxes
                 $fieldOptions = unserialize($getOption['value']);
                 $thisStatuses = isset($fieldOptions[$fieldId]['statuses'])? $fieldOptions[$fieldId]['statuses'] : "";
                 $isSelected = "";
-                if(isset($fieldOptions[$fieldId])){
+                if(isset($fieldOptions[$fieldId]) && $thisStatuses!=""){
                     $isSelected = in_array($status['Guid_status'], $thisStatuses)? " checked": "";
                 }                
                 $content .= $level."<input ".$isSelected." type='checkbox' name=stauses[] value='".$status['Guid_status']."' class='".$optionClass."'> " .$status['status'].'</br>';
