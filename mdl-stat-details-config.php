@@ -112,7 +112,7 @@ require_once ('navbar.php');
 						    $getStatusParent = $db->row("SELECT parent_id FROM `tbl_mdl_status` WHERE Guid_status=:Guid_status", array('Guid_status'=>$stausID));
 						    $parent=$getStatusParent['parent_id'];
 						    $parent = $parent!="0" ? $parent : "";
-						    $statusNames .= getStatusParentNames($db, $stausID)."; ";
+						    $statusNames .= getStatusParentNames($db, $stausID);
 						}
 						echo rtrim($statusNames, '; ');
 					    }
