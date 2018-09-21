@@ -24,6 +24,9 @@ body{
 .fs-15{
     font-size: 15px!important;
 }
+.padd-0{
+    padding: 0 !important;
+}
 .pT-5{
     padding-top: 5px !important;
 }

@@ -215,6 +215,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         updateCurrentStatusID($db, $Guid_patient);
         Leave($patientInfoUrl);
     }
+    //delete note log
+    if(isset($_GET['delete-note-log']) && $_GET['delete-note-log']!=""){
+        deleteByField($db,'tbl_mdl_note', 'Guid_note', $_GET['delete-note-log']);
+        Leave($patientInfoUrl);
+    }
   
  } ?>
 
@@ -359,12 +364,66 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                             $mdlClass = (strlen($mdlNumber)!=0 && strlen($mdlNumber)<7)?' error error-border' : '';
                                             ?>
                                             <input type="number" autocomplete="off" class="mdlnumber <?php echo $mdlClass; ?>" name="mdl_number" value="<?php echo $mdlNumber; ?>" />
-                                        </p>                                        
-                                        <p>
-                                            <label>Comment:</label>
-                                            <textarea autocomplete="off" name="comment"><?php echo isset($_POST['comment'])?$_POST['comment']:$mdlInfo['comment']; ?></textarea>                                
                                         </p>
                                     </div> 
+                                    
+                                    <div id="statusLogs"  class="col-md-12 clearfix padd-0">
+                                        <h5 class="pT-30">
+                                            Notes:                                            
+                                            <a title="Add Note" class="pull-right" href="<?php echo $patientInfoUrl."&note_log=add";?>">
+                                                <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
+                                            </a>                                            
+                                        </h5>
+                                        <table class="table">
+                                            <thead>
+                                                <th>Date</th>
+                                                <th>Category &nbsp;&nbsp; 
+                                                    <?php if($role=='Admin'){ ?>
+                                                    <a title="Edit Statuses"  href="<?php echo $patientInfoUrl.'&manage_note_category=edit'; ?>" >
+                                                        <span class="fas fa-pencil-alt" aria-hidden="true"></span>
+                                                    </a>
+                                                    <a title="Add New Status"  href="<?php echo $patientInfoUrl.'&manage_note_category=add'; ?>" >
+                                                        <span class="fas fa-plus-circle" aria-hidden="true"></span> 
+                                                    </a>
+                                                    <?php } ?>
+                                                </th>
+                                                <th>Recorded By</th>
+                                                <th>Comment</th>
+                                                <?php if($role=='Admin'){ ?><th class="text-center wh-100">Action</th><?php } ?>
+                                            </thead>
+                                            <tbody>
+                                                <?php //note_id
+                                                    $nQ =  "SELECT n.*, p.firstname, p.lastname, cat.name AS category FROM `tbl_mdl_note` n
+                                                            LEFT JOIN `tblpatient` p ON n.Guid_user=p.Guid_user
+                                                            LEFT JOIN `tbl_mdl_note_category` cat ON n.Guid_note_category=cat.Guid_note_category
+                                                            WHERE n.Guid_user=:Guid_user"; 
+                                                    $notes = $db->query($nQ, array('Guid_user'=>$_GET['patient']));
+                                                    
+                                                    foreach ($notes as $k=>$v) {  
+                                                ?>
+                                                    <tr>
+                                                        <td><?php echo date("n/j/Y", strtotime($v['Date'])); ?></td>
+                                                        <td><?php echo $v['category']; ?></td>
+                                                        <td><?php echo $v['firstname']." ".$v['lastname']; ?></td>
+                                                        <td><?php echo $v['Comment']; ?></td>                                                   
+                                                        <?php if($role=='Admin'){ ?>
+                                                            <td class="text-center">
+                                                                <div class="action-btns">
+                                                                    <a href="<?php echo $patientInfoUrl."&note_log=edit&note_id=".$v['Guid_note'];?>" class="">
+                                                                        <span class="fas fa-pencil-alt"></span>
+                                                                    </a>
+                                                                    <a href="<?php echo $patientInfoUrl.'&delete-note-log='.$v['Guid_note']; ?>" onclick="javascript:confirmationDeleteNooteLog($(this));return false;" class="color-red">
+                                                                        <span class="far fa-trash-alt"></span> 
+                                                                    </a>   
+                                                                </div>
+                                                            </td>   
+                                                        <?php } ?>
+                                                    </tr>
+                                                <?php } ?>
+
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -802,12 +861,6 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>        
         
         <h5 class="title">
-            <!-- <a class="" id="open-new-status-form">
-                <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add New
-            </a>&nbsp;&nbsp;
-            <a class="" id="opent-status-list">
-                <span class="fas fa-list " aria-hidden="true"></span> List Statuses
-            </a> -->
             Add New Status
         </h5>
         <div class="content">
@@ -861,7 +914,6 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 </div>
 <?php } ?>
 
-
 <?php 
 if(isset($_POST['edit_statuses'])){    
     if(isset($_POST['status']['Guid_status'])){
@@ -880,11 +932,10 @@ if(isset($_POST['edit_statuses'])){
             
             updateTable($db, 'tbl_mdl_status', $editStatusData, $whereEditStatus);
         }
+        $message = "All data saved.";
     }
 } 
-
 ?>
-
 <?php if(isset($_GET['manage_status']) && $_GET['manage_status']=='edit' && $role=='Admin'){ ?>
 <div id="manage-status-modal" class="modalBlock editStausesModal">
     <div class="contentBlock">
@@ -897,7 +948,9 @@ if(isset($_POST['edit_statuses'])){
             <!--<div class="status-list">list here...</div>-->
             <div class="edit-status-form">
                 <form action="" method="POST">
-                
+                    <?php if(isset($message)){ ?>
+                        <div class="text-center success-text"><?php echo $message; ?></div>
+                    <?php } ?>
                     <table class="table">
                         <thead>
                             <tr>
@@ -914,6 +967,130 @@ if(isset($_POST['edit_statuses'])){
                 
                     <div class="text-right pT-10">
                        <button class="button btn-inline" name="edit_statuses" type="submit" >Save</button>
+                       <a href="<?php echo $patientInfoUrl; ?>" class="btn-inline btn-cancel">Cancel</a>                   
+                   </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php } ?>
+
+<?php
+    if(isset($_POST['manage_category'])){ 
+        $categoryData=array('name'=>$_POST['name'], 'order_by'=>$_POST['order_by']);
+        $insertNoteCat = insertIntoTable($db, 'tbl_mdl_note_category', $categoryData);
+        if($insertNoteCat['insertID']!=""){
+            $message = "New Category Inserted.";
+        }
+    } 
+?>
+<?php if(isset($_GET['manage_note_category']) && $_GET['manage_note_category']=='add' && $role=='Admin'){ ?>
+<div id="manage-status-modal" class="modalBlock ">
+    <div class="contentBlock">
+        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>        
+        
+        <h5 class="title">
+            Add Note Category
+        </h5>
+        <div class="content">
+            <!--<div class="status-list">list here...</div>-->
+            <div class="add-status-form">
+                <form action="" method="POST">
+                <h4 class="text-center"></h4>
+                <?php if(isset($message)){ ?>
+                    <div class="text-center success-text"><?php echo $message; ?></div>
+                <?php } ?>
+                 
+                <div class="f2 ">
+                    <label class="dynamic" for="name"><span>Category Name</span></label>
+                    <div class="group">
+                        <input required autocomplete="off" id="name" name="name" type="text" value="" placeholder="Category Name">
+                        <p class="f_status">
+                            <span class="status_icons"><strong></strong></span>
+                        </p>
+                    </div>
+                </div>                
+                <div class="f2 ">
+                    <label class="dynamic" for="order_by"><span>Order By</span></label>
+                    <div class="group">
+                        <input type="number" min="0" step="1" autocomplete="off" id="order_by" name="order_by"  value="" placeholder="Order By">
+                        <p class="f_status">
+                            <span class="status_icons"><strong></strong></span>
+                        </p>
+                    </div>
+                </div>
+                
+                 <div class="text-right pT-10">
+                    <button class="button btn-inline" name="manage_category" type="submit" >Save</button>
+                    <!--<button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>-->                   
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php } ?>
+<?php 
+if(isset($_POST['edit_categories'])){    
+    if(isset($_POST['category']['Guid_note_category'])){
+        $categoryIDS = $_POST['category']['Guid_note_category'];
+        $categoryNames = $_POST['category']['name'];
+        $categoryOrder = $_POST['category']['order_by'];
+        $count = count($categoryIDS);
+        foreach ($categoryIDS as $k => $categoryID) {
+            $whereEditCategory = array('Guid_note_category'=>$categoryID);
+            $editCategoryData = array(
+                'name' => $categoryNames[$k],
+                'order_by' => $categoryOrder[$k]
+            );            
+            updateTable($db, 'tbl_mdl_note_category', $editCategoryData, $whereEditCategory);
+        }
+        $message = "Category data saved";
+    }
+} 
+?>
+<?php if(isset($_GET['manage_note_category']) && $_GET['manage_note_category']=='edit' && $role=='Admin'){ ?>
+<div id="manage-status-modal" class="modalBlock editStausesModal">
+    <div class="contentBlock">
+        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>       
+        
+        <h5 class="title">
+            Edit Note Categories
+        </h5>
+        <div class="content">
+            <!--<div class="status-list">list here...</div>-->
+            <div class="edit-status-form">
+                <form action="" method="POST">
+                    <?php if(isset($message)){ ?>
+                        <div class="text-center success-text"><?php echo $message; ?></div>
+                    <?php } ?>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="status_name">Category Name</th>
+                                <th>Order By</th>
+                            </tr>
+                        </thead>
+                        <tbody>                            
+                            <?php 
+                            $categories = $db->selectAll("tbl_mdl_note_category");
+                            foreach ($categories as $k=>$v){ 
+                            ?>
+                            <tr>
+                                <td>
+                                    <input type="hidden" name="category[Guid_note_category][]" value="<?php echo $v['Guid_note_category']; ?>">
+                                    <input type="text" name="category[name][]" value="<?php echo $v['name']; ?>">
+                                </td>
+                                <td><input type="text" name="category[order_by][]" value="<?php echo $v['order_by']; ?>"></td>
+                            </tr>
+                            <?php }?>                            
+                        </tbody>
+                    </table>
+                
+                
+                    <div class="text-right pT-10">
+                       <button class="button btn-inline" name="edit_categories" type="submit" >Save</button>
                        <a href="<?php echo $patientInfoUrl; ?>" class="btn-inline btn-cancel">Cancel</a>                   
                    </div>
                 </form>
@@ -1001,6 +1178,98 @@ if(isset($_POST['edit_statuses'])){
                 
                  <div class="text-right pT-10">
                     <button class="button btn-inline" name="manage_status_log" type="submit" >Save</button>
+                    <!--<button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>-->                   
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php } ?>
+
+
+<?php
+    if(isset($_POST['manage_note_log'])){ 
+      
+        $date=($_POST['date']!="")?date('Y-m-d h:i:s',strtotime($_POST['date'])):"";
+        
+        $noteLogData = array(            
+            'Guid_note_category'=> $_POST['Guid_note_category'],
+            'Guid_user' => $_POST['Guid_user'],
+            'Recorder_by' => $_SESSION['user']['id'], 
+            'Comment' => $_POST['comment'],
+            'Date'=>$date            
+        );        
+        
+        if(isset($_POST['Guid_note']) && $_POST['Guid_note']!=""){
+            //update log
+            $where = array('Guid_note'=>$_POST['Guid_note']);
+            updateTable($db, 'tbl_mdl_note', $noteLogData, $where);
+            Leave($patientInfoUrl);
+        } else {
+            //insert log
+            $noteLogData['Date_created']=date('Y-m-d h:i:s');
+            insertIntoTable($db, 'tbl_mdl_note', $noteLogData);            
+            Leave($patientInfoUrl);
+        }   
+       
+    } 
+?>
+<?php 
+    if(isset($_GET['note_log'])){ 
+        $title= ($_GET['note_log']=='add')?"Add Note":"Update Note";
+        if(isset($_GET['note_id'])&&$_GET['note_id']!=""){
+            $catLogRow = $db->row("SELECT * FROM tbl_mdl_note WHERE Guid_note=:Guid_note", array('Guid_note'=>$_GET['note_id']));
+        }
+        
+?>
+<div id="manage-status-modal" class="modalBlock ">
+    <div class="contentBlock">
+        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>        
+        
+        <h5 class="title"><?php echo $title;?> </h5>
+        <div class="content">
+            <!--<div class="status-list">list here...</div>-->
+            <div class="add-status-form">
+                <form action="" method="POST">
+                <h4 class="text-center"></h4>
+                <?php if(isset($message)){ ?>
+                    <div class="text-center success-text"><?php echo $message; ?></div>
+                <?php } ?>
+                <input type="hidden" name="Guid_note" value="<?php echo (isset($_GET['note_id'])&&$_GET['note_id']!="")?$_GET['note_id']:""; ?>" />
+                <input type="hidden" name="Guid_user" value="<?php echo $_GET['patient']; ?>" />
+                
+                <div class="col-md-12">
+                    <input required class="datepicker" autocomplete="off" id="status" name="date" type="text" value="<?php echo (isset($catLogRow['Date'])&&$catLogRow['Date']!="") ? date('n/j/Y', strtotime($catLogRow['Date'])) : date('n/j/Y'); ?>" placeholder="Date">
+                </div>
+                
+                <div class="col-md-12 clearfix">                                            
+                    <div class="f2   show-label s">
+                    <div class="group">
+                        <select required name="Guid_note_category">
+                            <option value="">Select category</option>
+                        <?php 
+                            $categories = $db->selectAll('tbl_mdl_note_category');
+                            foreach ($categories as $k=>$v){
+                                $selected = (isset($catLogRow['Guid_note_category']) && $catLogRow['Guid_note_category']==$v['Guid_note_category']) ? " selected":"";
+                        ?>
+                            <option <?php echo $selected; ?> value="<?php echo $v['Guid_note_category']; ?>"><?php echo $v['name']; ?></option>
+                        <?php } ?>   
+                        </select>
+                        <p class="f_status">
+                            <span class="status_icons"><strong></strong></span>
+                        </p>
+                    </div>
+                    </div>                            
+                </div>         
+                <div class="col-md-12 clearfix">                                            
+                    <div class="f2">                        
+                        <textarea required name="comment"><?php echo (isset($catLogRow['Comment'])) ? $catLogRow['Comment'] : ''; ?></textarea>
+                    </div>                            
+                </div>         
+                
+                 <div class="text-right pT-10">
+                    <button class="button btn-inline" name="manage_note_log" type="submit" >Save</button>
                     <!--<button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>-->                   
                 </div>
                 </form>
