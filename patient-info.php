@@ -118,11 +118,17 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		   updateTable($db, 'tbl_mdl_number', $mdlNumberData, $whereMdlNum);
 		}
 	    } else {//insert mdl number info
-
 		if($mdlNumberData){
-
 		   insertIntoTable($db, 'tbl_mdl_number', $mdlNumberData);
 		}
+	    }
+
+	    //mark user as a test
+	    $markedUserID = $_GET['patient'];
+	    if(isset($_POST['mark_as_test'])){
+		updateTable($db,'tbl_ss_qualify', array('mark_as_test'=>'1'), array('Guid_user'=>$markedUserID));
+	    } else {
+		updateTable($db,'tbl_ss_qualify', array('mark_as_test'=>'0'), array('Guid_user'=>$markedUserID));
 	    }
 
 	   //add revenue data if exists
@@ -186,6 +192,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		    $updateReveue = updateTable($db, 'tbl_deductable_log', $dataDeductable, $whereDeductable);
 		}
 	    }
+
 
 	    $url=$patientInfoUrl."&u";
 	    Leave($url);
@@ -652,7 +659,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		    </div>
 		    <div class="row actionButtons pB-30">
 			<div class="col-md-12">
-			    <button id="save-patient-info" name="save" type="submit" class="button btn-inline">Save</button>
+			    <span class="pull-left markTest">
+				<input <?php echo $ssQualifyResult['0']['mark_as_test']=='1'?' checked': ''; ?> id="mark-as-test" type="checkbox" name="mark_as_test" value="1" />
+				<label for="mark-as-test">Mark As Test</label>
+			    </span>
+			    <button id="save-patient-info" name="save" type="submit" class="button btn-inline pull-right">Save</button>
 			</div>
 		    </div>
 		</form>
