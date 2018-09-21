@@ -954,6 +954,12 @@ function confirmationDeleteUser(anchor){
     var conf = confirm('Are you sure you want to delete User #'+$str[1]+'?');
     if(conf)  window.location=anchor.attr("href");
 }
+function confirmationDeleteNooteLog(anchor){
+    $str = anchor.attr("href").split("&");
+    $str = $str[1].split("=");
+    var conf = confirm('Are you sure you want to delete Note #'+$str[1]+'?');
+    if(conf)  window.location=anchor.attr("href");
+}
 
 
 
