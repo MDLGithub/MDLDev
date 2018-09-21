@@ -97,28 +97,31 @@ require_once ('navbar.php');
 				<td>
 				    <?php
 					if(isset($optionVal[$k])){
-
-					    $assignedStatuses = $optionVal[$k]['statuses'];
-					    $statusNames = "";
-					    foreach ($assignedStatuses as $key=>$stausID){
-						$getStatusParent = $db->row("SELECT parent_id FROM `tbl_mdl_status` WHERE Guid_status=:Guid_status", array('Guid_status'=>$stausID));
-						$parent=$getStatusParent['parent_id'];
-						$parent = $parent!="0" ? $parent : "";
-						$statusNames .= getStatusParentNames($db, $stausID)."; ";
+					    if(isset($optionVal[$k]['statuses'])){
+						$assignedStatuses = $optionVal[$k]['statuses'];
+						$statusNames = "";
+						foreach ($assignedStatuses as $key=>$stausID){
+						    $getStatusParent = $db->row("SELECT parent_id FROM `tbl_mdl_status` WHERE Guid_status=:Guid_status", array('Guid_status'=>$stausID));
+						    $parent=$getStatusParent['parent_id'];
+						    $parent = $parent!="0" ? $parent : "";
+						    $statusNames .= getStatusParentNames($db, $stausID)."; ";
+						}
+						echo rtrim($statusNames, '; ');
 					    }
-					    echo rtrim($statusNames, '; ');
 					}
 				    ?>
 				</td>
 				<td>
 				    <?php
 					if(isset($optionVal[$k])){
-					    $assignedRoles = $optionVal[$k]['roles'];
-					    $roleNames = "";
-					    foreach ($assignedRoles as $key=>$roleID){
-						$roleNames .= getRoleName($db, $roleID)."; ";
+					    if(isset($optionVal[$k]['roles'])){
+						$assignedRoles = $optionVal[$k]['roles'];
+						$roleNames = "";
+						foreach ($assignedRoles as $key=>$roleID){
+						    $roleNames .= getRoleName($db, $roleID)."; ";
+						}
+						echo rtrim($roleNames, '; ');
 					    }
-					    echo rtrim($roleNames, '; ');
 					}
 				    ?>
 				</td>
