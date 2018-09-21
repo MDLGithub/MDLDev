@@ -93,7 +93,15 @@ require_once ('navbar.php');
 			<tbody>
 			    <?php foreach ($labels as $k=>$v){ ?>
 			    <tr>
-				<td><?php echo $v; ?></td>
+				<td>
+				    <?php
+				    echo $v;
+				    if(isset($optionVal[$k]['label'])){
+					echo " / ".$optionVal[$k]['label'];
+				    }
+
+				    ?>
+				</td>
 				<td>
 				    <?php
 					if(isset($optionVal[$k])){
@@ -247,13 +255,12 @@ if(isset($_GET['field_id'])){
 			    <div id="roles-dropdown-box">
 				<?php
 				    $roles = $db->selectAll('tblrole');
-				    $thisRoles = $fieldOptions['roles'];
 				?>
 				<?php foreach ($roles as $key => $role) { ?>
 				<?php
 				    $isSelected = "";
-				    if(isset($thisRoles)){
-				    $isSelected = in_array($role['Guid_role'], $thisRoles)? " checked": "";
+				    if(isset($fieldOptions['roles'])){
+				    $isSelected = in_array($role['Guid_role'], $fieldOptions['roles'])? " checked": "";
 				    }
 				?>
 				    <p><input <?php echo $isSelected; ?> type="checkbox" name="roles[<?php echo $role['Guid_role']; ?>]" > <?php echo $role['role']; ?></p>
