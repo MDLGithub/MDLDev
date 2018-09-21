@@ -20,6 +20,11 @@ CREATE TABLE `tbl_mdl_note_category` (
   PRIMARY KEY (`Guid_note_category`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
+---------------------------------------------------------
+ALTER TABLE `tbl_mdl_note` CHANGE `Recorder_by` `Recorded_by` INT(11);
+
+
+
 
 /*Updated Files*/
 mdl-stat-details-config.php
