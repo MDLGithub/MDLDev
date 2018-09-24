@@ -60,7 +60,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 
 	$numSize = strlen($_POST['mdl_number']);
 	if(isset($_POST['mdl_number'])&&$_POST['mdl_number']!=""){
-	    if(!isset($_POST['mark_as_test']) && !isset($_POST['mark_as_test_incomplate']) && $_POST['specimen_collected']!='No' ){
+	    if(!isset($_POST['mark_as_test']) && !isset($_POST['mark_as_test_incomplate']) ){
 		if(isset($_POST['mdl_number']) && $numSize != 7){
 		    $isValid = false;
 		    $errorMsgMdlStats .= "MDL# must contain 7 digits only <br/>";
@@ -378,7 +378,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					    </div>
 					</div>
 				    </div>-->
-
+				    <?php if( isset($qualifyResult['specimen_collected']) && $qualifyResult['specimen_collected']!=NULL && $qualifyResult['specimen_collected']!='0' ){ ?>
 				    <div id="mdlInfoBox" class="pInfo <?php echo ($qualifyResult['specimen_collected']!='Yes')?'hidden':"";?>">
 					<p>
 					    <label>MDL#:</label>
@@ -389,6 +389,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					    <input type="number" autocomplete="off" class="mdlnumber <?php echo $mdlClass; ?>" name="mdl_number" value="<?php echo $mdlNumber; ?>" />
 					</p>
 				    </div>
+				    <?php } ?>
 
 				    <div id="statusLogs"  class="col-md-12 clearfix padd-0">
 					<h5 class="pT-30">
