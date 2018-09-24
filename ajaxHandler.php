@@ -62,16 +62,35 @@ function save_specimen_not_collected_into_logs($db, $date, $Guid_user, $account,
     }else{
         $statuses[] = '37';
     }
-    
-    
+       
     //insert log
     $saveStats = saveStatusLog($db, $statuses, $statusLogData);
-    if($saveStats){
-        updateTable($db, 'tblpatient', array('specimen_collected'=>'No'), array('Guid_patient'=>$patient['Guid_patient']));
-        updateCurrentStatusID($db, $patient['Guid_patient']);
+    
+    updateTable($db, 'tblpatient', array('specimen_collected'=>'No'), array('Guid_patient'=>$patient['Guid_patient']));
+    
+    
+    
+    $Guid_patient = $patient['Guid_patient'];
+    $q  =   "SELECT * 
+            FROM `tbl_mdl_status` statuses
+            LEFT JOIN `tbl_mdl_status_log` statuslogs
+            ON statuses.`Guid_status`= statuslogs.`Guid_status`
+            AND statuslogs.`Guid_status_log`<>''
+            AND statuses.parent_id='0'
+            AND statuslogs.Guid_patient=$Guid_patient
+            ORDER BY statuslogs.`Date` DESC, statuses.order_by DESC LIMIT 1";
+    $result = $db->row($q);
+   
+    $thisLog = $db->row("SELECT * FROM tbl_mdl_status_log WHERE Guid_status=:Guid_status", array('Guid_status'=>'37'));    
+    if(!empty($thisLog)){
+        $LogGroup = $thisLog['Log_group'];
+        //delete old log
+        deleteByField($db, 'tbl_mdl_status_log', 'Log_group', $LogGroup); 
     }
     
-    echo json_encode(array('log_data'=>$statusLogData));
+    $statID = updateCurrentStatusID($db, $Guid_patient, FALSE);
+            
+    echo json_encode(array('log_data'=>$statusLogData, 'updateCurrentStatusID'=>$statID, 'q'=>$q, 'result'=>$result));
     exit();    
 }
 
