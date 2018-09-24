@@ -29,15 +29,22 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     if( isset($_GET['account']) &&$_GET['account']!=""){
         $patientInfoUrl .= '&account='.$_GET['account'];
     }
+    if( isset($_GET['incomplete']) &&$_GET['incomplete']=="1"){
+        $patientInfoUrl .= '&incomplete=1';   
+    }
     
-    $sqlQualify = "SELECT q.Guid_qualify,q.Guid_user,q.insurance,q.other_insurance,q.Date_created,q.provider_id,
+    $sqlQualify = "SELECT q.Guid_qualify,q.Guid_user,q.insurance,q.other_insurance,q.Date_created,q.provider_id,q.`mark_as_test`, 
                     CONCAT(prov.first_name,' ',prov.last_name) provider,
-                    p.*, u.email 
-                    FROM tblqualify q
-                    LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user
+                    p.*, u.email ";
+    if(isset($_GET['incomplete'])){
+        $sqlQualify .= "FROM tblqualify q ";
+    } else {
+        $sqlQualify .= "FROM tbl_ss_qualify q ";
+    }
+    $sqlQualify .= "LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user
                     LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user 
                     LEFT JOIN tblprovider prov ON prov.Guid_provider = q.provider_id
-                    WHERE q.Guid_user=:Guid_user";
+                    WHERE q.Guid_user=:Guid_user ORDER BY q.`Date_created` DESC LIMIT 1";
     $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$Guid_user));    
     
     $mdlInfoQ = "SELECT * FROM tbl_mdl_number WHERE Guid_user=:Guid_user";
@@ -53,7 +60,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         
         $numSize = strlen($_POST['mdl_number']);
         if(isset($_POST['mdl_number'])&&$_POST['mdl_number']!=""){
-            if(!isset($_POST['mark_as_test'])){
+            if(!isset($_POST['mark_as_test']) && !isset($_POST['mark_as_test_incomplate']) ){
                 if(isset($_POST['mdl_number']) && $numSize != 7){
                     $isValid = false;
                     $errorMsgMdlStats .= "MDL# must contain 7 digits only <br/>";
@@ -133,6 +140,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 updateTable($db,'tbl_ss_qualify', array('mark_as_test'=>'1'), array('Guid_user'=>$markedUserID));
             } else {
                 updateTable($db,'tbl_ss_qualify', array('mark_as_test'=>'0'), array('Guid_user'=>$markedUserID));
+            }
+            if(isset($_POST['mark_as_test_incomplate'])){  
+                updateTable($db,'tblqualify', array('mark_as_test'=>'1'), array('Guid_user'=>$markedUserID));
+            } else {
+                updateTable($db,'tblqualify', array('mark_as_test'=>'0'), array('Guid_user'=>$markedUserID));
             }
             
            //add revenue data if exists
@@ -713,7 +725,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         <div class="col-md-12">
                             <?php if($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager' ){ ?>
                             <span class="pull-left markTest"> 
-                                <input <?php echo $ssQualifyResult['0']['mark_as_test']=='1'?' checked': ''; ?> id="mark-as-test" type="checkbox" name="mark_as_test" value="1" /> 
+                                <?php if(isset($_GET['incomplete'])&&$_GET['incomplete']==1){ ?>
+                                <input <?php echo $qualifyResult['mark_as_test']=='1'?' checked': ''; ?> id="mark-as-test" type="checkbox" name="mark_as_test_incomplate" value="1" /> 
+                                <?php } else { ?>
+                                <input <?php echo $qualifyResult['mark_as_test']=='1'?' checked': ''; ?> id="mark-as-test" type="checkbox" name="mark_as_test" value="1" /> 
+                                <?php } ?>
                                 <label for="mark-as-test">Mark As Test</label>
                             </span>
                             <?php } ?>

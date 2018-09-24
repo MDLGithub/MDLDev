@@ -588,17 +588,20 @@ $num_estimates = $qualify_requests;
                                     <?php if(isFieldVisibleByRole($roleIDs['from_date']['view'], $roleID)) {?>
                                         <td><?php echo date("n/j/Y", strtotime($qualify_request['date'])); ?></td>
                                     <?php } ?>
-                                    <?php $accountStr = $qualify_request['account_number'] ? "&account=".$qualify_request['account_number']:"" ?>
+                                    <?php 
+                                        $accountStr = $qualify_request['account_number'] ? "&account=".$qualify_request['account_number']:"";
+                                        $incompleteStr = $isIncomplete ? '&incomplete=1' : '';
+                                    ?>
                                     <?php if(isFieldVisibleByRole($roleIDs['first_name']['view'], $roleID)) {?>
                                         <td>
-                                            <a target="_blank" href="<?php echo SITE_URL."/patient-info.php?patient=".$qualify_request['Guid_user'].$accountStr; ?>">
+                                            <a target="_blank" href="<?php echo SITE_URL."/patient-info.php?patient=".$qualify_request['Guid_user'].$accountStr.$incompleteStr; ?>">
                                             <?php echo ucfirst($qualify_request['firstname']); ?>
                                             </a>
                                         </td>
                                     <?php } ?>
                                     <?php if(isFieldVisibleByRole($roleIDs['last_name']['view'], $roleID)) {?>
                                         <td>
-                                            <a target="_blank" href="<?php echo SITE_URL."/patient-info.php?patient=". $qualify_request['Guid_user'].$accountStr; ?>">
+                                            <a target="_blank" href="<?php echo SITE_URL."/patient-info.php?patient=". $qualify_request['Guid_user'].$accountStr.$incompleteStr; ?>">
                                                 <?php echo ucfirst($qualify_request['lastname']); ?>
                                             </a>
                                         </td>
