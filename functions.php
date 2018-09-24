@@ -1280,16 +1280,14 @@ function saveStatusLog($db,$statusIDs, $statusLogData){
     return TRUE;
 }
 
-function updateCurrentStatusID($db, $Guid_patient,$visibility=TRUE){
+function updateCurrentStatusID($db, $Guid_patient){
     //SELECT statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date` 
     $q  =   "SELECT * 
             FROM `tbl_mdl_status` statuses
             LEFT JOIN `tbl_mdl_status_log` statuslogs
-            ON statuses.`Guid_status`= statuslogs.`Guid_status` ";
-    if($visibility){
-    $q  .=  "WHERE statuses.`visibility`='1' ";
-    }
-    $q  .=  "AND statuslogs.`Guid_status_log`<>''
+            ON statuses.`Guid_status`= statuslogs.`Guid_status`
+            WHERE statuses.`visibility`='1' 
+            AND statuslogs.`Guid_status_log`<>''
             AND statuses.parent_id='0'
             AND statuslogs.Guid_patient=$Guid_patient
             ORDER BY statuslogs.`Date` DESC, statuses.order_by DESC LIMIT 1";
