@@ -812,7 +812,7 @@ $(document).ready(function () {
 		success: function(response) {
 		    var result = JSON.parse(response);
 		    console.log(result);
-		    //window.location.replace(redirectUrl);
+		    window.location.replace(redirectUrl);
 		},
 		error: function() {
 		    console.log('0');
