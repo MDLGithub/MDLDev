@@ -728,20 +728,30 @@ $(document).ready(function () {
     $('#specimen input').on('click', function() {
         var specimen = this.value;        
         if(specimen=='No'){
-            $('#select-reson').removeClass('hidden');
-            $('#pLogs, #mdlInfoBox').addClass('hidden');
+            $('#specimen').addClass('show-modal');
+            $('.specimenCollected.not').show();
+            $('.specimenCollected.yes').hide();
+//            $('#select-reson').removeClass('hidden');
+//            $('#pLogs, #mdlInfoBox').addClass('hidden');
         } 
         if(specimen=='Yes'){
             $('#specimen').addClass('show-modal');
+            $('.specimenCollected.yes').show();
+            $('.specimenCollected.not').hide();
             //$('#select-reson, #specimenRadioBox').addClass('hidden');
             //$('#pLogs, #mdlInfoBox').removeClass('hidden');
         }
     });
     
-    $('#cancel-specimen-collected').on('click', function(){
+    $('.cancel-specimen-collected').on('click', function(){
          $('#specimen').removeClass('show-modal');
+         $('.specimenCollected ').hide();
          $('#specimen-collected-cbox').prop('checked', false);
+         $('#specimen-notcollected-cbox').prop('checked', false);
     });
+    /**
+     * Patient Info screen Specimen collected options(Yes, No) functions
+     */
     $('#save-specimen-collected').on('click', function(){
         var dateVal = $('#specimen .datepicker').val();
         var redirectUrl = $('#redirectUrl').val();
@@ -772,6 +782,46 @@ $(document).ready(function () {
             });
         }
     });
+    $('#save-specimen-notcollected').on('click', function(){
+        var dateVal = $('#specimen .datepicker').val();
+        var redirectUrl = $('#redirectUrl').val();
+        var Guid_user = $('#Guid_user').val();
+        var account = $('#account').val();
+        var statusVal = $('#specimen-not-collected').val();
+        $('#specimen .datepicker').removeClass('error-border');
+        $('#specimen #specimen-not-collected').removeClass('error-border');
+        if(dateVal == ""){
+            $('#specimen .datepicker').addClass('error-border');
+        } 
+        if(statusVal == ""){
+            $('#specimen #specimen-not-collected').addClass('error-border');
+        } 
+        
+        if(dateVal != "" && statusVal != "") {
+            //save spacimen collected into logs
+            var ajaxUrl = baseUrl+'/ajaxHandler.php';
+            $.ajax( ajaxUrl , {
+                type: 'POST',
+                data: {
+                   save_specimen_not_collected_into_logs: '1',                   
+                   date: dateVal,
+                   Guid_user: Guid_user,
+                   account: account,
+                   status: statusVal
+                },
+                success: function(response) {
+                    var result = JSON.parse(response);
+                    console.log(result);
+                    window.location.replace(redirectUrl);
+                },
+                error: function() {
+                    console.log('0');
+                }
+            });
+        }
+    });
+    
+    
     $('#add-patient-deductable').on('click', function(){
         $('#total-deductible').toggleClass('hidden');
     });

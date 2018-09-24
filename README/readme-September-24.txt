@@ -5,6 +5,8 @@ ALTER TABLE `tblqualify` ADD COLUMN `mark_as_test` ENUM('0','1') NOT NULL DEFAUL
 
 patient-info.php
 dashboard.php
+ajaxHandler.php
+functions.php
 
 custom-styles.css
 scripts.js
