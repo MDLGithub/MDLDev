@@ -60,7 +60,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 
 	$numSize = strlen($_POST['mdl_number']);
 	if(isset($_POST['mdl_number'])&&$_POST['mdl_number']!=""){
-	    if(!isset($_POST['mark_as_test']) && !isset($_POST['mark_as_test_incomplate']) ){
+	    if(!isset($_POST['mark_as_test']) && !isset($_POST['mark_as_test_incomplate']) && $_POST['specimen_collected']!='No' ){
 		if(isset($_POST['mdl_number']) && $numSize != 7){
 		    $isValid = false;
 		    $errorMsgMdlStats .= "MDL# must contain 7 digits only <br/>";
@@ -103,16 +103,29 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 	     //update patient table for reason and cpecimen collected values
 	    $wherePatient = array('Guid_user'=>$_GET['patient']);
 	    $patientData = array();
-	    if(isset($_POST['specimen_collected'])&&$_POST['specimen_collected']!=""){
-		$patientData['specimen_collected']=$_POST['specimen_collected'];
-	    }
-	    if(isset($_POST['Guid_reason'])&&$_POST['Guid_reason']!=""){
-		$patientData['Guid_reason']=$_POST['Guid_reason'];
-	    } else {
-		$patientData['Guid_reason']="";
-	    }
+//            if(isset($_POST['specimen_collected'])&&$_POST['specimen_collected']!=""){
+//                $patientData['specimen_collected']=$_POST['specimen_collected'];
+//            }
+//            if(isset($_POST['Guid_reason'])&&$_POST['Guid_reason']!=""){
+//                $patientData['Guid_reason']=$_POST['Guid_reason'];
+//            } else {
+//                $patientData['Guid_reason']="";
+//            }
 	    if(!empty($patientData)){
 		$updatePatient = updateTable($db, 'tblpatient', $patientData, $wherePatient);
+	    }
+
+	    //mark user as a test
+	    $markedUserID = $_GET['patient'];
+	    if(isset($_POST['mark_as_test'])){
+		updateTable($db,'tbl_ss_qualify', array('mark_as_test'=>'1'), array('Guid_user'=>$markedUserID));
+	    } else {
+		updateTable($db,'tbl_ss_qualify', array('mark_as_test'=>'0'), array('Guid_user'=>$markedUserID));
+	    }
+	    if(isset($_POST['mark_as_test_incomplate'])){
+		updateTable($db,'tblqualify', array('mark_as_test'=>'1'), array('Guid_user'=>$markedUserID));
+	    } else {
+		updateTable($db,'tblqualify', array('mark_as_test'=>'0'), array('Guid_user'=>$markedUserID));
 	    }
 
 	    //Update MDL# info
@@ -134,18 +147,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		}
 	    }
 
-	    //mark user as a test
-	    $markedUserID = $_GET['patient'];
-	    if(isset($_POST['mark_as_test'])){
-		updateTable($db,'tbl_ss_qualify', array('mark_as_test'=>'1'), array('Guid_user'=>$markedUserID));
-	    } else {
-		updateTable($db,'tbl_ss_qualify', array('mark_as_test'=>'0'), array('Guid_user'=>$markedUserID));
-	    }
-	    if(isset($_POST['mark_as_test_incomplate'])){
-		updateTable($db,'tblqualify', array('mark_as_test'=>'1'), array('Guid_user'=>$markedUserID));
-	    } else {
-		updateTable($db,'tblqualify', array('mark_as_test'=>'0'), array('Guid_user'=>$markedUserID));
-	    }
+
 
 	   //add revenue data if exists
 	    if(isset($_POST['revenueAdd']) && !empty($_POST['revenueAdd'])){
@@ -290,7 +292,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 
 		<form id="mdlInfoForm" action="" method="POST" >
 			<input type="hidden" name="save" value="1"/>
-			<input type="hidden" name="account" value="<?php echo isset($_GET['account'])?$_GET['account']:$mdlInfo['account'] ?>"/>
+			<input type="hidden" name="account" value="<?php echo isset($_GET['account'])?$_GET['account']:(isset($mdlInfo['account'])?$mdlInfo['account']:""); ?>"/>
 			<div class="row">
 			    <div class="col-md-6 pInfo">
 				<p><label>Date of Birth: </label><input type="text" name="dob" class="datepicker" value="<?php echo ($qualifyResult['dob']!="")?date("n/j/Y", strtotime($qualifyResult['dob'])):""; ?>" autocomplete="off" /></p>
@@ -329,22 +331,40 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 						<?php if($qualifyResult['specimen_collected'] !== 'Yes'){ ?>
 						<input id="specimen-notcollected-cbox" <?php echo ($qualifyResult['specimen_collected']=='No')?"checked":"";?> type="radio" name="specimen_collected" value="No" /> No
 						<?php } ?>
-						<div class="pick-date">
+						<div class="specimenCollected yes">
 						    <label>Date: </label>
 						    <input id="redirectUrl" type="hidden" value="<?php echo $patientInfoUrl; ?>" />
 						    <input id="Guid_user" type="hidden" value="<?php echo $_GET['patient']; ?>" />
 						    <input id="account" type="hidden" value="<?php echo isset($_GET['account'])?$_GET['account']:""; ?>" />
 						    <input type="text" class="datepicker" value="<?php echo date('n/j/Y'); ?>">
 						    <button id="save-specimen-collected" class="btn btn-specimen btn-inline" type="button">OK</button>
-						    <button id="cancel-specimen-collected" class="btn btn-specimen btn-inline" type="button">Cancel</button>
+						    <button class="cancel-specimen-collected btn btn-specimen btn-inline" type="button">Cancel</button>
 						</div>
+						<div class="specimenCollected not">
+						    <label>Date: </label>
+						    <input id="redirectUrl" type="hidden" value="<?php echo $patientInfoUrl; ?>" />
+						    <input id="Guid_user" type="hidden" value="<?php echo $_GET['patient']; ?>" />
+						    <input id="account" type="hidden" value="<?php echo isset($_GET['account'])?$_GET['account']:""; ?>" />
+						    <input type="text" class="datepicker" value="<?php echo date('n/j/Y'); ?>">
+
+						    <?php $notCollected= $db->row("SELECT * FROM tbl_mdl_status WHERE Guid_status=:Guid_status", array('Guid_status'=>'37')); ?>
+
+						    <select id="specimen-not-collected" class="selectBox" name="">
+							<option value="<?php echo $notCollected['Guid_status']; ?>"><?php echo $notCollected['status']; ?></option>
+							<?php echo get_option_of_nested_status($db, $notCollected['Guid_status'], "&nbsp;&nbsp;");?>
+						    </select>
+
+						    <button id="save-specimen-notcollected" class="btn btn-specimen btn-inline" type="button">OK</button>
+						    <button class="cancel-specimen-collected btn btn-specimen btn-inline" type="button">Cancel</button>
+						</div>
+
 					    </div>
 					</div>
 				    </div>
-				    <div id="select-reson" class="col-md-8 <?php echo ( is_null($qualifyResult['specimen_collected']) || $qualifyResult['specimen_collected']=='Yes')?"hidden":"";?>">
+<!--                                    <div id="select-reson" class="col-md-8 <?php echo ( is_null($qualifyResult['specimen_collected']) || $qualifyResult['specimen_collected']=='Yes')?"hidden":"";?>">
 					<div class="f2">
-					    <!--<label class="dynamic" for="reason_not"><span>Reasons for not taking the test</span></label>-->
-					    <?php $reasons = $db->selectAll('tbl_reasons');?>
+					    <label class="dynamic" for="reason_not"><span>Reasons for not taking the test</span></label>
+					    <?php //$reasons = $db->selectAll('tbl_reasons');?>
 					    <div class="group">
 						<select id="reason" name="Guid_reason" class="no-selection">
 						    <option value="">Reasons for not taking the test</option>
@@ -357,7 +377,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 						</p>
 					    </div>
 					</div>
-				    </div>
+				    </div>-->
 
 				    <div id="mdlInfoBox" class="pInfo <?php echo ($qualifyResult['specimen_collected']!='Yes')?'hidden':"";?>">
 					<p>
@@ -396,13 +416,13 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					    </thead>
 					    <tbody>
 						<?php //note_id
-						    $nQ =  "SELECT n.*, p.firstname, p.lastname, cat.name AS category
+						    $nQ =  "SELECT DISTINCT n.*, p.firstname, p.lastname, cat.name AS category
 							    FROM `tbl_mdl_note` n
 							    LEFT JOIN `tblpatient` p ON n.Guid_user=p.Guid_user
 							    LEFT JOIN `tbl_mdl_note_category` cat ON n.Guid_note_category=cat.Guid_note_category
 							    WHERE n.Guid_user=:Guid_user";
 						    $notes = $db->query($nQ, array('Guid_user'=>$_GET['patient']));
-
+						    //var_dump($nQ);
 						    foreach ($notes as $k=>$v) {
 							$userInfo = getUserFullInfo($db, $v['Recorded_by']);
 						?>
@@ -726,9 +746,9 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			    <?php if($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager' ){ ?>
 			    <span class="pull-left markTest">
 				<?php if(isset($_GET['incomplete'])&&$_GET['incomplete']==1){ ?>
-				<input <?php echo $qualifyResult['mark_as_test']=='1'?' checked': ''; ?> id="mark-as-test" type="checkbox" name="mark_as_test_incomplate" value="1" />
+				<input <?php echo $qualifyResult['mark_as_test']=='1'?' checked': ''; ?>  type="checkbox" name="mark_as_test_incomplate" value="1" />
 				<?php } else { ?>
-				<input <?php echo $qualifyResult['mark_as_test']=='1'?' checked': ''; ?> id="mark-as-test" type="checkbox" name="mark_as_test" value="1" />
+				<input <?php echo $qualifyResult['mark_as_test']=='1'?' checked': ''; ?>  type="checkbox" name="mark_as_test" value="1" />
 				<?php } ?>
 				<label for="mark-as-test">Mark As Test</label>
 			    </span>

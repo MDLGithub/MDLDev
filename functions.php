@@ -799,9 +799,8 @@ function get_value($db, $table, $extractFieldValue, $where=array()){
 }
 
 
-function validateProviderId($db, $data){
+function validateProviderId($db, $data, $provider_id){
     extract($data);
-    $provider_id = $_POST['provider_id'];
     $providers = array();
     $query = "";
     if($action=='update'){

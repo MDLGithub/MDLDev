@@ -49,11 +49,10 @@ if( isset($_POST['manage_provider'])){
     $data = array(
 	'title' => $title,
 	'first_name' => $first_name,
-	'last_name' => $last_name
+	'last_name' => $last_name,
+	'provider_id'=>$provider_id
     );
-    if($provider_id!=""){
-	$data['provider_id']=$provider_id;
-    }
+
     if($_FILES["photo_filename"]["name"] != ""){
 	$fileName = $_FILES["photo_filename"]["name"];
 	$data['photo_filename'] = $fileName;
@@ -70,8 +69,14 @@ if( isset($_POST['manage_provider'])){
 			'account_id'=>$_POST['account_id'],
 			'Guid_provider'=>$_POST['Guid_provider']
 	    );
-
-	$isProviderValid = validateProviderId($db, $providerDataArray);
+	$provider_id=$_POST['provider_id'];
+	$isProviderValid = array();
+	if(isset($provider_id) && $provider_id!=""){
+	    $isProviderValid = validateProviderId($db, $providerDataArray, $provider_id);
+	} else{
+	    $isProviderValid['status']=1;
+	    $isProviderValid['msg'] = "";
+	}
 
 	if($isProviderValid['status']==1){
 	    if($Guid_user == ""){ //insert User
@@ -84,6 +89,7 @@ if( isset($_POST['manage_provider'])){
 		$whereUser = array('Guid_user'=>$Guid_user);
 		$updateUser = updateTable($db, 'tbluser', $userData, $whereUser);
 	    }
+
 	    $update = updateTable($db, 'tblprovider', $data, $where, $msg );
 	    Leave(SITE_URL.'/accounts.php?account_id='.$_GET['account_id']);
 	} else {
@@ -108,8 +114,9 @@ if( isset($_POST['manage_provider'])){
 
 	    $providerDataArray['action'] = 'insert';
 	    $providerDataArray['provider_id']=$_POST['provider_id'];
+	    $provider_id= $_POST['provider_id'];
 
-	    $isProviderValid = validateProviderId($db, $providerDataArray);
+	    $isProviderValid = validateProviderId($db, $providerDataArray, $provider_id);
 	    if($isProviderValid['status']==1){
 		$insert = insertIntoTable($db, 'tblprovider', $data, $msg);
 		Leave(SITE_URL.'/accounts.php?account_id='.$_GET['account_id']);
