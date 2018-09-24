@@ -558,10 +558,14 @@ $num_estimates = $qualify_requests;
                                     $provider_name = "";
                                 }
                             }
-                            $q = "SELECT CONCAT(sr.first_name, ' ', sr.last_name) AS name FROM tblaccount a LEFT JOIN tblaccountrep ar ON a.Guid_account=ar.Guid_account LEFT JOIN tblsalesrep sr ON ar.Guid_salesrep = sr.Guid_salesrep WHERE a.account = '" . $qualify_request['account_number'] . "'";
+                            if(isset($qualify_request['account_number'])&&$qualify_request['account_number']!=""){
+                                $q = "SELECT CONCAT(sr.first_name, ' ', sr.last_name) AS name FROM tblaccount a LEFT JOIN tblaccountrep ar ON a.Guid_account=ar.Guid_account LEFT JOIN tblsalesrep sr ON ar.Guid_salesrep = sr.Guid_salesrep WHERE a.account = '" . $qualify_request['account_number'] . "'";
 
-                            $salesrep = $db->row($q);
-                            $salesrep = $salesrep['name'];
+                                $salesrep = $db->row($q);
+                                $salesrep = $salesrep['name'];
+                            } else {
+                                $salesrep = "";
+                            }
                             $isIncomplete=FALSE;
                             $dataPrintable = "1";
                             if(isset($qualify_request['incomplete'])){ 
