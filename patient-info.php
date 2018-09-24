@@ -433,7 +433,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			    <thead>
 				<th>Print</th>
 				<th>Qualified</th>
-				<th>Date Completed</th>
+				<th>Date</th>
 				<th>Clinical History</th>
 			    </thead>
 			    <tbody>
