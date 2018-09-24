@@ -301,8 +301,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 if(isset($_POST['mark_as_test'])){
     $markedUsers =$_POST['markedRow']['user'];
     if($markedUsers){
-	foreach ($markedUsers as $userID=>$v){
-	    updateTable($db,'tbl_ss_qualify', array('mark_as_test'=>'1'), array('Guid_user'=>$userID));
+	if(isset($_POST['q_incomplete'])){
+	    foreach ($markedUsers as $userID=>$v){
+		updateTable($db,'tblqualify', array('mark_as_test'=>'1'), array('Guid_user'=>$userID));
+	    }
+	}else{
+	    foreach ($markedUsers as $userID=>$v){
+		updateTable($db,'tbl_ss_qualify', array('mark_as_test'=>'1'), array('Guid_user'=>$userID));
+	    }
 	}
     }
 }
@@ -332,10 +338,11 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
     if (isset($_POST['meets_mn']) && strlen($_POST['meets_mn'])) {
 	$whereTest = "";
 	if($_POST['meets_mn']=='incomplete'){
-	    $sqlTbl  = "SELECT q.*,p.*, u.email, q.Date_created AS `date` FROM tblqualify q
+	    $sqlTbl  = "SELECT q.*,p.*, u.email, q.Date_created AS `date`, '1' AS incomplete FROM tblqualify q
 			LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user
 			LEFT JOIN tbluser u ON p.Guid_user = u.Guid_user";
-	    $where = " WHERE NOT EXISTS(SELECT * FROM tbl_ss_qualify qs WHERE q.Guid_qualify=qs.Guid_qualify)";
+	    $where = " WHERE NOT EXISTS(SELECT * FROM tbl_ss_qualify qs WHERE q.Guid_qualify=qs.Guid_qualify) AND q.mark_as_test='0'";
+
 	}else{
 	    $where = (strlen($where)) ? " AND " : " WHERE ";
 	    $where .= " q.qualified = '" . $_POST['meets_mn'] . "'";
@@ -555,13 +562,22 @@ $num_estimates = $qualify_requests;
 
 			    $salesrep = $db->row($q);
 			    $salesrep = $salesrep['name'];
+			    $isIncomplete=FALSE;
+			    $dataPrintable = "1";
+			    if(isset($qualify_request['incomplete'])){
+				$isIncomplete=TRUE;
+				$dataPrintable = '2';
+			    }
 		    ?>
 			    <tr data-id="<?php //echo $estimate_request['Guid_brcaestimate']; ?>" class="t_row">
 				    <td class="printSelectBlock text-center">
 					<?php if(isset($qualify_request['qualified']) && $qualify_request['qualified']=='Unknown'){ ?>
 					    <input name="markedRow[user][<?php echo $qualify_request['Guid_user']; ?>]" type="checkbox" class="print1 report1" data-prinatble="0" data-selected_questionnaire="<?php echo $qualify_request['Guid_qualify']; ?>" data-selected_date="<?php echo $qualify_request['date']; ?>" />
 					<?php } else { ?>
-					    <input name="markedRow[user][<?php echo $qualify_request['Guid_user']; ?>]" type="checkbox" class="print1 report1" data-prinatble="1" data-selected_questionnaire="<?php echo $qualify_request['Guid_qualify']; ?>" data-selected_date="<?php echo $qualify_request['date']; ?>" />
+					    <?php if($isIncomplete){ ?>
+					    <input type="hidden" name="q_incomplete" value="1" />
+					    <?php } ?>
+					    <input name="markedRow[user][<?php echo $qualify_request['Guid_user']; ?>]" type="checkbox" class="print1 report1" data-prinatble="<?php echo $dataPrintable; ?>" data-selected_questionnaire="<?php echo $qualify_request['Guid_qualify']; ?>" data-selected_date="<?php echo $qualify_request['date']; ?>" />
 					<?php } ?>
 				    </td>
 				    <?php if(isset($qualify_request['qualified']) && isFieldVisibleByRole($roleIDs['meets_mn']['view'], $roleID)) {?>

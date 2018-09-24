@@ -208,6 +208,8 @@ $(document).ready(function () {
 		    $("#admin_print").append(data);
 		    scalePedigree();
 		});
+	    } else if (data_printable=='2') {
+		notPrintableMsg = "The summary report for questionnaires with Incomplete medical necessity result cannot be printed.";
 	    } else {
 		notPrintableMsg = "The summary report for questionnaires with Unknown medical necessity result cannot be printed.";
 	    }
