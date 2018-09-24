@@ -53,9 +53,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         
         $numSize = strlen($_POST['mdl_number']);
         if(isset($_POST['mdl_number'])&&$_POST['mdl_number']!=""){
-            if(isset($_POST['mdl_number']) && $numSize != 7){
-                $isValid = false;
-                $errorMsgMdlStats .= "MDL# must contain 7 digits only <br/>";
+            if(!isset($_POST['mark_as_test'])){
+                if(isset($_POST['mdl_number']) && $numSize != 7){
+                    $isValid = false;
+                    $errorMsgMdlStats .= "MDL# must contain 7 digits only <br/>";
+                }
             }
         }
         if($isValid){
