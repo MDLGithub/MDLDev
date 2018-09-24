@@ -1415,7 +1415,7 @@ button[name="search"] > strong{
     display: block;
 }
 #specimenRadioBox .show-modal .specimenCollected.not{
-    width: 460px;
+    width: 520px;
 }
 #specimenRadioBox .show-modal .specimenCollected label{
     float: left;
@@ -1431,7 +1431,7 @@ button[name="search"] > strong{
     height: 23px;
 }
 #specimenRadioBox .show-modal .specimenCollected .selectBox{
-    width: 150px;
+    width: 210px;
 }
 #specimenRadioBox  .show-modal button.btn-specimen.btn-inline {
     min-width: auto;
