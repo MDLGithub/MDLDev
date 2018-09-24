@@ -315,7 +315,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                             <div id="specimen">
                                                 <input id="specimen-collected-cbox" <?php echo ($qualifyResult['specimen_collected']=='Yes')?"checked":"";?> type="radio" name="specimen_collected" value="Yes" /> Yes &nbsp;&nbsp;
                                                 <?php if($qualifyResult['specimen_collected'] !== 'Yes'){ ?>
-                                                <input <?php echo ($qualifyResult['specimen_collected']=='No')?"checked":"";?> type="radio" name="specimen_collected" value="No" /> No
+                                                <input id="specimen-notcollected-cbox" <?php echo ($qualifyResult['specimen_collected']=='No')?"checked":"";?> type="radio" name="specimen_collected" value="No" /> No
                                                 <?php } ?>                                               
                                                 <div class="pick-date">                                                    
                                                     <label>Date: </label>
