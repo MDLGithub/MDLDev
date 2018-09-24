@@ -66,8 +66,12 @@ $(document).ready(function () {
      */
     $( "form#mdlInfoForm" ).submit(function( event ) {
 	if ($(".mdlnumber").hasClass('error')) {
-	    event.preventDefault();
-	    $('#message').html("MDL# must contain 7 digits only.");
+	    if($('#mark-as-test').prop('checked', true)){
+		$(".mdlnumber").removeClass('error');
+	    }  else {
+		event.preventDefault();
+		$('#message').html("MDL# must contain 7 digits only.");
+	    }
 	} else {
 	    return;
 	}
