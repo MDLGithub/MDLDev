@@ -1401,10 +1401,10 @@ button[name="search"] > strong{
     z-index: 100;
 
 }
-#specimenRadioBox .pick-date{
+#specimenRadioBox .specimenCollected{
     display: none;
 }
-#specimenRadioBox .show-modal .pick-date{
+#specimenRadioBox .show-modal .specimenCollected{
     position: absolute;
     top: 0;
     left: 0;
@@ -1414,21 +1414,29 @@ button[name="search"] > strong{
     z-index: 200;
     display: block;
 }
-#specimenRadioBox .show-modal .pick-date label{
+#specimenRadioBox .show-modal .specimenCollected.not{
+    width: 460px;
+}
+#specimenRadioBox .show-modal .specimenCollected label{
     float: left;
     margin: 0;
 }
-#specimenRadioBox .show-modal .pick-date .datepicker{
+#specimenRadioBox .show-modal .specimenCollected .datepicker,
+#specimenRadioBox .show-modal .specimenCollected .selectBox{
     border: 1px solid;
     background: #fff;
     width: 100px;
     float: left;
     margin-left: 10px;
+    height: 23px;
+}
+#specimenRadioBox .show-modal .specimenCollected .selectBox{
+    width: 150px;
 }
 #specimenRadioBox  .show-modal button.btn-specimen.btn-inline {
     min-width: auto;
     height: auto;
-    margin: 0 0 0 10px;
+    margin: 0 0 0 5px;
     padding: 2px 10px;
     font-size: 15px;
 }

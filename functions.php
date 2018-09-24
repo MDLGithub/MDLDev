@@ -1278,6 +1278,7 @@ function saveStatusLog($db,$statusIDs, $statusLogData){
 	    $insertStatusLog = insertIntoTable($db, 'tbl_mdl_status_log', $statusLogData);
 	}
     }
+    return TRUE;
 }
 
 function updateCurrentStatusID($db, $Guid_patient){
@@ -1326,7 +1327,7 @@ function get_status_dropdown($db, $parent='0') {
 }
 
 function get_nested_status_dropdown($db, $parent = 0) {
-    $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
+    $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." AND visibility='1' ORDER BY order_by ASC, Guid_status ASC");
 
     $content = '<select class="no-selection" name="parent_id" id="parent">
 			    <option value="0">Select Status Parent</option>';
