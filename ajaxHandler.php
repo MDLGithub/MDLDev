@@ -74,7 +74,7 @@ function save_specimen_not_collected_into_logs($db, $date, $Guid_user, $account,
             ORDER BY statuslogs.`Date` DESC, statuses.order_by DESC LIMIT 1";
     $result = $db->row($q);
    
-    $thisLog = $db->row("SELECT * FROM tbl_mdl_status_log WHERE Guid_status=:Guid_status", array('Guid_status'=>'37'));    
+    $thisLog = $db->row("SELECT * FROM tbl_mdl_status_log WHERE Guid_status=:Guid_status AND Guid_patient=:Guid_patient", array('Guid_status'=>'37', 'Guid_patient'=>$Guid_patient));    
     if(!empty($thisLog)){
         $LogGroup = $thisLog['Log_group'];
         //delete old log
