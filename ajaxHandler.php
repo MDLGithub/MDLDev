@@ -63,13 +63,6 @@ function save_specimen_not_collected_into_logs($db, $date, $Guid_user, $account,
         $statuses[] = '37';
     }
        
-    //insert log
-    $saveStats = saveStatusLog($db, $statuses, $statusLogData);
-    
-    updateTable($db, 'tblpatient', array('specimen_collected'=>'No'), array('Guid_patient'=>$patient['Guid_patient']));
-    
-    
-    
     $Guid_patient = $patient['Guid_patient'];
     $q  =   "SELECT * 
             FROM `tbl_mdl_status` statuses
@@ -87,6 +80,11 @@ function save_specimen_not_collected_into_logs($db, $date, $Guid_user, $account,
         //delete old log
         deleteByField($db, 'tbl_mdl_status_log', 'Log_group', $LogGroup); 
     }
+    
+    //insert log
+    $saveStats = saveStatusLog($db, $statuses, $statusLogData);    
+    updateTable($db, 'tblpatient', array('specimen_collected'=>'No'), array('Guid_patient'=>$patient['Guid_patient']));
+    
     
     $statID = updateCurrentStatusID($db, $Guid_patient, FALSE);
             
