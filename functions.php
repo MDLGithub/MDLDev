@@ -1537,7 +1537,7 @@ function get_status_table_rows($db, $parent = 0) {
     return $content;
 }
 function get_status_child_rows($db, $parent = 0,  $level = '') {
-    $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent."  ORDER BY order_by DESC, Guid_status DESC");
+    $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent."  ORDER BY order_by ASC");
     if ( $statuses ) {
         $content ='';
         $prefix = 0;
