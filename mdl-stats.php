@@ -19,6 +19,10 @@ if($role!="Admin"){
     Leave(SITE_URL."/no-permission.php");
 }
 $users = getUsersAndRoles($db);
+$searchData = array();
+if(isset($_POST['filter'])){
+    $searchData = $_POST;
+}
 
 require_once ('navbar.php');
 ?>
@@ -46,11 +50,32 @@ require_once ('navbar.php');
 			<div class="row ">
 			    <div class="col-md-12 text-center">
 				<div class="h-filters">
-				    <label>From: </label> <input class="date datepicker" type="text" />
-				    <label>To: </label> <input class="date datepicker" type="text" />
-				    <select class="salesrep"><option value="">Genetic Consultant</option></select>
-				    <select class="account"><option value="">Account</option></select>
-				    <button type="submit" class="" >Filter</button>
+				    <label>From: </label>
+
+				    <input name="from_date" class="date datepicker" type="text" autocomplete="off" value="" />
+				    <label>To: </label> <input name="to_date" class="date datepicker" type="text" autocomplete="off" value="" />
+				    <label>MDL#: </label> <input name="mdl_number" class="stat_mdl_number" type="text" autocomplete="off" value="<?php echo isset($_POST['mdl_number'])?$_POST['mdl_number']:"";?>"/>
+				    <select name="Guid_salesrep" class="salesrep">
+					<option value="">Genetic Consultant</option>
+					<?php $salesReps = $db->query("SELECT Guid_salesrep, CONCAT(first_name,' ', last_name) AS name FROM tblsalesrep ORDER BY name "); ?>
+					<?php foreach ($salesReps as $k=>$v){ ?>
+					<?php $selected = (isset($_POST['Guid_salesrep'])&&$_POST['Guid_salesrep']==$v['Guid_salesrep'])?" selected": ""; ?>
+					    <?php if (trim($v['name'])!=""){ ?>
+						<option <?php echo $selected; ?> value="<?php echo $v['Guid_salesrep']; ?>"><?php echo $v['name']; ?></option>
+					    <?php } ?>
+					<?php } ?>
+				    </select>
+				    <select name="Guid_account" class="account">
+					<option value="">Account</option>
+					<?php $accounts = $db->query("SELECT Guid_account, name FROM tblaccount ORDER BY name"); ?>
+					<?php foreach ($accounts as $k=>$v){ ?>
+					<?php $selected = (isset($_POST['Guid_account'])&&$_POST['Guid_account']==$v['Guid_account'])?" selected": ""; ?>
+					    <?php if (trim($v['name'])!=""){ ?>
+					    <option <?php echo $selected; ?>  value="<?php echo $v['Guid_account']; ?>"><?php echo ucfirst(strtolower($v['name'])); ?></option>
+					    <?php } ?>
+					<?php } ?>
+				    </select>
+				    <button name="filter" type="submit" class="" >Filter</button>
 				</div>
 			    </div>
 			</div>
@@ -64,7 +89,7 @@ require_once ('navbar.php');
 					</tr>
 				    </thead>
 				    <tbody>
-					<?php echo get_status_table_rows($db);?>
+					<?php echo get_status_table_rows($db, '0', $searchData);?>
 				    </tbody>
 				</table>
 			    </div>

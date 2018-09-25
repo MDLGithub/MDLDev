@@ -1469,33 +1469,59 @@ function getTestUserIDs($db){
     return $testUserIds;
 
 }
+
+function formatDate($date){
+    return date("n/j/Y", strtotime($date));
+}
+
 /**
  * Get Stats info
  * @param type $db
  * @param type $statusID
  * @return type array ('count'=>5, 'info'=>array())
  */
-function get_stats_info($db, $statusID, $hasChildren=FALSE){
+function get_stats_info($db, $statusID, $hasChildren=FALSE, $searchData=array()){
+
     //exclude test users
     $markedTestUserIds = getMarkedTestUserIDs($db);
     $testUserIds = getTestUserIDs($db);
     //$testUserIds = '';
-    $q = "SELECT statuses.*, statuslogs.`Guid_status_log`,
-	    statuslogs.`Guid_patient`, statuslogs.`Log_group`,
-	    statuses.`order_by`, statuslogs.`Date`
+    $q = "SELECT statuses.*, statuslogs.*,
+	    mdlnum.mdl_number as mdl_number
 	    FROM `tbl_mdl_status` statuses
-	    LEFT JOIN `tbl_mdl_status_log` statuslogs
-	    ON statuses.`Guid_status`= statuslogs.`Guid_status`
-	    WHERE  statuslogs.`currentstatus`='Y'
-	    AND statuslogs.`Guid_status_log`<>''
+	    LEFT JOIN `tbl_mdl_status_log` statuslogs ON statuses.`Guid_status`= statuslogs.`Guid_status`
+	    LEFT JOIN `tbl_mdl_number` mdlnum ON statuslogs.Guid_user=mdlnum.Guid_user ";
+
+    $q .=  "WHERE  statuslogs.`currentstatus`='Y' ";
+
+    if(!empty($searchData)){
+	if (strlen($searchData['from_date']) && $searchData['to_date']) {
+	    if ($searchData['from_date'] == $searchData['to_date']) {
+		$q .= " AND statuslogs.Date LIKE '%" . date("Y-m-d", strtotime($searchData['from_date'])) . "%'";
+	    } else {
+		$q .= " AND statuslogs.Date BETWEEN '" . date("Y-m-d", strtotime($searchData['from_date'])) . "' AND '" . date("Y-m-d", strtotime($searchData['to_date'])) . "'";
+	    }
+	}
+	if(isset($searchData['mdl_number']) && $searchData['mdl_number']!=""){
+	    $q .= " AND mdl_number='".$searchData['mdl_number']."' ";
+	}
+	if(isset($searchData['Guid_salesrep']) && $searchData['Guid_salesrep']!=""){
+	    $q .= " AND statuslogs.Guid_salesrep='".$searchData['Guid_salesrep']."' ";
+	}
+	if(isset($searchData['Guid_account']) && $searchData['Guid_account']!=""){
+	    $q .= " AND statuslogs.Guid_account='".$searchData['Guid_account']."' ";
+	}
+    }
+
+    $q .=  " AND statuslogs.`Guid_status_log`<>''
 	    AND statuslogs.Guid_status=$statusID ";
     if($markedTestUserIds!=""){
-    $q .=  "AND statuslogs.Guid_user NOT IN(".$markedTestUserIds.") ";
+    $q .=  " AND statuslogs.Guid_user NOT IN(".$markedTestUserIds.") ";
     }
     if($testUserIds!=""){
-    $q .=  "AND statuslogs.Guid_user NOT IN(".$testUserIds.") ";
+    $q .=  " AND statuslogs.Guid_user NOT IN(".$testUserIds.") ";
     }
-    $q .=  "AND statuslogs.Guid_patient<>'0'
+    $q .=  " AND statuslogs.Guid_patient<>'0'
 	    ORDER BY statuslogs.`Date` DESC, statuses.`order_by` DESC";
 
     $stats = $db->query($q);
@@ -1504,20 +1530,21 @@ function get_stats_info($db, $statusID, $hasChildren=FALSE){
 	$result['count'] = count($stats);
 	$result['info'] = $stats;
     }
+
     return $result;
 }
 
-function get_status_table_rows($db, $parent = 0) {
-    $statusQ = "SELECT * FROM tbl_mdl_status "
-	    . "WHERE `parent_id` = ".$parent." "
-	    . "ORDER BY order_by ASC";
+function get_status_table_rows($db, $parent = 0, $searchData=array()) {
+
+    $statusQ = "SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC";
     $statuses = $db->query($statusQ);
+
     $content = '';
     if ( $statuses ) {
 	foreach ( $statuses as $status ) {
 	    $checkCildren = $db->query("SELECT * FROM tbl_mdl_status "
 		    . "WHERE `parent_id` = ".$status['Guid_status']);
-	    $stats = get_stats_info($db, $status['Guid_status'], FALSE);
+	    $stats = get_stats_info($db, $status['Guid_status'], FALSE, $searchData);
 	    if($stats['count']!=0){
 		$optionClass = '';
 		if ( !empty($checkCildren) ) {
