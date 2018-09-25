@@ -1803,13 +1803,13 @@ function getRevenueStat($db, $Guid_user){
             if($Guid_payor!='1'){
                 $insuranceName .= $v['name']."; ";
             }
-        }
-        $insuranceName = rtrim($insuranceName, '; ');
-        $revenueData['patient_paid'] =  $paidPatient;   
-        $revenueData['insurance_paid'] =  $paidInsurance;   
-        $revenueData['total'] =  $total;   
-        $revenueData['insurance_name'] =  $insuranceName;   
+        }         
     }
+    $insuranceName = rtrim($insuranceName, '; ');
+    $revenueData['patient_paid'] =  $paidPatient;   
+    $revenueData['insurance_paid'] =  $paidInsurance;   
+    $revenueData['total'] =  $total;   
+    $revenueData['insurance_name'] =  $insuranceName;  
     
     return $revenueData;
 }
@@ -1820,18 +1820,22 @@ function getRevenueStat($db, $Guid_user){
  * @return type array
  */
 function getStatusRevenueTotals($db, $Guid_status){    
-    $usersQ = "SELECT * FROM `tbl_mdl_status_log` WHERE Guid_status=$Guid_status";
+    $usersQ = "SELECT * FROM `tbl_mdl_status_log` WHERE Guid_status=$Guid_status AND currentstatus='Y'";
     $users = $db->query($usersQ);
 
     $patientTotal = 0;
     $insuranceTotal = 0;
     $total = 0;
     $revenueTotalsData = array();
-    foreach ($users as $user){
-        $revenuDetails = getRevenueStat($db, $user['Guid_user']);
-        $patientTotal += $revenuDetails['patient_paid'];
-        $insuranceTotal += $revenuDetails['insurance_paid'];
-        $total += $revenuDetails['total'];
+    if(!empty($users)){
+        foreach ($users as $user){
+            $revenuDetails = getRevenueStat($db, $user['Guid_user']);
+            if(!empty($revenuDetails)){
+                $patientTotal += $revenuDetails['patient_paid'];
+                $insuranceTotal += $revenuDetails['insurance_paid'];
+                $total += $revenuDetails['total'];
+            }
+        }
     }
     $revenueTotalsData['patient_total'] = $patientTotal;
     $revenueTotalsData['insurance_total'] = $insuranceTotal;
