@@ -1766,3 +1766,76 @@ function isFieldVisibleForRole($db, $fieldID, $roleID){
     }
     return FALSE;    
 }
+/**
+ * Get Revenue Details for stats page
+ * @param type $db
+ * @param type $Guid_user
+ * @return type array
+ */
+function getRevenueStat($db, $Guid_user){
+    $revenueData = array();
+    $getPayorQ = "SELECT r.Guid_payor, p.name FROM `tbl_revenue` r "
+                . "LEFT JOIN tbl_mdl_payors p ON r.Guid_payor=p.Guid_payor "
+                . "WHERE r.Guid_payor<>'' AND r.Guid_user=:Guid_user "
+                . "GROUP BY r.Guid_payor ORDER BY r.Guid_payor ";
+    $payors = $db->query($getPayorQ, array('Guid_user'=>$Guid_user));
+    
+    $paidPatient = 0;
+    $paidInsurance = 0;
+    $total = 0;
+    $insuranceName = "";
+    if(!empty($payors)){
+        foreach ($payors as $k=>$v){
+            $Guid_payor = $v['Guid_payor'];
+            $revenueAmmountQ = "SELECT r.amount FROM `tbl_revenue` r
+                                LEFT JOIN `tbl_mdl_payors` p ON r.`Guid_payor`=p.`Guid_payor`
+                                WHERE r.`Guid_payor`= $Guid_payor
+                                ORDER BY r.`Guid_payor` "; 
+            $revenueAmmount = $db->query($revenueAmmountQ);
+            foreach ($revenueAmmount as $amount){
+                if($Guid_payor=='1'){ // Payor ID with 1 is Patients
+                    $paidPatient += $amount['amount'];
+                }else{ //insurance
+                    $paidInsurance += $amount['amount'];
+                }
+                $total += $amount['amount'];
+            }
+            if($Guid_payor!='1'){
+                $insuranceName .= $v['name']."; ";
+            }
+        }
+        $insuranceName = rtrim($insuranceName, '; ');
+        $revenueData['patient_paid'] =  $paidPatient;   
+        $revenueData['insurance_paid'] =  $paidInsurance;   
+        $revenueData['total'] =  $total;   
+        $revenueData['insurance_name'] =  $insuranceName;   
+    }
+    
+    return $revenueData;
+}
+/**
+ * Get Totals for given status
+ * @param type $db
+ * @param type $Guid_status
+ * @return type array
+ */
+function getStatusRevenueTotals($db, $Guid_status){    
+    $usersQ = "SELECT * FROM `tbl_mdl_status_log` WHERE Guid_status=$Guid_status";
+    $users = $db->query($usersQ);
+
+    $patientTotal = 0;
+    $insuranceTotal = 0;
+    $total = 0;
+    $revenueTotalsData = array();
+    foreach ($users as $user){
+        $revenuDetails = getRevenueStat($db, $user['Guid_user']);
+        $patientTotal += $revenuDetails['patient_paid'];
+        $insuranceTotal += $revenuDetails['insurance_paid'];
+        $total += $revenuDetails['total'];
+    }
+    $revenueTotalsData['patient_total'] = $patientTotal;
+    $revenueTotalsData['insurance_total'] = $insuranceTotal;
+    $revenueTotalsData['total'] = $total;
+    
+    return $revenueTotalsData;    
+}

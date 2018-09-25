@@ -162,7 +162,8 @@ require_once ('navbar.php');
                     }
                     $accountInfo = $accountInfo['0'];
                     extract($accountInfo); 
-                    $labelClass="";                    
+                    $labelClass="";   
+                    $noSelection = '';
                 }else{  
                     $labelClass = "";
                     $Guid_account= isset($Guid_account) ? $Guid_account: '';
@@ -176,6 +177,7 @@ require_once ('navbar.php');
                     $website= isset($website)?$website:'';
                     $phone_number = isset($phone_number)?$phone_number:"";
                     $fax = isset($fax)?$fax:"";
+                    $noSelection = 'no-selection';
                 }
             ?>
                 <div class="row">
@@ -209,9 +211,9 @@ require_once ('navbar.php');
                                     <input type="hidden" name="Guid_account" value="<?php echo $Guid_account; ?>" />
                                      <?php if(isFieldVisibleByRole($isAccountView, $roleID)) {?>
                                     <div class="f2 required <?php echo ($account!="" && $accountFieldMsg=="")?"valid show-label":"";?>">
-                                        <label class="dynamic" for="account"><span>Account</span></label>
+                                        <label class="dynamic" for="account"><span>Account Number</span></label>
                                         <div class="group">
-                                            <input class="numberonly" id="account" name="account" type="text" value="<?php echo $account; ?>" placeholder="Account" required="">
+                                            <input class="numberonly" id="account" name="account" type="text" value="<?php echo $account; ?>" placeholder="Account Number" required="">
                                             <p class="f_status">
                                                 <span class="status_icons"><strong>*</strong></span>
                                             </p>
@@ -236,8 +238,8 @@ require_once ('navbar.php');
                                             <div class="f2  <?php echo ($Guid_salesrep!="")?"valid show-label":"";?>">
                                                 <label class="dynamic" for="Guid_salesrep"><span>Genetic Consultant</span></label>
                                                 <div class="group">
-                                                    <select class="no-selection" name="Guid_salesrep" id="Guid_salesrep">
-                                                        <option>Genetic Consultant</option>
+                                                    <select class="<?php echo $noSelection; ?>" name="Guid_salesrep" id="Guid_salesrep">
+                                                        <option value="">Genetic Consultant</option>
                                                         <?php 
                                                         foreach ($salesreps as $key => $v) { 
                                                             $selected = ($Guid_salesrep == $v['Guid_salesrep']) ? ' selected' : '';
@@ -252,7 +254,7 @@ require_once ('navbar.php');
                                             </div>  
                                             
                                         </div>
-                                        <div class="col-md-3 pT-40">
+                                        <div class="col-md-3 pT-20">
                                             <a href="<?php echo SITE_URL; ?>/salesreps.php?action=add" class="add-new-account fs-28">
                                                 <span class="fas fa-plus-circle"></span>
                                             </a>
@@ -272,7 +274,7 @@ require_once ('navbar.php');
                                                 </div>
                                             </div>                                            
                                         </div>
-                                        <div class="col-md-3 pT-20">
+                                        <div class="col-md-3 pT-5">
                                             <?php $logo = ($logo=="")? "/assets/images/default.png":"/../images/practice/".$logo; ?>
                                             <img id="image" class="accountLogo" height="40" src="<?php echo SITE_URL.$logo; ?>" >
                                         </div>
@@ -283,9 +285,9 @@ require_once ('navbar.php');
                                 <div class="col-md-6">
                                     <?php if(isFieldVisibleByRole($isAddressView, $roleID)) {?>
                                     <div class="f2 <?php echo ($address!="")?"valid show-label":"";?>">
-                                        <label class="dynamic" for="address"><span>Address</span></label>
+                                        <label class="dynamic" for="address"><span>Account Address</span></label>
                                         <div class="group">
-                                            <input id="address" name="address" type="text" value="<?php echo $address; ?>" placeholder="Address">
+                                            <input id="address" name="address" type="text" value="<?php echo $address; ?>" placeholder="Account Address">
                                             <p class="f_status">
                                                 <span class="status_icons"><strong></strong></span>
                                             </p>
@@ -312,7 +314,7 @@ require_once ('navbar.php');
                                             <div class="f2 <?php echo ($state!="")?"valid show-label":"";?>">
                                                 <label class="dynamic" for="state"><span>State</span></label>
                                                 <div class="group">
-                                                    <select name="state" class="no-selection" id="state">
+                                                    <select name="state" class="<?php echo $noSelection; ?>" id="state">
                                                         <option value="">State</option>
                                                         <?php foreach ($states as $k => $v) { ?>
                                                         <?php $selected = ($state==$v['stateCode'])? " selected" : ""; ?>
@@ -401,13 +403,13 @@ require_once ('navbar.php');
                         <thead>
                             <tr>   
                             <?php if(isFieldVisibleByRole($isAccountView, $roleID)) {?>
-                                <th>Account</th>
+                                <th>Account Number</th>
                             <?php } ?>
                             <?php if(isFieldVisibleByRole($isNameView, $roleID)) {?>
                                 <th>Name</th>
                             <?php } ?>    
                             <?php if(isFieldVisibleByRole($isAddressView, $roleID)) {?>
-                                <th class="">Address</th>
+                                <th class="">Account Address</th>
                             <?php } ?>    
                             <?php if(isFieldVisibleByRole($isCityView, $roleID)) {?>
                                 <th class="">City</th>
