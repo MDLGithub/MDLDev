@@ -34,6 +34,7 @@ if(isset($_GET['get_patient_ids'])){
 
 //exclude test users from mdl stats
 $testUserIds = getTestUserIDs($db);
+$markedTestUserIds = getMarkedTestUserIDs($db);
 
 $initLabels = array(
     'first_name'=>'Patient First Name', 
@@ -42,20 +43,26 @@ $initLabels = array(
     'salesrep'=>'Sales Rep',
 );
 
-$initQ = 'SELECT s.Guid_status, s.Guid_user, s.Date, s.Date_created, p.Guid_patient, 
+    $initQ = 'SELECT s.Guid_status, s.Guid_user, s.Date, s.Date_created, p.Guid_patient, 
         p.firstname, p.lastname, 
-	a.account AS account_number, a.name AS account_name, a.address AS location,  
+        a.account AS account_number, a.name AS account_name, a.address AS location,  
         num.mdl_number,
-	CONCAT(srep.`first_name`, " " ,srep.`last_name`) AS salesrep  
+        CONCAT(srep.`first_name`, " " ,srep.`last_name`) AS salesrep  
         FROM `tbl_mdl_status_log` s 
         LEFT JOIN `tblpatient` p ON s.Guid_patient=p.Guid_patient
         LEFT JOIN `tblaccount` a ON s.Guid_account=a.Guid_account
         LEFT JOIN `tblsalesrep` srep ON s.Guid_salesrep=srep.Guid_salesrep
         Left JOIN `tbl_mdl_number` num ON s.Guid_user=num.Guid_user
         WHERE s.Guid_status=:Guid_status 
-        AND s.currentstatus="Y"
-        AND s.Guid_user NOT IN('.$testUserIds.') 
-        AND s.Guid_patient<>"0"';
+        AND s.currentstatus="Y" ';
+
+    if($markedTestUserIds!=""){
+        $initQ.='AND s.Guid_user NOT IN('.$markedTestUserIds.') ';
+    }
+    if($testUserIds!=""){
+        $initQ.='AND s.Guid_user NOT IN('.$testUserIds.') '; 
+    }
+    $initQ.='AND s.Guid_patient<>"0"';
 if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
     $initData=$db->query($initQ, array('Guid_status'=>$_GET['status_id']));
 } else {
