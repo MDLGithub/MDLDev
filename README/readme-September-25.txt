@@ -8,8 +8,10 @@ account-config.php
 dashboard.php
 functions.php
 mdl-stat-details.php
+mdl-stats.php
 
 custom-styles.css
+scripts.js
 
 
 

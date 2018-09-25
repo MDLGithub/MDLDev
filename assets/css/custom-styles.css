@@ -1333,19 +1333,22 @@ button[name="search"] > strong{
     border: 1px solid #e8e8e8;
     outline: none;
     height: 35px;
+    width: 200px;
 }
-.h-filters input.date{
+.h-filters input{
     padding: 0 5px;
-    width: 170px;
+    width: 150px;
     max-width: 100%;
     padding: 5px 30px 8px 10px;
     border: 1px solid #e8e8e8;
-    outline: none;
+    outline: none;    
+    margin: 0 10px 0 3px;
+    height: 35px;
+}
+.h-filters input.date{
     background: url(../images/dates_icon.svg) 0 0 no-repeat;
     background-size: 22px auto;
     background-position: 95% 50%;
-    margin: 0 10px 0 3px;
-    height: 35px;
 }
 .h-filters label{
     margin: 0 3px 0 0;
