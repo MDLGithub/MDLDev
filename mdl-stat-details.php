@@ -44,7 +44,7 @@ $initLabels = array(
 
 $initQ = 'SELECT s.Guid_status, s.Guid_user, s.Date, s.Date_created, p.Guid_patient,
 	p.firstname, p.lastname,
-	a.account AS account_number, a.name AS account_name,
+	a.account AS account_number, a.name AS account_name, a.address AS location,
 	num.mdl_number,
 	CONCAT(srep.`first_name`, " " ,srep.`last_name`) AS salesrep
 	FROM `tbl_mdl_status_log` s
@@ -134,6 +134,7 @@ require_once ('navbar.php');
 			<tbody>
 			    <?php foreach ($initData as $k=>$v){ ?>
 			    <?php
+				$revenue = getRevenueStat($db, $v['Guid_user']);
 				$patientInfoUrl = SITE_URL.'/patient-info.php?patient='.$v['Guid_user'];
 				if($v['account_number'] && $v['account_number']!=''){
 				    $patientInfoUrl .= '&account='.$v['account_number'];
@@ -158,7 +159,7 @@ require_once ('navbar.php');
 				<?php } ?>
 
 				<?php if(isFieldVisibleForStatus($db, 'account_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'account_name', $roleID)){ ?>
-				<td><?php echo $v['account_name']; ?></td>
+				<td><?php echo ucwords(strtolower($v['account_name'])); ?></td>
 				<?php } ?>
 
 				<?php if(isFieldVisibleForStatus($db, 'salesrep', $_GET['status_id']) && isFieldVisibleForRole($db, 'salesrep', $roleID)){ ?>
@@ -178,19 +179,19 @@ require_once ('navbar.php');
 				<?php } ?>
 
 				<?php if(isFieldVisibleForStatus($db, 'insurance_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'insurance_paid', $roleID)){ ?>
-				<td>??</td>
+				<td><?php echo formatMoney($revenue['insurance_paid']); ?></td>
 				<?php } ?>
 
 				<?php if(isFieldVisibleForStatus($db, 'patient_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'patient_paid', $roleID)){ ?>
-				<td>??</td>
+				<td><?php echo formatMoney($revenue['patient_paid']); ?></td>
 				<?php } ?>
 
 				<?php if(isFieldVisibleForStatus($db, 'total_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'total_paid', $roleID)){ ?>
-				<td>??</td>
+				<td><?php echo formatMoney($revenue['total']); ?></td>
 				<?php } ?>
 
 				<?php if(isFieldVisibleForStatus($db, 'insurance_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'insurance_name', $roleID)){ ?>
-				<td>??</td>
+				<td><?php echo $revenue['insurance_name']; ?></td>
 				<?php } ?>
 
 				<?php if(isFieldVisibleForStatus($db, 'test_ordered', $_GET['status_id']) && isFieldVisibleForRole($db, 'test_ordered', $roleID)){ ?>
@@ -198,11 +199,26 @@ require_once ('navbar.php');
 				<?php } ?>
 
 				<?php if(isFieldVisibleForStatus($db, 'location', $_GET['status_id']) && isFieldVisibleForRole($db, 'location', $roleID)){ ?>
-				<td>??</td>
+				<td><?php echo $v['location']; ?></td>
 				<?php } ?>
 			    </tr>
 			    <?php } ?>
 			</tbody>
+			<?php $userRevenuTotals = getStatusRevenueTotals($db, $_GET['status_id']); ?>
+			<tfoot class="strong">
+			    <tr>
+				<td class=" text-right" colspan="1">Insurance Total: </td>
+				<td colspan="2"><?php echo formatMoney($userRevenuTotals['insurance_total']); ?></td>
+			    </tr>
+			    <tr>
+				<td class=" text-right" colspan="1">Patient Total: </td>
+				<td colspan="2"><?php echo formatMoney($userRevenuTotals['patient_total']); ?></td>
+			    </tr>
+			    <tr>
+				<td class=" text-right" colspan="1">Total: </td>
+				<td colspan="2"><?php echo formatMoney($userRevenuTotals['total']); ?></td>
+			    </tr>
+			</tfoot>
 		    </table>
 		</div>
 	    </div>

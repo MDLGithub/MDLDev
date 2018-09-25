@@ -612,7 +612,7 @@ $num_estimates = $qualify_requests;
 				    <?php } ?>
 
 				    <?php if(isFieldVisibleByRole($roleIDs['account']['view'], $roleID)) {?>
-					<td><?php echo $qualify_request['account_number']; ?></td>
+					<td><?php echo ($qualify_request['account_number']!="" && !is_null($qualify_request['account_number']))?$qualify_request['account_number']:""; ?></td>
 				    <?php } ?>
 
 				    <?php if(isFieldVisibleByRole($roleIDs['location']['view'], $roleID)) {?>

@@ -29,14 +29,14 @@ $tables = array(
 	'account'=>'Account',
 	'provider'=>'Provider',
 	'location'=>'Location',
-	'salesrep'=>'Sales Rep'
+	'salesrep'=>'Genetic Consultants'
     ),
     'account' => array(
 	'tableName' => 'Account',
 	'tableActions' => array('add', 'edit', 'delete'),
 	'account' => 'Account',
 	'name' => 'Name',
-	'Guid_salesrep'=>'Sales Rep',
+	'Guid_salesrep'=>'Genetic Consultant',
 	'logo'=>'Logo',
 	'address'=>'Address',
 	'city'=>'City',
@@ -50,14 +50,14 @@ $tables = array(
 	'tableName' => 'Devices',
 	'tableActions' => array('add', 'edit', 'delete'),
 	'serial_number'=>'Serial',
-	'Guid_salesrep'=>'Sales Rep',
+	'Guid_salesrep'=>'Genetic Consultant',
 	'deviceid'=>'Device Name',
 	'inservice_date'=>'In-Service Date',
 	'outservice_date'=>'Out-Of-Service Date',
 	'comment'=>'Comment'
     ),
     'salesreps' => array(
-	'tableName' => 'Sales Reps',
+	'tableName' => 'Genetic Consultants',
 	'tableActions' => array('add', 'edit', 'delete'),
 	'first_name' => 'First Name',
 	'last_name' => 'Last Name',
@@ -142,7 +142,7 @@ require_once ('navbar.php');
 	    <p><a href="<?php echo SITE_URL; ?>/access-roles.php?config=tables&tableid=home"><i class="fas fa-arrow-circle-right"></i> Home</a></p>
 	    <p><a href="<?php echo SITE_URL; ?>/access-roles.php?config=tables&tableid=account"><i class="fas fa-arrow-circle-right"></i> Accounts</a></p>
 	    <p><a href="<?php echo SITE_URL; ?>/access-roles.php?config=tables&tableid=devices"><i class="fas fa-arrow-circle-right"></i> Devices</a></p>
-	    <p><a href="<?php echo SITE_URL; ?>/access-roles.php?config=tables&tableid=salesreps"><i class="fas fa-arrow-circle-right"></i> Sales Reps</a></p>
+	    <p><a href="<?php echo SITE_URL; ?>/access-roles.php?config=tables&tableid=salesreps"><i class="fas fa-arrow-circle-right"></i> Genetic Consultants</a></p>
 	</div>
 	<?php } ?>
 	<!-- ./Config Tables -->

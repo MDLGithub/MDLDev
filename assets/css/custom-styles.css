@@ -9,6 +9,9 @@ body{
 .clearfix{
     clear: both;
 }
+.strong{
+    font-weight: bold!important;
+}
 .capitalize{
     text-transform: capitalize!important;
 }
@@ -913,6 +916,7 @@ table.dataTable thead .sorting {
 .accountLogo{
     max-width: 100%;
     height: auto!important;
+    max-height: 50px;
 }
 
 #add-test-status{
