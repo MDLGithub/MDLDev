@@ -250,10 +250,11 @@ require_once ('navbar.php');
 <script type="text/javascript">  
     if ($('#dataTable').length ) {
         var table = $('#dataTable').DataTable({
-            orderCellsTop: true,
-            fixedHeader: true,
-            //searching: false,
-            lengthChange: false
+            
+                fixedHeader: true,
+                lengthMenu: [[10, 20, 30, 50, 100,-1], [10, 20, 30, 50, 100, "All"]],
+                searching: false,
+                "pageLength": 20
         });   
     }
 </script>
