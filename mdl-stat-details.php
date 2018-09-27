@@ -213,18 +213,24 @@ require_once ('navbar.php');
 			</tbody>
 			<?php $userRevenuTotals = getStatusRevenueTotals($db, $_GET['status_id']); ?>
 			<tfoot class="strong">
+			    <?php if(isFieldVisibleForStatus($db, 'insurance_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'insurance_paid', $roleID)){ ?>
 			    <tr>
 				<td class=" text-right" colspan="1">Insurance Total: </td>
 				<td colspan="2"><?php echo "$".formatMoney($userRevenuTotals['insurance_total']); ?></td>
 			    </tr>
+			    <?php } ?>
+			    <?php if(isFieldVisibleForStatus($db, 'patient_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'patient_paid', $roleID)){ ?>
 			    <tr>
 				<td class=" text-right" colspan="1">Patient Total: </td>
 				<td colspan="2"><?php echo "$".formatMoney($userRevenuTotals['patient_total']); ?></td>
 			    </tr>
+			    <?php } ?>
+			    <?php if(isFieldVisibleForStatus($db, 'total_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'total_paid', $roleID)){ ?>
 			    <tr>
 				<td class=" text-right" colspan="1">Total: </td>
 				<td colspan="2"><?php echo "$".formatMoney($userRevenuTotals['total']); ?></td>
 			    </tr>
+			    <?php } ?>
 			</tfoot>
 		    </table>
 		</div>
