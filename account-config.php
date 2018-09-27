@@ -56,6 +56,7 @@ if (isset($_GET['delete']) && $_GET['delete'] != '') {
 
 $thisMessage = "";
 $accountFieldMsg = "";
+$errorMessage = "";
 if(isset($_POST['submit_account'])){
     extract($_POST);
     $accountData = $_POST;
@@ -81,7 +82,11 @@ if(isset($_POST['submit_account'])){
 	    }
 	    Leave(SITE_URL.'/account-config.php?update');
 	} else {
-	    $thisMessage = "Account ID <strong>".$_POST['account']."</strong> Exists. Please choose another.";
+	    if($_POST['account']=="0"){
+		$errorMessage = "Account ID can't be <strong>".$_POST['account']."</strong>. Please Type valid ID.";
+	    }else{
+		$errorMessage = "Account ID <strong>".$_POST['account']."</strong> Exists. Please choose another.";
+	    }
 	    $accountFieldMsg = 'error';
 	}
     } else {
@@ -97,7 +102,11 @@ if(isset($_POST['submit_account'])){
 	    }
 	    Leave(SITE_URL.'/account-config.php?insert');
 	}else {
-	    $thisMessage = "Account ID <strong>".$_POST['account']."</strong> Exists. Please choose another.";
+	    if($_POST['account']=="0"){
+		$errorMessage = "Account ID can not be <strong>".$_POST['account']."</strong>. Please Type valid ID.";
+	    }else{
+		$errorMessage = "Account ID <strong>".$_POST['account']."</strong> Exists. Please choose another.";
+	    }
 	    $accountFieldMsg = 'error';
 	}
     }
@@ -192,6 +201,7 @@ require_once ('navbar.php');
 					    echo "<div class='error-text'>".$uploadMsg['msg']."</div>";
 					}
 				    }
+
 				?>
 			    </div>
 			</div>
@@ -202,7 +212,12 @@ require_once ('navbar.php');
 				    <button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>
 				    <!--<a href="<?php echo SITE_URL."/account-config.php";?>" class="btn-inline btn-cancel">Cancel</a>-->
 				</div>
-				<div class="col-md-4 text-center">
+				<div class="col-md-8">
+				    <?php
+					if( isset($errorMessage) && $errorMessage != ""){
+					    echo "<div class='error-text'>".$errorMessage."</div>";
+					}
+				    ?>
 				    <span class="error" id="message"></span>
 				</div>
 			   </div>

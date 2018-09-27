@@ -752,7 +752,7 @@ function ifAccountIDValid($accountID, $Guid_account = NULL){
 	$query = "SELECT `account` FROM tblaccount WHERE account=:account";
 	$row = $db->row($query, array("account"=>$accountID));
     }
-    if($row['account']==$accountID){
+    if($row['account']==$accountID || $accountID=="0"){
 	return FALSE;
     }
     return TRUE;
