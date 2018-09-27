@@ -1491,3 +1491,6 @@ button[name="search"] > strong{
     float: left;
     margin-right: 6px;
 }
+table.valignTop td{
+    vertical-align: top !important;
+}
