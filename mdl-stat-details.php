@@ -186,15 +186,15 @@ require_once ('navbar.php');
                                 <?php } ?>
                                 
                                 <?php if(isFieldVisibleForStatus($db, 'insurance_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'insurance_paid', $roleID)){ ?>
-                                <td><?php echo formatMoney($revenue['insurance_paid']); ?></td>  
+                                <td><?php echo "$".formatMoney($revenue['insurance_paid']); ?></td>  
                                 <?php } ?>
                                 
                                 <?php if(isFieldVisibleForStatus($db, 'patient_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'patient_paid', $roleID)){ ?>
-                                <td><?php echo formatMoney($revenue['patient_paid']); ?></td>
+                                <td><?php echo "$".formatMoney($revenue['patient_paid']); ?></td>
                                 <?php } ?>
                                 
                                 <?php if(isFieldVisibleForStatus($db, 'total_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'total_paid', $roleID)){ ?>
-                                <td><?php echo formatMoney($revenue['total']); ?></td> 
+                                <td><?php echo "$".formatMoney($revenue['total']); ?></td> 
                                 <?php } ?>
                                 
                                 <?php if(isFieldVisibleForStatus($db, 'insurance_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'insurance_name', $roleID)){ ?>
@@ -215,15 +215,15 @@ require_once ('navbar.php');
                         <tfoot class="strong">
                             <tr>
                                 <td class=" text-right" colspan="1">Insurance Total: </td>
-                                <td colspan="2"><?php echo formatMoney($userRevenuTotals['insurance_total']); ?></td>
+                                <td colspan="2"><?php echo "$".formatMoney($userRevenuTotals['insurance_total']); ?></td>
                             </tr>
                             <tr>
                                 <td class=" text-right" colspan="1">Patient Total: </td>
-                                <td colspan="2"><?php echo formatMoney($userRevenuTotals['patient_total']); ?></td>
+                                <td colspan="2"><?php echo "$".formatMoney($userRevenuTotals['patient_total']); ?></td>
                             </tr>
                             <tr>
                                 <td class=" text-right" colspan="1">Total: </td>
-                                <td colspan="2"><?php echo formatMoney($userRevenuTotals['total']); ?></td>
+                                <td colspan="2"><?php echo "$".formatMoney($userRevenuTotals['total']); ?></td>
                             </tr>
                         </tfoot>
                     </table>
