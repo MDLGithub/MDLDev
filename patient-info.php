@@ -398,7 +398,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                                 <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
                                             </a>                                            
                                         </h5>
-                                        <table class="table">
+                                        <table class="table valignTop">
                                             <thead>
                                                 <th>Date</th>
                                                 <th>Category &nbsp;&nbsp; 
@@ -1106,7 +1106,7 @@ if(isset($_POST['edit_categories'])){
                         </thead>
                         <tbody>                            
                             <?php 
-                            $categories = $db->selectAll("tbl_mdl_note_category");
+                            $categories = $db->selectAll("tbl_mdl_note_category", " ORDER BY order_by ASC");
                             foreach ($categories as $k=>$v){ 
                             ?>
                             <tr>
@@ -1281,7 +1281,7 @@ if(isset($_POST['edit_categories'])){
                         <select required name="Guid_note_category">
                             <option value="">Select category</option>
                         <?php 
-                            $categories = $db->selectAll('tbl_mdl_note_category');
+                            $categories = $db->selectAll('tbl_mdl_note_category', " ORDER BY order_by ASC");
                             foreach ($categories as $k=>$v){
                                 $selected = (isset($catLogRow['Guid_note_category']) && $catLogRow['Guid_note_category']==$v['Guid_note_category']) ? " selected":"";
                         ?>
