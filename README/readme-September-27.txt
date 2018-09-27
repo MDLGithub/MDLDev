@@ -10,6 +10,8 @@ patient-info.php
 scripts.php
 mdl-stats.php
 functions.php
+navbar.php
+
 
 scripts.js
 custom-styles.css

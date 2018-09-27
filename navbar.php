@@ -30,7 +30,7 @@
 			<li><a href="<?php echo SITE_URL; ?>/url-configuration.php">URL</a></li>
 			<li><a href="<?php echo SITE_URL; ?>/account-config.php">Accounts</a></li>
 			<li><a href="<?php echo SITE_URL; ?>/devicesInventory.php">Devices</a></li>
-			<?php if($role=='Admin' || $role=='Sales Manager') { ?>
+			<?php if($role=='Admin' || $role=='Sales Manager' || $role=='Sales Rep') { ?>
 			    <li><a href="<?php echo SITE_URL; ?>/salesreps.php">Genetic Consultants</a></li>
 			<?php } ?>
 			<li><a href="<?php echo SITE_URL; ?>/eventschedule.php">Event Schedule</a></li>
