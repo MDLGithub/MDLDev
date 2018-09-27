@@ -4,3 +4,4 @@
 <script type="text/javascript" src="assets/libs/DataTables/datatables.min.js"></script>
 <script type="text/javascript" src="assets/libs/jquery.mask.js"></script>
 <script src="assets/libs/jquery-ui/jquery-ui.min.js"></script>
+<script src="assets/libs/jquery-input-file-text.js"></script>
