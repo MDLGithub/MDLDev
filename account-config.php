@@ -222,9 +222,9 @@ require_once ('navbar.php');
 				    <?php } ?>
 				    <?php if(isFieldVisibleByRole($isNameView, $roleID)) {?>
 				    <div class="f2 required <?php echo ($name!="")?"valid":"";?>">
-					<label class="dynamic" for="name"><span>Name</span></label>
+					<label class="dynamic" for="name"><span>Account Name</span></label>
 					<div class="group">
-					    <input id="name" name="name" type="text" value="<?php echo $name; ?>" placeholder="Name" required="">
+					    <input id="name" name="name" type="text" value="<?php echo $name; ?>" placeholder="Account Name" required="">
 					    <p class="f_status">
 						<span class="status_icons"><strong>*</strong></span>
 					    </p>
@@ -264,7 +264,7 @@ require_once ('navbar.php');
 				    <?php if(isFieldVisibleByRole($isLogoView, $roleID)) {?>
 				    <div class="row">
 					<div class="col-md-9">
-					    <div class="f2 required <?php echo ($logo!="")?"valid show-label":"";?>">
+					    <div class="f2 <?php echo ($logo!="")?"valid show-label":"";?>">
 						<label class="dynamic" for="photo"><span>Photo</span></label>
 						<div class="group">
 						    <input id="file" class="form-control pT-5" type="file" name="logo" value="<?php echo $logo; ?>" />
@@ -372,9 +372,9 @@ require_once ('navbar.php');
 				    </div>
 				    <?php if(isFieldVisibleByRole($isWebsiteView, $roleID)) {?>
 				    <div class="f2 <?php echo ($website!="")?"valid show-label":"";?>">
-					<label class="dynamic" for="website"><span>Website</span></label>
+					<label class="dynamic" for="website"><span>Account Website</span></label>
 					<div class="group">
-					    <input id="website" name="website" type="url" value="<?php echo $website; ?>" placeholder="Website">
+					    <input id="website" name="website" type="url" value="<?php echo $website; ?>" placeholder="Account Website">
 					    <p class="f_status">
 						<span class="status_icons"><strong></strong></span>
 					    </p>
@@ -406,7 +406,7 @@ require_once ('navbar.php');
 				<th>Account Number</th>
 			    <?php } ?>
 			    <?php if(isFieldVisibleByRole($isNameView, $roleID)) {?>
-				<th>Name</th>
+				<th>Account Name</th>
 			    <?php } ?>
 			    <?php if(isFieldVisibleByRole($isAddressView, $roleID)) {?>
 				<th class="">Account Address</th>
@@ -528,5 +528,7 @@ require_once ('navbar.php');
 	    ]
 	});
     }
+
+
 </script>
 <?php require_once('footer.php');?>
