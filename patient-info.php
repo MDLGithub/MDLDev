@@ -576,18 +576,19 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             <tbody>
                                 <?php 
                                 $patientID=$_GET['patient'];
-                                $qStatusLog = 'SELECT sl.Guid_status_log,sl.Log_group, sl.Guid_user, sl.Guid_status, sl.Date, s.parent_id '
+                                $qStatusLog = 'SELECT sl.Guid_status_log,sl.Log_group, sl.Guid_user, sl.Guid_status, '
+                                            . 'DATE(sl.Date) AS logDate, s.parent_id '
                                             . 'FROM tbl_mdl_status_log sl '
                                             . 'LEFT JOIN tblpatient p ON sl.Guid_patient=p.Guid_user '
                                             . 'LEFT JOIN tbl_mdl_status s ON sl.Guid_status=s.Guid_status '
                                             . 'WHERE sl.Guid_user='.$patientID.'  AND s.parent_id="0" '
-                                            . 'ORDER BY sl.date DESC, s.order_by DESC';
-                                
+                                            . 'ORDER BY logDate DESC, s.order_by DESC';
+                                 
                                 $ststusLogs = $db->query($qStatusLog);
                                 foreach ($ststusLogs as $k=>$v){ 
                                 ?>
                                     <tr>
-                                        <td><?php echo date("n/j/Y", strtotime($v['Date'])); ?></td> 
+                                        <td><?php echo date("n/j/Y", strtotime($v['logDate'])); ?></td> 
                                         <td><?php echo get_status_names( $db, $v['Guid_status'], $v['Guid_user'], $v['Log_group'] ); ?></td>   
                                         <?php if($role=='Admin'){ ?>
                                         <td class="text-center">

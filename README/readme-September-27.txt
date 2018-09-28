@@ -2,6 +2,9 @@
 ALTER TABLE `tbl_mdl_number` MODIFY `mdl_number` VARCHAR(7);
 UPDATE `tbl_mdl_number` SET mdl_number='' WHERE mdl_number='0'
 
+//sent by Atul
+ALTER TABLE `tbluser` ADD `Guid_role` INT(2) NOT NULL DEFAULT '3' AFTER `status`;
+
 
 /*Updated Files*/
 account-config.php
