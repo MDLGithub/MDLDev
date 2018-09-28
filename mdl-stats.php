@@ -52,8 +52,8 @@ require_once ('navbar.php');
 				<div class="h-filters">
 				    <label>From: </label>
 
-				    <input name="from_date" class="date datepicker" type="text" autocomplete="off" value="" />
-				    <label>To: </label> <input name="to_date" class="date datepicker" type="text" autocomplete="off" value="" />
+				    <input name="from_date" class="date datepicker" type="text" autocomplete="off" value="<?php echo (isset($_POST['from_date']))?$_POST['from_date']:"";?>" />
+				    <label>To: </label> <input name="to_date" class="date datepicker" type="text" autocomplete="off" value="<?php echo (isset($_POST['to_date']))?$_POST['to_date']:"";?>" />
 				    <label>MDL#: </label> <input name="mdl_number" class="stat_mdl_number" type="text" autocomplete="off" value="<?php echo isset($_POST['mdl_number'])?$_POST['mdl_number']:"";?>"/>
 				    <select name="Guid_salesrep" class="salesrep">
 					<option value="">Genetic Consultant</option>

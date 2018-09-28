@@ -45,7 +45,7 @@ $initLabels = array(
 
     $initQ = 'SELECT s.Guid_status, s.Guid_user, s.Date, s.Date_created, p.Guid_patient,
 	p.firstname, p.lastname,
-	a.account AS account_number, a.name AS account_name, a.address AS location,
+	a.Guid_account, a.account AS account_number, a.name AS account_name, a.address AS location,
 	num.mdl_number,
 	CONCAT(srep.`first_name`, " " ,srep.`last_name`) AS salesrep
 	FROM `tbl_mdl_status_log` s
@@ -62,7 +62,28 @@ $initLabels = array(
     if($testUserIds!=""){
 	$initQ.='AND s.Guid_user NOT IN('.$testUserIds.') ';
     }
+
+    //adding filter conditions
+    if(isset($_GET['salesrep'])&&$_GET['salesrep']!=""){
+	$initQ .= 'AND s.Guid_salesrep='.$_GET['salesrep'].' ';
+    }
+    if(isset($_GET['account'])&&$_GET['account']!=""){
+	$initQ .= 'AND a.Guid_account='.$_GET['account'].' ';
+    }
+    if(isset($_GET['mdnum'])&&$_GET['mdnum']!=""){
+	$initQ .= 'AND num.mdl_number='.$_GET['mdnum'].' ';
+    }
+    if( isset($_GET['from']) && isset($_GET['to']) ){
+	if ($_GET['from'] == $_GET['to']) {
+	    $initQ .= " AND s.Date LIKE '%" . date("Y-m-d", strtotime($_GET['from'])) . "%'";
+	} else {
+	    $initQ .= " AND s.Date BETWEEN '" . date("Y-m-d", strtotime($_GET['from'])) . "' AND '" . date("Y-m-d", strtotime($_GET['to'])) . "'";
+	}
+    }
+
+
     $initQ.='AND s.Guid_patient<>"0"';
+
 if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
     $initData=$db->query($initQ, array('Guid_status'=>$_GET['status_id']));
 } else {
