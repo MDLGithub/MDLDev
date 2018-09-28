@@ -1485,6 +1485,7 @@ function get_stats_info($db, $statusID, $hasChildren=FALSE, $searchData=array())
     //exclude test users
     $markedTestUserIds = getMarkedTestUserIDs($db);
     $testUserIds = getTestUserIDs($db);
+    $filterUrlStr = "";
     //$testUserIds = '';
     $q = "SELECT statuses.*, statuslogs.*,
             mdlnum.mdl_number as mdl_number
@@ -1501,15 +1502,20 @@ function get_stats_info($db, $statusID, $hasChildren=FALSE, $searchData=array())
             } else {
                 $q .= " AND statuslogs.Date BETWEEN '" . date("Y-m-d", strtotime($searchData['from_date'])) . "' AND '" . date("Y-m-d", strtotime($searchData['to_date'])) . "'";
             }
+            $filterUrlStr .= "&from=".date("Y-m-d", strtotime($searchData['from_date']));
+            $filterUrlStr .= "&to=".date("Y-m-d", strtotime($searchData['to_date']));
         }
         if(isset($searchData['mdl_number']) && $searchData['mdl_number']!=""){
             $q .= " AND mdl_number='".$searchData['mdl_number']."' ";
+            $filterUrlStr .= "&mdnum=".$searchData['mdl_number'];
         }
         if(isset($searchData['Guid_salesrep']) && $searchData['Guid_salesrep']!=""){
             $q .= " AND statuslogs.Guid_salesrep='".$searchData['Guid_salesrep']."' ";
+            $filterUrlStr .= "&salesrep=".$searchData['Guid_salesrep'];
         }
         if(isset($searchData['Guid_account']) && $searchData['Guid_account']!=""){
             $q .= " AND statuslogs.Guid_account='".$searchData['Guid_account']."' ";
+            $filterUrlStr .= "&account=".$searchData['Guid_account'];
         }
     }
   
@@ -1528,7 +1534,7 @@ function get_stats_info($db, $statusID, $hasChildren=FALSE, $searchData=array())
     $result['count'] = 0;
     if(!empty($stats)){
         $result['count'] = count($stats);
-        $result['serarch'] = $searchData;
+        $result['filterUrlStr'] = $filterUrlStr;
         $result['info'] = $stats;
     }  
     
@@ -1539,21 +1545,23 @@ function get_status_table_rows($db, $parent = 0, $searchData=array()) {
     
     $statusQ = "SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC";
     $statuses = $db->query($statusQ);
-    
+    $filterUrlStr = "";
     $content = '';    
     if ( $statuses ) {
         foreach ( $statuses as $status ) {  
             $checkCildren = $db->query("SELECT * FROM tbl_mdl_status "
                     . "WHERE `parent_id` = ".$status['Guid_status']);
             $stats = get_stats_info($db, $status['Guid_status'], FALSE, $searchData);
+            
             if($stats['count']!=0){
                 $optionClass = '';
+                $filterUrlStr = $stats['filterUrlStr'];
                 if ( !empty($checkCildren) ) { 
                     $optionClass = 'has_sub';                 
                 } 
                 $content .= "<tr id='".$status['Guid_status']."' class='parent ".$optionClass."'>";
                 $content .= "<td class='text-left'><span>".$status['status'].'</span></td>';            
-                $content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].'">'.$stats['count'].'</a></td>';
+                $content .= '<td><a target="_blank" href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].$filterUrlStr.'">'.$stats['count'].'</a></td>';
                 if ( !empty($checkCildren) ) {
                     $content .= get_status_child_rows( $db, $status['Guid_status'], "&nbsp;", $searchData );
                 }            
@@ -1574,12 +1582,13 @@ function get_status_child_rows($db, $parent = 0,  $level = '', $searchData=array
             $optionClass = '';  
             $stats = get_stats_info($db, $status['Guid_status'], TRUE, $searchData);
             if($stats['count']!=0){
+                $filterUrlStr = $stats['filterUrlStr'];
                 if ( !empty($checkCildren) ) { 
                     $optionClass = 'parent has_sub';   
                 }  
                 $content .= "<tr id='".$status['Guid_status']."' data-parent-id='".$parent."' class='sub ".$optionClass."'>";
                 $content .= "<td class='text-left'><span>".$level . " " .$status['status'].'</span></td>';
-                $content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].'&parent='.$parent.'">'.$stats['count']. '</a></td>';
+                $content .= '<td><a target="_blank" href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].'&parent='.$parent.$filterUrlStr.'">'.$stats['count']. '</a></td>';
                 if ( !empty($checkCildren) ) {
                     $prefix .= '&nbsp;';
                     $content .= get_status_child_rows( $db, $status['Guid_status'], $level . "&nbsp;" );
