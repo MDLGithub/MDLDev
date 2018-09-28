@@ -53,6 +53,13 @@ if( isset($_POST['manage_provider'])){
 	'provider_id'=>$provider_id
     );
 
+    if($_POST['email']!=""){
+	$userData['email']=$email;
+    }
+    if($_POST['password']!=""){
+	$userData['password']=encode_password($password);
+    }
+
     if($_FILES["photo_filename"]["name"] != ""){
 	$fileName = $_FILES["photo_filename"]["name"];
 	$data['photo_filename'] = $fileName;
@@ -132,12 +139,15 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
     $providerBoxClass = "show";
     $provider_guid =  $_GET['provider_guid'];
     $providerInfo = get_provider_user_info($db, $provider_guid);
+
     $Guid_provider = $providerInfo["Guid_provider"];
     $Guid_user = $providerInfo["Guid_user"];
     $provider_id = $providerInfo["provider_id"];
     $provider_account_id = $providerInfo["account_id"];
     $provider_first_name = $providerInfo["first_name"];
     $provider_last_name = $providerInfo["last_name"];
+    $provider_email = $providerInfo["provider_email"];
+
     $provider_title = $providerInfo["title"];
     $provider_photo_filename = $providerInfo["photo_filename"];
     $providerTitleTxt = "Update Provider";
@@ -151,6 +161,8 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
     $provider_account_id = "";
     $provider_first_name = "";
     $provider_last_name = "";
+    $provider_email = "";
+    $provider_password = "";
     $provider_title = "";
     $provider_photo_filename = "";
     $providerTitleTxt = "Add Provider";
@@ -163,6 +175,8 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
     $provider_account_id = "";
     $provider_first_name = "";
     $provider_last_name = "";
+    $provider_email = "";
+    $provider_password = "";
     $provider_title = "";
     $provider_photo_filename = "";
     $providerTitleTxt = "Add Provider";
@@ -389,6 +403,24 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
 		    </p>
 		</div>
 	    </div>
+	    <div class="f2 <?php echo ($provider_emial!="")?"valid":"";?>">
+		<label class="dynamic" for="email"><span>Email</span></label>
+		<div class="group">
+		    <input autocomplete="off" id="email" name="email" type="email" value="<?php echo $provider_email; ?>" placeholder="Email" >
+		    <p class="f_status">
+			<span class="status_icons"><strong>*</strong></span>
+		    </p>
+		</div>
+	    </div>
+	    <div class="f2 ">
+		<label class="dynamic" for="password"><span>Password</span></label>
+		<div class="group">
+		    <input autocomplete="off" id="password" name="password" type="password" value="" placeholder="Password" >
+		    <p class="f_status">
+			<span class="status_icons"><strong>*</strong></span>
+		    </p>
+		</div>
+	    </div>
 
 	    <div class="form-group">
 		<div class="row">
@@ -404,7 +436,7 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
 			</div>
 		    </div>
 		    <?php $providerImg = ($provider_photo_filename=="")?"/assets/images/default.png":"/images/users/".$provider_photo_filename; ?>
-		    <div id="profile-pic" class="col-md-2 pT-30">
+		    <div id="profile-pic" class="col-md-2 pT-10">
 			<img id="image" width="40" src="<?php echo SITE_URL.$providerImg; ?>" />
 		    </div>
 		</div>

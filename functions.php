@@ -1528,6 +1528,7 @@ function get_stats_info($db, $statusID, $hasChildren=FALSE, $searchData=array())
     $result['count'] = 0;
     if(!empty($stats)){
 	$result['count'] = count($stats);
+	$result['serarch'] = $searchData;
 	$result['info'] = $stats;
     }
 
@@ -1554,7 +1555,7 @@ function get_status_table_rows($db, $parent = 0, $searchData=array()) {
 		$content .= "<td class='text-left'><span>".$status['status'].'</span></td>';
 		$content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].'">'.$stats['count'].'</a></td>';
 		if ( !empty($checkCildren) ) {
-		    $content .= get_status_child_rows( $db, $status['Guid_status'], "&nbsp;" );
+		    $content .= get_status_child_rows( $db, $status['Guid_status'], "&nbsp;", $searchData );
 		}
 		$content .= "</tr>";
 	    }
@@ -1563,7 +1564,7 @@ function get_status_table_rows($db, $parent = 0, $searchData=array()) {
 
     return $content;
 }
-function get_status_child_rows($db, $parent = 0,  $level = '') {
+function get_status_child_rows($db, $parent = 0,  $level = '', $searchData=array()) {
     $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent."  ORDER BY order_by ASC");
     if ( $statuses ) {
 	$content ='';
@@ -1571,7 +1572,7 @@ function get_status_child_rows($db, $parent = 0,  $level = '') {
 	foreach ( $statuses as $status ) {
 	    $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
 	    $optionClass = '';
-	    $stats = get_stats_info($db, $status['Guid_status'], TRUE);
+	    $stats = get_stats_info($db, $status['Guid_status'], TRUE, $searchData);
 	    if($stats['count']!=0){
 		if ( !empty($checkCildren) ) {
 		    $optionClass = 'parent has_sub';
