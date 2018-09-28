@@ -1806,6 +1806,7 @@ function getRevenueStat($db, $Guid_user){
 		. "LEFT JOIN tbl_mdl_payors p ON r.Guid_payor=p.Guid_payor "
 		. "WHERE r.Guid_payor<>'' AND r.Guid_user=:Guid_user "
 		. "GROUP BY r.Guid_payor ORDER BY r.Guid_payor ";
+
     $payors = $db->query($getPayorQ, array('Guid_user'=>$Guid_user));
 
     $paidPatient = 0;
@@ -1817,7 +1818,7 @@ function getRevenueStat($db, $Guid_user){
 	    $Guid_payor = $v['Guid_payor'];
 	    $revenueAmmountQ = "SELECT r.amount FROM `tbl_revenue` r
 				LEFT JOIN `tbl_mdl_payors` p ON r.`Guid_payor`=p.`Guid_payor`
-				WHERE r.`Guid_payor`= $Guid_payor
+				WHERE r.`Guid_payor`= $Guid_payor AND r.Guid_user=$Guid_user
 				ORDER BY r.`Guid_payor` ";
 	    $revenueAmmount = $db->query($revenueAmmountQ);
 	    foreach ($revenueAmmount as $amount){
