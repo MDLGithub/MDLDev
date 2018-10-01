@@ -442,7 +442,7 @@ require_once ('navbar.php');
                             <div class="f2 <?php echo ($photo_filename!="")?"valid show-label":"";?>">
                                 <label class="dynamic" for="photo"><span>Photo</span></label>
                                 <div class="group">
-                                    <input id="file" value="<?php echo $photo_filename; ?>" name="photo_filename" class="form-control pT-5" type="file" placeholder="Photo"/>
+                                    <input id="file" value="<?php echo $photo_filename; ?>" name="photo_filename" class="userLogoInput form-control pT-5" type="file" placeholder="Photo"/>
                                     <p class="f_status">
                                         <span class="status_icons"><strong>*</strong></span>
                                     </p>

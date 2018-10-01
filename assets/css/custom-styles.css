@@ -24,9 +24,13 @@ body{
 .f_status{
     height: 2.3em;
 }
-.wh-100{
-    width: 100px!important;
+.w-50{
+    width: 50px!important;
 }
+.w-150{
+    width: 150px!important;
+}
+
 .fs-28{
     font-size: 28px!important;
 }
@@ -1336,13 +1340,13 @@ button[name="search"] > strong{
 .h-filters select,
 .h-filters label{
     float: left;
+    margin-bottom: 10px;
 }
 .h-filters select{
     padding: 5px 30px 8px 10px;
     border: 1px solid #e8e8e8;
     outline: none;
     height: 35px;
-    width: 200px;
 }
 .h-filters input{
     padding: 0 5px;
@@ -1458,8 +1462,8 @@ button[name="search"] > strong{
 }
 .modalBlock .contentBlock.manageStatsModal, 
 .modalBlock.editStausesModal .contentBlock {
-    width: 50%;
-    left: 25%;
+    width: 60%;
+    left: 20%;
 }
 #statuses-dropdowns-box,
 #roles-dropdown-box{
@@ -1476,10 +1480,25 @@ button[name="search"] > strong{
 .edit-status-form th.status_name{
     width: 70%;
 }
-.edit-status-form input,
+.edit-status-form input[type='text'],
+.edit-status-form input[type='number'],
 .edit-status-form select{
     border: 1px solid #999;
     width: 90%;
+}
+.edit-status-form .rolesBlock.hidden{
+    display: none;
+}
+.toggleRoles, .toggleThisRoles {
+    font-size: 18px;
+    color: #585858;
+    cursor: pointer;
+}
+.toggleRoles.fa-eye, .toggleThisRoles.fa-eye{
+    color: #c11021;
+}
+.edit-status-form td.roles p{
+    width: 150px;
 }
 #patient-info-box .markTest{
     padding-top: 10px;

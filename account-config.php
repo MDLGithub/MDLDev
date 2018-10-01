@@ -282,7 +282,7 @@ require_once ('navbar.php');
                                             <div class="f2 <?php echo ($logo!="")?"valid show-label":"";?>">
                                                 <label class="dynamic" for="photo"><span>Photo</span></label>
                                                 <div class="group">
-                                                    <input id="file" class="form-control pT-5" type="file" name="logo" value="<?php echo $logo; ?>" />
+                                                    <input id="file" class="accountLogoInput form-control pT-5" type="file" name="logo" value="<?php echo $logo; ?>" />
                                                     <p class="f_status">
                                                         <span class="status_icons"><strong>*</strong></span>
                                                     </p>

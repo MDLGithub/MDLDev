@@ -61,17 +61,17 @@ require_once ('navbar.php');
                                         <?php foreach ($salesReps as $k=>$v){ ?>
                                         <?php $selected = (isset($_POST['Guid_salesrep'])&&$_POST['Guid_salesrep']==$v['Guid_salesrep'])?" selected": ""; ?>
                                             <?php if (trim($v['name'])!=""){ ?>
-                                                <option <?php echo $selected; ?> value="<?php echo $v['Guid_salesrep']; ?>"><?php echo $v['name']; ?></option>
+                                        <option <?php echo $selected; ?> value="<?php echo ucfirst(strtolower($v['Guid_salesrep'])); ?>"><?php echo $v['name']; ?></option>
                                             <?php } ?>
                                         <?php } ?>
                                     </select>
                                     <select name="Guid_account" class="account">
                                         <option value="">Account</option>
-                                        <?php $accounts = $db->query("SELECT Guid_account, name FROM tblaccount ORDER BY name"); ?>
+                                        <?php $accounts = $db->query("SELECT Guid_account, name, account FROM tblaccount ORDER BY account"); ?>
                                         <?php foreach ($accounts as $k=>$v){ ?>
                                         <?php $selected = (isset($_POST['Guid_account'])&&$_POST['Guid_account']==$v['Guid_account'])?" selected": ""; ?>
                                             <?php if (trim($v['name'])!=""){ ?>
-                                            <option <?php echo $selected; ?>  value="<?php echo $v['Guid_account']; ?>"><?php echo ucfirst(strtolower($v['name'])); ?></option>
+                                            <option <?php echo $selected; ?>  value="<?php echo $v['Guid_account']; ?>"><?php echo $v['account']." - ".ucfirst(strtolower($v['name'])); ?></option>
                                             <?php } ?>
                                         <?php } ?>                                        
                                     </select>

@@ -28,7 +28,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 ?>
 <?php require_once 'navbar.php'; ?> 
 <!--SEARCH FORM BLOCK Start-->
-<aside id="action_palette" >		
+<aside id="action_palette" class="action_palette_width" >		
     <div class="box full">
         <h4 class="box_top">Filters</h4>
         <?php if($dataViewAccess) { ?>
@@ -298,6 +298,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
 <?php
 
+//updating mark as test users
 if(isset($_POST['mark_as_test'])){
     $markedUsers =$_POST['markedRow']['user'];
     if($markedUsers){
@@ -412,6 +413,7 @@ $where  .= " AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%test%' "
         . "AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Smith%' "
         . "AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Doe%' "
         . "AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%Jane Doe%'";
+$where .= "AND q.`Date_created` = (SELECT MAX(Date_created) FROM tbl_ss_qualify AS m2 WHERE q.Guid_qualify = m2.Guid_qualify)";
 
 if($role == "Sales Rep"){
     
@@ -422,8 +424,10 @@ $sqlTbl .= $whereTest;
 $sqlTbl .= $whereIncomplete;
 $sqlTbl .= $where;  
   
-$sqlTbl .= " GROUP BY p.Guid_user";
+//$sqlTbl .= " GROUP BY p.Guid_user";
 $sqlTbl .= " ORDER BY date DESC";
+
+
 $qualify_requests = $db->query($sqlTbl);
 
 $num_estimates = $qualify_requests;
@@ -431,7 +435,7 @@ $num_estimates = $qualify_requests;
 
 ?>
 
-<main>
+<main class="wider-main">
     <div class="box full visible">
         <?php if($dataViewAccess){ ?>
         <section id="palette_top" class="shorter_palette_top">
@@ -645,7 +649,7 @@ $num_estimates = $qualify_requests;
     <div id="admin_print"></div>
 </main>
 
-<button id="action_palette_toggle" class=""><i class="fa fa-2x fa-angle-left"></i></button>
+<button id="action_palette_toggle" class="toggle_move"><i class="fa fa-2x fa-angle-left"></i></button>
 
 
 
