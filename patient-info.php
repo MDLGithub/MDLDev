@@ -217,24 +217,24 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 	}
     }
     //delete deductible log row
-    if(isset($_GET['delete-deductible']) && $_GET['delete-deductible']!=""){
+    if(isset($_GET['delete-deductible']) && $_GET['delete-deductible']!="" && $role=='Admin'){
 	deleteByField($db,'tbl_deductable_log', 'Guid_deductable', $_GET['delete-deductible']);
 	Leave($patientInfoUrl);
     }
     //delete revenue row
-    if(isset($_GET['delete-revenue']) && $_GET['delete-revenue']!=""){
+    if(isset($_GET['delete-revenue']) && $_GET['delete-revenue']!="" && $role=='Admin'){
 	deleteByField($db,'tbl_revenue', 'Guid_revenue', $_GET['delete-revenue']);
 	Leave($patientInfoUrl);
     }
     //delete status log row and update lats status log id in patients table
-    if(isset($_GET['delete-status-log']) && $_GET['delete-status-log']!=""){
+    if(isset($_GET['delete-status-log']) && $_GET['delete-status-log']!="" && $role=='Admin'){
 	$Guid_patient = $qualifyResult['Guid_patient'];
 	deleteByField($db,'tbl_mdl_status_log', 'Log_group', $_GET['group']);
 	updateCurrentStatusID($db, $Guid_patient);
 	Leave($patientInfoUrl);
     }
     //delete note log
-    if(isset($_GET['delete-note-log']) && $_GET['delete-note-log']!=""){
+    if(isset($_GET['delete-note-log']) && $_GET['delete-note-log']!="" && $role=='Admin'){
 	deleteByField($db,'tbl_mdl_note', 'Guid_note', $_GET['delete-note-log']);
 	Leave($patientInfoUrl);
     }
@@ -288,7 +288,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		<?php if(isset($message)){ ?>
 		<div class="error-text"><?php echo $message; ?></div>
 		<?php } ?>
-		<h2 class="text-center"><?php echo ucfirst($qualifyResult['firstname'])." ".ucfirst($qualifyResult['lastname']);?></h2>
+		<h2 class="text-center"><?php echo ucfirst(strtolower($qualifyResult['firstname']))." ".ucfirst(strtolower($qualifyResult['lastname']));?></h2>
 
 		<form id="mdlInfoForm" action="" method="POST" >
 			<input type="hidden" name="save" value="1"/>
@@ -327,9 +327,9 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					<h5>Specimen collected?</h5>
 					<div class="col-md-4 pL-0">
 					    <div id="specimen">
-						<input id="specimen-collected-cbox" <?php echo ($qualifyResult['specimen_collected']=='Yes')?"checked":"";?> type="radio" name="specimen_collected" value="Yes" /> Yes &nbsp;&nbsp;
+						<input id="<?php echo ($qualifyResult['specimen_collected']=='Yes')?"":"specimen-collected-cbox";?>" <?php echo ($qualifyResult['specimen_collected']=='Yes')?"checked":"";?> type="radio" name="specimen_collected" value="Yes" /> Yes &nbsp;&nbsp;
 						<?php if($qualifyResult['specimen_collected'] !== 'Yes'){ ?>
-						<input id="specimen-notcollected-cbox" <?php echo ($qualifyResult['specimen_collected']=='No')?"checked":"";?> type="radio" name="specimen_collected" value="No" /> No
+						<input id="<?php echo ($qualifyResult['specimen_collected']=='No')?"":"specimen-notcollected-cbox";?>" <?php echo ($qualifyResult['specimen_collected']=='No')?"checked":"";?> type="radio" name="specimen_collected" value="No" /> No
 						<?php } ?>
 						<div class="specimenCollected yes">
 						    <label>Date: </label>
@@ -386,7 +386,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					    $mdlNumber = isset($_POST['mdl_number'])?$_POST['mdl_number']:$mdlInfo['mdl_number'];
 					    $mdlClass = (strlen($mdlNumber)!=0 && strlen($mdlNumber)<7)?' error error-border' : '';
 					    ?>
+					    <?php if($role=='Admin') {?>
 					    <input type="number" autocomplete="off" class="mdlnumber <?php echo $mdlClass; ?>" name="mdl_number" value="<?php echo $mdlNumber; ?>" />
+					    <?php } else {
+						echo $mdlNumber;
+					    }  ?>
 					</p>
 				    </div>
 				    <?php } ?>
@@ -394,9 +398,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 				    <div id="statusLogs"  class="col-md-12 clearfix padd-0">
 					<h5 class="pT-30">
 					    Notes:
+					    <?php if($role=='Admin'){ ?>
 					    <a title="Add Note" class="pull-right" href="<?php echo $patientInfoUrl."&note_log=add";?>">
 						<span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
 					    </a>
+					    <?php } ?>
 					</h5>
 					<table class="table valignTop">
 					    <thead>
@@ -553,9 +559,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			    <h5>
 				Test Status Change Log:
 				<?php if(isset($qualifyResult['specimen_collected']) && $qualifyResult['specimen_collected']=='Yes'){ ?>
+				<?php if($role=='Admin'){ ?>
 				<a title="Add New Test Status Log" class="pull-right" href="<?php echo $patientInfoUrl."&status_log=add";?>">
 				    <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
 				</a>
+				<?php } ?>
 				<?php } ?>
 			    </h5>
 			    <table class="table">
@@ -576,8 +584,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			    <tbody>
 				<?php
 				$patientID=$_GET['patient'];
-				$qStatusLog = 'SELECT sl.Guid_status_log,sl.Log_group, sl.Guid_user, sl.Guid_status, '
-					    . 'DATE(sl.Date) AS logDate, s.parent_id '
+				$qStatusLog = 'SELECT sl.Guid_status_log,sl.Log_group, sl.Guid_user, sl.Guid_status,  '
+					    . 'DATE(sl.Date) AS logDate, s.parent_id, s.access_roles '
 					    . 'FROM tbl_mdl_status_log sl '
 					    . 'LEFT JOIN tblpatient p ON sl.Guid_patient=p.Guid_user '
 					    . 'LEFT JOIN tbl_mdl_status s ON sl.Guid_status=s.Guid_status '
@@ -585,7 +593,14 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					    . 'ORDER BY logDate DESC, s.order_by DESC';
 
 				$ststusLogs = $db->query($qStatusLog);
+
 				foreach ($ststusLogs as $k=>$v){
+
+				    if( $role=='Admin' || (isset($v['access_roles']) && $v['access_roles']!="")){
+					$access_roles = unserialize($v['access_roles']);
+					if($role=='Admin' || key_exists($roleID, $access_roles)){
+
+
 				?>
 				    <tr>
 					<td><?php echo date("n/j/Y", strtotime($v['logDate'])); ?></td>
@@ -603,11 +618,12 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					</td>
 					<?php } ?>
 				    </tr>
-				<?php } ?>
+				<?php } } } ?>
 			    </tbody>
 			</table>
 			</div>
 		    </div>
+		    <?php if($role!="Physician"){ ?>
 		    <div id="pLogs" class="row <?php echo (!$qualifyResult['specimen_collected'] || $qualifyResult['specimen_collected']=='No')?"hidden":"";?>">
 			<div id="deductable-log" class="col-md-6">
 			    <?php
@@ -617,6 +633,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			    ?>
 			    <h5>
 				Deductible Log:
+				<?php if($role=='Admin'){ ?>
 				<a class="pull-right" id="add-deductable-log">
 				    <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
 				</a>
@@ -625,8 +642,13 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 				    <span class="fas fa-plus-circle" aria-hidden="true"></span>  Deductible
 				</a>
 				<?php } ?>
+				<?php } ?>
 				<span id="total-deductible" class="<?php echo (!$qualifyResult['total_deductible'])?"hidden":"";?> pull-right">
+				    <?php if($role=='Admin'){ ?>
 				    $<input value="<?php echo ($qualifyResult['total_deductible']!="")?$qualifyResult['total_deductible']:""; ?>" name="total_deductible" placeholder="Total Deductible" type="number" min="0.00" step="0.01">
+				    <?php } else { ?>
+				    <?php echo "$".formatMoney($qualifyResult['total_deductible']); ?>
+				    <?php } ?>
 				</span>
 
 			    </h5>
@@ -640,7 +662,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					    <th>Date Checked</th>
 					    <th>Checked By</th>
 					    <th>Deductible $</th>
-					    <th class="text-center wh-100">Action</th>
+					    <?php if($role=='Admin'){ ?><th class="text-center wh-100">Action</th><?php } ?>
 					</tr>
 				    </thead>
 				    <tbody>
@@ -655,6 +677,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					    <td><span class="editable_date_checked"><?php echo (!preg_match("/0{4}/" , $v['date_checked'])) ? date('n/j/Y', strtotime($v['date_checked'])) : ""; ?></span></td>
 					    <td><span class="editable_checked_by"><?php echo $v['checked_by']; ?></span></td>
 					    <td>$<span class="editable_deductable"><?php echo formatMoney($v['deductable']); ?></span></td>
+					    <?php if($role=='Admin'){ ?>
 					    <td class="text-center">
 						<div class="action-btns">
 						<a data-id="<?php echo $v['Guid_deductable']; ?>" class="edit_deductable">
@@ -665,6 +688,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 						</a>
 						</div>
 					    </td>
+					    <?php } ?>
 					</tr>
 					<?php } ?>
 					<tr class="priceSum">
@@ -679,12 +703,16 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 				</table>
 			    </div>
 			</div>
+
+
 			<div id="revenue" class="col-md-6">
 			    <h5>
 				Revenue:
+				<?php if($role=='Admin'){ ?>
 				<a title="Add Revenue" class="pull-right" href="<?php echo $patientInfoUrl."&add_revenue=1";?>">
 				    <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
 				</a>
+				<?php } ?>
 			    </h5>
 			    <div class="revenue-form"></div>
 
@@ -695,7 +723,9 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					<th>Payor</th>
 					<th>CPT</th>
 					<th>Amount $</th>
+					<?php if($role=='Admin'){ ?>
 					<th class="text-center wh-100">Action</th>
+					<?php } ?>
 				    </tr>
 				</thead>
 				<tbody>
@@ -717,6 +747,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					<td><?php echo $v['payor']; ?></td>
 					<td><?php echo $v['code']; ?></td>
 					<td>$<?php echo formatMoney($v['amount']); ?></td>
+					<?php if($role=='Admin'){ ?>
 					<td class="text-center">
 					    <div class="action-btns">
 					    <a href="<?php echo $patientInfoUrl.'&edit_revenue='.$v['Guid_revenue']; ?>" class="">
@@ -727,6 +758,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					    </a>
 					    </div>
 					</td>
+					<?php } ?>
 				    </tr>
 
 				    <?php } ?>
@@ -743,6 +775,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			    </table>
 			</div>
 		    </div>
+		    <?php } ?>
+
 		    <div class="row actionButtons pB-30">
 			<div class="col-md-12">
 			    <?php if($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager' ){ ?>
@@ -758,6 +792,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			    <button id="save-patient-info" name="save" type="submit" class="button btn-inline pull-right">Save</button>
 			</div>
 		    </div>
+
 		</form>
 	    </div>
 	</div>
@@ -803,7 +838,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 	extract($revenueRow);
     }
 ?>
-<?php if(isset($_GET['add_revenue']) || (isset($_GET['edit_revenue'])&&$_GET['edit_revenue']!="") ){ ?>
+<?php if($role=='Admin' && (isset($_GET['add_revenue']) || (isset($_GET['edit_revenue'])&& $_GET['edit_revenue']!="")) ){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock">
 	<a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>
@@ -847,7 +882,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			<select name="Guid_cpt">
 			    <option value=" ">Select CPT Code</option>
 			    <?php
-			    $cpt_codes = $db->selectAll('tbl_mdl_cpt_code', ' ORDER BY code DESC');
+			    $cpt_codes = $db->selectAll('tbl_mdl_cpt_code', ' ORDER BY code ASC');
 			    foreach ($cpt_codes as $k=>$v){
 			    ?>
 			    <option <?php echo (isset($Guid_cpt)&&$Guid_cpt==$v['Guid_cpt'])?" selected":""; ?> value="<?php echo $v['Guid_cpt']; ?>"><?php echo $v['code']; ?></option>
@@ -950,18 +985,25 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 <?php
 if(isset($_POST['edit_statuses'])){
     if(isset($_POST['status']['Guid_status'])){
+
 	$statusIDS = $_POST['status']['Guid_status'];
 	$statusNames = $_POST['status']['name'];
 	$statusOrder = $_POST['status']['order'];
 	$statusVisibility = $_POST['status']['visibility'];
+	$access_roles = $_POST['status']['roles'];
 	$count = count($statusIDS);
 	foreach ($statusIDS as $k => $statusID) {
+
 	    $whereEditStatus = array('Guid_status'=>$statusID);
 	    $editStatusData = array(
 		'status' => $statusNames[$k],
 		'visibility' => $statusVisibility[$k],
+		'access_roles' => '',
 		'order_by' => $statusOrder[$k]
 	    );
+	    if(isset($access_roles[$statusID])){
+		$editStatusData['access_roles'] = serialize($access_roles[$statusID]);
+	    }
 
 	    updateTable($db, 'tbl_mdl_status', $editStatusData, $whereEditStatus);
 	}
@@ -987,9 +1029,11 @@ if(isset($_POST['edit_statuses'])){
 		    <table class="table">
 			<thead>
 			    <tr>
+				<th class="w-50">Status#</th>
 				<th class="status_name">Status Name</th>
 				<th>Order</th>
 				<th>Visibility</th>
+				<th>Roles <span class="toggleRoles pull-right far fa-eye-slash"></span></th>
 			    </tr>
 			</thead>
 			<tbody>
@@ -1173,10 +1217,11 @@ if(isset($_POST['edit_categories'])){
     }
 ?>
 <?php
-    if(isset($_GET['status_log'])){
+    if(isset($_GET['status_log']) && $role=='Admin'){
 	$title= ($_GET['status_log']=='add')?"Add Status Log":"Update Status Log";
 	if(isset($_GET['log_id'])&&$_GET['log_id']!=""){
-	    $logRow = $db->row("SELECT * FROM tbl_mdl_status_log WHERE Guid_status_log=:Guid_status_log", array('Guid_status_log'=>$_GET['log_id']));
+	    $logRowQ = "SELECT * FROM tbl_mdl_status_log WHERE Guid_status_log=:Guid_status_log";
+	    $logRow = $db->row($logRowQ, array('Guid_status_log'=>$_GET['log_id']));
 	}
 
 ?>
@@ -1249,7 +1294,7 @@ if(isset($_POST['edit_categories'])){
     }
 ?>
 <?php
-    if(isset($_GET['note_log'])){
+    if(isset($_GET['note_log']) && $role=='Admin') {
 	$title= ($_GET['note_log']=='add')?"Add Note":"Update Note";
 	if(isset($_GET['note_id'])&&$_GET['note_id']!=""){
 	    $catLogRow = $db->row("SELECT * FROM tbl_mdl_note WHERE Guid_note=:Guid_note", array('Guid_note'=>$_GET['note_id']));

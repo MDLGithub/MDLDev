@@ -3,10 +3,37 @@ $(document).ready(function () {
    // $('.h-filters .date').mask("00/00/0000", {placeholder: "__/__/____"});
     $('.h-filters .stat_mdl_number').mask("0000000");
 
-    $('#file').inputFileText( {
+    $('#file.accountLogoInput').inputFileText( {
 	text: 'Account Logo',
 	buttonCLass: 'cooseFileBtn',
 	textClass: 'chooseFileTxt'
+    });
+    $('#file.userLogoInput').inputFileText( {
+	text: 'Upload User\'s Photo',
+	buttonCLass: 'cooseFileBtn',
+	textClass: 'chooseFileTxt'
+    });
+
+    $('.toggleRoles').on('click', function(){
+	if($('.edit-status-form .rolesBlock').hasClass('hidden')){
+	    $('.edit-status-form .rolesBlock').removeClass('hidden');
+	    $('.toggleThisRoles').removeClass('fa-eye-slash').addClass('fa-eye');
+	    $(this).removeClass('fa-eye-slash').addClass('fa-eye');
+	} else {
+	    $('.edit-status-form .rolesBlock').addClass('hidden');
+	    $('.toggleThisRoles').removeClass('fa-eye').addClass('fa-eye-slash');
+	    $(this).removeClass('fa-eye').addClass('fa-eye-slash');
+	}
+    });
+    $('.toggleThisRoles').on('click', function(){
+	var rolesBlock = $(this).parent().parent().find( ".rolesBlock" );
+	if(rolesBlock.hasClass('hidden')){
+	    rolesBlock.removeClass('hidden');
+	    $(this).removeClass('fa-eye-slash').addClass('fa-eye');
+	} else {
+	    rolesBlock.addClass('hidden');
+	    $(this).removeClass('fa-eye').addClass('fa-eye-slash');
+	}
     });
 
     //formatting number to currency
@@ -732,21 +759,17 @@ $(document).ready(function () {
 
 
     //specimen checkbox actions
-    $('#specimen input').on('click', function() {
+    $('#specimen-collected-cbox, #specimen-notcollected-cbox').on('click', function() {
 	var specimen = this.value;
 	if(specimen=='No'){
 	    $('#specimen').addClass('show-modal');
 	    $('.specimenCollected.not').show();
 	    $('.specimenCollected.yes').hide();
-//            $('#select-reson').removeClass('hidden');
-//            $('#pLogs, #mdlInfoBox').addClass('hidden');
 	}
 	if(specimen=='Yes'){
 	    $('#specimen').addClass('show-modal');
 	    $('.specimenCollected.yes').show();
 	    $('.specimenCollected.not').hide();
-	    //$('#select-reson, #specimenRadioBox').addClass('hidden');
-	    //$('#pLogs, #mdlInfoBox').removeClass('hidden');
 	}
     });
 
@@ -795,16 +818,17 @@ $(document).ready(function () {
 	var Guid_user = $('#Guid_user').val();
 	var account = $('#account').val();
 	var statusVal = $('#specimen-not-collected').val();
+
 	$('#specimen .datepicker').removeClass('error-border');
 	$('#specimen #specimen-not-collected').removeClass('error-border');
 	if(dateVal == ""){
 	    $('#specimen .datepicker').addClass('error-border');
 	}
-	if(statusVal == ""){
+	if(statusVal == "" || statusVal == "37"){ //37 is ID for speciment not collected status
 	    $('#specimen #specimen-not-collected').addClass('error-border');
 	}
 
-	if(dateVal != "" && statusVal != "") {
+	if(dateVal != "" && statusVal != "" && statusVal != "37" ) {
 	    //save spacimen collected into logs
 	    var ajaxUrl = baseUrl+'/ajaxHandler.php';
 	    $.ajax( ajaxUrl , {

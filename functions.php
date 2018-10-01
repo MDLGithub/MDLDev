@@ -1151,6 +1151,7 @@ function formatMoney($number){
 
 
 function get_status_names($db, $Guid_status, $Guid_user, $Log_group){
+
     $statusStr = "";
     $ids = "";
     $statusIds = array();
@@ -1162,13 +1163,16 @@ function get_status_names($db, $Guid_status, $Guid_user, $Log_group){
     foreach($nestedIDs as $k=>$v){
 	array_push($statusIds, $v['Guid_status']);
     }
+
     if(!empty($statusIds)){
 	foreach ($statusIds as $k=>$v){
 	    $ids .= $v.', ';
 	}
 	$ids = rtrim($ids, ', ');
 	//var_dump("SELECT Guid_status, status FROM tbl_mdl_status WHERE Guid_status IN($ids)");
-	$statuses = $db->query("SELECT Guid_status, status FROM tbl_mdl_status WHERE Guid_status IN($ids) ");
+	$stQ = "SELECT Guid_status, status FROM tbl_mdl_status WHERE Guid_status IN($ids) ORDER BY parent_id, order_by";
+
+	$statuses = $db->query($stQ);
 	foreach ($statuses as $k=>$v){
 	    if($k==0 ){
 		$statusStr .= $v['status'];
@@ -1220,7 +1224,7 @@ function get_selected_log_dropdown($db, $Log_group, $parent="0") {
     $content = "";
     foreach ($selectedStatuses as $k => $v){
 	$getParent = $db->row("SELECT parent_id FROM tbl_mdl_status WHERE Guid_status=:Guid_status", array('Guid_status'=>$v['Guid_status']));
-	$statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$getParent['parent_id']." AND visibility='1' ORDER BY order_by ASC, Guid_status ASC");
+	$statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$getParent['parent_id']."  ORDER BY order_by ASC, Guid_status ASC");
 	$content .= '<div class="f2 valid ">
 			<div class="group">
 			    <select data-parent="'.$parent.'" required class="status-dropdown" name="status[]" id="">
@@ -1397,13 +1401,15 @@ function get_option_of_nested_status($db, $parent = 0,  $level = '', $checkboxes
 
 function get_nested_ststus_editable_rows($db, $parent = 0, $level = '') {
     $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
+    $roles= $db->query('SELECT * FROM `tblrole` WHERE `role`<>"Admin" ');
+
     $content = "";
     if ( $statuses ) {
 	$content ='';
 	$prefix = 0;
 
 	foreach ( $statuses as $status ) {
-	    echo "<tr>";
+
 	    $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
 	    $optionClass = '';
 
@@ -1411,6 +1417,7 @@ function get_nested_ststus_editable_rows($db, $parent = 0, $level = '') {
 		$optionClass = 'has_sub';
 	    }
 
+	    $content .= "<td>".$status['Guid_status'] . "</td>";
 	    $content .= "<td  class='".$optionClass."'>".$level . " ";
 	    $content .= "<input type='hidden' name=status[Guid_status][] value='".$status['Guid_status']."' />";
 	    $content .= "<input type='text' name=status[name][] value='".$status['status']."' />";
@@ -1423,11 +1430,27 @@ function get_nested_ststus_editable_rows($db, $parent = 0, $level = '') {
 				<option ".$selectedN." value='0'>No</option>
 			    </select>
 			</td>";
+	    $content .= "<td class='roles'>";
+	    if($roles){
+		$content .= "<p><span class='toggleThisRoles pull-right far fa-eye-slash'></span></p>";
+		$content .= "<div class='rolesBlock hidden'>";   //.hidden
+		foreach ($roles as $k => $v) {
+		    $checked = "";
+
+		    if($status['access_roles'] && $status['access_roles']!=""){
+			$accessRoles = unserialize($status['access_roles']);
+			if(array_key_exists($v['Guid_role'], $accessRoles)){
+			    $checked = " checked";
+			}
+		    }
+		    $content .= "<p><input name=status[roles][".$status['Guid_status']."][".$v["Guid_role"]."] type='checkbox' ".$checked." />".$v['role']."</p>";
+		}
+		$content .= "</div>";
+	    }
+	    $content .= "</td>";
 	    $content .= "</tr>";
 	    if ( !empty($checkCildren) ) {
 		$prefix .= '-';
-	    $prefix .= '-';
-
 		$content .= get_nested_ststus_editable_rows( $db, $status['Guid_status'], $level . "-&nbsp;" );
 	    }
 	}
