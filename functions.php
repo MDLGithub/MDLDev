@@ -1904,8 +1904,32 @@ function getRevenueStat($db, $Guid_user){
  * @param type $Guid_status
  * @return type array
  */
-function getStatusRevenueTotals($db, $Guid_status){
-    $usersQ = "SELECT * FROM `tbl_mdl_status_log` WHERE Guid_status=$Guid_status AND currentstatus='Y'";
+function getStatusRevenueTotals($db, $Guid_status, $searchData=array()){
+    $usersQ = "SELECT * FROM `tbl_mdl_status_log` sl LEFT JOIN tbl_mdl_number mn ON sl.Guid_user=mn.Guid_user ";
+
+    $usersQ .= " WHERE Guid_status=$Guid_status AND currentstatus='Y' ";
+
+    if(!empty($searchData)){
+	//adding filter conditions
+	if(isset($searchData['Guid_salesrep'])&&$searchData['Guid_salesrep']!=""){
+	    $usersQ .= 'AND sl.Guid_salesrep='.$searchData['Guid_salesrep'].' ';
+	}
+	if(isset($searchData['Guid_account'])&&$searchData['Guid_account']!=""){
+	    $usersQ .= 'AND sl.Guid_account='.$searchData['Guid_account'].' ';
+	}
+	if(isset($searchData['mdl_number'])&&$searchData['mdl_number']!=""){
+	    $usersQ .= 'AND mn.mdl_number='.$searchData['mdl_number'].' ';
+	}
+	if( isset($searchData['from_date']) && isset($searchData['to_date']) ){
+	    if ($searchData['from_date'] == $searchData['to_date']) {
+		$usersQ .= " AND sl.Date LIKE '%" . date("Y-m-d", strtotime($searchData['from_date'])) . "%'";
+	    } else {
+		$usersQ .= " AND sl.Date BETWEEN '" . date("Y-m-d", strtotime($searchData['from_date'])) . "' AND '" . date("Y-m-d", strtotime($searchData['to_date'])) . "'";
+	    }
+	}
+    }
+
+
     $users = $db->query($usersQ);
 
     $patientTotal = 0;

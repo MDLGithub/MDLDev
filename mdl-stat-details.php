@@ -64,16 +64,22 @@ $initLabels = array(
     }
 
     //adding filter conditions
+    $searchData = array();
     if(isset($_GET['salesrep'])&&$_GET['salesrep']!=""){
 	$initQ .= 'AND s.Guid_salesrep='.$_GET['salesrep'].' ';
+	$searchData['Guid_salesrep'] = $_GET['salesrep'];
     }
     if(isset($_GET['account'])&&$_GET['account']!=""){
 	$initQ .= 'AND a.Guid_account='.$_GET['account'].' ';
+	$searchData['Guid_account'] = $_GET['account'];
     }
     if(isset($_GET['mdnum'])&&$_GET['mdnum']!=""){
 	$initQ .= 'AND num.mdl_number='.$_GET['mdnum'].' ';
+	$searchData['mdl_number'] = $_GET['mdnum'];
     }
     if( isset($_GET['from']) && isset($_GET['to']) ){
+	$searchData['from_date'] = $_GET['from'];
+	$searchData['to_date'] = $_GET['to'];
 	if ($_GET['from'] == $_GET['to']) {
 	    $initQ .= " AND s.Date LIKE '%" . date("Y-m-d", strtotime($_GET['from'])) . "%'";
 	} else {
@@ -232,7 +238,7 @@ require_once ('navbar.php');
 			    </tr>
 			    <?php } ?>
 			</tbody>
-			<?php $userRevenuTotals = getStatusRevenueTotals($db, $_GET['status_id']); ?>
+			<?php $userRevenuTotals = getStatusRevenueTotals($db, $_GET['status_id'], $searchData);                  ?>
 			<tfoot class="strong">
 			    <?php if(isFieldVisibleForStatus($db, 'insurance_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'insurance_paid', $roleID)){ ?>
 			    <tr>
