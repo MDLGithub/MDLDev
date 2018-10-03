@@ -104,20 +104,18 @@ if( isset($_POST['manage_provider'])){
 	}
     } else {
 	//insert new user in tblusers table
-	//insert sales rep user
+	//insert provider user
 	$userData['user_type'] = 'provider';
 	$userData['Date_created'] = date('Y-m-d H:i:s');
+	$userData['Guid_role'] = '2';
 	$inserUser = insertIntoTable($db, 'tbluser', $userData);
 
 	if($inserUser['insertID']){
-	    $data['Guid_user']= $inserUser['insertID'];
-	    $inserRole = insertIntoTable($db, 'tbluserrole', array('Guid_user'=>$inserUser['insertID'], 'Guid_role'=>'2'));
-	}
-	if($inserRole['insertID']){
 	    //insert new provider for this account
 	    $msg['success'] = "Account New Provider inserted!";
 	    $msg['error'] = "Account New Provider insert Issue.";
 	    $data['account_id'] = $accountActive['account'];
+	    $data['Guid_user'] = $inserUser['insertID'];
 
 	    $providerDataArray['action'] = 'insert';
 	    $providerDataArray['provider_id']=$_POST['provider_id'];

@@ -22,7 +22,7 @@ body{
     display: none;
 }
 .f_status{
-    height: 2.3em;
+    max-height: 2.3em;
 }
 .w-50{
     width: 50px!important;
@@ -48,6 +48,9 @@ body{
 }
 .pT-10{
     padding-top: 10px !important;
+}
+.pT-15{
+    padding-top: 15px !important;
 }
 .pT-20{
     padding-top: 20px !important;
@@ -1512,4 +1515,28 @@ button[name="search"] > strong{
 }
 table.valignTop td{
     vertical-align: top !important;
+}
+#mange-user-block.modalBlock .contentBlock {
+    width: 50%;
+    left: 25%;
+}
+#mange-user-block.modalBlock .contentBlock .form{
+    max-width: 450px;
+    margin: 0 auto;
+}
+
+tr.mdl_patient{
+    background: #ffa7a7!important;
+}
+tr.marked_test{
+    background: #eaff75!important;
+}
+table.dataTable.display tbody tr:hover>.sorting_1,
+table.dataTable.order-column tbody tr>.sorting_1,
+table.dataTable.order-column tbody tr>.sorting_2,
+table.dataTable.order-column tbody tr>.sorting_3,
+table.dataTable.display tbody tr>.sorting_1,
+table.dataTable.display tbody tr>.sorting_2,
+table.dataTable.display tbody tr>.sorting_3{
+    background: none!important;
 }

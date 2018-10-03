@@ -274,7 +274,7 @@ require_once ('navbar.php');
 
 		fixedHeader: true,
 		lengthMenu: [[10, 20, 30, 50, 100,-1], [10, 20, 30, 50, 100, "All"]],
-		searching: false,
+
 		"pageLength": 20
 	});
     }

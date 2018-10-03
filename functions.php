@@ -164,7 +164,7 @@ function getThisUserID(){
  */
 function isUser($db, $role){
     $userID = $_SESSION['user']['id'];
-    $query = "SELECT r.Guid_role, r.role FROM tblrole r LEFT JOIN tbluserrole u ON r.Guid_role = u.Guid_role WHERE u.Guid_user = " . $userID;
+    $query = "SELECT r.Guid_role, r.role FROM tblrole r LEFT JOIN tbluser u ON r.Guid_role = u.Guid_role WHERE u.Guid_user = " . $userID;
     $userInfo = $db->row($query);
     if( $userInfo['role'] == $role ){
 	return TRUE;
@@ -191,8 +191,6 @@ function deleteUserByID($db, $userID){
     deleteByField($db, 'tblsalesrep','Guid_user', $userID);
     deleteByField($db, 'tblprovider','Guid_user', $userID);
     deleteByField($db, 'tblpatient','Guid_user', $userID);
-    //delete from roles
-    deleteByField($db, 'tbluserrole','Guid_user', $userID);
     //delet from users table
     deleteByField($db, 'tbluser','Guid_user', $userID);
     return TRUE;
@@ -205,7 +203,7 @@ function deleteUserByID($db, $userID){
  * @return type
  */
 function getUserName($db, $userID){
-    $query = "SELECT * FROM tblrole r LEFT JOIN tbluserrole u ON r.Guid_role = u.Guid_role WHERE u.Guid_user = " . $userID;
+    $query = "SELECT * FROM tblrole r LEFT JOIN tbluser u ON r.Guid_role = u.Guid_role WHERE u.Guid_user = " . $userID;
     $userInfo = $db->row($query);
 
     if($userInfo['role']=='Patient'){
@@ -249,7 +247,7 @@ function getUserName($db, $userID){
 }
 
 function getUserFullInfo($db, $userID){
-    $query = "SELECT * FROM tblrole r LEFT JOIN tbluserrole u ON r.Guid_role = u.Guid_role WHERE u.Guid_user = $userID";
+    $query = "SELECT * FROM tblrole r LEFT JOIN tbluser u ON r.Guid_role = u.Guid_role WHERE u.Guid_user = $userID";
 
     $userInfo = $db->row($query);
     $result = "";
@@ -450,15 +448,13 @@ function setOption($db, $key, $val, $type='page'){
 
 function getUsersAndRoles($db){
     $query = "SELECT u.*, r.* FROM `tbluser` u
-		LEFT JOIN `tbluserrole` urole ON u.Guid_user=urole.Guid_user
-		LEFT JOIN `tblrole` r ON r.Guid_role=urole.Guid_role";
+		LEFT JOIN `tblrole` r ON r.Guid_role=u.Guid_role";
     $users = $db->query($query);
     return $users;
 }
 function getUserAndRole($db, $userID){
     $query = "SELECT u.*, r.* FROM `tbluser` u
-		LEFT JOIN `tbluserrole` urole ON u.Guid_user=urole.Guid_user
-		LEFT JOIN `tblrole` r ON r.Guid_role=urole.Guid_role
+		LEFT JOIN `tblrole` r ON r.Guid_role=u.Guid_role
 		WHERE u.Guid_user=:Guid_user";
     $user = $db->row($query, array("Guid_user"=>$userID));
 
@@ -467,7 +463,7 @@ function getUserAndRole($db, $userID){
 
 function getRole($db, $userID){
     $query = "SELECT r.Guid_role, r.role FROM tblrole r "
-	    . "LEFT JOIN tbluserrole u ON r.Guid_role = u.Guid_role "
+	    . "LEFT JOIN tbluser u ON r.Guid_role = u.Guid_role "
 	    . "WHERE u.Guid_user=:Guid_user";
 
     $result = $db->row($query, array("Guid_user"=>$userID));
@@ -482,7 +478,7 @@ function getUserDetails($db, $userRole, $userID, $patientID=""){
 	$q = "SELECT first_name, last_name, photo_filename FROM tblsalesrep";
     } elseif ($userRole == 'Physician') {
 	$q = "SELECT first_name, last_name, photo_filename FROM tblprovider";
-    } elseif ($userRole == 'Patient') {
+    } elseif ($userRole == 'Patient' || $userRole == 'MDL Patient') {
 	$q = "SELECT firstname as first_name, lastname as last_name FROM tblpatient";
     }
 
@@ -497,18 +493,6 @@ function getUserDetails($db, $userRole, $userID, $patientID=""){
     }
 
     return $userDetail;
-}
-function saveUserRole($db, $Guid_user, $Guid_role) {
-    $query = "SELECT * FROM tbluserrole WHERE Guid_user=:Guid_user";
-    $result = $db->row($query, array("Guid_user"=>$Guid_user));
-    if($result){ //update role connection
-	$update = updateTable($db, 'tbluserrole', array('Guid_role'=>$Guid_role), array('Guid_user'=>$Guid_user));
-	return $update;
-    } else { //insert role connection
-	$insert = insertIntoTable($db, 'tbluserrole', array('Guid_role'=>$Guid_role, 'Guid_user'=>$Guid_user));
-	return $insert['status'];
-    }
-    return FALSE;
 }
 
 function saveUserDetails($db, $Guid_user, $Guid_role, $userDetails){
@@ -531,7 +515,7 @@ function saveUserDetails($db, $Guid_user, $Guid_role, $userDetails){
 	    $userDetails['Guid_user'] = $Guid_user;
 	    insertIntoTable($db, 'tblprovider', $userDetails);
 	}
-    } elseif ($Guid_role=='3') {//patient
+    } elseif ($Guid_role=='3' || $Guid_role=='6') {//patient or mdl patient
 	$userQ = "SELECT Guid_user FROM tblpatient WHERE Guid_user=:Guid_user";
 	$isUserExists = $db->row($userQ, array('Guid_user'=>$Guid_user));
 	if($isUserExists){
@@ -559,31 +543,74 @@ function saveUserDetails($db, $Guid_user, $Guid_role, $userDetails){
  * @param type $prevRole
  */
 //this function under development
-function moveUserData($db,$userData,$thisRole,$prevRole,$Guid_user,$Guid_patient=''){
-    var_dump($userData);die;
+function moveUserData($db, $Guid_user, $userDetails, $thisRole, $prevRole){
+    //we'll work only with users Admin, Sales Rep and Sales Manager (Guid_role -> 1, 4, 5)
+    $fName = (isset($userDetails['first_name'])) ? $userDetails['first_name']: "";
+    $lName = (isset($userDetails['last_name'])) ? $userDetails['last_name']: "";
+    $filename = (isset($userDetails['photo_filename'])) ? $userDetails['photo_filename']: "";
+
     if($thisRole != $prevRole){
+	if($thisRole=='1'){//Admin
+	    //we need to move sales rep to admin table
+	    $salesrepQ = "SELECT * FROM tblsalesrep WHERE Guid_user=:Guid_user";
+	    $getSalserep = $db->row($salesrepQ, array('Guid_user'=>$Guid_user));
 
-	if($thisRole=='1'){ //Admin
+	    $adminData = array(
+		'Guid_user' => $Guid_user,
+		'first_name' => ($fName !="") ? $fName:$getSalserep['first_name'],
+		'last_name' => ($lName !="") ? $lName:$getSalserep['last_name'],
+		'photo_filename' => ($filename !="") ? $filename:$getSalserep['photo_filename'],
+		'phone_number' => $getSalserep['phone_number'],
+		'address' => $getSalserep['address'],
+		'city' => $getSalserep['city'],
+		'state' => $getSalserep['state'],
+		'zip' => $getSalserep['zip']
+	    );
+	    $insert = insertIntoTable($db, 'tbladmins', $adminData);
 
-	} elseif ($thisRole=='2') { //Physician
+	    if(isset($insert['insertID'])){
+		$Guid_salesrep = $getSalserep['Guid_salesrep'];
+		deleteByField($db, 'tblsalesrep', 'Guid_salesrep', $Guid_salesrep);
+	    }
 
-	} elseif ($thisRole=='3') { //Patient
+	    return $insert;
+	} elseif ($thisRole=='4' || $thisRole=='5') {//Sales Rep OR Sales Manager
 
-	} elseif ($thisRole=='4' || $prevRole=='5') { //Sales Rep OR Sales Manager
+	    if($prevRole == '4' || $prevRole == '5'){
+
+		// need just change role, don't need of moving data
+		$is_manager = ($thisRole=='5') ? '1' : '0'; //1-sales Mgr and 0-Sales Rep
+		updateTable($db, 'tblsalesrep', array('is_manager'=>$is_manager), array('Guid_user'=>$Guid_user));
+		return TRUE;
+	    } else { //we need to move admin to salesrep table
+
+		$adminQ = "SELECT * FROM tbladmins WHERE Guid_user=:Guid_user";
+		$getAdmin = $db->row($adminQ, array('Guid_user'=>$Guid_user));
+
+		$salesrepData = array(
+		    'Guid_user' => $Guid_user,
+		    'first_name' => ($fName !="") ? $fName:$getAdmin['first_name'],
+		    'last_name' => ($lName !="") ? $lName:$getAdmin['last_name'],
+		    'photo_filename' => ($filename !="") ? $filename:$getAdmin['photo_filename'],
+		    'phone_number' => $getAdmin['phone_number'],
+		    'address' => $getAdmin['address'],
+		    'city' => $getAdmin['city'],
+		    'state' => $getAdmin['state'],
+		    'zip' => $getAdmin['zip']
+		);
+		if($thisRole=='5'){
+		    $salesrepData['is_manager'] = '1';
+		}
+
+		$insert = insertIntoTable($db, 'tblsalesrep', $salesrepData);
+		if(isset($insert['insertID'])){
+		    $Guid_admin = $getAdmin['Guid_admin'];
+		    deleteByField($db, 'tbladmins', 'Guid_admin', $Guid_admin);
+		}
+		return $insert;
+	    }
 
 	}
-
-	if($prevRole=='1'){ //Admin
-
-	} elseif ($prevRole=='2') { //Physician
-
-	} elseif ($prevRole=='3') { //Patient
-
-	} elseif ($prevRole=='4' || $prevRole=='5') { //Sales Rep OR Sales Manager
-
-	}
-
-
     }
     return FALSE;
 }
@@ -1284,15 +1311,12 @@ function saveStatusLog($db,$statusIDs, $statusLogData){
     return TRUE;
 }
 
-function updateCurrentStatusID($db, $Guid_patient,$visibility=TRUE){
+function updateCurrentStatusID($db, $Guid_patient){
     //SELECT statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date`
     $q  =   "SELECT *
 	    FROM `tbl_mdl_status` statuses
 	    LEFT JOIN `tbl_mdl_status_log` statuslogs
 	    ON statuses.`Guid_status`= statuslogs.`Guid_status` ";
-    if($visibility){
-    $q  .=  "WHERE statuses.`visibility`='1' ";
-    }
     $q  .=  "AND statuslogs.`Guid_status_log`<>''
 	    AND statuses.parent_id='0'
 	    AND statuslogs.Guid_patient=$Guid_patient
@@ -1466,7 +1490,7 @@ function get_nested_ststus_editable_rows($db, $parent = 0, $level = '') {
  * @return type String 11,55,22,45
  */
 function getMarkedTestUserIDs($db){
-    $getTestUsers = $db->query("SELECT Guid_user FROM `tbl_ss_qualify` WHERE mark_as_test=:mark_as_test GROUP BY Guid_user", array('mark_as_test'=>'1'));
+    $getTestUsers = $db->query("SELECT Guid_user FROM `tbluser` WHERE marked_test=:marked_test", array('marked_test'=>'1'));
     $userIds = "";
     foreach ($getTestUsers as $k=>$v){
 	$userIds .= $v['Guid_user'].', ';

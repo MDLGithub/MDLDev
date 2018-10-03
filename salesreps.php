@@ -87,14 +87,12 @@ if( isset($_POST['manage_salesrep'])){
 		'email' => $email,
 		'password'=>'',
 		'user_type' => 'salesrep',
+		'Guid_role'=>'4',
 		'Date_created'=> date('Y-m-d H:i:s')
 	    );
 	    $inserUser = insertIntoTable($db, 'tbluser', $userData);
 
 	    if($inserUser['insertID']){
-		$inserRole = insertIntoTable($db, 'tbluserrole', array('Guid_user'=>$inserUser['insertID'], 'Guid_role'=>'4'));
-	    }
-	    if($inserRole['insertID']){
 		$data['Guid_user'] = $inserUser['insertID'];
 		//insert sales rep
 		$update = updateTable($db, 'tblsalesrep', $data, array("Guid_salesrep"=>$Guid_salesrep));
@@ -111,14 +109,12 @@ if( isset($_POST['manage_salesrep'])){
 	    'email' => $email,
 	    'password'=>'',
 	    'user_type' => 'salesrep',
+	    'Guid_role'=>'4',
 	    'Date_created'=> date('Y-m-d H:i:s')
 	);
 	$inserUser = insertIntoTable($db, 'tbluser', $userData);
 
 	if($inserUser['insertID']){
-	    $inserRole = insertIntoTable($db, 'tbluserrole', array('Guid_user'=>$inserUser['insertID'], 'Guid_role'=>'4'));
-	}
-	if($inserRole['insertID']){
 	    $data['Guid_user'] = $inserUser['insertID'];
 	    //insert sales rep
 	    $insert = insertIntoTable($db, 'tblsalesrep', $data);

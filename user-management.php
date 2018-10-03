@@ -21,50 +21,92 @@ if($role!="Admin"){
 $userTables = array(
     'admin'=>'tbladmins',
     'patient'=>'tblpatient',
+    'mdlpatient'=>'tblpatient',
     'salesrep'=>'tblsalesrep',
-    'tblprovider'=>'tblprovider'
+    'salesrepmgr'=>'tblsalesrep',
+    'provider'=>'tblprovider'
 );
 $selectQ = "";$adminQ="";$patientsQ="";$salesrepsQ="";$providersQ="";
-foreach ($userTables as $k=>$v){
-    $selectQ = "SELECT u.Guid_user, u.status, uInfo.first_name, uInfo.last_name, u.email, r.role";
 
-    if($k=='patient'){
-	$selectQ = "SELECT u.Guid_user, u.status, uInfo.Guid_patient, uInfo.firstname AS first_name, uInfo.lastname AS last_name, u.email, r.role";
-    }
+foreach ($userTables as $k=>$v){
+    $thisTable = $v;
+
     if($k=='admin'){
 	$roleID = '1';
     } elseif ($k=='patient') {
 	$roleID = '3';
     } elseif ($k=='salesrep') {
-       $roleID = '4 OR urole.Guid_role=5';
-    } elseif ($k=='tblprovider') {
+       $roleID = '4';
+    } elseif ($k=='salesrepmgr') {
+       $roleID = '5';
+    } elseif ($k=='provider') {
 	$roleID = '2';
+    }elseif ($k=='mdlpatient') {
+	$roleID = '6';
     }
 
-    $selectQ .= " FROM $v uInfo
-		LEFT JOIN `tbluser` u ON uInfo.Guid_user=u.Guid_user
-		LEFT JOIN `tbluserrole` urole ON uInfo.Guid_user=urole.Guid_user AND urole.Guid_role=$roleID
-		LEFT JOIN `tblrole` r ON r.Guid_role=urole.Guid_role";
+    $selectQ = "SELECT u.Guid_user, u.status, u.Guid_role, u.marked_test, uInfo.first_name, uInfo.last_name, u.email, r.role ";
+    if($k=='patient' || $k=='mdlpatient'){
+	$selectQ = "SELECT u.Guid_user, u.status, u.Guid_role, u.marked_test, uInfo.Guid_patient, uInfo.firstname AS first_name, uInfo.lastname AS last_name, u.email, r.role ";
+    }
+    $selectQ .= "FROM tbluser u ";
+    $selectQ .= "LEFT JOIN `tblrole` r ON u.Guid_role=r.Guid_role ";
+    $selectQ .= "LEFT JOIN $thisTable uInfo ON u.Guid_user=uInfo.Guid_user ";
+
+    $selectQ .= "WHERE u.Guid_role=$roleID ";
+
+    if(isset($_POST['search'])){
+	if(isset($_POST['first_name']) && $_POST['first_name']!=""){
+	    if($k=='patient'){
+		$selectQ .= " AND uInfo.firstname LIKE '%".escape($_POST['first_name'])."%'";
+	    }else{
+		$selectQ .= " AND uInfo.first_name LIKE '".escape($_POST['first_name'])."%'";
+	    }
+	}
+	if(isset($_POST['last_name']) && $_POST['last_name']!=""){
+	    if($k=='patient'){
+		$selectQ .= " AND uInfo.lastname LIKE '%".escape($_POST['last_name'])."%'";
+	    }else{
+		$selectQ .= " AND uInfo.last_name LIKE '%".escape($_POST['last_name'])."%'";
+	    }
+	}
+	if(isset($_POST['email']) && $_POST['email']!=""){
+	    $selectQ .= " AND u.email = '".escape($_POST['email'])."'";
+	}
+	if(isset($_POST['Guid_role']) && $_POST['Guid_role']!=""){
+	    $selectQ .= " AND u.Guid_role = '".$_POST['Guid_role']."'";
+	}
+	if(isset($_POST['status']) && $_POST['status']!=""){
+	    $selectQ .= " AND u.status = '".$_POST['status']."'";
+	}
+	if(isset($_POST['marked_test']) && $_POST['marked_test']=="1"){
+	    $selectQ .= " AND u.marked_test = '1'";
+	}
+    }
 
     if($k=='admin'){
 	$adminQ = $selectQ;
     } elseif ($k=='patient') {
 	$patientsQ = $selectQ;
+    } elseif ($k=='mdlpatient') {
+	$mdlpatientsQ = $selectQ;
     } elseif ($k=='salesrep') {
 	$salesrepsQ = $selectQ;
-    } elseif ($k=='tblprovider') {
+    } elseif ($k=='salesrepmgr') {
+	$salesrepsMgrQ = $selectQ;
+    } elseif ($k=='provider') {
 	$providersQ = $selectQ;
     }
 }
 
-
 $query1 = ($adminQ!="")?$db->query($adminQ):array();
 $query2 = ($patientsQ!="")?$db->query($patientsQ):array();
-$query3 = ($salesrepsQ!="")?$db->query($salesrepsQ):array();
-$query4 = ($providersQ!="")?$db->query($providersQ):array();
+$query3 = ($mdlpatientsQ!="")?$db->query($mdlpatientsQ):array();
+$query4 = ($salesrepsQ!="")?$db->query($salesrepsQ):array();
+$query5 = ($salesrepsMgrQ!="")?$db->query($salesrepsMgrQ):array();
+$query6 = ($providersQ!="")?$db->query($providersQ):array();
 
-$users = array_merge($query1,$query2,$query3,$query4);
-
+$users = array_merge($query1,$query2,$query3,$query4,$query5,$query6);
 $thisMessage="";
 
 if(isset($_GET['delete-user']) && $_GET['delete-user']!=""){
@@ -82,56 +124,81 @@ require_once ('navbar.php');
 
 	<div class="boxtent scroller ">
 	    <form id="filter_form" action="" method="post">
-<!--                <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['first_name'])) && (strlen(trim($_POST['first_name'])))) ? " show-label valid" : ""; ?>">
+		<div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['first_name'])) && (strlen(trim($_POST['first_name'])))) ? " show-label valid" : ""; ?>">
 		    <label class="dynamic" for="first_name"><span>First Name</span></label>
-
 		    <div class="group">
 			<input id="first_name" name="first_name" type="text" value="<?php echo ((!isset($_POST['clear'])) && isset($_POST['first_name']) && strlen(trim($_POST['first_name']))) ? trim($_POST['first_name']) : ""; ?>" placeholder="First Name">
+			<p class="f_status">
+			    <span class="status_icons"><strong></strong></span>
+			</p>
+		    </div>
+		</div>
+		<div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['last_name'])) && (strlen(trim($_POST['last_name'])))) ? " show-label valid" : ""; ?>">
+		    <label class="dynamic" for="first_name"><span>Last Name</span></label>
+		    <div class="group">
+			<input id="last_name" name="last_name" type="text" value="<?php echo ((!isset($_POST['clear'])) && isset($_POST['last_name']) && strlen(trim($_POST['last_name']))) ? trim($_POST['last_name']) : ""; ?>" placeholder="Last Name">
+			<p class="f_status">
+			    <span class="status_icons"><strong></strong></span>
+			</p>
+		    </div>
+		</div>
+		<div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['email'])) && (strlen(trim($_POST['email'])))) ? " show-label valid" : ""; ?>">
+		    <label class="dynamic" for="first_name"><span>Last Name</span></label>
+		    <div class="group">
+			<input id="email" name="email" type="email" value="<?php echo ((!isset($_POST['clear'])) && isset($_POST['email']) && strlen(trim($_POST['email']))) ? trim($_POST['email']) : ""; ?>" placeholder="Email">
+			<p class="f_status">
+			    <span class="status_icons"><strong></strong></span>
+			</p>
+		    </div>
+		</div>
+
+		<div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['Guid_role'])) && (strlen($_POST['Guid_role']))) ? " show-label valid" : ""; ?>">
+		    <label class="dynamic" for="Guid_role"><span>User Role</span></label>
+
+		    <div class="group">
+			<select id="Guid_role" name="Guid_role" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['Guid_role'])) && (strlen($_POST['Guid_role']))) ? "" : "no-selection"; ?>">
+			    <option value="">User Role</option>
+			    <?php
+			    $roles = $db->query("SELECT * FROM `tblrole` ORDER BY role ASC");
+			    foreach ($roles as $k=>$v) {
+				$selected = (!isset($_POST['clear']) && isset($_POST['Guid_role']) && $_POST['Guid_role']==$v['Guid_role']) ?  "selected " : "";
+			    ?>
+				<option <?php echo $selected; ?> value="<?php echo $v['Guid_role']; ?>"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['Guid_role']) && ($_POST['Guid_role'] == $v['Guid_role'])) ? " selected" : ""); ?>><?php echo $v['role']; ?></option>
+				<?php
+			    }
+			    ?>
+			</select>
 
 			<p class="f_status">
 			    <span class="status_icons"><strong></strong></span>
 			</p>
 		    </div>
-		</div>-->
-		    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['Guid_role'])) && (strlen($_POST['Guid_role']))) ? " show-label valid" : ""; ?>">
-			<label class="dynamic" for="Guid_role"><span>User Role</span></label>
+		</div>
 
-			<div class="group">
-			    <select id="Guid_role" name="Guid_role" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['location'])) && (strlen($_POST['location']))) ? "" : "no-selection"; ?>">
-				<option value="">User Role</option>
-				<?php
-				$roles = $db->query("SELECT * FROM tblrole");
+		<div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['status'])) && (strlen($_POST['status']))) ? " show-label valid" : ""; ?>">
+		    <label class="dynamic" for="status"><span>Status</span></label>
+		    <?php
+		    $selectedActive = (!isset($_POST['clear']) && isset($_POST['status']) && $_POST['status']=='1') ?  "selected " : "";
+		    $selectedInactive = (!isset($_POST['clear']) && isset($_POST['status']) && $_POST['status']=='0') ?  "selected " : "";
+		    ?>
+		    <div class="group">
+			<select id="Guid_role" name="status" class="<?php echo (!isset($_POST['clear']) && isset($_POST['status']) && strlen($_POST['status']) ) ? "" : "no-selection"; ?>">
+			    <option value="">Status</option>
+			    <option <?php echo $selectedActive; ?> value="1" >Active</option>
+			    <option <?php echo $selectedInactive; ?> value="0" >Inactive</option>
 
-				foreach ($roles as $k=>$v) {
-				    ?>
-				    <option value="<?php echo $v['Guid_role']; ?>"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['Guid_role']) && ($_POST['Guid_role'] == $v['Guid_role'])) ? " selected" : ""); ?>><?php echo $v['role']; ?></option>
-				    <?php
-				}
-				?>
-			    </select>
+			</select>
 
-			    <p class="f_status">
-				<span class="status_icons"><strong></strong></span>
-			    </p>
-			</div>
+			<p class="f_status">
+			    <span class="status_icons"><strong></strong></span>
+			</p>
 		    </div>
+		</div>
 
-		    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['Guid_role'])) && (strlen($_POST['Guid_role']))) ? " show-label valid" : ""; ?>">
-			<label class="dynamic" for="status"><span>Status</span></label>
-
-			<div class="group">
-			    <select id="Guid_role" name="status" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['status'])) && (strlen($_POST['status']))) ? "" : "no-selection"; ?>">
-				<option value="">Status</option>
-				<option value="1" <?php echo ((!isset($_POST['clear'])) && (isset($_POST['status']) && ($_POST['status'] == $v['status'])) ? " selected" : ""); ?>>Active</option>
-				<option value="0" <?php echo ((!isset($_POST['clear'])) && (isset($_POST['status']) && ($_POST['status'] == $v['status'])) ? " selected" : ""); ?>>Inactive</option>
-
-			    </select>
-
-			    <p class="f_status">
-				<span class="status_icons"><strong></strong></span>
-			    </p>
-			</div>
-		    </div>
+		<div>
+		    <input id="show-tests" name="marked_test" value="1" type="checkbox" <?php echo ((!isset($_POST['clear'])) && (isset($_POST['marked_test']) && ($_POST['marked_test'] == 1)) ? " checked" : ""); ?> />
+		    <label for="show-tests">Marked Test</label>
+		</div>
 
 
 
@@ -198,7 +265,16 @@ require_once ('navbar.php');
 			</thead>
 			<tbody>
 			    <?php foreach ($users as $k=>$user){  ?>
-			    <tr>
+			    <?php
+			    $trClass = "";
+			    if($user['marked_test']=='1'){
+				$trClass = "marked_test";
+			    }
+			    if($user['Guid_role']=='6'){
+				$trClass = "mdl_patient";
+			    }
+			    ?>
+			    <tr class="<?php echo $trClass;?>">
 				<td><?php echo $user['Guid_user']; ?></td>
 				<td><?php echo $user['first_name']; ?> </td>
 				<td><?php echo $user['last_name']; ?></td>
@@ -211,7 +287,7 @@ require_once ('navbar.php');
 					echo "<span class='fas fa-user-alt-slash mn no'></span>";
 				    }?>
 				</td>
-				<td class="text-center">
+				<td class="">
 				    <?php
 					$editUrl = "";
 					if($user['Guid_user'] != ""){
@@ -225,9 +301,16 @@ require_once ('navbar.php');
 				    <a href="<?php echo SITE_URL; ?>/user-management.php?action=update<?php echo $editUrl; ?>">
 					<span class="fas fa-pencil-alt" aria-hidden="true"></span>
 				    </a>
-				    <a onclick="javascript:confirmationDeleteUser($(this));return false;" href="<?php echo SITE_URL; ?>/user-management.php?delete-user=<?php echo $user['Guid_user']; ?>&id=<?php echo $user['Guid_user']; ?>">
+				    <?php if($user['marked_test']=='1'){?>
+				    <a id="test-user" class="deleteUser" title="Remove User and History" data-user-id="<?php echo $user['Guid_user']; ?>" >
+					<span class="fas fa-trash" aria-hidden="true"></span>
+				    </a>
+				    <?php } ?>
+				    <?php if($user['Guid_role']=='6'){?>
+				    <a id="mdl-user" class="deleteUser" title="Remove History" data-user-id="<?php echo $user['Guid_user']; ?>" >
 					<span class="far fa-trash-alt" aria-hidden="true"></span>
 				    </a>
+				    <?php } ?>
 				</td>
 			    </tr>
 			    <?php } ?>
@@ -251,10 +334,14 @@ require_once ('navbar.php');
 	$userData['email'] = $email;
 	$userData['status'] = $status;
 
-	if($_POST['password'] != ""){
+	if(isset($_POST['password']) &&$_POST['password'] != ""){
 	    $userData['password'] = encode_password($password);
 	}
-	if($Guid_role != ""){
+	if(isset($_POST['marked_test']) && $_POST['marked_test'] != ""){
+	    $userData['marked_test'] = '1';
+	}
+
+	if(isset($Guid_role) && $Guid_role != ""){
 	    if($Guid_role=='1'){
 		$userData['user_type'] = 'admin';
 		$roleName = 'Admin';
@@ -264,6 +351,9 @@ require_once ('navbar.php');
 	    } elseif ($Guid_role=='3') {
 		$userData['user_type'] = 'patient';
 		$roleName = 'Patient';
+	    }elseif ($Guid_role=='6') {
+		$userData['user_type'] = 'mdl-patient';
+		$roleName = 'MDL Patient';
 	    } elseif ($Guid_role=='4') {
 		$userData['user_type'] = 'salesrep';
 		$roleName = 'Sales Rep';
@@ -271,70 +361,67 @@ require_once ('navbar.php');
 		$userData['user_type'] = 'salesmgr';
 		$roleName = 'Sales Manager';
 	    }
-	}else{
-	    $userData['user_type'] = 'patient';
-	    $roleName = 'Patient';
 	}
 
 	if($Guid_user == ""){ //insert User
 	    //checking for email unique
-	    $isMailExists = $db->row("SELECT `email` FROM tbluser WHERE `email`='".$email."' ");
+	    $isMailExists = $db->row("SELECT `email` FROM tbluser WHERE email=:email", array('email'=> escape($email)));
 	    if(!$isMailExists){
 		unset($userData['Guid_user']);
 		$userData['Date_created'] = date('Y-m-d H:i:s');
+		$userData['Guid_role'] = $Guid_role;
 		$inserUser = insertIntoTable($db, 'tbluser', $userData);
-		if($inserUser['insertID']){
-		    $Guid_user = $inserUser['insertID'];
-		    $saveRoles = saveUserRole($db, $Guid_user, $Guid_role);
-		    $result = TRUE;
-		}
+		Leave(SITE_URL."/user-management.php?update");
 	    } else {
 		$message = "User with this email already exists.";
 	    }
 	}else{ //update
+
 	    $isMailExists = $db->row("SELECT `email` FROM tbluser WHERE `email`='".$email."' AND `Guid_user`<>$Guid_user");
 	    if(!$isMailExists){
 		$userData['Date_modified'] = date('Y-m-d H:i:s');
+		$userData['Guid_role'] = $Guid_role;
 		$whereUser = array('Guid_user'=>$Guid_user);
-		//check if role is changed, then move all data to that user by role table and remove previous
-		$prevRole = $db->row('SELECT Guid_role FROM `tbluserrole` WHERE Guid_user=:Guid_user', $whereUser);
-		if($prevRole['Guid_role'] == $Guid_role){
-		    $updateUser = updateTable($db, 'tbluser', $userData, $whereUser);
-		    saveUserRole($db, $Guid_user, $Guid_role);
-		} else { // need to move user info data to proper table and delete prev
-		    //under development
-		    $movingUser = moveUserData($db,$userData,$Guid_role,$prevRole,$Guid_user);
+
+		$fName = isset($_POST['first_name']) ? $_POST['first_name'] : "";
+		$lName = isset($_POST['last_name']) ? $_POST['last_name'] : "";
+		if($Guid_role=='3' || $Guid_role=='6'){
+		    $userDetails = array('firstname'=>$fName, 'lastname'=>$lName);
+		} else {
+		    $userDetails = array('first_name'=>$fName, 'last_name'=>$lName);
+		    if($_FILES["photo_filename"]["name"] != ""){
+			$fileName = $_FILES["photo_filename"]["name"];
+			$userDetails['photo_filename'] = $fileName;
+			$uploadMsg = uploadFile('photo_filename', 'images/users/');
+		    }
 		}
 
-		$result = TRUE;
+		//check if role is changed, then move all data to that user by role table and remove previous
+		$prevRole = $db->row('SELECT Guid_role FROM `tbluser` WHERE Guid_user=:Guid_user', $whereUser);
+		if($prevRole['Guid_role'] == $Guid_role){
+		    updateTable($db, 'tbluser', $userData, $whereUser);
+		    saveUserDetails($db, $Guid_user, $Guid_role, $userDetails);
+		    Leave(SITE_URL."/user-management.php?update");
+		} else {
+		    //need to move user info data to proper table and delete prev
+		    updateTable($db, 'tbluser', $userData, $whereUser);
+		    moveUserData($db, $Guid_user, $userDetails, $Guid_role, $prevRole['Guid_role']);
+		    Leave(SITE_URL."/user-management.php?update");
+		}
+
 	    } else {
 		$message = "User with this email already exists.";
 	    }
 	}
 
-	if($result && $message==""){
-	    $fName = isset($_POST['first_name']) ? $_POST['first_name'] : "";
-	    $lName = isset($_POST['last_name']) ? $_POST['last_name'] : "";
-	    if($Guid_role=='3'){
-		$userDetails = array('firstname'=>$fName, 'lastname'=>$lName);
-	    } else {
-		$userDetails = array('first_name'=>$fName, 'last_name'=>$lName);
-		if($_FILES["photo_filename"]["name"] != ""){
-		    $fileName = $_FILES["photo_filename"]["name"];
-		    $userDetails['photo_filename'] = $fileName;
-		    $uploadMsg = uploadFile('photo_filename', 'images/users/');
-		}
-	    }
-	    saveUserDetails($db, $Guid_user, $Guid_role, $userDetails);
-	    Leave(SITE_URL."/user-management.php?update");
-	}
     }
 
 
     if(isset($_GET['action']) && $_GET['action'] !="" ){
 	$userID = $_GET['id'];
 	$user = getUserAndRole($db, $userID);
-	$allRoles = $db->selectAll('tblrole', ' ORDER BY role ASC');
+	//we can change only roles admin and sales reps
+	$allRoles = $db->query('SELECT * FROM tblrole WHERE Guid_role IN(1,4,5) ORDER BY role ASC');
 	$patientID = isset($_GET['patient_id'])?$_GET['patient_id']:"";
 	$userDetails = getUserDetails($db, $user['role'], $userID, $patientID);
 
@@ -363,11 +450,8 @@ require_once ('navbar.php');
 	<?php } ?>
 	<form action="" method="POST" enctype="multipart/form-data">
 	    <div class="row">
-
 		<input type="hidden" name="Guid_user" value="<?php echo isset($user['Guid_user'])?$user['Guid_user']:''; ?>" />
-
 		<div class="col-md-6 col-md-offset-3">
-
 		    <div class="f2 <?php echo ($first_name!="")?"valid show-label":"";?>">
 			<label class="dynamic" for="first_name"><span>First Name</span></label>
 			<div class="group">
@@ -386,12 +470,13 @@ require_once ('navbar.php');
 			    </p>
 			</div>
 		    </div>
+		    <?php if($user['role']=='Admin' || $user['role']=='Sales Rep' || $user['role']=='Sales Manager') { ?>
 		    <div class="f2 required <?php echo ($user['role']!="")?"valid show-label":"";?>">
-			<label class="dynamic" for="reason_not"><span>User Roles</span></label>
+			<label class="dynamic" for="reason_not"><span>User Role</span></label>
 			<div class="group">
 			    <?php $selUserRole = isset($_POST['user_type'])?$_POST['user_type']:$user['role'];?>
 			    <select required id="user_type" name="Guid_role" class="<?php echo ($user['role']=="")?'no-selection':''; ?> ">
-				<option value="">User Roles</option>
+				<option value="">User Role</option>
 				<?php foreach ($allRoles as $role){ ?>
 				    <option <?php echo ($selUserRole==$role['role']) ? " selected": ""; ?> value="<?php echo $role['Guid_role']; ?>"><?php echo $role['role']; ?></option>
 				<?php } ?>
@@ -401,11 +486,23 @@ require_once ('navbar.php');
 			    </p>
 			</div>
 		    </div>
+		    <?php } else { ?>
+		    <div class="f2 required <?php echo ($user['role']!="")?"valid show-label":"";?>">
+			<label class="dynamic" for="reason_not"><span>User Role</span></label>
+			<div class="group">
+			    <input value="<?php echo $user['role'];?>" type="text" disabled="" class="form-control" placeholder="User Role">
+			    <input name="Guid_role" value="<?php echo $user['Guid_role'];?>" type="hidden">
+			    <p class="f_status">
+				<span class="status_icons"><strong></strong></span>
+			    </p>
+			</div>
+		    </div>
+		    <?php }  ?>
 		    <div class="f2 required <?php echo ($user['status']!="")?"valid show-label":"";?>">
 			<label class="dynamic" for="status"><span>Status</span></label>
 			<div class="group">
 			    <?php $userStatus = isset($_POST['status'])?$_POST['status']:$user['status'];?>
-			    <select required id="status" name="status">
+			    <select required id="status" name="status" class="<?php echo ($user['status']=="")?'no-selection':''; ?> ">
 				<option value="">Status</option>
 				<option <?php echo ($userStatus=='1') ? " selected": ""; ?> value="1">Active</option>
 				<option <?php echo ($userStatus=='0') ? " selected": ""; ?> value="0">Inactive</option>
@@ -424,7 +521,6 @@ require_once ('navbar.php');
 			    </p>
 			</div>
 		    </div>
-
 		    <?php $passRequred = isset($_GET['add'])?' required':''; ?>
 		    <div class="f2 <?php echo $passRequred; ?> ">
 			<label class="dynamic" for="password"><span>Password</span></label>
@@ -435,8 +531,7 @@ require_once ('navbar.php');
 			    </p>
 			</div>
 		    </div>
-
-		    <?php if($user['role']==NULL && $role != 'Patient') { //For patients we dont have photo field in DB ?>
+		    <?php if($user['role'] != 'Patient') { //For patients we dont have photo field in DB ?>
 		    <div class="row">
 			<div class="col-md-10">
 			    <div class="f2 <?php echo ($photo_filename!="")?"valid show-label":"";?>">
@@ -450,13 +545,11 @@ require_once ('navbar.php');
 			    </div>
 			</div>
 			<?php $image = (!isset($photo_filename) || $photo_filename=="")?"/assets/images/default.png":"/images/users/".$photo_filename; ?>
-			<div id="profile-pic" class="col-md-2 pT-30">
+			<div id="profile-pic" class="col-md-2 pT-15">
 			    <img id="image" width="40" src="<?php echo SITE_URL.$image; ?>" />
 			</div>
 		    </div>
 		    <?php } ?>
-
-
 		</div>
 	    </div>
 	    <div class="row actionButtons">
@@ -479,12 +572,12 @@ require_once ('navbar.php');
 	    //searching: false,
 	    //lengthChange: false,
 	    "pageLength": 25,
-	    "order": [[ 4, "asc" ]],
+	    "order": [[ 0, "asc" ]],
 	    "aoColumnDefs": [
 	      {
 
-		  //"bSortable": false,
-		  "aTargets": [ 4,5 ] }
+		  "bSortable": false,
+		  "aTargets": [ 5,6 ] }
 	    ]
 	});
 
