@@ -26,8 +26,110 @@ if(isset($_POST['save_specimen_into_logs'])){
 if(isset($_POST['save_specimen_not_collected_into_logs'])){
     save_specimen_not_collected_into_logs($db, $_POST['date'], $_POST['Guid_user'], $_POST['account'], $_POST['status']);
 }
+if(isset($_POST['deleteUser'])){
+    delete_user($db, $_POST['userType'], $_POST['Guid_user']);
+}
 
-//save save_specimen_into_logs
+/**
+ * Delete User 
+ * @param type $db
+ * @param string $type
+ * @param type $Guid_user
+ */
+function delete_user($db, $type, $Guid_user){   
+    
+    //tbl_ss_qualify 
+    $SSQualify = $db->row("SELECT Guid_qualify FROM `tbl_ss_qualify` WHERE Guid_user=:Guid_user ORDER BY Date_created DESC LIMIT 1", array('Guid_user'=>$Guid_user));
+    $clinupSSQualifyTables = array(
+        'tbl_ss_qualifyfam',
+        'tbl_ss_qualifypers',
+        'tbl_ss_qualifyans',
+        'tbl_ss_qualifygene',
+    );
+    if(isset($SSQualify['Guid_qualify'])){        
+        $Guid_qualify = $SSQualify['Guid_qualify'];
+        foreach ($clinupSSQualifyTables as $k=>$thisTable){            
+            $sql = "DELETE FROM $thisTable WHERE Guid_qualify=".$Guid_qualify;
+            if ($db->query($sql)) {
+                $arrMsg[] = "#".$Guid_qualify." user from ".$thisTable." table deleted successfully.";
+            } else {
+                $arrMsg[] = "Error deleting #".$Guid_qualify." user from ".$thisTable." table. ";
+            }
+        }
+    }
+    
+    //tblqualify
+    $Qualify = $db->row("SELECT Guid_qualify FROM `tblqualify` WHERE Guid_user=:Guid_user ORDER BY Date_created DESC LIMIT 1", array('Guid_user'=>$Guid_user));
+    $clinupQualifyTables = array(        
+        'tblqualifyfam',
+        'tblqualifypers',
+        'tblqualifyans',
+        'tblqualifygene',
+    ); 
+    if(isset($Qualify['Guid_qualify'])){
+        $Guid_qualify = $Qualify['Guid_qualify'];
+        foreach ($clinupQualifyTables as $k=>$thisTable){            
+            $sql = "DELETE FROM $thisTable WHERE Guid_qualify=".$Guid_qualify;
+            if ($db->query($sql)) {
+                $arrMsg[] = "#".$Guid_qualify." user from ".$thisTable." table deleted successfully";
+            } else {
+                $arrMsg[] = "Error deleting #".$Guid_qualify." user from ".$thisTable." table. ";
+            }
+        }
+    }
+    
+    //both users 'test-user' and 'mdl-user' are in patients table, 
+    //but have different role ids in user table (Guid_role)    
+    // Delete the history of given user 
+    $arrMsg = array();
+    $cleanupTables = array(
+        'tbl_ss_qualify',        
+        'tblqualify',
+        'tblurlconfig',
+        'tbl_deductable_log',
+        'tbl_mdl_note',
+        'tbl_mdl_number',
+        'tbl_revenue',
+        'tbl_mdl_status_log'
+    );
+    foreach ($cleanupTables as $k=>$thisTable){
+        $sql = "DELETE FROM $thisTable WHERE Guid_user=".$Guid_user;
+        $delete =  $db->query($sql);
+        if ($delete) {
+            $arrMsg[] = "#".$Guid_user." user from ".$thisTable." table deleted successfully";
+        } else {
+            $arrMsg[] = "Error deleting #".$Guid_user." user from ".$thisTable." table. ";
+        }        
+    }
+    
+    //If user is test user     
+    if($type=='test-user'){ //Delete user data
+        $userTables = array(
+            'tbluser',
+            'tblpatient'
+        );
+        foreach ($userTables as $k=>$thisTable){
+            $sql = "DELETE FROM $thisTable WHERE Guid_user=".$Guid_user;
+            if ($db->query($sql)) {
+                $arrMsg[] = "#".$Guid_user." user from ".$thisTable." table deleted successfully";
+            } else {
+                $arrMsg[] = "Error deleting #".$Guid_user." user from ".$thisTable." table. ";
+            }
+        }
+    }
+    
+    echo json_encode(array('message'=>$arrMsg, '$Qualify'=>$Qualify, '$SSQualify'=>$SSQualify));
+    exit();
+}
+
+/**
+ * save save_specimen_into_logs
+ * @param type $db
+ * @param type $date
+ * @param type $Guid_user
+ * @param type $account
+ * @param type $status
+ */
 function save_specimen_not_collected_into_logs($db, $date, $Guid_user, $account, $status){
     
     if($account && $account!=""){

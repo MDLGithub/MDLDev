@@ -33,9 +33,10 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         $patientInfoUrl .= '&incomplete=1';   
     }
     
-    $sqlQualify = "SELECT q.Guid_qualify,q.Guid_user,q.insurance,q.other_insurance,q.Date_created,q.provider_id,q.`mark_as_test`, 
+    $sqlQualify = "SELECT q.Guid_qualify,q.Guid_user,q.insurance,
+                    q.other_insurance,q.Date_created,q.provider_id, 
                     CONCAT(prov.first_name,' ',prov.last_name) provider,
-                    p.*, u.email ";
+                    p.*, u.email, u.marked_test ";
     if(isset($_GET['incomplete'])){
         $sqlQualify .= "FROM tblqualify q ";
     } else {
@@ -60,7 +61,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
        
         $numSize = strlen($_POST['mdl_number']);
         if(isset($_POST['mdl_number'])&&$_POST['mdl_number']!=""){
-            if(!isset($_POST['mark_as_test']) && !isset($_POST['mark_as_test_incomplate']) ){
+            if(!isset($_POST['mark_as_test'])){
                 if(isset($_POST['mdl_number']) && $numSize != 7){
                     $isValid = false;
                     $errorMsgMdlStats .= "MDL# must contain 7 digits only <br/>";
@@ -72,22 +73,19 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
             if(isset($_POST['email']) && $_POST['email']!=''){
                 $userData['email'] = $_POST['email'];
             }
-        
+            $userData['Guid_role'] = '3';
             if(!empty($userData)){
                 $userData['Date_modified'] = date('Y-m-d H:i:s');
                 $whereUser = array('Guid_user'=>$_GET['patient']);
                 //check if user exists
                 $isUserExists=$db->row("SELECT * FROM tbluser WHERE Guid_user=:Guid_user", $whereUser);            
                 if($isUserExists){//update user                
-                    $updateUser = updateTable($db, 'tbluser', $userData, $whereUser);
-                    saveUserRole($db, $_GET['patient'], '3');
+                    $updateUser = updateTable($db, 'tbluser', $userData, $whereUser);                    
                 } else { //insert user
                     $userData['user_type'] = 'patient';
                     $userData['Date_created'] = date('Y-m-d H:i:s');
+                    $userData['Guid_role']='3';
                     $inserUser = insertIntoTable($db, 'tbluser', $userData);
-                    if($inserUser['insertID']){            
-                        $inserRole = insertIntoTable($db, 'tbluserrole', array('Guid_user'=>$inserUser['insertID'], 'Guid_role'=>'3'));
-                    }
                 }            
             }
             
@@ -116,16 +114,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
             }
             
             //mark user as a test
-            $markedUserID = $_GET['patient'];            
+            $markedUserID = $_GET['patient'];
             if(isset($_POST['mark_as_test'])){  
-                updateTable($db,'tbl_ss_qualify', array('mark_as_test'=>'1'), array('Guid_user'=>$markedUserID));
+                updateTable($db,'tbluser', array('marked_test'=>'1'), array('Guid_user'=>$markedUserID));
             } else {
-                updateTable($db,'tbl_ss_qualify', array('mark_as_test'=>'0'), array('Guid_user'=>$markedUserID));
-            }
-            if(isset($_POST['mark_as_test_incomplate'])){  
-                updateTable($db,'tblqualify', array('mark_as_test'=>'1'), array('Guid_user'=>$markedUserID));
-            } else {
-                updateTable($db,'tblqualify', array('mark_as_test'=>'0'), array('Guid_user'=>$markedUserID));
+                updateTable($db,'tbluser', array('marked_test'=>'0'), array('Guid_user'=>$markedUserID));
             }
 
             //Update MDL# info
@@ -780,12 +773,9 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     <div class="row actionButtons pB-30">
                         <div class="col-md-12">
                             <?php if($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager' ){ ?>
-                            <span class="pull-left markTest"> 
-                                <?php if(isset($_GET['incomplete'])&&$_GET['incomplete']==1){ ?>
-                                <input <?php echo $qualifyResult['mark_as_test']=='1'?' checked': ''; ?>  type="checkbox" name="mark_as_test_incomplate" value="1" /> 
-                                <?php } else { ?>
-                                <input <?php echo $qualifyResult['mark_as_test']=='1'?' checked': ''; ?>  type="checkbox" name="mark_as_test" value="1" /> 
-                                <?php } ?>
+                            <span class="pull-left markTest">                               
+                                <input <?php echo $qualifyResult['marked_test']=='1'?' checked': ''; ?>  type="checkbox" name="mark_as_test" value="1" /> 
+                                
                                 <label for="mark-as-test">Mark As Test</label>
                             </span>
                             <?php } ?>

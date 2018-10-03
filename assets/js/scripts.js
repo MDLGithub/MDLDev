@@ -966,6 +966,48 @@ $(document).ready(function () {
         $(this).find('span').toggleClass('opened');
     });
     
+    
+    /**
+     *  Delete 
+     */
+    $('.deleteUser').on('click', function (event) {     
+        var thisUserClass = $(this);
+        var userType = $(this).attr('id');  //mdl-user or test-user
+        var userId = $(this).attr('data-user-id');  
+        var message = 'Are you sure you want to delete #'+userId+' MDL User History?';
+        if(userType=='test-user'){
+            message = 'Are you sure you want to delete #'+userId+' Test User Data and All The History of that User?';
+        }
+        
+        var conf = confirm(message);
+        if(conf){
+        $.ajax( 'ajaxHandler.php', {
+            type: 'POST',
+            data: {
+               deleteUser: '1',
+               userType: userType,
+               Guid_user: userId
+            },
+            success: function(response) {
+                var result = JSON.parse(response);               
+                console.log(result);
+                console.log($(this).parent().parent());
+                if(userType=="test-user"){
+                    thisUserClass.parent().parent().hide();
+                    alert('#'+userId+' Test User Data and All The History Deleted.');
+                }        
+                if(userType=="mdl-user"){
+                    alert('#'+userId+' MDL User History Deleted.');
+                }
+            },
+            error: function() {
+                console.log('0');
+            }
+        });
+        }
+    });
+    
+    
 });
 
 /***

@@ -28,7 +28,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 ?>
 <?php require_once 'navbar.php'; ?> 
 <!--SEARCH FORM BLOCK Start-->
-<aside id="action_palette" class="action_palette_width" >		
+<aside id="action_palette" class="" >		
     <div class="box full">
         <h4 class="box_top">Filters</h4>
         <?php if($dataViewAccess) { ?>
@@ -302,24 +302,18 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 if(isset($_POST['mark_as_test'])){
     $markedUsers =$_POST['markedRow']['user'];
     if($markedUsers){
-        if(isset($_POST['q_incomplete'])){
-            foreach ($markedUsers as $userID=>$v){
-                updateTable($db,'tblqualify', array('mark_as_test'=>'1'), array('Guid_user'=>$userID));
-            }
-        }else{
-            foreach ($markedUsers as $userID=>$v){
-                updateTable($db,'tbl_ss_qualify', array('mark_as_test'=>'1'), array('Guid_user'=>$userID));
-            }
+        foreach ($markedUsers as $userID=>$v){
+            updateTable($db,'tbluser', array('marked_test'=>'1'), array('Guid_user'=>$userID));
         }
     }    
 }
 
-$sqlTbl  =  "SELECT q.*, p.*, u.email, q.Date_created AS date FROM tbl_ss_qualify q "
+$sqlTbl  =  "SELECT q.*, p.*, u.email, u.marked_test, q.Date_created AS date FROM tbl_ss_qualify q "
             . "LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user "
             . "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user";
 $where = "";
 $whereTest = (strlen($where)) ? " AND " : " WHERE ";
-$whereTest .= " q.mark_as_test='0' ";      
+$whereTest .= " u.marked_test='0' ";      
 $whereIncomplete  = "";
 
 
@@ -330,19 +324,19 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
     
     if (isset($_POST['mark_test']) && strlen($_POST['mark_test'])) {
         $whereTest = (strlen($where)) ? " AND " : " WHERE ";
-        $whereTest .= " q.mark_as_test = '1'";
+        $whereTest .= " u.marked_test = '1'";
     } else {
         $whereTest = (strlen($where)) ? " AND " : " WHERE ";
-        $whereTest .= " q.mark_as_test = '0'";
+        $whereTest .= " u.marked_test = '0'";
     }
     
     if (isset($_POST['meets_mn']) && strlen($_POST['meets_mn'])) {
         $whereTest = "";
         if($_POST['meets_mn']=='incomplete'){
-            $sqlTbl  = "SELECT q.*,p.*, u.email, q.Date_created AS `date`, '1' AS incomplete FROM tblqualify q  
+            $sqlTbl  = "SELECT q.*,p.*, u.email, u.marked_test, q.Date_created AS `date`, '1' AS incomplete FROM tblqualify q  
                         LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user  
                         LEFT JOIN tbluser u ON p.Guid_user = u.Guid_user"; 
-            $where = " WHERE NOT EXISTS(SELECT * FROM tbl_ss_qualify qs WHERE q.Guid_qualify=qs.Guid_qualify) AND q.mark_as_test='0'";
+            $where = " WHERE NOT EXISTS(SELECT * FROM tbl_ss_qualify qs WHERE q.Guid_qualify=qs.Guid_qualify) AND u.marked_test='0'";
         
         }else{
             $where = (strlen($where)) ? " AND " : " WHERE ";
@@ -413,7 +407,10 @@ $where  .= " AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%test%' "
         . "AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Smith%' "
         . "AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Doe%' "
         . "AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%Jane Doe%'";
-$where .= "AND q.`Date_created` = (SELECT MAX(Date_created) FROM tbl_ss_qualify AS m2 WHERE q.Guid_qualify = m2.Guid_qualify)";
+if( !(isset($_POST['meets_mn']) && $_POST['meets_mn']=='incomplete')){
+    $where .= "AND q.`Date_created` = (SELECT MAX(Date_created) FROM tbl_ss_qualify AS m2 WHERE q.Guid_qualify = m2.Guid_qualify)";
+}
+
 
 if($role == "Sales Rep"){
     
@@ -435,7 +432,7 @@ $num_estimates = $qualify_requests;
 
 ?>
 
-<main class="wider-main">
+<main class="">
     <div class="box full visible">
         <?php if($dataViewAccess){ ?>
         <section id="palette_top" class="shorter_palette_top">
@@ -649,7 +646,7 @@ $num_estimates = $qualify_requests;
     <div id="admin_print"></div>
 </main>
 
-<button id="action_palette_toggle" class="toggle_move"><i class="fa fa-2x fa-angle-left"></i></button>
+<button id="action_palette_toggle" class=""><i class="fa fa-2x fa-angle-left"></i></button>
 
 
 
