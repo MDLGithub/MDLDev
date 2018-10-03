@@ -363,14 +363,29 @@ require_once ('navbar.php');
             }            
         }
         
+        $fName = isset($_POST['first_name']) ? $_POST['first_name'] : "";
+        $lName = isset($_POST['last_name']) ? $_POST['last_name'] : "";
+        if($Guid_role=='3' || $Guid_role=='6'){
+            $userDetails = array('firstname'=>$fName, 'lastname'=>$lName);                    
+        } else {
+            $userDetails = array('first_name'=>$fName, 'last_name'=>$lName);
+            if($_FILES["photo_filename"]["name"] != ""){
+                $fileName = $_FILES["photo_filename"]["name"];        
+                $userDetails['photo_filename'] = $fileName;
+                $uploadMsg = uploadFile('photo_filename', 'images/users/');
+            }
+        }
+        
         if($Guid_user == ""){ //insert User 
             //checking for email unique
             $isMailExists = $db->row("SELECT `email` FROM tbluser WHERE email=:email", array('email'=> escape($email)));
             if(!$isMailExists){
                 unset($userData['Guid_user']);
                 $userData['Date_created'] = date('Y-m-d H:i:s');             
-                $userData['Guid_role'] = $Guid_role;             
-                $inserUser = insertIntoTable($db, 'tbluser', $userData);   
+                $userData['Guid_role'] = $Guid_role;                   
+                $inserUser = insertIntoTable($db, 'tbluser', $userData);              
+                $Guid_user = $inserUser['insertID'];
+                saveUserDetails($db, $Guid_user, $Guid_role, $userDetails);
                 Leave(SITE_URL."/user-management.php?update");
             } else {
                 $message = "User with this email already exists.";
@@ -382,29 +397,26 @@ require_once ('navbar.php');
                 $userData['Date_modified'] = date('Y-m-d H:i:s');
                 $userData['Guid_role'] = $Guid_role;                
                 $whereUser = array('Guid_user'=>$Guid_user);
-                
-                $fName = isset($_POST['first_name']) ? $_POST['first_name'] : "";
-                $lName = isset($_POST['last_name']) ? $_POST['last_name'] : "";
-                if($Guid_role=='3' || $Guid_role=='6'){
-                    $userDetails = array('firstname'=>$fName, 'lastname'=>$lName);                    
-                } else {
-                    $userDetails = array('first_name'=>$fName, 'last_name'=>$lName);
-                    if($_FILES["photo_filename"]["name"] != ""){
-                        $fileName = $_FILES["photo_filename"]["name"];        
-                        $userDetails['photo_filename'] = $fileName;
-                        $uploadMsg = uploadFile('photo_filename', 'images/users/');
+                updateTable($db, 'tbluser', $userData, $whereUser);
+                if($Guid_role=='2'){ // also need to update account for Physician
+                    $checkProvider = $db->row("SELECT Guid_provider, Guid_user FROM tblprovider WHERE Guid_user=:Guid_user", $whereUser);
+                    $account_id = escape($_POST['account_id']);
+                    
+                    if(isset($checkProvider['Guid_provider']) && $checkProvider['Guid_provider']!="" ){
+                        updateTable($db, 'tblprovider', array('account_id'=>$account_id), $whereUser);
+                    }else{
+                        insertIntoTable($db, 'tblprovider', array('account_id'=>$account_id, 'Guid_user'=>$Guid_user));
                     }
+                    
                 }
                 
                 //check if role is changed, then move all data to that user by role table and remove previous
                 $prevRole = $db->row('SELECT Guid_role FROM `tbluser` WHERE Guid_user=:Guid_user', $whereUser);
-                if($prevRole['Guid_role'] == $Guid_role){
-                    updateTable($db, 'tbluser', $userData, $whereUser); 
+                if($prevRole['Guid_role'] == $Guid_role){                     
                     saveUserDetails($db, $Guid_user, $Guid_role, $userDetails);            
                     Leave(SITE_URL."/user-management.php?update");
                 } else { 
                     //need to move user info data to proper table and delete prev
-                    updateTable($db, 'tbluser', $userData, $whereUser); 
                     moveUserData($db, $Guid_user, $userDetails, $Guid_role, $prevRole['Guid_role']);
                     Leave(SITE_URL."/user-management.php?update");
                 }                
@@ -412,10 +424,8 @@ require_once ('navbar.php');
             } else {
                 $message = "User with this email already exists.";
             }
-        }
-        
-    }
-  
+        }        
+    } 
     
     if(isset($_GET['action']) && $_GET['action'] !="" ){ 
         $userID = $_GET['id'];
@@ -437,11 +447,9 @@ require_once ('navbar.php');
             if($userDetails){
                 extract($userDetails);
                 $user['email'] = $email;
-                $user['role'] = $roleName;
-                
+                $user['role'] = $roleName;                
             }            
-        }
-    
+        }   
         
     $modalTitle = ($_GET['action']=="update")? "Update User" : "Add New User";
 ?>
@@ -501,7 +509,30 @@ require_once ('navbar.php');
                             </p>                           
                         </div>
                     </div>
-                    <?php }  ?>                    
+                    <?php }  ?>  
+                    <?php if( $_GET['action']=='update' && $user['role']=='Physician') { ?>
+                    <div class="f2 required <?php echo ($user['account']!="")?"valid show-label":"";?>">
+                        <label class="dynamic" for="status"><span>Account</span></label>
+                        <div class="group">
+                            <?php 
+                                $accounts = $db->query("SELECT Guid_account, account, name FROM tblaccount Order BY account ASC");
+                                $getAccountId = $db->row("SELECT account_id FROM tblprovider WHERE Guid_user=:Guid_user", array('Guid_user'=>$_GET['id']) );
+                                $accountID = $getAccountId['account_id'];
+                            ?>
+                            <select required id="account_id" name="account_id" class="<?php echo ($accountID=="")?'no-selection':''; ?> ">
+                                <option value="">Account</option>
+                                <?php foreach ($accounts as $k=>$v) { ?>
+                                <?php $selected = (isset($accountID) && $accountID==$v['account'])?" selected":""; ?>
+                                <option <?php echo $selected; ?> value="<?php echo $v['account']; ?>"><?php echo $v['account']."-".ucfirst(strtolower($v['name'])); ?></option>                                
+                                <?php }?>
+                            </select>
+                            <p class="f_status">
+                                <span class="status_icons"><strong></strong></span>
+                            </p>
+                        </div>
+                    </div>
+                    <?php } ?>
+                    
                     <div class="f2 required <?php echo ($user['status']!="")?"valid show-label":"";?>">
                         <label class="dynamic" for="status"><span>Status</span></label>
                         <div class="group">
