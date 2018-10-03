@@ -72,6 +72,8 @@ button, input, select, textarea {
     background: transparent;
 }
 
+.scroller select { -webkit-appearance: none; -moz-appearance: none; font-size: 16px; }
+
 input:focus, select:focus, textarea:focus, button:focus {
     outline-width: 0;
 }
