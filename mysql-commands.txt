@@ -1,0 +1,11 @@
+ALTER TABLE `tblevents` DROP `comments`;
+
+CREATE TABLE IF NOT EXISTS `tblcomments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `comments` text NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `eventid` int(11) NOT NULL,
+  `created_date` datetime NOT NULL,
+  `updated_date` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
