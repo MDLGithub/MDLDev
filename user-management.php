@@ -421,7 +421,11 @@ require_once ('navbar.php');
 	$userID = $_GET['id'];
 	$user = getUserAndRole($db, $userID);
 	//we can change only roles admin and sales reps
-	$allRoles = $db->query('SELECT * FROM tblrole WHERE Guid_role IN(1,4,5) ORDER BY role ASC');
+	if($_GET['action']=='add'){
+	    $allRoles = $db->query('SELECT * FROM tblrole ORDER BY role ASC');
+	}else{
+	    $allRoles = $db->query('SELECT * FROM tblrole WHERE Guid_role IN(1,4,5) ORDER BY role ASC');
+	}
 	$patientID = isset($_GET['patient_id'])?$_GET['patient_id']:"";
 	$userDetails = getUserDetails($db, $user['role'], $userID, $patientID);
 
@@ -470,7 +474,7 @@ require_once ('navbar.php');
 			    </p>
 			</div>
 		    </div>
-		    <?php if($user['role']=='Admin' || $user['role']=='Sales Rep' || $user['role']=='Sales Manager') { ?>
+		    <?php if( $_GET['action']=='add' || $user['role']=='Admin' || $user['role']=='Sales Rep' || $user['role']=='Sales Manager') { ?>
 		    <div class="f2 required <?php echo ($user['role']!="")?"valid show-label":"";?>">
 			<label class="dynamic" for="reason_not"><span>User Role</span></label>
 			<div class="group">
