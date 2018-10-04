@@ -28,6 +28,7 @@ $isRegionView = isset($roleIDs['region']['view'])?$roleIDs['region']['view']:"";
 $isCityView = isset($roleIDs['city']['view'])?$roleIDs['city']['view']:"";
 $isStateView = isset($roleIDs['state']['view'])?$roleIDs['state']['view']:"";
 $isZipView = isset($roleIDs['zip']['view'])?$roleIDs['zip']['view']:"";
+$isColorView = isset($roleIDs['color']['view'])?$roleIDs['color']['view']:"";
 $isPhoneView = isset($roleIDs['phone_number']['view'])?$roleIDs['phone_number']['view']:"";
 $isActionAdd = isset($roleIDs['actions']['add'])?$roleIDs['actions']['add']:"";
 $isActionEdit = isset($roleIDs['actions']['edit'])?$roleIDs['actions']['edit']:"";
@@ -297,7 +298,7 @@ require_once ('navbar.php');
                                     </div>
                                 </div>
                                 <?php } ?>
-                                
+                                <?php if(isFieldVisibleByRole($isColorView, $roleID)) {?>
                                 <div class="form-group">
                                     <div class="row">                                
                                         <div class="col-md-12 padd-0">
@@ -317,6 +318,7 @@ require_once ('navbar.php');
                                         </div>
                                     </div>
                                 </div>
+                                <?php } ?>
                                 
                                 
                             </div>

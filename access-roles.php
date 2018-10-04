@@ -69,6 +69,7 @@ $tables = array(
         'city' => 'City',
         'state' => 'State',
         'zip' => 'Zip',
+        'color' => 'Color',
         'phone_number' => 'Phone'
     ),        
 );
