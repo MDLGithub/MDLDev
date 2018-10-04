@@ -1,6 +1,9 @@
 /*DB table updates */
 
 /*Updated Files*/
+
+/assets/images/house_icon.png
+
 scripts.js
 custom-styles.css
 access-roles.php
@@ -17,7 +20,7 @@ salesreps.php
 url-configuration.php
 user-management.php
 navbar.php
-
+functions.php
 
 
 

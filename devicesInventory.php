@@ -243,7 +243,7 @@ require_once ('navbar.php');
                                     <?php } ?>
                                     <?php if(isFieldVisibleByRole($isDeviceNameView, $roleID)) {?>
                                     <div class="row">
-                                        <div class="col-md-10">
+                                        <div class="col-md-10 select_device_dropdown">
                                           <div class="f2  <?php echo ($deviceid!="")?"valid show-label":"";?>">
                                             <label class="dynamic" for="deviceType"><span>Device Name</span></label>
                                             <div class="group">
@@ -296,11 +296,9 @@ require_once ('navbar.php');
                                     <?php if(isFieldVisibleByRole($isCommentView, $roleID)) {?>
                                     <div class="f2 <?php echo ($comment!="")?"valid show-label":"";?>">
                                         <label class="dynamic" for="comment"><span>Comment</span></label>
-                                        <div class="group">
-                                            <textarea name="comment" class="form-control" id="comment" placeholder="Your Comment here."><?php echo $comment; ?></textarea>
-                                            <p class="f_status">
-                                                <span class="status_icons"><strong>*</strong></span>
-                                            </p>
+                                        <div class="group fullWidth">
+                                            <textarea rows="3" name="comment" class="form-control " id="comment" placeholder="Your Comment here."><?php echo $comment; ?></textarea>
+                                            
                                         </div>
                                     </div>   
                                     <?php } ?>

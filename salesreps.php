@@ -58,7 +58,7 @@ if( isset($_POST['cancel_manage_salesrep'])){
     Leave(SITE_URL.'/salesreps.php');
 }
 if( isset($_POST['manage_salesrep'])){
-    extract($_POST);   
+    extract($_POST);       
     $data = array(
         'first_name' => $first_name,
         'last_name' => $last_name,
@@ -71,6 +71,11 @@ if( isset($_POST['manage_salesrep'])){
         'state'=>$state,
         'zip'=>$zip
     );
+    if(isset($_POST['color'])){
+        $data['color'] = $_POST['color'];
+    } else {
+         $data['color'] = '';
+    }
     if($_FILES["photo_filename"]["name"] != ""){
         $fileName = $_FILES["photo_filename"]["name"];        
         $data['photo_filename'] = $fileName;
@@ -200,6 +205,7 @@ require_once ('navbar.php');
                     $city ='';
                     $state='';
                     $zip='';
+                    $color = '';
                 }
             ?>
            
@@ -291,6 +297,28 @@ require_once ('navbar.php');
                                     </div>
                                 </div>
                                 <?php } ?>
+                                
+                                <div class="form-group">
+                                    <div class="row">                                
+                                        <div class="col-md-12 padd-0">
+                                            Select Color
+                                            <div class="colorBox">
+                                                <?php 
+                                                    $colorsArr = array('f99d1b','16a44a','3869b3', 'd4c038', 'c13f95', '3ec5cd', '9dbd1d' );
+                                                    foreach ($colorsArr as $k=>$v){
+                                                        $selected = ($color=='#'.$v)?' checked':'';
+                                                ?>
+                                                    <div class="item">
+                                                        <input <?php echo $selected; ?> id="<?php echo $v; ?>" type="radio" name="color" value="#<?php echo $v; ?>" />
+                                                        <label style="background:#<?php echo $v; ?>;" for="<?php echo $v; ?>">#<?php echo $v; ?></label>
+                                                    </div>
+                                                <?php } ?>
+                                            </div>                                            
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                
                             </div>
                             <div class="col-md-6">
                                 <?php if(isFieldVisibleByRole($isAddressView, $roleID)) {?>

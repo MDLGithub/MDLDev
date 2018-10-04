@@ -513,7 +513,7 @@ $num_estimates = $qualify_requests;
 
                     <?php if ($num_estimates) { ?>                 
 
-                    <thead class="">
+                    <thead class="wider-bar">
                         <tr>
                         <th class="text-center no-bg">
                             <label class="switch">

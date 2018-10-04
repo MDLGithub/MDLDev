@@ -338,8 +338,10 @@ require_once ('navbar.php');
         if(isset($_POST['password']) &&$_POST['password'] != ""){
             $userData['password'] = encode_password($password);
         }   
-        if(isset($_POST['marked_test']) && $_POST['marked_test'] != ""){
+        if(isset($_POST['mark_as_test']) && $_POST['mark_as_test'] != ""){
             $userData['marked_test'] = '1';
+        } else {
+            $userData['marked_test'] = '0';
         }   
         
         if(isset($Guid_role) && $Guid_role != ""){
@@ -435,7 +437,12 @@ require_once ('navbar.php');
         if($_GET['action']=='add'){
             $allRoles = $db->query('SELECT * FROM tblrole ORDER BY role ASC'); 
         }else{
-            $allRoles = $db->query('SELECT * FROM tblrole WHERE Guid_role IN(1,4,5) ORDER BY role ASC'); 
+            if(in_array($user['Guid_role'], array('1','4','5'))){ //Admin, Sales Rep, Sales mgr
+                $allRoles = $db->query('SELECT * FROM tblrole WHERE Guid_role IN(1,4,5) ORDER BY role ASC'); 
+            }
+            if(in_array($user['Guid_role'], array('3','6'))){ //Patient, MDL Patient
+                $allRoles = $db->query('SELECT * FROM tblrole WHERE Guid_role IN(3,6) ORDER BY role ASC'); 
+            }
         }
         $patientID = isset($_GET['patient_id'])?$_GET['patient_id']:"";
         $userDetails = getUserDetails($db, $user['role'], $userID, $patientID);
@@ -483,7 +490,9 @@ require_once ('navbar.php');
                             </p>
                         </div>
                     </div>
-                    <?php if( $_GET['action']=='add' || $user['role']=='Admin' || $user['role']=='Sales Rep' || $user['role']=='Sales Manager') { ?>
+                    <?php 
+                    $rolesArr = array('Admin', 'Sales Rep', 'Sales Manager', 'Patient', 'MDL Patient');
+                    if( $_GET['action']=='add' || in_array($user['role'], $rolesArr)) { ?>
                     <div class="f2 required <?php echo ($user['role']!="")?"valid show-label":"";?>">
                         <label class="dynamic" for="reason_not"><span>User Role</span></label>
                         <div class="group">
@@ -586,6 +595,26 @@ require_once ('navbar.php');
                         </div>
                     </div>    
                     <?php } ?>
+                    <?php if(in_array($user['Guid_role'], array('3','6'))){  ?>
+                     <?php 
+                     $checked = "";
+                     if(isset($_POST['mark_as_test'])){
+                         $checked = " checked";
+                     } else {
+                         if($user['marked_test']=='1'){
+                             $checked = " checked";
+                         }
+                     }
+                     ?>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <input <?php echo $checked; ?> <?php ?> id="show-tests" name="mark_as_test" value="1" type="checkbox">
+                            <label for="show-tests">Mark As Test</label>   
+                        </div>
+                    </div>
+                    <?php }  ?>
+                    
+                    
                 </div>                
             </div>
             <div class="row actionButtons">

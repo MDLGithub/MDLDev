@@ -725,13 +725,23 @@ input:checked + .slider:before {
 /****** Gabby Johnson *********/
 
 .form-control textarea{
-        height: 42px!important;
+    height: 42px!important;
 }
+
 .role_tables p{
     padding: 10px 20px;
 }
 textarea.form-control {
     height: 42px!important;
+}
+.f2 .group.fullWidth{
+    padding: 0!important;
+    width: 100%!important;
+}
+.fullWidth textarea.form-control{
+    height: auto!important;
+    border: 2px solid #b9b9b9;
+    border-radius: .438em;
 }
 .addPlusIconBox{
     margin-top: 15px;
@@ -1585,4 +1595,29 @@ td.tdAccount .account_name:after{
 }
 td.tdAccount:hover .account_name{
     display: block;
+}
+.select_device_dropdown{
+    padding-left:0px !important;
+}
+.colorBox{
+    display: inline-block;
+    width: 100%;
+}
+.colorBox input[type='radio']{
+    float: left;
+    margin-top: 8px;
+    margin-right: 3px;
+}
+.colorBox label{
+    padding: 3px 5px;
+    font-size: 13px;
+    line-height: 1.5;
+    float: left;
+    margin-right: 6px;
+    margin-bottom: 5px;
+}
+.colorBox .item{
+  display: inline-block;
+  padding: 0;
+  border: 0;
 }
