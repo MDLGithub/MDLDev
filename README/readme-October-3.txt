@@ -96,6 +96,12 @@ patient-info.php
 salesreps.php
 user-management.php
 
+-----------------------------------------
+admin.css
+custom-styles.css
+functions.php
+mdl-stat-details.php
+
 
 /*Deleted Files*/
 mdl-status-log.php
