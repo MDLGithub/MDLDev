@@ -1,6 +1,7 @@
 /*DB table updates */
 
 /*Updated Files*/
+scripts.js
 custom-styles.css
 access-roles.php
 account-config.php

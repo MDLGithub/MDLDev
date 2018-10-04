@@ -63,14 +63,26 @@ if (isset($_POST['generate_url_config']) && $_POST['generate_url_config']=='1'){
         $dvMessage = "<div class='error-text'>Please select device.</div>";
     }
     $accountNumber = $_POST['an'];
-    $hasAccountProviders = $db->query("SELECT Guid_provider FROM tblprovider WHERE account_id=:account_id", array('account_id'=>$accountNumber));
-    if($lc!="F"){
-        if(empty($hasAccountProviders)){
+    
+    if(in_array($lc, array('D', 'O', 'L', 'W', 'PM'))){
+        if( $an=='' || $an=='0'){
             $isValid = FALSE;
             $generateUrlLink = "";
-            $accountMessage = "<div class='error-text'>Selected account doesn't have providers.</div>";
+            $accountMessage .= "<div class='error-text'>Account Number is required for this Location.</div>";
         }
     }
+    
+    $hasAccountProviders = $db->query("SELECT Guid_provider FROM tblprovider WHERE account_id=:account_id", array('account_id'=>$accountNumber));
+    if($lc!="F"){
+        if( $an!=''&&$an!='0'){
+            if(empty($hasAccountProviders)){
+                $isValid = FALSE;
+                $generateUrlLink = "";
+                $accountMessage .= "<div class='error-text'>Selected account doesn't have providers.</div>";
+            }
+        }
+    }
+    
     if(isset($_POST['previous']) && $_POST['previous'] != ""){
         $generateUrlLink = $urlPrev;
     }
