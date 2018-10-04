@@ -335,10 +335,7 @@ table.prev_settings thead > tr > th,
     
 }
 
-select {
-    -webkit-appearance: menulist!important;
-    -moz-appearance:  menulist!important;
-}
+
 .btn-inline {
     display: inline-block!important;
     min-width: 100px;
@@ -1173,7 +1170,9 @@ and (orientation : portrait) {
     }
 
     #dataTableHome tbody{
-    	margin-top:20px;
+
+        margin-top: 60px;
+
     }
 
     #dataTableHome tbody td {
@@ -1188,6 +1187,13 @@ and (orientation : portrait) {
     .wider-bar{
     	width: 93%!important;
     }
+
+    #app_data .url_config_box  div.col-md-7 .col-md-6:nth-child(1){
+            padding-right: 0px;
+            padding-left: 22px;
+    }
+
+
 
 }
 
@@ -1550,4 +1556,33 @@ table.dataTable.display tbody tr>.sorting_3{
 #urlLink{
     font-size: 18px;
     font-weight: bold;
+}
+td.tdAccount{
+    position: relative;
+    cursor: pointer;
+}
+td.tdAccount .account_name {
+    position: absolute;
+    left:0;
+    top: 36px;
+    background: #dee3e8;
+    width: max-content;
+    z-index: 1000;
+    padding: 3px 10px;
+    display: none;
+    
+}
+td.tdAccount .account_name:after{
+  content: " ";
+  position: absolute;
+  left: 15px;
+  top: -6px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 10px 8px 10px;
+  border-color: transparent transparent #dee3e8 transparent;
+}
+td.tdAccount:hover .account_name{
+    display: block;
 }
