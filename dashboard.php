@@ -308,9 +308,11 @@ if(isset($_POST['mark_as_test'])){
     }
 }
 
-$sqlTbl  =  "SELECT q.*, p.*, u.email, u.marked_test, q.Date_created AS date FROM tbl_ss_qualify q "
-	    . "LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user "
-	    . "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user";
+$sqlTbl = "SELECT q.*, p.*, a.name as account_name, u.email, u.marked_test, "
+	. "q.Date_created AS date FROM tbl_ss_qualify q "
+	. "LEFT JOIN tblaccount a ON q.account_number = a.account "
+	. "LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user "
+	. "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user";
 $where = "";
 $whereTest = (strlen($where)) ? " AND " : " WHERE ";
 $whereTest .= " u.marked_test='0' ";
@@ -333,7 +335,8 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
     if (isset($_POST['meets_mn']) && strlen($_POST['meets_mn'])) {
 	$whereTest = "";
 	if($_POST['meets_mn']=='incomplete'){
-	    $sqlTbl  = "SELECT q.*,p.*, u.email, u.marked_test, q.Date_created AS `date`, '1' AS incomplete FROM tblqualify q
+	    $sqlTbl  = "SELECT q.*,p.*, a.name as account_name, u.email, u.marked_test, q.Date_created AS `date`, '1' AS incomplete FROM tblqualify q
+			LEFT JOIN tblaccount a ON q.account_number = a.account
 			LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user
 			LEFT JOIN tbluser u ON p.Guid_user = u.Guid_user";
 	    $where = " WHERE NOT EXISTS(SELECT * FROM tbl_ss_qualify qs WHERE q.Guid_qualify=qs.Guid_qualify) AND u.marked_test='0'";
@@ -601,20 +604,28 @@ $num_estimates = $qualify_requests;
 				    <?php if(isFieldVisibleByRole($roleIDs['first_name']['view'], $roleID)) {?>
 					<td>
 					    <a target="_blank" href="<?php echo SITE_URL."/patient-info.php?patient=".$qualify_request['Guid_user'].$accountStr.$incompleteStr; ?>">
-					    <?php echo ucfirst($qualify_request['firstname']); ?>
+					    <?php echo ucfirst(strtolower($qualify_request['firstname'])); ?>
 					    </a>
 					</td>
 				    <?php } ?>
 				    <?php if(isFieldVisibleByRole($roleIDs['last_name']['view'], $roleID)) {?>
 					<td>
 					    <a target="_blank" href="<?php echo SITE_URL."/patient-info.php?patient=". $qualify_request['Guid_user'].$accountStr.$incompleteStr; ?>">
-						<?php echo ucfirst($qualify_request['lastname']); ?>
+						<?php echo ucfirst(strtolower($qualify_request['lastname'])); ?>
 					    </a>
 					</td>
 				    <?php } ?>
 
 				    <?php if(isFieldVisibleByRole($roleIDs['account']['view'], $roleID)) {?>
-					<td><?php echo ($qualify_request['account_number']!="" && !is_null($qualify_request['account_number']) && $qualify_request['account_number']!="NULL")?$qualify_request['account_number']:""; ?></td>
+					<td class="tdAccount"><?php
+					    if( $qualify_request['account_number']!="" && !is_null($qualify_request['account_number']) && $qualify_request['account_number']!="NULL"){
+						echo $qualify_request['account_number'];
+						if($qualify_request['account_name']!=""){
+						echo "<span class='account_name'>".ucwords(strtolower($qualify_request['account_name']))."</span>";
+						}
+					    }
+					    ?>
+					</td>
 				    <?php } ?>
 
 				    <?php if(isFieldVisibleByRole($roleIDs['location']['view'], $roleID)) {?>
