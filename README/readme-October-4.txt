@@ -15,6 +15,7 @@ patient-info.php
 salesreps.php
 url-configuration.php
 user-management.php
+navbar.php
 
 
 
