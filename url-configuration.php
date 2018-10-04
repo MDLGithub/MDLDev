@@ -354,6 +354,13 @@ $accountProviders = '';
 
 
 		     </fieldset>
+		    <div class="col-md-12 text-center">
+			<?php if(isset($_POST['generate_url_config']) && $generateUrlLink!=''){ ?>
+			    <a class="pT-30" id="urlLink" target="_blank" href="<?php echo $generateUrlLink; ?>">
+			      Website Link
+			    </a>
+			<?php } ?>
+		    </div>
 	      </div>
 	      <div class="col-md-6">
 		  <div class="row">
@@ -434,6 +441,8 @@ $accountProviders = '';
 			}
 		    ?>
 		  </div>
+
+
 	      </div>
 	    </div>
 
@@ -442,18 +451,7 @@ $accountProviders = '';
 
 	</div>
 
-	<div class="row">
-	      <div class="col-md-5"></div>
-	      <div class="col-md-7">
-		  <br/>
-		  <?php if(isset($_POST['generate_url_config']) && $generateUrlLink!=''){ ?>
-		  <a class="pL-30" id="urlLink" target="_blank" href="<?php echo $generateUrlLink; ?>">
-		    Link:
-		    <?php echo $generateUrlLink; ?>
-		  </a>
-		  <?php } ?>
-	      </div>
-	  </div>
+
     </div>
 
 
