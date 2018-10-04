@@ -202,6 +202,21 @@ $(document).ready(function () {
 	} else {
 	    $("#url-config-settings #pin").prop("disabled", false);
 	}
+	if(location=='F'){
+	    $('#url-config-settings #pass').prop('checked', false);
+	    $('#url-config-settings #pin').prop('checked', true);
+	    $("#url-config-settings #pass").prop("disabled", true);
+	} else {
+	    $("#url-config-settings #pass").prop("disabled", false);
+	}
+	var locaArr = ['D', 'DE', 'O', 'L', 'PM'];
+	for (var i=0; i<locaArr.length; i++ ){
+	    if(locaArr[i]==location){
+		//#noemail must be active
+		$('#url-config-settings #pin, #url-config-settings #pass').prop('checked', false);
+		$('#url-config-settings #noemail').prop('checked', true);
+	    }
+	}
     });
     /**
      * account dropdown on change function
