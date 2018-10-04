@@ -272,6 +272,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 </ol>                
             </h4>
             <a href="<?php echo SITE_URL; ?>/patient-info.php?logout=1" name="log_out" class="button red back logout"></a>
+            <a href="<?php echo SITE_URL; ?>/dashboard2.php" class="button homeIcon"></a>
             <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit smaller_button"><strong>View Questionnaire</strong></a>
         </section>
 
