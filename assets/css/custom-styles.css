@@ -1547,3 +1547,7 @@ table.dataTable.display tbody tr>.sorting_3{
     padding: 0 1.5em!important;
     margin-left: 5px;
 }
+#urlLink{
+    font-size: 18px;
+    font-weight: bold;
+}
