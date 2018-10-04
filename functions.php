@@ -1247,7 +1247,12 @@ function get_nested_status_ids($db, $Guid_status, $Guid_user, $Log_group) {
 
 
 function get_selected_log_dropdown($db, $Log_group, $parent="0") {
-    $selectedStatuses = $db->query("SELECT Guid_status FROM tbl_mdl_status_log WHERE `Log_group`= ".$Log_group);
+    $selectedStatuses = $db->query(
+		"SELECT sl.Guid_status, st.status, st.parent_id FROM tbl_mdl_status_log sl "
+		. " LEFT JOIN tbl_mdl_status st ON st.Guid_status=sl.Guid_status"
+		. " WHERE `Log_group`= ".$Log_group
+		. " ORDER BY st.parent_id ASC, st.order_by ASC"
+    );
     $content = "";
     foreach ($selectedStatuses as $k => $v){
 	$getParent = $db->row("SELECT parent_id FROM tbl_mdl_status WHERE Guid_status=:Guid_status", array('Guid_status'=>$v['Guid_status']));
@@ -1905,11 +1910,14 @@ function getRevenueStat($db, $Guid_user){
  * @return type array
  */
 function getStatusRevenueTotals($db, $Guid_status, $searchData=array()){
-    $usersQ = "SELECT * FROM `tbl_mdl_status_log` sl LEFT JOIN tbl_mdl_number mn ON sl.Guid_user=mn.Guid_user ";
+    $usersQ = "SELECT sl.*, mn.mdl_number FROM `tbl_mdl_status_log` sl "
+	    . "LEFT JOIN tbl_mdl_number mn "
+	    . "ON sl.Guid_user=mn.Guid_user ";
 
-    $usersQ .= " WHERE Guid_status=$Guid_status AND currentstatus='Y' ";
+    $usersQ .= " WHERE sl.Guid_status=:Guid_status AND sl.currentstatus='Y' ";
 
     if(!empty($searchData)){
+
 	//adding filter conditions
 	if(isset($searchData['Guid_salesrep'])&&$searchData['Guid_salesrep']!=""){
 	    $usersQ .= 'AND sl.Guid_salesrep='.$searchData['Guid_salesrep'].' ';
@@ -1929,16 +1937,18 @@ function getStatusRevenueTotals($db, $Guid_status, $searchData=array()){
 	}
     }
 
-
-    $users = $db->query($usersQ);
+    $users = $db->query($usersQ, array('Guid_status'=>$Guid_status, ));
 
     $patientTotal = 0;
     $insuranceTotal = 0;
     $total = 0;
     $revenueTotalsData = array();
     if(!empty($users)){
+
 	foreach ($users as $user){
+
 	    $revenuDetails = getRevenueStat($db, $user['Guid_user']);
+
 	    if(!empty($revenuDetails)){
 		$patientTotal += $revenuDetails['patient_paid'];
 		$insuranceTotal += $revenuDetails['insurance_paid'];
