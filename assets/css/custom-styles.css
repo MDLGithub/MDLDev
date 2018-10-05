@@ -1621,3 +1621,16 @@ td.tdAccount:hover .account_name{
   padding: 0;
   border: 0;
 }
+.fa-user-lock{
+    color: #f00;
+    cursor: pointer;
+}
+#login-attempt-log-box{
+    display: none;
+}
+#locked-user-email{
+    color: #f00;
+    font-size: 13px;
+    text-align: center;
+    font-style: italic;
+}
