@@ -424,27 +424,20 @@ require_once ('navbar.php');
 			    <?php if(isFieldVisibleByRole($isNameView, $roleID)) {?>
 				<th>Account Name</th>
 			    <?php } ?>
-			    <?php if(isFieldVisibleByRole($isAddressView, $roleID)) {?>
-				<th class="">Account Address</th>
-			    <?php } ?>
+
 			    <?php if(isFieldVisibleByRole($isCityView, $roleID)) {?>
 				<th class="">City</th>
 			    <?php } ?>
 			    <?php if(isFieldVisibleByRole($isStateView, $roleID)) {?>
 				<th class="">State</th>
 			    <?php } ?>
-			    <?php if(isFieldVisibleByRole($isZipView, $roleID)) {?>
-				<th class="">Zip</th>
-			    <?php } ?>
-			    <?php if(isFieldVisibleByRole($isPhoneView, $roleID)) {?>
-				<th class="">Phone</th>
-			    <?php } ?>
-			    <?php if(isFieldVisibleByRole($isFaxView, $roleID)) {?>
-				<th class="">Fax</th>
-			    <?php } ?>
 			    <?php if(isFieldVisibleByRole($isSalesrepView, $roleID)) {?>
 				<th class="">Genetic Consultant</th>
 			    <?php } ?>
+			    <th class="">Registered</th>
+			    <th class="">Completed</th>
+			    <th class="">Qualified</th>
+			    <th class="">Submitted</th>
 			    <?php if(isFieldVisibleByRole($isLogoView, $roleID)) {?>
 				<th class="noFilter text-center">Logo</th>
 			    <?php } ?>
@@ -466,27 +459,19 @@ require_once ('navbar.php');
 				<?php if(isFieldVisibleByRole($isNameView, $roleID)) {?>
 				    <td><?php echo ucwords(strtolower($v['name'])); ?></td>
 				<?php } ?>
-				<?php if(isFieldVisibleByRole($isAddressView, $roleID)) {?>
-				    <td><?php echo $v['address']; ?></td>
-				<?php } ?>
 				<?php if(isFieldVisibleByRole($isCityView, $roleID)) {?>
 				    <td><?php echo $v['city']; ?></td>
 				<?php } ?>
 				<?php if(isFieldVisibleByRole($isStateView, $roleID)) {?>
 				   <td><?php echo $v['state']; ?></td>
 				<?php } ?>
-				<?php if(isFieldVisibleByRole($isZipView, $roleID)) {?>
-				    <td><?php echo $v['zip']; ?></td>
-				<?php } ?>
-				<?php if(isFieldVisibleByRole($isPhoneView, $roleID)) {?>
-				    <td><span class="phone_us"><?php echo $v['phone_number']; ?></span></td>
-				<?php } ?>
-				<?php if(isFieldVisibleByRole($isFaxView, $roleID)) {?>
-				    <td><span class="phone_us"><?php echo $v['fax']; ?></span></td>
-				<?php } ?>
 				<?php if(isFieldVisibleByRole($isSalesrepView, $roleID)) {?>
 				    <td><?php echo $v['salesrepFName']." ".$v['salesrepLName']?></td>
 				<?php } ?>
+				<td><?php echo getAccountStatusCount($db, $v['account'], '28' ); //28->Registered ?></td>
+				<td><?php echo getAccountStatusCount($db, $v['account'], '36'); //36->Questionnaire Completed ?></td>
+				<td><?php echo getAccountStatusCount($db, $v['account'], '29'); //29->Questionnaire Completed->Qualified ?></td>
+				<td><?php echo getAccountStatusCount($db, $v['account'], '1' ); //28->Submitted (Specimen Collected) ?></td>
 				<?php if(isFieldVisibleByRole($isLogoView, $roleID)) {?>
 				    <td class="text-center">
 					<a target="_blank" href="<?php echo ($v['website']!="")? $v['website'] : "#"; ?>">

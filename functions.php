@@ -735,7 +735,8 @@ function getAccountAndSalesrep($db, $accountGuid=NULL, $getRow=NULL){
 	    . "tblsalesrep.state AS salesrepState, tblsalesrep.zip AS salesrepZip, tblsalesrep.photo_filename AS salesrepPhoto "
 	    . "FROM tblaccount "
 	    . "LEFT JOIN tblaccountrep ON tblaccount.Guid_account = tblaccountrep.Guid_account "
-	    . "LEFT JOIN tblsalesrep ON tblsalesrep.Guid_salesrep=tblaccountrep.Guid_salesrep";
+	    . "LEFT JOIN tblsalesrep ON tblsalesrep.Guid_salesrep=tblaccountrep.Guid_salesrep "
+	    . "GROUP BY tblaccount.Guid_account";
 
     if($accountGuid){
 	$query .= " WHERE tblaccount.Guid_account=:id";
@@ -749,6 +750,14 @@ function getAccountAndSalesrep($db, $accountGuid=NULL, $getRow=NULL){
 
     return $result;
 }
+function getAccountStatusCount($db, $account, $Guid_status ){
+    $q = "SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` WHERE account=:account AND Guid_status=:Guid_status";
+    $result = $db->row($q, array('account'=>$account,'Guid_status'=>$Guid_status));
+
+    return $result['count'];
+}
+
+
 
 function getProviderSalesRep($db, $providerID) {
     $query = "SELECT
