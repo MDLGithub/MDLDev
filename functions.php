@@ -735,8 +735,7 @@ function getAccountAndSalesrep($db, $accountGuid=NULL, $getRow=NULL){
 	    . "tblsalesrep.state AS salesrepState, tblsalesrep.zip AS salesrepZip, tblsalesrep.photo_filename AS salesrepPhoto "
 	    . "FROM tblaccount "
 	    . "LEFT JOIN tblaccountrep ON tblaccount.Guid_account = tblaccountrep.Guid_account "
-	    . "LEFT JOIN tblsalesrep ON tblsalesrep.Guid_salesrep=tblaccountrep.Guid_salesrep "
-	    . "GROUP BY tblaccount.Guid_account";
+	    . "LEFT JOIN tblsalesrep ON tblsalesrep.Guid_salesrep=tblaccountrep.Guid_salesrep ";
 
     if($accountGuid){
 	$query .= " WHERE tblaccount.Guid_account=:id";
@@ -745,13 +744,23 @@ function getAccountAndSalesrep($db, $accountGuid=NULL, $getRow=NULL){
     elseif ($getRow) {
 	$result = $db->row($query);
     }else{
+	$query .= " GROUP BY tblaccount.Guid_account";
 	$result = $db->query($query);
     }
-
     return $result;
 }
 function getAccountStatusCount($db, $account, $Guid_status ){
-    $q = "SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` WHERE account=:account AND Guid_status=:Guid_status";
+    $q = "SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` "
+	."WHERE account=:account AND Guid_status=:Guid_status ";
+    $markedTestUserIds = getMarkedTestUserIDs($db);
+    $testUserIds = getTestUserIDs($db);
+
+    if($markedTestUserIds!=""){
+	$q .=  " AND Guid_user NOT IN(".$markedTestUserIds.") ";
+    }
+    if($testUserIds!=""){
+	$q .=  " AND Guid_user NOT IN(".$testUserIds.") ";
+    }
     $result = $db->row($q, array('account'=>$account,'Guid_status'=>$Guid_status));
 
     return $result['count'];
