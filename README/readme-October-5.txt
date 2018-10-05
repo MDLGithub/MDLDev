@@ -8,3 +8,4 @@ navbar.php
 user-management.php
 dashboard.php
 mdl-stat-details.php
+functions.php

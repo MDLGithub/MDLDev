@@ -29,6 +29,9 @@ if(isset($_POST['save_specimen_not_collected_into_logs'])){
 if(isset($_POST['deleteUser'])){
     delete_user($db, $_POST['userType'], $_POST['Guid_user']);
 }
+if(isset($_POST['deleteMarkedTestUsers'])){
+    delete_marked_test_users($db);
+}
 if(isset($_POST['get_loced_user_data'])){
     get_loced_user_log($db, $_POST['email']);
 }
@@ -141,6 +144,88 @@ function delete_user($db, $type, $Guid_user){
     }
 
     echo json_encode(array('message'=>$arrMsg, '$Qualify'=>$Qualify, '$SSQualify'=>$SSQualify));
+    exit();
+}
+
+function delete_marked_test_users($db){
+
+    //tbl_ss_qualify
+    $SSQualifyQuery = "SELECT Guid_qualify, Guid_user FROM `tbl_ss_qualify` "
+	    . "WHERE Guid_user IN(SELECT Guid_user FROM  `tbluser` WHERE marked_test='1')";
+    $SSQualify = $db->query($SSQualifyQuery);
+    $clinupSSQualifyTables = array(
+	'tbl_ss_qualifyfam',
+	'tbl_ss_qualifypers',
+	'tbl_ss_qualifyans',
+	'tbl_ss_qualifygene'
+    );
+    if(!empty($SSQualify)){
+	foreach ($SSQualify as $key=>$val){
+	    $Guid_qualify = $val['Guid_qualify'];
+	    foreach ($clinupSSQualifyTables as $k=>$thisTable){
+		$sql = "DELETE FROM $thisTable WHERE Guid_qualify=".$Guid_qualify;
+		if ($db->query($sql)) {
+		    $arrMsg[] = "#".$Guid_qualify." user from ".$thisTable." table deleted successfully.";
+		} else {
+		    $arrMsg[] = "Error deleting #".$Guid_qualify." user from ".$thisTable." table. ";
+		}
+	    }
+	}
+    }
+
+    //tblqualify
+    $qualifyQuery = "SELECT Guid_qualify, Guid_user FROM `tblqualify` WHERE Guid_user IN(SELECT Guid_user FROM  `tbluser` WHERE marked_test='1')";
+    $Qualify = $db->row($qualifyQuery);
+    $clinupQualifyTables = array(
+	'tblqualifyfam',
+	'tblqualifypers',
+	'tblqualifyans',
+	'tblqualifygene',
+    );
+    if(!empty($Qualify)){
+	foreach ($Qualify as $key=>$val){
+	    if(isset($val['Guid_qualify'])){
+		$Guid_qualify = $val['Guid_qualify'];
+		foreach ($clinupQualifyTables as $k=>$thisTable){
+		    $sql = "DELETE FROM $thisTable WHERE Guid_qualify=".$Guid_qualify;
+		    if ($db->query($sql)) {
+			$arrMsg[] = "#".$Guid_qualify." user from ".$thisTable." table deleted successfully";
+		    } else {
+			$arrMsg[] = "Error deleting #".$Guid_qualify." user from ".$thisTable." table. ";
+		    }
+		}
+	    }
+	}
+    }
+
+    // Delete Marked Test Users
+    $arrMsg = array();
+    $cleanupTables = array(
+	'tbl_ss_qualify',
+	'tblqualify',
+	'tblurlconfig',
+	'tbl_deductable_log',
+	'tbl_mdl_note',
+	'tbl_mdl_number',
+	'tbl_revenue',
+	'tbl_mdl_status_log',
+	'tblpatient'
+    );
+
+    foreach ($cleanupTables as $k=>$thisTable){
+	$sql = "DELETE FROM $thisTable WHERE Guid_user IN(SELECT Guid_user FROM  `tbluser` WHERE marked_test='1')";
+	$delete =  $db->query($sql);
+	if ($delete) {
+	    $arrMsg[] = "Marked Test users from ".$thisTable." table deleted successfully";
+	} else {
+	    $arrMsg[] = "Error Marked Test users deleting from ".$thisTable." table. ";
+	}
+    }
+
+    //delete from users table too
+    $deleteUsers = $db->query("DELETE FROM `tbluser` WHERE marked_test='1' ");
+
+    echo json_encode(array('message'=>$arrMsg));
     exit();
 }
 
