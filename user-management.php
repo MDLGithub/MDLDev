@@ -26,7 +26,7 @@ $userTables = array(
     'salesrepmgr'=>'tblsalesrep',
     'provider'=>'tblprovider'
 );
-$selectQ = "";$adminQ="";$patientsQ="";$salesrepsQ="";$providersQ="";
+$selectQ = "";$adminQ="";$patientsQ="";$mdlpatientsQ="";$salesrepsQ="";$salesrepsMgrQ="";$providersQ="";
 
 foreach ($userTables as $k=>$v){
     $thisTable = $v;   
@@ -82,8 +82,25 @@ foreach ($userTables as $k=>$v){
         if(isset($_POST['marked_test']) && $_POST['marked_test']=="1"){            
             $selectQ .= " AND u.marked_test = '1'";            
         }
-    }
-    
+        if(isset($_POST['locked_users']) && $_POST['locked_users']=="1"){            
+            //$getLockedEmails = checkbrute($user['email'], $db);  
+            $now = time();
+            $valid_attempts = $now - (2 * 60 * 60);            
+            $attemptsQ = "SELECT email FROM tbluser_login_attempts WHERE time > '$valid_attempts' GROUP BY `email`";
+            $lockedEmails = $db->query($attemptsQ);
+            $emails = '';
+            if($lockedEmails){
+                foreach ($lockedEmails as $key=>$val){
+                    $emails .= "'".$val['email']."', ";
+                }
+                $emails = rtrim($emails, ', ');
+            }
+            if($emails){
+                $selectQ .= " AND u.email IN(".$emails.")";
+            }            
+        }
+    }   
+   
     if($k=='admin'){
         $adminQ = $selectQ;
     } elseif ($k=='patient') {
@@ -97,16 +114,21 @@ foreach ($userTables as $k=>$v){
     } elseif ($k=='provider') {
         $providersQ = $selectQ;
     }
+    
 }
 
-$query1 = ($adminQ!="")?$db->query($adminQ):array();
-$query2 = ($patientsQ!="")?$db->query($patientsQ):array();
-$query3 = ($mdlpatientsQ!="")?$db->query($mdlpatientsQ):array();
-$query4 = ($salesrepsQ!="")?$db->query($salesrepsQ):array();
-$query5 = ($salesrepsMgrQ!="")?$db->query($salesrepsMgrQ):array();
-$query6 = ($providersQ!="")?$db->query($providersQ):array();
+$query1 = (isset($adminQ) && $adminQ!="")?$db->query($adminQ):array();
+$query2 = (isset($patientsQ) && $patientsQ!="")?$db->query($patientsQ):array();
+$query3 = (isset($mdlpatientsQ) && $mdlpatientsQ!="")?$db->query($mdlpatientsQ):array();
+$query4 = (isset($salesrepsQ) && $salesrepsQ!="")?$db->query($salesrepsQ):array();
+$query5 = (isset($salesrepsMgrQ) && $salesrepsMgrQ!="")?$db->query($salesrepsMgrQ):array();
+$query6 = (isset($providersQ) && $providersQ!="")?$db->query($providersQ):array();
+
+
+
 
 $users = array_merge($query1,$query2,$query3,$query4,$query5,$query6);
+
 $thisMessage="";
 
 if(isset($_GET['delete-user']) && $_GET['delete-user']!=""){
@@ -199,8 +221,10 @@ require_once ('navbar.php');
                     <input id="show-tests" name="marked_test" value="1" type="checkbox" <?php echo ((!isset($_POST['clear'])) && (isset($_POST['marked_test']) && ($_POST['marked_test'] == 1)) ? " checked" : ""); ?> />
                     <label for="show-tests">Marked Test</label>                     
                 </div>
-               
-
+                <div>
+                    <input id="locked_users" name="locked_users" value="1" type="checkbox" <?php echo ((!isset($_POST['clear'])) && (isset($_POST['locked_users']) && ($_POST['locked_users'] == 1)) ? " checked" : ""); ?> />
+                    <label for="locked_users">Locked Users</label>                     
+                </div>
                 
                 <button id="filter" value="1" name="search" type="submit" class="button filter half"><strong>Search</strong></button>
                 <button type="submit" name="clear" class="button cancel half"><strong>Clear</strong></button>
@@ -282,11 +306,17 @@ require_once ('navbar.php');
                                 <td><?php echo $user['email']; ?></td>
                                 <td><?php echo isset($user['role'])?$user['role']:'Patient'; ?></td>
                                 <td class="text-center fs-20">
-                                    <?php if($user['status']=='1') {
-                                       echo "<span class='fas fa-user-check mn yes'></span>"; 
-                                    } else {
-                                        echo "<span class='fas fa-user-alt-slash mn no'></span>"; 
-                                    }?>
+                                    <?php                                     
+                                        if (checkbrute($user['email'], $db) == true){
+                                            echo "<span data-user-email='".$user['email']."' class='locked-user fas fa-user-lock'></span>";
+                                        } else {
+                                            if($user['status']=='1') {
+                                                echo "<span class='fas fa-user-check mn yes'></span>"; 
+                                            } else {
+                                                echo "<span class='fas fa-user-alt-slash mn no'></span>"; 
+                                            }
+                                        }
+                                    ?>
                                 </td>
                                 <td class="">   
                                     <?php 
@@ -475,7 +505,7 @@ require_once ('navbar.php');
                     <div class="f2 <?php echo ($first_name!="")?"valid show-label":"";?>">
                         <label class="dynamic" for="first_name"><span>First Name</span></label>
                         <div class="group">
-                            <input name="first_name" value="<?php echo $first_name; ?>" type="text" class="form-control" id="first_name" placeholder="First Name">
+                            <input autocomplete="off" name="first_name" value="<?php echo $first_name; ?>" type="text" class="form-control" id="first_name" placeholder="First Name">
                             <p class="f_status">
                                 <span class="status_icons"><strong>*</strong></span>
                             </p>
@@ -484,7 +514,7 @@ require_once ('navbar.php');
                     <div class="f2 <?php echo ($last_name!="")?"valid show-label":"";?>">
                         <label class="dynamic" for="last_name"><span>Last Name</span></label>
                         <div class="group">
-                            <input name="last_name" value="<?php echo $last_name; ?>" type="text" class="form-control" id="last_name" placeholder="Last Name">
+                            <input autocomplete="off" name="last_name" value="<?php echo $last_name; ?>" type="text" class="form-control" id="last_name" placeholder="Last Name">
                             <p class="f_status">
                                 <span class="status_icons"><strong>*</strong></span>
                             </p>
@@ -560,7 +590,7 @@ require_once ('navbar.php');
                     <div class="f2 required <?php echo ($user['email']!="")?"valid show-label":"";?>">
                         <label class="dynamic" for="email"><span>Email</span></label>
                         <div class="group">
-                            <input required="" name="email" value="<?php echo $user['email']; ?>" type="text" class="form-control" id="email" placeholder="Email">
+                            <input autocomplete="off" required="" name="email" value="<?php echo $user['email']; ?>" type="text" class="form-control" id="email" placeholder="Email">
                             <p class="f_status">
                                 <span class="status_icons"><strong>*</strong></span>
                             </p>
@@ -570,7 +600,7 @@ require_once ('navbar.php');
                     <div class="f2 <?php echo $passRequred; ?> ">
                         <label class="dynamic" for="password"><span>Password</span></label>
                         <div class="group">
-                            <input <?php echo $passRequred; ?> name="password" type="password" class="form-control" id="password" placeholder="Password">
+                            <input autocomplete="off" <?php echo $passRequred; ?> name="password" type="password" class="form-control" id="password" placeholder="Password">
                             <p class="f_status">
                                 <span class="status_icons"><strong>*</strong></span>
                             </p>
@@ -612,8 +642,7 @@ require_once ('navbar.php');
                             <label for="show-tests">Mark As Test</label>   
                         </div>
                     </div>
-                    <?php }  ?>
-                    
+                    <?php }  ?>                   
                     
                 </div>                
             </div>
@@ -627,6 +656,28 @@ require_once ('navbar.php');
     </div>    
 </div>
 <?php } ?>
+
+<!-- Unlock user and show logs modal Box -->
+<div id="login-attempt-log-box" class="modalBlock">
+    <div class="contentBlock">
+        <a class="close">X</a>        
+        <h2 class="text-center">Login Attempts</h2>
+        <h2 id="locked-user-email" class="pB-10"></h2>       
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>IP</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody id="login-attempt-log-content">                
+            </tbody>
+        </table>
+        <div class="actions text-center">
+            <button id="unlock-user" class="btn btn-primary">Unlock User</button>
+        </div>
+    </div>
+</div>
 
 <?php require_once('scripts.php');?>
 <script type="text/javascript">  

@@ -36,6 +36,61 @@ $(document).ready(function () {
         }       
     });
     
+    $('#dataTable').delegate('.locked-user','click', function(){
+        var email = $(this).attr('data-user-email');        
+        var ajaxUrl = baseUrl+'/ajaxHandler.php';
+        $.ajax( ajaxUrl , {
+            type: 'POST',
+            data: {
+               get_loced_user_data: '1',
+               email: email
+            },
+            success: function(response) {
+                $('#login-attempt-log-box').show();
+                $('#locked-user-email').html(email);
+                $('#unlock-user').attr('data-unlock-user-email', email);
+                var result = JSON.parse(response);
+                console.log(result);
+                if(result['content']){
+                    $('#login-attempt-log-content').html(result['content']);
+                }                
+            },
+            error: function() {
+                console.log('0');
+            }
+        });
+    });   
+    
+    $('#unlock-user').on('click', function(e){
+        var email = $(this).attr('data-unlock-user-email');
+        var message = "Are you sure you want to unlock this user?";        
+        var ajaxUrl = baseUrl+'/ajaxHandler.php';
+        var redirectUrl = baseUrl+'/user-management.php';
+        var conf = confirm(message);
+        if(conf){            
+            $.ajax( ajaxUrl , {
+                type: 'POST',
+                data: {
+                   unlock_this_user: '1',
+                   email: email
+                },
+                success: function(response) {                   
+                    var result = JSON.parse(response);
+                    console.log(result); 
+                    window.location.replace(redirectUrl);
+                },
+                error: function() {
+                    console.log('0');
+                }
+            });
+        }
+    });
+    
+    $('#login-attempt-log-box .close').on('click', function(e){
+        e.preventDefault();
+        $('#login-attempt-log-box ').hide();
+    });
+    
     //formatting number to currency
     Number.prototype.formatMoney = function(c, d, t){
         var n = this, 

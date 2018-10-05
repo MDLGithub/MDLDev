@@ -29,6 +29,28 @@ if(isset($_POST['save_specimen_not_collected_into_logs'])){
 if(isset($_POST['deleteUser'])){
     delete_user($db, $_POST['userType'], $_POST['Guid_user']);
 }
+if(isset($_POST['get_loced_user_data'])){
+    get_loced_user_log($db, $_POST['email']);
+}
+if(isset($_POST['unlock_this_user'])){
+    unlock_user($db, $_POST['email']);
+}
+
+function  unlock_user($db, $email){
+    deleteByField($db, 'tbluser_login_attempts', 'email',  $_POST['email']);
+    echo json_encode(array('delete'=>TRUE));
+}
+
+function get_loced_user_log($db, $email){    
+    $userLoginLog = $db->query('SELECT ip, time FROM tbluser_login_attempts WHERE email=:email', array('email'=>$email));
+    $content = "";
+    foreach ($userLoginLog as $k=>$v){
+        $date = date('Y-m-d H:i:s', $v['time']);
+        $ip = $v['ip'];
+        $content.="<tr><td>".$ip."</td><td>".$date."</td></tr>";
+    }    
+    echo json_encode(array('content'=>$content));                
+}
 
 /**
  * Delete User 
