@@ -1099,8 +1099,6 @@ $(document).ready(function () {
         }
     });
     
-    
-    
 });
 
 /***
