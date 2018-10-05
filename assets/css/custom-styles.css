@@ -1047,6 +1047,12 @@ and (orientation : landscape) {
 	margin-top:-4.5px;
     }
 
+
+    #app_data .url_config_box input[type='radio'], input[type='radio']:checked{
+
+	height:18px;
+    }
+
 }
 
 /*iPad portrait*/
@@ -1128,6 +1134,13 @@ and (orientation : portrait) {
 	width:165%;
     }
 
+    #app_data .url_config_box input[type='radio'], input[type='radio']:checked{
+
+	height:18px;
+    }
+
+
+
 }
 
 /* iPad Pro Landscape */
@@ -1159,6 +1172,13 @@ and (orientation : portrait) {
     .wider-bar{
 	width: 93% !important;
     }
+
+    #app_data .url_config_box input[type='radio'], input[type='radio']:checked{
+
+	height:30px;
+    }
+
+
 
 }
 
@@ -1204,6 +1224,10 @@ and (orientation : portrait) {
     }
 
 
+    #app_data .url_config_box input[type='radio'], input[type='radio']:checked{
+
+	height:18px;
+    }
 
 }
 
