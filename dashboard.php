@@ -335,7 +335,8 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
     if (isset($_POST['meets_mn']) && strlen($_POST['meets_mn'])) {
 	$whereTest = "";
 	if($_POST['meets_mn']=='incomplete'){
-	    $sqlTbl  = "SELECT q.*,p.*, a.name as account_name, u.email, u.marked_test, q.Date_created AS `date`, '1' AS incomplete FROM tblqualify q
+	    $sqlTbl  = "SELECT q.*,p.*, a.name as account_name, u.email, u.marked_test, q.Date_created AS `date`,
+			'1' AS incomplete FROM tblqualify q
 			LEFT JOIN tblaccount a ON q.account_number = a.account
 			LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user
 			LEFT JOIN tbluser u ON p.Guid_user = u.Guid_user";
