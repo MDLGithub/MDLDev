@@ -561,8 +561,9 @@ $(document).ready(function () {
      *  Generate Url button on click foncion
      */
     $('.url_config').on('click', function (event) {      
-        var id = $(this).attr('id');        
-        $.ajax( 'ajaxHandler.php', {
+        var id = $(this).attr('id'); 
+        var ajaxUrl = baseUrl+'/ajaxHandler.php';
+        $.ajax( ajaxUrl, {
             type: 'POST',
             data: {
                url_config: '1',
@@ -658,8 +659,8 @@ $(document).ready(function () {
             }
             $('#officeAddress').prepend(addressInfo);        
             $('#physiciansList, #physiciansListLabel').html("");  
-
-            $.ajax( 'ajaxHandler.php', {
+            var ajaxUrl = baseUrl+'/ajaxHandler.php';
+            $.ajax( ajaxUrl, {
                 type: 'POST',
                 data: {
                    get_providers: '1',
@@ -1038,7 +1039,7 @@ $(document).ready(function () {
     
     
     /**
-     *  Delete 
+     *  Delete Market test user
      */
     $('.deleteUser').on('click', function (event) {     
         var thisUserClass = $(this);
@@ -1047,11 +1048,11 @@ $(document).ready(function () {
         var message = 'Are you sure you want to delete #'+userId+' MDL User History?';
         if(userType=='test-user'){
             message = 'Are you sure you want to delete #'+userId+' Test User Data and All The History of that User?';
-        }
-        
+        }        
         var conf = confirm(message);
+        var ajaxUrl = baseUrl+'/ajaxHandler.php';
         if(conf){
-        $.ajax( 'ajaxHandler.php', {
+        $.ajax( ajaxUrl, {
             type: 'POST',
             data: {
                deleteUser: '1',
@@ -1076,6 +1077,28 @@ $(document).ready(function () {
         });
         }
     });
+    //Delete All marked test users and history
+    $('#delete-marked-test-users').on('click', function (event) { 
+        var message = 'Are you sure you want to delete All Marked Test Users Data and History?';
+        var ajaxUrl = baseUrl+'/ajaxHandler.php';
+        var redirectUrl =  baseUrl+'/user-management.php'
+        var conf = confirm(message);
+        if(conf){
+            $.ajax( ajaxUrl, {
+                type: 'POST',
+                data: { deleteMarkedTestUsers: '1'},
+                success: function(response) {
+                    var result = JSON.parse(response);               
+                    console.log(result);
+                    window.location.replace(redirectUrl);
+                },
+                error: function() {
+                    console.log('0');
+                }
+            });
+        }
+    });
+    
     
     
 });

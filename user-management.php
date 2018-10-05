@@ -261,13 +261,13 @@ require_once ('navbar.php');
             <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
         </section>
         <div class="scroller">  
-            <div class="row">                   
-                <div class="col-md-7">
-                  
-                </div>               
-                <div class="col-md-5">                    
-                    <a class="add-new-button pull-right" href="<?php echo SITE_URL; ?>/user-management.php?action=add">
+            <div class="row">               
+                <div class="col-md-12">                    
+                    <a class="add-new-button" href="<?php echo SITE_URL; ?>/user-management.php?action=add">
                         <span class="fas fa-user-plus" aria-hidden="true"></span> Add 
+                    </a>
+                    <a id="delete-marked-test-users" class="add-new-button pull-right">
+                        <span class="fas fa-history" ></span> Delete Marked Test Users 
                     </a>
 <!--                    <form action="" method="POST">
                         <button name="show-duplicates" type="submit" value="1" class="pull-right button  add-new-button"><i class="fas fa-clone"></i> Show User Duplicates</button>
