@@ -16,13 +16,14 @@ if (isset($_GET['logout'])) {
 require_once ('navbar.php');
 require_once ('functions_event.php');
 
-
-
 $roles = array('Admin', 'Sales Rep', 'Sales Manager');
 
-$userID = $_SESSION['user']["id"];
+echo $userID = $_SESSION['user']["id"];
 $roleInfo = getRole($db, $userID);
-$role = $roleInfo['role'];
+
+//print_r($roleInfo['role']); exit;
+
+$role = 'Admin';//$roleInfo['role'];
 if (!in_array($role, $roles)) {
     Leave(SITE_URL . "/no-permission.php");
 }
@@ -93,7 +94,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .schedulemodal-content {
         background-color: #fefefe;
         margin: 15% auto; /* 15% from the top and centered */
-        padding: 20px;
+        padding: 5px;
         border: 1px solid #888;
         width: 80%; /* Could be more or less, depending on screen size */
     }
@@ -104,6 +105,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         float: right;
         font-size: 28px;
         font-weight: bold;
+        padding: 4px 9px;
     }
 
     .close:hover,
@@ -117,9 +119,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
     .fc-month-view .evttitle, .fc-basicWeek-view .evttitle{width:90%;}
     .fc-basicWeek-view .fc-comments{width: 90%;}
-    .fc-comments{white-space: nowrap !important; overflow: hidden;text-overflow: ellipsis;}
-
-    .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px;}
+    .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px; pointer-events: visible;}
     .rightCircleicon2{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_health_fair.png"); background-repeat: no-repeat;background-size: 20px 20px;}
     .numberCircle {
         /*border-radius: 50%;*/
@@ -222,6 +222,13 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     }
 
     .fc-month-view .fc-scroller{ height: auto !important; }
+
+
+    .fc-comments{white-space: nowrap !important; overflow: hidden;text-overflow: ellipsis;}
+    tr > td > .fc-day-grid-event{ pointer-events: none; }
+    .show-stats { pointer-events: visible; }
+    .fc-basicDay-view .evttitle{ white-space: normal !important; }
+    #home form{ padding: 20px; }
 
     @media only screen 
     and (min-device-width : 768px) 
@@ -348,6 +355,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $("#detail").css("background", "linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");
         });
 
+        /*$(".show-stats").mouseover(function(){
+            alert("test");
+        })*/
+
         var calendar = $('#calendar').fullCalendar({
             header: {
                 left: 'prev,next today',
@@ -381,9 +392,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
                 var thisdate = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
                 if (moment <= thisdate) {
-                    $('#updateEvent').find('input, select').prop("disabled", false);
+                    $('#updateEvent').find('input, button, select').prop("disabled", false);
                 } else {
-                    $('#updateEvent').find('input, select').prop("disabled", true);
+                    $('#updateEvent').find('input, button, select').prop("disabled", true);
                 }
                 var frmstart = $.fullCalendar.formatDate(event.start, "MM/DD/Y");
                 $('#myModal').find('#modaleventstart').val(frmstart);
@@ -522,15 +533,16 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     cmts = '<div class="fc-number"><span>Account Number: </span>' + event.account + '</div>';
                     
                     cmts += '<div class = "day_stats">';
-                    cmts += '<div><span class="silhouette">' + event.registeredCnt + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ event.qualifiedCnt + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ event.completedCnt + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">0 <img src="assets/eventschedule/icons/flask_icon.png"></span></div>' +
+                    cmts += '<div class="show-stats"><span class="silhouette">' + event.registeredCnt + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ event.qualifiedCnt + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ event.completedCnt + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">0 <img src="assets/eventschedule/icons/flask_icon.png"></span></div>' +
                                 '</div>';
                     cmts += '</div></div>'
                     cmts += '<div class="fc-comments"><h1>Comments</h1><div class = "day-comments">';
                     if(event.comments != null) 
                           cmts += event.comments;
-                     cmts += '</div></div>'
-
-                    cmts += '<div class="fc-logo"><img src = "../login/images/practice/' + event.logo + '"/></div>'
+                    cmts += '</div></div>'
+                    if(event.logo != null)
+                        cmts += '<div class="fc-logo"><img src = "../login/images/practice/' + event.logo + '" onError="imgError(this);"/></div>';
+                    //else cmts += '<div class="fc-logo"><img src = "../login/images/practice/logo-placeholder.png"/></div>';
                 }
                 if (view.name == 'basicWeek' && event.comments)
                     cmts = '<div class="fc-comments">' + event.comments + '</div>'
@@ -585,7 +597,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                                 '<div class="fc-content evtcontent">'+                                
                                 '<div class="fc-title evttitle">' + modifiedName + '</div>' + salesrep + cmts;
                                 if(view.name != 'basicDay'){
-                                    content += '<div><span class="silhouette">' + event.registeredCnt + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ event.qualifiedCnt + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ event.completedCnt + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">0 <img src="assets/eventschedule/icons/flask_icon.png"></span></div>'
+                                    content += '<div class="show-stats"><span class="silhouette">' + event.registeredCnt + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ event.qualifiedCnt + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ event.completedCnt + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">0 <img src="assets/eventschedule/icons/flask_icon.png"></span></div>'
                                 }
                             content += '<div class="' + icon + '"></div>';   
                             content += '</div> </a>';
@@ -688,13 +700,22 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 return false;
             }
         });
-        $("#modalcomment").change(function(){
+
+        $("#modalcomment").bind("keyup change", function(e) {
             $(this).addClass('updated');
+            if($(this).val() != '')
+                $('button#eventupdate').prop('disabled', false);
+            else
+                $('button#eventupdate').prop('disabled', true);
         })
+        /*$("#modalcomment").change(function(){
+            $(this).addClass('updated');
+            $('button#eventupdate').prop('disabled', false);
+        })*/
         // Whenever the user clicks on the "update" button
         $('#eventupdate').bind(clickEventType, function () {
             if($("#modalcomment").hasClass('updated')){
-                $("#modalcommentcopy").append(","+$("#modalcomment").val());
+                //$("#modalcommentcopy").append(","+$("#modalcomment").val());
                 $("#modalcomment").removeClass('updated');
             }
             var errorMsg = "";
@@ -1078,11 +1099,21 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
         });
     }
+
+    /* New Code */
+    function imgError(image) {
+        image.onerror = "";
+        image.src = "../login/images/logo-placeholder.png";
+        return true;
+    }
+
+    
+
 </script>
 <aside id="action_palette" class="action_palette_width">		
     <div class="box full">
         <h4 class="box_top">Add Event</h4>
-        <?php if ($dataViewAccess) { ?>
+        <?php //if ($dataViewAccess) { ?>
             <div class="boxtent scroller ">
                 <form id="filter_form" action="" method="post">	
                     <?php
@@ -1170,7 +1201,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     </div>
                     <div class='f2 accounttype'> 
                         <div class="group">
-                            <textarea class="form-control" rows="10" id="comment" placeholder="Comments"></textarea>
+                            <textarea class="form-control" rows="10" id="comment" placeholder="Comments" required="required"></textarea>
                         </div> 
                     </div> 
                     <div class="healthcare" style="display: none;">
@@ -1291,7 +1322,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 <!--********************   SEARCH BY PALETTE END    ******************** -->
 
             </div>
-        <?php } ?>
+        <?php //} ?>
     </div>    
 </aside>
 <?php
@@ -1310,7 +1341,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             <h4>             
                 <ol class="breadcrumb">
                     <li><a href="<?php echo SITE_URL; ?>">Home</a></li>
-                    <li class="active">Event Schedule</li>   
+                   <!--  <li class="active">Event Schedule</li>    -->
                 </ol>      
             </h4>
             <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>
@@ -1444,7 +1475,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                 <div class="row">
                                     <div class='col-md-7 col-sm-6 modalaccounttype'> 
                                         <div class="form-group">
-                                            <textarea class="form-control" rows="10" id="modalcomment" placeholder="Comments"></textarea>
+                                            <textarea class="form-control" rows="10" id="modalcomment" placeholder="Comments" required></textarea>
                                         </div> 
                                     </div>  
                                     <div class="col-md-5 col-sm-6">

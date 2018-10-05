@@ -37,6 +37,7 @@ foreach($result as $row){
     $i++;
 }
 //$piedata = array(0 => array('category'=>'subhan','value'=>10,'color'=>'red'),1 => array('category'=>'javid','value'=>40,'color'=>'blue'));
+//$piedata = array(0 => array('category'=>'subhan','value'=>10,'color'=>'red'),1 => array('category'=>'javid','value'=>40,'color'=>'blue'),2 => array('category'=>'subhans','value'=>0,'color'=>'purple'));
 $data = array(  'type' => 'pie',
                 'data' => $piedata
         );

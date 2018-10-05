@@ -38,10 +38,10 @@ $error = array();
 $roleID = $roleInfo['Guid_role'];
 
 $default_account = "";
-
+/*
 $accessRole = getAccessRoleByKey('home');
 $roleIDs = unserialize($accessRole['role_ids']);
-$dataViewAccess = isUserHasAnyAccess($roleIDs, $roleID, 'view');
+$dataViewAccess = isUserHasAnyAccess($roleIDs, $roleID, 'view');*/
 
 if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to_date']))) {
     verify_input($error);
@@ -156,6 +156,40 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .comments-log .commentlogss { padding: 8px 0;  border-bottom: 1px solid #00000009; }
     .comments-log .commentlogss p { font-size: 14px; }
     .comments-log { max-height: 250px; overflow-x: auto; }
+
+    #app_top{ height: 3.063em; }
+    main.full-width{ padding-top: 6.0em; }
+    #performance_chart .col-md-1{ font-size: 15px; line-height: 2.0; }
+    #home .box.full.visible { padding-top: 6px; }
+    .week_stats p{ font-size: 15px; }
+    #calendar{ margin-top: 0.5%; }
+    .fc-toolbar.fc-header-toolbar{ margin-top: -4.3em; margin-bottom: 1em;}
+    /*#chart_stats{ height: 380px; }*/
+    /*#chart_stats select#sidebar_select{ margin-top: 10%; }*/
+    select#sidebar_select { border: 1px solid #ccc; border-radius: 20px; width: 100%; padding: 5px 8px;   margin-bottom: 8px;}
+    /*#stats_header .info-button{ padding: 2px 15px 3px 15px; }
+    button#summary { margin: 0 15px;}*/
+    #stats_header a.button > strong{ display: block; font-size: 15px;}
+    #stats_header a.button.submit { height: 33px; display: inline-block; width: 150px; font-size: 15px; }
+    #calendar table{ min-height: 50%; }
+    .fc-basic-view .fc-body .fc-row{ min-height: 100px; }
+    /*.fc-scroller.fc-day-grid-container{ min-height: 370px; }*/
+    /*tr > td > .fc-day-grid-event{ pointer-events: none; }
+    .show-stats { pointer-events: visible; }*/
+
+    
+    tr > td > .fc-day-grid-event{ pointer-events: none; }
+    .show-stats, .evttitle a { pointer-events: visible; }
+    @media only screen and (max-width: 1024px) and (orientation: portrait)
+    {
+        .info_block_row{ width: 100%; padding-bottom: 60px; }
+        /*#detail{ padding: 0px 15px 0 15px; }*/
+        select#sidebar_select{ width: 50%; }
+        .info_block_row .col-md-6{ padding: 1% 0 4%; margin-bottom: 40px; }
+        #calendar table{ min-height: 100%; }
+        .fc-basic-view .fc-body .fc-row{ min-height: 140px; }
+
+    }   
 </style>
 <script>
     
@@ -236,6 +270,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         });
 
         var calendar = $('#calendar').fullCalendar({
+            eventLimit: true,
+            eventLimitText: "More",
             header: {
                 left: 'prev,next today',
                 center: 'title',
@@ -378,7 +414,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         }
                         var tooltip = '<div class="tooltipevent" style="padding:20px 20px;min-width:100px;min-height:100px;background:'+ bgclr + ';color:#000;position:absolute;z-index:10001;">' + message + '</div>';
                         $("body").append(tooltip);
-                        $(this).mouseover(function (e) {
+                        //$(this).mouseover(function (e) {
+                        $(".show-stats").mouseover(function (e) {
                             $(this).css('z-index', 10000);
                             $('.tooltipevent').fadeIn('500');
                             $('.tooltipevent').fadeTo('10', 1.9);
@@ -442,13 +479,13 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                  */
                 var modifiedName = sentenceCase(name);
 
-                var content = '<a class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable" style="' + borderColor + '">' +
+                var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable" style="' + borderColor + '">' +
                         '<div class="fc-content evtcontent">' +
                         '<div class="' + icon + '"></div>' +
-                        '<div class="fc-title evttitle">' + modifiedName + '</div>' +
+                        '<div class="fc-title evttitle"><a href="#">' + modifiedName + '</a></div>' +
                         salesrep + cmts +
                         '</div>' +
-                        '</a>';
+                        '</div>';
 
                 if (event.evtCnt) {
                     $("#summary").addClass("details_button").removeClass("summary_button");
@@ -465,14 +502,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     $("#detail").addClass("details_button").removeClass("summary_button");
                     $("#summary").addClass("summary_button").removeClass("details_button");
                     if (parsedEventTime < parsedNow) {
-                        var content = '<a class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable days-' + eventDate + '"  style="' + borderColor + '">' +
+                        var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable days-' + eventDate + '"  style="' + borderColor + '">' +
                                 '<div class="fc-content evtcontent">' +
                                 '<div class="' + icon + '"></div>' +
-                                '<div class="fc-title evttitle">' + modifiedName + '</div>' +
+                                '<div class="fc-title evttitle"><a href="account-config.php">' + modifiedName + '</a></div>' +
                                 salesrep + cmts +
-                                '<div><span class="silhouette">' + event.registeredCnt + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ event.qualifiedCnt + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ event.completedCnt + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">0 <img src="assets/eventschedule/icons/flask_icon.png"></span></div>' +
+                                '<div class="show-stats"><span class="silhouette">' + event.registeredCnt + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ event.qualifiedCnt + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ event.completedCnt + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">0 <img src="assets/eventschedule/icons/flask_icon.png"></span></div>' +
                                 '</div>' +
-                                '</a>';
+                                '</div>';
                         return $(content);
                     } else {
                         return $(content);
@@ -1208,12 +1245,34 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 </div>
              </div>
                 <div class="row info_block_row">
-                    <div class = "info_block">
-                        <h1>
+                    <!-- <div class = "info_block"> -->
+                        <div class = "col-md-11 col-sm-12">
+                        <!-- <select id="sidebar_select">
+                            <option value="">All Genetic Consultant</option>
+                            <option value="1">Gabby Johnson</option>
+                            <option value="2">Sale Rep</option>
+                            <option value="3">Manage Rep</option>
+                        </select> -->
+                        <!-- <h1>
                         All<i class="fas fa-angle-down" style = "float:right;"></i>
                         <br>Genetic
-                        <br>Consultants</h1> 
-                        <div class="col-md-6">
+                        <br>Consultants</h1> -->
+                        <div class="col-md-5 col-sm-4">
+                            <h1>
+                            All
+                            <br>Genetic
+                            <br>Consultants</h1> 
+                            <i class="fas fa-angle-down info_block_arrow"></i>
+                            <div class = "salesrep_dropdown dropdown_hide">
+                                <ul>
+                                    <a href = "#"><li>Name</li></a>
+                                    <a href = "#"><li>Name</li></a>
+                                </ul>
+                            </div>   
+                            
+                        </div>
+                         
+                        <div class="col-md-5 col-sm-8">
                         <button type="button" name="Detail" id="detail" class="info-button details_button">Detail</button>
                         <button type="button" name="Summary" id="summary" class="info-button summary_button">Summary</button>
                         <a href="eventschedule.php" class="button submit"><strong>Full Calendar</strong></a>   
@@ -1223,16 +1282,121 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 </div>
                 <div id="calendar"></div>
                 <div id = "chart_stats">
-                    <div class = "chart_header">
-                            <p>
+                    <div class = "chart_header col-md-4 col-sm-6">
+                            <p class = "stats_date">
                                 <span id="calendarmonth"></span><br>
                                 <span id="calendaryear"></span><br>
-                                Stats<i class="fas fa-angle-down" style = "float:right;"></i></p>
+                                <span>Stats</span>
+                            </p> 
+                    <!-- <div class = "col-md-4 col-sm-6">
+                        <select id="sidebar_select">
+                            <option value="">All Genetic Consultant</option>
+                            <option value="1">Gabby Johnson</option>
+                            <option value="2">Sale Rep</option>
+                            <option value="3">Manage Rep</option>
+                        </select> -->
+                            <!-- <i class="fas fa-angle-down stats_dropdown_arrow"></i> -->
+                            <div class = "stats_dropdown dropdown_hide">
+                                <form id="filter_form" class = "stats_dropdown_flex" action="" method="post"> 
+                                    <?php if(isFieldVisibleByRole($roleIDs['from_date']['view'], $roleID)) {?>
+                            
+                                    <div class = "dropdown_container" style = "display:flex">
+                                        <div class="f2">
+                                       
+
+                                            <div class="group">                       
+                                                <input readonly class="datepicker" type="text" id="from_date" name="from_date" value="<?php echo ((!isset($_POST['clear'])) && isset($_POST['from_date']) && strlen($_POST['from_date'])) ? $_POST['from_date'] : ""; ?>" placeholder="From Date">
+
+                                                <p class="f_status">
+                                                    <span class="status_icons"><strong></strong></span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                        <?php } ?>
+                                        <?php
+                                        $date_error = "";
+
+                                        if (isset($_POST['search'])) {
+                                            if (isset($error['to_date'])) {
+                                                $date_error = " error";
+                                            } elseif (strlen($_POST['to_date'])) {
+                                                $date_error = " valid";
+                                            }
+                                        }
+                                        ?>
+                                        <?php if(isFieldVisibleByRole($roleIDs['to_date']['view'], $roleID)) {?>
+                                            <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['to_date'])) && (strlen($_POST['to_date']))) ? " show-label" : ""; ?><?php echo $date_error; ?>">
+                                                <!--<label class="dynamic" for="to_date"><span>To Date</span></label>-->
+
+                                                <div class="group">                       
+                                                    <input readonly class="datepicker" type="text" id="to_date" name="to_date" value="<?php echo ((!isset($_POST['clear'])) && isset($_POST['to_date']) && strlen($_POST['to_date'])) ? $_POST['to_date'] : ""; ?>" placeholder="To Date" max="<?php echo date('Y-m-d'); ?>">
+
+                                                    <p class="f_status">
+                                                        <span class="status_icons"><strong></strong></span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        <?php } ?>
+                                    
+                                    <div class = "dropdown_container">     
+                                        <div class="f2">
+                                            <!--<label class="dynamic" for="to_date"><span>Current Week</span></label>-->
+
+                                            <div class="group">                       
+                                                <input readonly type="text" id="to_date" name="to_date" value="" placeholder="Current Week">
+
+                                                <p class="f_status">
+                                                    <span class="status_icons"><strong></strong></span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="f2">
+                                            <!--<label class="dynamic" for="to_date"><span>Month</span></label>-->
+
+                                            <div class="group">                       
+                                                <input readonly type="text" id="to_date" name="to_date" value="" placeholder="Month">
+
+                                                <p class="f_status">
+                                                    <span class="status_icons"><strong></strong></span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class = "dropdown_container">
+                                        <div class="f2">
+                                            <!--<label class="dynamic" for="to_date"><span>Quarter</span></label>-->
+
+                                            <div class="group">                       
+                                                <input readonly type="text" id="to_date" name="to_date" value="" placeholder="Quarter">
+
+                                                <p class="f_status">
+                                                    <span class="status_icons"><strong></strong></span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="f2">
+                                            <!--<label class="dynamic" for="to_date"><span>Year</span></label>-->
+
+                                            <div class="group">                       
+                                                <input readonly type="text" id="to_date" name="to_date" value="" placeholder="Year">
+
+                                                <p class="f_status">
+                                                    <span class="status_icons"><strong></strong></span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                <a class = "stats_filter" href="#"></a>
+                            </form>
+                        </div>
+
                             <a href="mdl-stats.php" target="_blank" class="button submit smaller_button"><strong>View All Stats</strong></a>
 
                     </div>
-                    <div id="piechart"  class="col-md-6" ></div>
-                    <div id="chart"  class="col-md-6" ></div>
+                    <div id="piechart"  class="col-md-4 col-sm-6" ></div>
+                    <div id="chart"  class="col-md-4 col-sm-6" ></div>
                 </div>
                 </div>
             </div>
@@ -1464,7 +1628,10 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     //categories: [1952, 1956, 1960, 1964, 1968],
                     majorGridLines: {
                         //visible: false
-                    }
+                    },
+                    labels: {
+                                template: labelTemplate
+                            }
                 },
                 tooltip: {
                     visible: true,
@@ -1481,7 +1648,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 },
                 seriesDefaults: {
                     labels: {
-                        template: "#= kendo.format('{0:P}', percentage)#",
+                        //template: "#= kendo.format('{0:P}', percentage)#",
+                        template: "#if (value > 0) {# #: value #% #}#",
                         position: "center",
                         visible: true,
                         background: "transparent"
@@ -1492,6 +1660,10 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     template: "#= category # - #= kendo.format('{0:P}', percentage) #"
                 }
             });
+
+            function labelTemplate(e) {
+                return e.value.split(" ").join("\n");
+            }
         }
 
        // $(document).ready(createChart);

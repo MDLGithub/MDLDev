@@ -35,21 +35,6 @@ foreach($result as $row){
     $completed[] = (int)$row['completedCnt'];
     $salereps[] = $row['salerepname'];
 }
-
-$maxArr = array(max($registered),max($qualified),max($completed));
-$maxValue = max($maxArr);
-if($maxValue <= 50){
-    $setAxis = 50;
-}
-else if($maxValue > 50 && $maxValue <= 100){
-    $setAxis = 100;
-}
-else if($maxValue > 100 && $maxValue <= 500){
-    $setAxis = 500;
-}
-else if($maxValue > 500 && $maxValue <= 1000){
-    $setAxis = 1000;
-}
 $data = array( 'series' => array ( [
                                 'name'=> "Registered",
                                 'data'=> $registered,
@@ -64,8 +49,7 @@ $data = array( 'series' => array ( [
                                 'color'=> "#263805"
                             ]
                            ),
-                'categories' => $salereps,
-                'yaxis' => $setAxis
+                'categories' => $salereps 
     );
 echo json_encode($data);
 ?>
