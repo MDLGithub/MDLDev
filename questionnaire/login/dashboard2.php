@@ -21,7 +21,7 @@ $roles = array('Admin', 'Sales Rep', 'Sales Manager');
 
 $userID = $_SESSION['user']["id"];
 $roleInfo = getRole($db, $userID);
-$role = 'Admin';$roleInfo['role'];
+$role = $roleInfo['role'];
 if (!in_array($role, $roles)) {
     Leave(SITE_URL . "/no-permission.php");
 }
