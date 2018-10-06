@@ -83,7 +83,8 @@
     flex-direction: row;
     flex-wrap: wrap;*/
     flex-grow: 1;
-    margin-bottom: 1%;
+    /*margin-bottom: 1%;*/
+    margin-bottom: 6px;
 }
 
 .calendar_button{
@@ -146,7 +147,6 @@
   background: none;
   /*padding: 5% 0 0 5%;*/
   float:none;
-  /*transition:visibility 0s 0.8s;*/
 
 }
 
@@ -156,7 +156,9 @@
 
 .info_block_row{
   flex-grow: 1;
-  padding-left:3%;
+  /*padding-left:3%;*/
+  padding-left: 10px;
+  height: 140px;
 }
 
 .info_block_row .col-md-6{
@@ -386,7 +388,7 @@
 
 }
 
-.chart_header .stats_date{
+.chart_header p{
     margin: auto;
     text-align: left;
     font-size: 30px;
@@ -398,115 +400,13 @@
 }
 
 .chart_header .button{
-  width:45%;
+  width:70%;
   margin:auto;
-  min-width:195px;
 }
 
 /*.chart_header .button strong{
   font-size:1.1em;
 }*/
-
-/*Infoblock dropdown*/
-
-.info_block_arrow{
-    font-size: 30px;
-    color: rgb(70, 106, 147);
-    font-weight: bold;
-    line-height: 0.9;
-    background: none;
-    margin-left: -50px;
-    margin-top: -60px;
-    z-index:1;
-}
-
-
-/*Stats Dropdown*/
-
-
-.stats_dropdown_arrow{
-  font-size:30px;
-  display:initial;
-  color: rgb(70, 106, 147);
-  font-weight: bold;
-  line-height: 0.9;
-  background: none;
-  position:relative;
-}
-
-.dropdown_arrow_show{
-  width:210px;
-  display: block;
-  text-align: right;
-  background:rgba(137,153,171,1);
-  margin:auto;
-  top:20px;
-}
-
-.dropdown_container{
-  margin:auto;
-}
-
-.stats_dropdown{
-    position: relative;
-    background-color: rgb(227, 227, 227);
-    width: 210px;
-    height: 220px;
-    transition: height 0.6s 0.2s;
-    border-radius: 0px 0px 10px 10px;
-    margin:auto;
-    top:20px;
-}
-
-.stats_filter{
-    background: url(../images/icon_find.png) no-repeat center, radial-gradient(ellipse at center, #6695cb 0%,#1c487b 100%);
-    width: 30px;
-    height: 30px;
-    border-radius: 20px;
-}
-
-.stats_dropdown .f_status{
-  height:initial;
-}
-
-.salesrep_dropdown{
-    position: relative;
-    background-color: rgb(227, 227, 227);
-    width: 210px;
-    height: 130px;
-    /*transition: height 0.6s 0.2s;*/
-    border-radius: 0px 0px 10px 10px;
-    margin:auto;
-}
-
-.salesrep_dropdown a{
-    display: block;
-}
-
-.stats_dropdown .f2 input{
-    background:white;
-    border-radius: 20px 0px 0px 20px;
-    font-size:12px;
-}
-
-.stats_dropdown_flex{
-    display:flex;
-    flex-direction:column;
-    
-}
-
-.dropdown_hide{
-  height:0px !important;
-  overflow:hidden;
-}
-
-.hide{
-  visibility:hidden;
-}
-
-.dropdown_group{
-  border-radius:7px;
-}
 
 .top_accounts{
     /*height: 42%;*/
@@ -585,10 +485,6 @@
     text-align: center;
     line-height: 0.4;
 
-}
-
-#calendar .fc-content-skeleton{
-  padding-bottom:0px !important;
 }
 
 #calendar .fc-prev-button{
@@ -939,7 +835,7 @@ and (orientation : landscape) {
 }
 
 #chart_stats{
-  height:200px;
+  height:350px;
 }
 
 }
@@ -1023,8 +919,9 @@ br{
 }
 
 .chart_header{
-  width:100%;
+  /*width:100%;*/
   text-align:center;
+  height: 500px;
 }
 
 
