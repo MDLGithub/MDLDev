@@ -1298,7 +1298,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                             <!-- <i class="fas fa-angle-down stats_dropdown_arrow"></i> -->
                             <div class = "stats_dropdown dropdown_hide">
                                 <form id="filter_form" class = "stats_dropdown_flex" action="" method="post"> 
-                                    <?php if(isFieldVisibleByRole($roleIDs['from_date']['view'], $roleID)) {?>
+                                    <?php //if(isFieldVisibleByRole($roleIDs['from_date']['view'], $roleID)) {?>
                             
                                     <div class = "dropdown_container" style = "display:flex">
                                         <div class="f2">
@@ -1313,7 +1313,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                             </div>
                                         </div>
                                     </div>
-                                        <?php } ?>
+                                        <?php //} ?>
                                         <?php
                                         $date_error = "";
 
@@ -1325,7 +1325,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                             }
                                         }
                                         ?>
-                                        <?php if(isFieldVisibleByRole($roleIDs['to_date']['view'], $roleID)) {?>
+                                        <?php //if(isFieldVisibleByRole($roleIDs['to_date']['view'], $roleID)) {?>
                                             <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['to_date'])) && (strlen($_POST['to_date']))) ? " show-label" : ""; ?><?php echo $date_error; ?>">
                                                 <!--<label class="dynamic" for="to_date"><span>To Date</span></label>-->
 
@@ -1337,7 +1337,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                                     </p>
                                                 </div>
                                             </div>
-                                        <?php } ?>
+                                        <?php //} ?>
                                     
                                     <div class = "dropdown_container">     
                                         <div class="f2">
