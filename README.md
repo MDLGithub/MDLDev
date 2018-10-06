@@ -18,3 +18,22 @@ If you want to learn more about creating good readme files then refer the follow
 - [ASP.NET Core](https://github.com/aspnet/Home)
 - [Visual Studio Code](https://github.com/Microsoft/vscode)
 - [Chakra Core](https://github.com/Microsoft/ChakraCore)
+
+
+#Updated files list on 06-Oct-2018
+- /login/dashboard2.php
+- /login/eventschedule.php
+- /login/eventupdate.php
+- /login/assets/css/custom-styles.css
+- /login/assets/css/calendar.css
+
+#Table structure for Comments
+Table Name - tblcomments
+Columns:
+- id : INT(11), Primary key, Auto-increment
+- comments : LONGTEXT
+- user_id : INT(11)
+- eventid : INT(11)
+- created_date: DATETIME
+- updated_date: DATETIME
+
