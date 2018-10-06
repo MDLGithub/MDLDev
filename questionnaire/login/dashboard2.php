@@ -21,7 +21,7 @@ $roles = array('Admin', 'Sales Rep', 'Sales Manager');
 
 $userID = $_SESSION['user']["id"];
 $roleInfo = getRole($db, $userID);
-$role = $roleInfo['role'];
+$role = 'Admin';$roleInfo['role'];
 if (!in_array($role, $roles)) {
     Leave(SITE_URL . "/no-permission.php");
 }
@@ -57,13 +57,13 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 <link rel="stylesheet" href="assets/eventschedule/css/bootstrap-datetimepicker.min.css">
 <script src="assets/eventschedule/js/jquery.min.js"></script>
 <script src="assets/eventschedule/js/jquery-ui.min.js"></script>
+<script src="assets/eventschedule/kendoUI/js/jszip.min.js"></script>
+<script src="assets/eventschedule/kendoUI/js/kendo.all.min.js"></script>
+<script src="assets/eventschedule/js/myweekview.js"></script>
 <script src="assets/eventschedule/js/moment.min.js"></script>
 <script src="assets/eventschedule/js/fullcalendar.min.js"></script>
 <script src="assets/eventschedule/js/bootstrap-datetimepicker.min.js"></script>
-<script src="assets/eventschedule/js/myweekview.js"></script>
 
-<script src="assets/eventschedule/kendoUI/js/jszip.min.js"></script>
-<script src="assets/eventschedule/kendoUI/js/kendo.all.min.js"></script>
 <style>
     .col-md-1 { width: 10.333333% !important;}
     .container { max-width: 100% !important;}
@@ -80,6 +80,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .fc-event {
         box-shadow:  0 0 .25em !important;
         border-radius:  .625em !important;
+        background-color: #fff !important;
+        color: #000 !important;
     }
     .fc-axis{display: none !important;}
 
@@ -127,11 +129,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .fc-basic-view .fc-comments{width: 90%;}
     .fc-comments{white-space: nowrap !important; overflow: hidden;text-overflow: ellipsis;}
 
-    .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px;}
+    .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px; pointer-events: visible;}
     .rightCircleicon2{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_health_fair.png"); background-repeat: no-repeat;background-size: 20px 20px;}
-    .numberCircle {
-        /*border-radius: 50%;*/
-        behavior: url(PIE.htc); /* remove if you don't care about IE8 */
+    /*.numberCircle {
+        behavior: url(PIE.htc); 
         width: 16px;
         height: 66px;
         padding: 8px;
@@ -144,7 +145,27 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         color: rgb(255, 255, 255);
         font-weight: bold;
         text-shadow: 0px 0px 10px #654c07;
-        }
+        }*/
+    .numberCircle {
+        padding: 14px;
+        text-align: center;
+        position: relative;
+        top: 0;
+        left: 0;
+        font-size: 20px;
+        font-family: "Open Sans";
+        color: rgb(255, 255, 255);
+        font-weight: bold;
+        text-shadow: 0px 0px 10px #654c07;
+        background: url(assets/eventschedule/icons/icon_brca_day.png);
+        background-size: 90%;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+    .numberCircleContainer {
+        margin: 10px 0;
+        text-align: center;
+    }
     #calendar .fc-body td {vertical-align: top !important;}  
     .fc-event-container > a {min-height: 65px;}    
     #mebrcacnt,#meregcnt,#mecomcnt,#meeventcnt,#mequalcnt,#mesubcnt{color:blue}
@@ -158,28 +179,33 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .comments-log { max-height: 250px; overflow-x: auto; }
 
     #app_top{ height: 3.063em; }
-    main.full-width{ padding-top: 6.0em; }
-    #performance_chart .col-md-1{ font-size: 15px; line-height: 2.0; }
+    main.full-width{ padding-top: 5.8em; }
+    #performance_chart .col-md-1{ font-size: 13px; line-height: 2.0; }
     #home .box.full.visible { padding-top: 6px; }
-    .week_stats p{ font-size: 15px; }
+    .week_stats p{ font-size: 14px; }
     #calendar{ margin-top: 0.5%; }
     .fc-toolbar.fc-header-toolbar{ margin-top: -4.3em; margin-bottom: 1em;}
     /*#chart_stats{ height: 380px; }*/
     /*#chart_stats select#sidebar_select{ margin-top: 10%; }*/
     select#sidebar_select { border: 1px solid #ccc; border-radius: 20px; width: 100%; padding: 5px 8px;   margin-bottom: 8px;}
+    #stats_header .info-button{ padding: .3em 1.5em .357em 1.5em; }
+    .info_block h1{ font-size: 20px; }
     /*#stats_header .info-button{ padding: 2px 15px 3px 15px; }
     button#summary { margin: 0 15px;}*/
-    #stats_header a.button > strong{ display: block; font-size: 15px;}
-    #stats_header a.button.submit { height: 33px; display: inline-block; width: 150px; font-size: 15px; }
-    #calendar table{ min-height: 50%; }
+    /*#stats_header a.button > strong{ display: block; font-size: 15px;}
+    #stats_header a.button.submit { height: 33px; display: inline-block; width: 150px; font-size: 15px; }*/
+    #calendar table{ min-height: 50%; max-height: 150px;}
     .fc-basic-view .fc-body .fc-row{ min-height: 100px; }
-    /*.fc-scroller.fc-day-grid-container{ min-height: 370px; }*/
-    /*tr > td > .fc-day-grid-event{ pointer-events: none; }
-    .show-stats { pointer-events: visible; }*/
-
-    
+    .fc-scroller.fc-day-grid-container{ max-height: 130px; }
+    .show-stats { pointer-events: visible; }
     tr > td > .fc-day-grid-event{ pointer-events: none; }
     .show-stats, .evttitle a { pointer-events: visible; }
+    .fc-salesrep a{color:#000; pointer-events:visible; margin-bottom: 5px;}
+    .dropdown_hide{ height: 0 !important; visibility: hidden; display: none;}
+    .show-stats, .evttitle a, .fc-salesrep a { pointer-events: visible; }
+    .top-buttons a.button.submit { max-width: 190px; }
+    .top-buttons a strong { font-size: 15px; }
+    .info_block_row .col-md-6{ min-width: 0; }
     @media only screen and (max-width: 1024px) and (orientation: portrait)
     {
         .info_block_row{ width: 100%; padding-bottom: 60px; }
@@ -187,7 +213,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         select#sidebar_select{ width: 50%; }
         .info_block_row .col-md-6{ padding: 1% 0 4%; margin-bottom: 40px; }
         #calendar table{ min-height: 100%; }
+        #chart_stats{ height: 480px; }
         .fc-basic-view .fc-body .fc-row{ min-height: 140px; }
+        .fc-scroller.fc-day-grid-container{ max-height: 150px; }
 
     }   
 </style>
@@ -270,8 +298,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         });
 
         var calendar = $('#calendar').fullCalendar({
-            eventLimit: true,
-            eventLimitText: "More",
+            eventLimit: 2,
             header: {
                 left: 'prev,next today',
                 center: 'title',
@@ -328,9 +355,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
                 var thisdate = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
                 if (moment <= thisdate) {
-                    $('#updateEvent').find('input, select').prop("disabled", false);
+                    $('#updateEvent').find('input, button, select').prop("disabled", false);
+                    $('#eventupdate').prop("disabled", true);
                 } else {
-                    $('#updateEvent').find('input, select').prop("disabled", true);
+                    $('#updateEvent').find('input, button, select').prop("disabled", true);
                 }
                 var frmstart = $.fullCalendar.formatDate(event.start, "MM/DD/Y");
                 $('#myModal').find('#modaleventstart').val(frmstart);
@@ -349,9 +377,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 $("#modalsalerepid").val(event.salesrepid);
                 $("#modalhealthcareid").val(event.healthcareid);
 
-                var eventID = event.id;
-                
-                $.ajax({
+                //var eventID = event.id;
+                popup_comment(event.id);
+                /*$.ajax({
                     type : 'POST',
                     data : 'eventid='+eventID,
                     url : 'getcomments.php',
@@ -373,7 +401,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             $(".comments-log").html(commentstext);
                         }
                     }
-                });
+                });*/
 
                 if (event.title == 'BRCA Day') {
                     $('#brcaradio').prop("checked", true);
@@ -391,7 +419,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var parsedNow =  new Date(today).getUnixTime();
                 var parsedEventTime = new Date(event.start).getUnixTime();
                 //if (parsedEventTime >= parsedNow) {
-                    modal.style.display = "block";
+                    //modal.style.display = "block";
+                    $("#myModal").delay( 100 ).fadeIn( 400 );
                 //}
             },
             eventMouseover: function (calEvent, jsEvent) {
@@ -404,8 +433,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     if (calEvent.account == null && calEvent.title == 'BRCA Day')
                         message += 'Account Number is missing';
                     var mouseOver = "Registerd: " + calEvent.registeredCnt + "<br />";
-                    mouseOver += "Qualified: " + calEvent.qualifiedCnt + "<br />";
-                    mouseOver += "Completed: " + calEvent.completedCnt;
+                    mouseOver += "Completed: " + calEvent.completedCnt + "<br />";
+                    mouseOver += "Qualified: " + calEvent.qualifiedCnt;
+                    
                     if (mouseOver != '') {
                         bgclr = '#FF4500';
                         if(message == ""){
@@ -450,12 +480,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     account = event.account + ' - ';
 
                 if (event.salesrep)
-                    salesrep = '<div class="fc-salesrep">' + event.salesrep + '</div>';
+                    salesrep = '<div class="fc-salesrep"><a href="salesreps.php?action=edit&id='+event.salesrepid+'">' + event.salesrep + '</a></div>';
                 var cmts = '';
 
                 var view = $('#calendar').fullCalendar('getView');
-                if (view.name == 'basicWeek' && event.comments)
-                    cmts = '<div class="fc-comments">' + event.comments + '</div>'
+                /*if (view.name == 'basicWeek' && event.comments)
+                    cmts = '<div class="fc-comments">' + event.comments + '</div>'*/
 
                 var icon = '';
                 if (event.title == 'BRCA Day') {
@@ -482,7 +512,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable" style="' + borderColor + '">' +
                         '<div class="fc-content evtcontent">' +
                         '<div class="' + icon + '"></div>' +
-                        '<div class="fc-title evttitle"><a href="#">' + modifiedName + '</a></div>' +
+                        '<div class="fc-title evttitle"><a href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>' +
                         salesrep + cmts +
                         '</div>' +
                         '</div>';
@@ -490,8 +520,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 if (event.evtCnt) {
                     $("#summary").addClass("details_button").removeClass("summary_button");
                     $("#detail").addClass("summary_button").removeClass("details_button");
-                    var content = '<div class="fc-content evtcontent days-' + eventDate + '" style="padding: 0 20px;">';
-                    content += '<div style="padding: 10px 0 0 127px;"><img src = "assets/eventschedule/icons/icon_brca_day.png" class="summary_brca_icon"><span class="numberCircle">' + event.evtCnt + '</span></></div>';
+                    var content = '<div class="fc-content evtcontent days-' + eventDate + '" style="padding: 0 20px; font-size: 15px; line-height: 16px;">';
+                    content += '<div class="numberCircleContainer"><span class="numberCircle">' + event.evtCnt + '</span></div>';
                     content += '<div>Registered <span style="float:right">' + event.registeredCnt + '</span></div>';
                     content += '<div>Completed <span style="float:right">' + event.qualifiedCnt + '</span></div>';
                     content += '<div>Qualified <span style="float:right">' + event.completedCnt + '</span></div>';
@@ -505,7 +535,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable days-' + eventDate + '"  style="' + borderColor + '">' +
                                 '<div class="fc-content evtcontent">' +
                                 '<div class="' + icon + '"></div>' +
-                                '<div class="fc-title evttitle"><a href="account-config.php">' + modifiedName + '</a></div>' +
+                                '<div class="fc-title evttitle"><a href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>' +
                                 salesrep + cmts +
                                 '<div class="show-stats"><span class="silhouette">' + event.registeredCnt + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ event.qualifiedCnt + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ event.completedCnt + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">0 <img src="assets/eventschedule/icons/flask_icon.png"></span></div>' +
                                 '</div>' +
@@ -872,6 +902,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             }
         });
 
+        $("#modalcomment").bind("keyup change", function(e) {
+            $(this).addClass('updated');
+            if($(this).val() != '')
+                $('button#eventupdate').prop('disabled', false);
+            else
+                $('button#eventupdate').prop('disabled', true);
+        })
+
         // Whenever the user clicks on the "update" button
         $('#eventupdate').bind(clickEventType, function () {
             var errorMsg = "";
@@ -939,8 +977,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     {
                         //$('#calendar').fullCalendar('renderEvent', eventData, true); // stick? = true
                         $('#calendar').fullCalendar('refetchEvents');
-                        modal.style.display = "none";
-                        //alert("Updated Successfully");
+                        popup_comment(modalid);
+                        //modal.style.display = "none";
+                        
                     }
                 })
 
@@ -1192,6 +1231,30 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
         });
     }
+    function popup_comment(eventID){
+        $.ajax({
+            type : 'POST',
+            data : 'eventid='+eventID,
+            url : 'getcomments.php',
+            success : function(res){
+
+                var result = JSON.parse(res);
+                console.log(result);
+                $(".comments-log").html('');
+                $("#modalcomment").val('');
+                var count = 0;
+                var commentstext = "";
+                if(result.length != 0){
+
+                    for( count = 0; count < result.length; count++){
+                        commentstext += "<div class='commentlogss'><p>"+result[count]['comments']+"</p>";
+                        commentstext += "<p> By: "+ result[count]['email'] + " on: " + result[count]['created_date'] + "</p></div>";
+                    }
+                    $(".comments-log").html(commentstext);
+                }
+            }
+        });
+    }
     
 </script>
 <?php
@@ -1210,7 +1273,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             <h4>             
                 <ol class="breadcrumb">
                     <li><a href="<?php echo SITE_URL; ?>">Home</a></li>
-                    <li class="active">Event Schedule</li>   
+                    <!-- <li class="active">Event Schedule</li>  -->  
                 </ol>      
             </h4>
             <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>
@@ -1245,34 +1308,20 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 </div>
              </div>
                 <div class="row info_block_row">
-                    <!-- <div class = "info_block"> -->
-                        <div class = "col-md-11 col-sm-12">
-                        <!-- <select id="sidebar_select">
-                            <option value="">All Genetic Consultant</option>
-                            <option value="1">Gabby Johnson</option>
-                            <option value="2">Sale Rep</option>
-                            <option value="3">Manage Rep</option>
-                        </select> -->
-                        <!-- <h1>
-                        All<i class="fas fa-angle-down" style = "float:right;"></i>
-                        <br>Genetic
-                        <br>Consultants</h1> -->
-                        <div class="col-md-5 col-sm-4">
+                        <div class = "info_block">
                             <h1>
-                            All
+                            All<i class="fas fa-angle-down" style = "float:right;"></i>
                             <br>Genetic
                             <br>Consultants</h1> 
-                            <i class="fas fa-angle-down info_block_arrow"></i>
+                            <!-- <i class="fas fa-angle-down info_block_arrow"></i>
                             <div class = "salesrep_dropdown dropdown_hide">
                                 <ul>
                                     <a href = "#"><li>Name</li></a>
                                     <a href = "#"><li>Name</li></a>
                                 </ul>
-                            </div>   
-                            
-                        </div>
-                         
-                        <div class="col-md-5 col-sm-8">
+                            </div>   --> 
+                        
+                        <div class="col-md-6 top-buttons">
                         <button type="button" name="Detail" id="detail" class="info-button details_button">Detail</button>
                         <button type="button" name="Summary" id="summary" class="info-button summary_button">Summary</button>
                         <a href="eventschedule.php" class="button submit"><strong>Full Calendar</strong></a>   
@@ -1282,20 +1331,13 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 </div>
                 <div id="calendar"></div>
                 <div id = "chart_stats">
-                    <div class = "chart_header col-md-4 col-sm-6">
+                    <div class = "chart_header col-md-3 col-sm-6">
                             <p class = "stats_date">
                                 <span id="calendarmonth"></span><br>
                                 <span id="calendaryear"></span><br>
                                 <span>Stats</span>
                             </p> 
-                    <!-- <div class = "col-md-4 col-sm-6">
-                        <select id="sidebar_select">
-                            <option value="">All Genetic Consultant</option>
-                            <option value="1">Gabby Johnson</option>
-                            <option value="2">Sale Rep</option>
-                            <option value="3">Manage Rep</option>
-                        </select> -->
-                            <!-- <i class="fas fa-angle-down stats_dropdown_arrow"></i> -->
+                             <i class="fas fa-angle-down stats_dropdown_arrow"></i>
                             <div class = "stats_dropdown dropdown_hide">
                                 <form id="filter_form" class = "stats_dropdown_flex" action="" method="post"> 
                                     <?php //if(isFieldVisibleByRole($roleIDs['from_date']['view'], $roleID)) {?>
@@ -1478,10 +1520,12 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                 <div class="row">
                                     <div class='col-md-7 modalaccounttype'> 
                                         <div class="form-group">
+                                            <label for="modalcomment">Add Comments: </label>
                                             <textarea class="form-control" rows="10" id="modalcomment" placeholder="Comments"></textarea>
                                         </div> 
                                     </div>  
                                     <div class="col-md-5">
+                                        <label>Event Comments: </label>
                                         <div class="comments-log">
                                             
                                         </div>
