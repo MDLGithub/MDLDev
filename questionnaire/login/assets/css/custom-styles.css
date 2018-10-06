@@ -1193,3 +1193,10 @@ span.editable_amount{
 button[name="search"] > strong{
 	padding-left:5%;
 }
+.homeIcon {
+    background: rgb(255,255,255,0.34) url(../images/house_icon.png) center center no-repeat !important;
+    width: 23px;
+    height: 38px;
+    padding: 0 1.5em!important;
+    margin-left: 5px;
+}
