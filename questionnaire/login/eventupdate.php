@@ -39,8 +39,8 @@ if(isset($_POST["modalid"]))
                             'comments' => $_POST['modalcomments'],
                             'eventid' => $_POST['modalid'],
                             'user_id' => $_POST['userid'],
-                            'created_date' => date("Y-m-d H:m:s"),
-                            'updated_date' => date("Y-m-d H:m:s"),
+                            'created_date' => date("Y-m-d H:i:s"),
+                            'updated_date' => date("Y-m-d H:i:s"),
                         );
     insertIntoTable($db, 'tblcomments', $addArrComments);
     
