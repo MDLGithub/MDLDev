@@ -123,7 +123,7 @@
 
 .info_block{
     /*height: 150px;*/
-    height:90%;
+    height:80%;
     background-color: blur;
     /*min-width: 228px;*/
     /*vertical-align: top !important;*/
@@ -505,6 +505,7 @@
 
 #chart{
   height:100%;
+  padding: 0;
 }
 
 #piechart{
@@ -919,9 +920,10 @@ br{
 }
 
 .chart_header{
-  /*width:100%;*/
+  width:100%;
   text-align:center;
-  height: 500px;
+ /* height: 500px;*/
+  height: auto;
 }
 
 
