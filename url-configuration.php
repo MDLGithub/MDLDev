@@ -45,7 +45,11 @@ $sources = $db->selectAll('tblsource', ' ORDER BY description ASC');
 $lastConfigData = getLastUrlConfig($db);
 $urlData = $lastConfigData;
 $currentUserId = $_SESSION['user']['id'];
-$urlMain = "https://www.mdlab.com/questionnaire";
+$urlPath = parse_url(SITE_URL,PHP_URL_PATH);
+$urlMain = "https://www.mdlab.com/dev";
+if (strpos($urlPath, 'questionnaire') !== false) {
+    $urlMain = "https://www.mdlab.com/questionnaire";
+}
 $urlPrev = "https://www.mdlab.com/previous";
 $urlStr = "";
 $generateUrlLink = $urlMain;
