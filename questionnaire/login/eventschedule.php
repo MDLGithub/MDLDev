@@ -19,7 +19,7 @@ $roles = array('Admin', 'Sales Rep', 'Sales Manager');
 
 $userID = $_SESSION['user']["id"];
 $roleInfo = getRole($db, $userID);
-$role = $roleInfo['role'];
+$role = 'Admin';//$roleInfo['role'];
 if (!in_array($role, $roles)) {
     Leave(SITE_URL . "/no-permission.php");
 }
@@ -737,8 +737,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         })*/
         // Whenever the user clicks on the "update" button
         $('#eventupdate').bind(clickEventType, function () {
-            if($("#modalcomment").hasClass('updated')){
-                $("#modalcomment").removeClass('updated');
+            var commentid = "";
+            if($(this).hasClass("edited")){
+                $(this).removeClass("edited")
+                commentid = $('#eventupdate').attr('data-commentid');
             }
             var errorMsg = "";
             if ($("#modalsalesrepopt").val() == "0") {
@@ -755,18 +757,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             }
             var title = $("input[name='modaleventtype']:checked").parent('label').text();
             if ($('#modaleventstart').val() && ($('#modalsalerepid').val() || $('#modalaccountopt').val() != 0)) {
-                /*
-                var start = dateFormat($('#modaleventstart').val(), "yyyy-mm-dd");
-                var end = dateFormat($('#modaleventstart').val(), "yyyy-mm-dd");
-                
-                var start = $('#modaleventstart').val();
-                var end = $('#modaleventstart').val();
-            
-                */
-                    
                 var start = moment($('#modaleventstart').val()).format("YYYY-MM-DD");
                 var end = moment($('#modaleventstart').val()).format("YYYY-MM-DD");   
-                
                 var accountId = $('#modalaccountopt').val();
                 var salesrepId = $('#modalsalerepid').val() ? $('#modalsalerepid').val() : 0;
                 var comments = $('#modalcomment').val();
@@ -794,11 +786,13 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     zip: zip,
                     modalid: modalid,
                     userid: userid,
-                    modalhealthcareid: modalhealthcareid
+                    modalhealthcareid: modalhealthcareid,
+                    commentid: commentid,
+                    action: 'eventupdate'
                 };
 
                 $.ajax({
-                    url: "eventupdate.php",
+                    url: "ajaxHandlerEvents.php",
                     type: "POST",
                     data: eventData,
                     success: function (res)
@@ -980,6 +974,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 } 
         });
 
+        
         var dateFormat = function () {
             var token = /d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZ]|"[^"]*"|'[^']*'/g,
                     timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g,
@@ -1134,27 +1129,62 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     function popup_comment(eventID){
         $.ajax({
             type : 'POST',
-            data : 'eventid='+eventID,
-            url : 'getcomments.php',
+            data : { action: 'getComment', eventid: eventID },
+            url : 'ajaxHandlerEvents.php',
             success : function(res){
-
                 var result = JSON.parse(res);
-                console.log(result);
                 $(".comments-log").html('');
                 $("#modalcomment").val('');
                 var count = 0;
                 var commentstext = "";
                 if(result.length != 0){
-
                     for( count = 0; count < result.length; count++){
-                        commentstext += "<div class='commentlogss'><p>"+result[count]['comments']+"</p>";
-                        commentstext += "<p> By: "+ result[count]['email'] + " on: " + result[count]['created_date'] + "</p></div>";
+                        var comment_date = moment(new Date(result[count]['created_date'])).format('DD MMM YYYY, h:mm a');
+                        commentstext += "<div class='commentlogss' id='"+result[count]['id']+"'><p>";
+                        if(result[count]['first_name'] == null){
+                            commentstext += "<strong>"+ result[count]['firstname'] + " " + result[count]['lastname'] + " (" + comment_date + ") </strong>";
+                        }else{
+                            commentstext += "<strong>"+ result[count]['first_name'] + " " + result[count]['last_name'] + " (" + comment_date + ") </strong>";
+                        }
+
+                        var current_user = $("#current_user").val();
+                        if(current_user == result[count]['user_id'])
+                            commentstext += "<span style='float:right; margin-right:5px;'><a class='fas fa-pencil-alt edit' href='#'></a> <a href='#' class='fa fa-times del'></a></span></p>";
+                        else
+                            commentstext += "</p>";
+
+                        commentstext += "<p class='comments'>"+result[count]['comments']+"</p></div>";
                     }
+
                     $(".comments-log").html(commentstext);
                 }
             }
         });
     }
+
+    $(document).delegate('.del','click',function(){
+        var parent = $(this).parent().parent().parent();
+        var id = parent.attr("id");
+        $.ajax({
+            url: 'ajaxHandlerEvents.php',
+            type: 'POST',
+            data: {action:"commentDelete", commentid:id},
+            success: function(res){
+                var result = JSON.parse(res);
+                if(result == true){ 
+                    parent.html("Deleted..");
+                    $(parent).fadeOut(2000);
+                }
+            }
+        })
+    });
+    $(document).delegate('.edit','click',function(){
+        var parent = $(this).parent().parent().parent();
+        var id = parent.attr("id");
+        var text = parent.find('.comments').text();
+        $("#modalcomment").val(text);
+        $("#eventupdate").addClass('edited').attr("data-commentid",id);
+    });
 
 </script>
 <aside id="action_palette" class="action_palette_width">		
@@ -1361,7 +1391,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         </div>
                     </div>
                     
-                    <input type="hidden" id="commenterid" name="userid" value="<?php echo $userID; ?>">
+                    <input type="hidden" id="current_user" name="userid" value="<?php echo $userID; ?>">
                     <input type="hidden" id="date_updated" name="update_date" value="<?php echo date("Y-m-d H:i:s"); ?>">
                     <button type="submit" id="eventsave" class="button filter half" style="cursor: pointer;">Save</button> 
                     <button type="submit" name="clear" class="button cancel half" style="cursor: pointer;"><strong>Clear</strong></button>
