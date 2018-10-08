@@ -68,12 +68,14 @@ if(isset($_POST["modalid"]) && isset($_POST['action']) && $_POST['action'] == "e
 
 if(isset($_POST['eventid']) && isset($_POST['action']) && $_POST['action'] == "getComment"){
     $eventId = $_POST['eventid'];
-    $query = "SELECT com.*, user.email, user.firstname, user.lastname, rep.first_name, rep.last_name "
+
+    $query = "SELECT  rep.first_name as repfname, rep.last_name as replname, admin.first_name as adminfname, admin.last_name as adminlname, com.* "
             ."FROM `tblcomments` com "
-            ."LEFT JOIN `tbluser` user ON com.user_id = user.Guid_user "
+            ."LEFT JOIN `tbladmins` admin ON com.user_id = admin.Guid_user "
             ."LEFT JOIN `tblsalesrep` rep ON com.user_id = rep.Guid_user "
             ."WHERE com.eventid = ".$eventId." ORDER BY `id` DESC";
     $result = $db->query($query);
+    
     echo json_encode($result);
 }
 

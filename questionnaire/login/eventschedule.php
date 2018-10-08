@@ -1132,6 +1132,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             data : { action: 'getComment', eventid: eventID },
             url : 'ajaxHandlerEvents.php',
             success : function(res){
+                //console.log(res);
                 var result = JSON.parse(res);
                 $(".comments-log").html('');
                 $("#modalcomment").val('');
@@ -1141,10 +1142,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     for( count = 0; count < result.length; count++){
                         var comment_date = moment(new Date(result[count]['created_date'])).format('DD MMM YYYY, h:mm a');
                         commentstext += "<div class='commentlogss' id='"+result[count]['id']+"'><p>";
-                        if(result[count]['first_name'] == null){
-                            commentstext += "<strong>"+ result[count]['firstname'] + " " + result[count]['lastname'] + " (" + comment_date + ") </strong>";
+                        if(result[count]['repfname'] != null){
+                            commentstext += "<strong>"+ result[count]['repfname'] + " " + result[count]['replname'] + " (" + comment_date + ") </strong>";
                         }else{
-                            commentstext += "<strong>"+ result[count]['first_name'] + " " + result[count]['last_name'] + " (" + comment_date + ") </strong>";
+                            commentstext += "<strong>"+ result[count]['adminfname'] + " " + result[count]['adminlname'] + " (" + comment_date + ") </strong>";
                         }
 
                         var current_user = $("#current_user").val();

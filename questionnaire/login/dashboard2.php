@@ -1263,20 +1263,15 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var count = 0;
                 var commentstext = "";
                 if(result.length != 0){
-
-                    /*for( count = 0; count < result.length; count++){
-                        commentstext += "<div class='commentlogss'><p>"+result[count]['comments']+"</p>";
-                        commentstext += "<p> By: "+ result[count]['email'] + " on: " + result[count]['created_date'] + "</p></div>";
-                    }*/
                     console.log(result);
                     var current_user = $("#update_commenterid").val();
                     for( count = 0; count < result.length; count++){
                         var comment_date = moment(new Date(result[count]['created_date'])).format('DD MMM YYYY, h:mm a');
                         commentstext += "<div class='commentlogss' id='"+result[count]['id']+"'><p>";
-                        if(result[count]['first_name'] == null){
-                            commentstext += "<strong>"+ result[count]['firstname'] + " " + result[count]['lastname'] + " (" + comment_date + ") </strong>";
+                        if(result[count]['repfname'] != null){
+                            commentstext += "<strong>"+ result[count]['repfname'] + " " + result[count]['replname'] + " (" + comment_date + ") </strong>";
                         }else{
-                            commentstext += "<strong>"+ result[count]['first_name'] + " " + result[count]['last_name'] + " (" + comment_date + ") </strong>";
+                            commentstext += "<strong>"+ result[count]['adminfname'] + " " + result[count]['adminlname'] + " (" + comment_date + ") </strong>";
                         }
                         if(current_user == result[count]['user_id'])
                             commentstext += "<span style='float:right; margin-right:5px;'><a class='fas fa-pencil-alt edit' href='#'></a> <a href='#' class='fa fa-times del'></a></span></p>";
