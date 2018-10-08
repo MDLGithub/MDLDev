@@ -214,11 +214,35 @@ require_once ('navbar.php');
 		<div class="col-md-8 col-md-offset-2">
 		    <form method="POST" enctype="multipart/form-data">
 			<div class="row pB-30">
-			    <div class="col-md-4">
+			    <div class="col-md-8">
 				<button name="manage_salesrep" type="submit" class="btn-inline">Save</button>
 				<button type="button" class="btn-inline btn-cancel" onclick="goBack()">Cancel</button>
 			    </div>
-			    <div class="col-md-4 text-center">
+			    <div class="col-md-4 padd-0">
+				<div class="status_chart">
+				    <div class="row">
+					<div class="col-md-6">
+					    Registered
+					    <span class="pull-right"><?php echo getSalesrepStatusCount($db, $Guid_salesrep, '28' ); //28->Registered ?></span>
+					</div>
+					<div class="col-md-6">
+					    Completed
+					    <span class="pull-right"><?php echo getSalesrepStatusCount($db, $Guid_salesrep, '36'); //36->Questionnaire Completed ?></span>
+					</div>
+				    </div>
+				    <div class="row">
+					<div class="col-md-6">
+					    Qualified
+					    <span class="pull-right"><?php echo getSalesrepStatusCount($db, $Guid_salesrep, '29'); //29->Questionnaire Completed->Qualified ?></span>
+					</div>
+					<div class="col-md-6">
+					    Submitted
+					    <span class="pull-right"><?php echo getSalesrepStatusCount($db, $Guid_salesrep, '1' ); //28->Submitted (Specimen Collected) ?></span>
+					</div>
+				    </div>
+				</div>
+			    </div>
+			    <div class="col-md-12 text-center">
 				<span class="error" id="message"></span>
 			    </div>
 			</div>
@@ -302,15 +326,22 @@ require_once ('navbar.php');
 				<div class="form-group">
 				    <div class="row">
 					<div class="col-md-12 padd-0">
-					    Select Color
+					    <label>Select Event Color</label>
 					    <div class="colorBox">
 						<?php
-						    $colorsArr = array('f99d1b','16a44a','3869b3', 'd4c038', 'c13f95', '3ec5cd', '9dbd1d' );
+						    $colorsArr = array('f99d1b','16a44a','3869b3', 'd4c038', 'c13f95', '3ec5cd', '9dbd1d','FF8170','9490FF','f599ff','d8d8d8','FFDAB1','9cffb1','D9BB93','C2E7F2','ea7898' );
+						    $getSelectedColors = $db->query("SELECT color FROM tblsalesrep WHERE color<>'' ");
+						    $disableColors = array();
+						    foreach ($getSelectedColors as $k=>$v){
+							$disableColors[] = $v['color'];
+						    }
+						    $disabled = '';
 						    foreach ($colorsArr as $k=>$v){
 							$selected = ($color=='#'.$v)?' checked':'';
+							$disabled = (in_array('#'.$v, $disableColors)&&($color!='#'.$v)) ? ' disabled' : '';
 						?>
-						    <div class="item">
-							<input <?php echo $selected; ?> id="<?php echo $v; ?>" type="radio" name="color" value="#<?php echo $v; ?>" />
+						    <div class="item <?php echo $disabled; ?>">
+							<input <?php echo $selected.' '.$disabled; ?> id="<?php echo $v; ?>" type="radio" name="color" value="#<?php echo $v; ?>" />
 							<label style="background:#<?php echo $v; ?>;" for="<?php echo $v; ?>">#<?php echo $v; ?></label>
 						    </div>
 						<?php } ?>
@@ -429,17 +460,8 @@ require_once ('navbar.php');
 				<?php if(isFieldVisibleByRole($isEmailView, $roleID)) {?>
 				    <th class="">Email</th>
 				<?php } ?>
-				<?php if(isFieldVisibleByRole($isPhoneView, $roleID)) {?>
-				    <th class="">Phone</th>
-				<?php } ?>
-				<?php if(isFieldVisibleByRole($isRegionView, $roleID)) {?>
-				    <th class="">Region</th>
-				<?php } ?>
 				<?php if(isFieldVisibleByRole($isTitleView, $roleID)) {?>
 				    <th class="">Title</th>
-				<?php } ?>
-				<?php if(isFieldVisibleByRole($isAddressView, $roleID)) {?>
-				    <th class="">Address</th>
 				<?php } ?>
 				<?php if(isFieldVisibleByRole($isCityView, $roleID)) {?>
 				    <th class="">City</th>
@@ -447,15 +469,10 @@ require_once ('navbar.php');
 				<?php if(isFieldVisibleByRole($isStateView, $roleID)) {?>
 				    <th class="">State</th>
 				<?php } ?>
-				<?php if(isFieldVisibleByRole($isZipView, $roleID)) {?>
-				    <th class="zip">Zip</th>
-				<?php } ?>
-				<?php if(isFieldVisibleByRole($isPhotoView, $roleID)) {?>
-				    <th class="noFilter text-center">Photo</th>
-				<?php } ?>
-				<?php if( isFieldVisibleByRole($isActionEdit, $roleID) || isFieldVisibleByRole($isActionDelete, $roleID)) {?>
-				    <th class="noFilter actions text-center">Actions</th>
-				<?php } ?>
+				<th class="">Registered</th>
+				<th class="">Completed</th>
+				<th class="">Qualified</th>
+				<th class="">Submitted</th>
 			    </tr>
 			</thead>
 			<tbody>
@@ -466,22 +483,63 @@ require_once ('navbar.php');
 			    ?>
 				<tr>
 				    <?php if(isFieldVisibleByRole($isFNameView, $roleID) || isFieldVisibleByRole($isLNameView, $roleID)) {?>
-					<td><?php echo $v['first_name']." ".$v['last_name']; ?></td>
+				    <td class="clickable">
+					<a class="details"><?php echo $v['first_name']." ".$v['last_name']; ?></a>
+					 <div class="moreInfo">
+					    <div class="content">
+						<span class="close">X</span>
+
+						<?php if(isFieldVisibleByRole($isPhotoView, $roleID)) {?>
+						    <p class="">
+							<?php $photo = ($v['photo_filename'] != "") ? "/images/users/".$v['photo_filename'] : "/assets/images/default.png";  ?>
+							<img width="40" src="<?php echo SITE_URL.$photo; ?>" />
+						    </p>
+						<?php } ?>
+						<?php if(isFieldVisibleByRole($isAddressView, $roleID)) {?>
+						    <?php if($v['address']!=""){ ?>
+							<p><label>Address: </label><?php echo $v['address']; ?></p>
+						    <?php } ?>
+						<?php } ?>
+						<?php if(isFieldVisibleByRole($isRegionView, $roleID)) {?>
+						    <?php if($v['region']!=""){ ?>
+							<p><label>Region: </label><?php echo $v['region']; ?></p>
+						    <?php } ?>
+						<?php } ?>
+						<?php if(isFieldVisibleByRole($isZipView, $roleID)) {?>
+						    <?php if($v['zip']!=""){ ?>
+							<p><label>Zip: </label><?php echo $v['zip']; ?></p>
+						    <?php } ?>
+						<?php } ?>
+						<?php if(isFieldVisibleByRole($isPhoneView, $roleID)) {?>
+						    <?php if($v['phone_number']!=""){ ?>
+							<p><label>Phone: </label><span class="phone_us"><?php echo $v['phone_number']; ?></span></p>
+						    <?php } ?>
+						<?php } ?>
+
+						<?php if( isFieldVisibleByRole($isActionEdit, $roleID) || isFieldVisibleByRole($isActionDelete, $roleID)) {?>
+						    <div class="text-right pT-15 pB-10">
+							<?php if( isFieldVisibleByRole($isActionEdit, $roleID) ) {?>
+							<a href="<?php echo SITE_URL; ?>/salesreps.php?action=edit&id=<?php echo $v['Guid_salesrep']; ?>">
+							    <span class="fas fa-pencil-alt"></span>
+							</a>
+							<?php } ?>
+							<?php if(isFieldVisibleByRole($isActionDelete, $roleID)) {?>
+							<a onclick="javascript:confirmationDeleteSalesReps($(this));return false;" href="<?php echo SITE_URL; ?>/salesreps.php?delete=<?php echo $v['Guid_salesrep'] ?>&id=<?php echo $v['Guid_salesrep']; ?>&user=<?php echo $v['Guid_user']; ?>">
+							    <span class="far fa-trash-alt"></span>
+							</a>
+							<?php } ?>
+						    </div>
+						<?php } ?>
+					    </div>
+					 </div>
+
+				    </td>
 				    <?php } ?>
 				    <?php if(isFieldVisibleByRole($isEmailView, $roleID)) {?>
 					<td><?php echo $v['email']; ?></td>
 				    <?php } ?>
-				    <?php if(isFieldVisibleByRole($isPhoneView, $roleID)) {?>
-					<td><span class="phone_us"><?php echo $v['phone_number']; ?></span></td>
-				    <?php } ?>
-				    <?php if(isFieldVisibleByRole($isRegionView, $roleID)) {?>
-					<td><?php echo $v['region']; ?></td>
-				    <?php } ?>
 				    <?php if(isFieldVisibleByRole($isTitleView, $roleID)) {?>
 					<td><?php echo $v['title']; ?></td>
-				    <?php } ?>
-				    <?php if(isFieldVisibleByRole($isAddressView, $roleID)) {?>
-					<td><?php echo $v['address']; ?></td>
 				    <?php } ?>
 				    <?php if(isFieldVisibleByRole($isCityView, $roleID)) {?>
 					<td><?php echo $v['city']; ?></td>
@@ -489,32 +547,10 @@ require_once ('navbar.php');
 				    <?php if(isFieldVisibleByRole($isStateView, $roleID)) {?>
 					<td><?php echo $v['state']; ?></td>
 				    <?php } ?>
-				    <?php if(isFieldVisibleByRole($isZipView, $roleID)) {?>
-					<td><?php echo $v['zip']; ?></td>
-				    <?php } ?>
-				    <?php if(isFieldVisibleByRole($isPhotoView, $roleID)) {?>
-					<td class="text-center">
-					    <?php
-						$photo = ($v['photo_filename'] != "") ? "/images/users/".$v['photo_filename'] : "/assets/images/default.png";
-
-					    ?>
-					    <img width="40" src="<?php echo SITE_URL.$photo; ?>" />
-					</td>
-				    <?php } ?>
-				    <?php if( isFieldVisibleByRole($isActionEdit, $roleID) || isFieldVisibleByRole($isActionDelete, $roleID)) {?>
-					<td class="text-center">
-					    <?php if( isFieldVisibleByRole($isActionEdit, $roleID) ) {?>
-					    <a href="<?php echo SITE_URL; ?>/salesreps.php?action=edit&id=<?php echo $v['Guid_salesrep']; ?>">
-						<span class="fas fa-pencil-alt"></span>
-					    </a>
-					    <?php } ?>
-					    <?php if(isFieldVisibleByRole($isActionDelete, $roleID)) {?>
-					    <a onclick="javascript:confirmationDeleteSalesReps($(this));return false;" href="?delete=<?php echo $v['Guid_salesrep'] ?>&id=<?php echo $v['Guid_salesrep']; ?>&user=<?php echo $v['Guid_user']; ?>">
-						<span class="far fa-trash-alt"></span>
-					    </a>
-					    <?php } ?>
-					</td>
-				    <?php } ?>
+				    <td><?php echo getSalesrepStatusCount($db, $v['Guid_salesrep'], '28' ); //28->Registered ?></td>
+				    <td><?php echo getSalesrepStatusCount($db, $v['Guid_salesrep'], '36'); //36->Questionnaire Completed ?></td>
+				    <td><?php echo getSalesrepStatusCount($db, $v['Guid_salesrep'], '29'); //29->Questionnaire Completed->Qualified ?></td>
+				    <td><?php echo getSalesrepStatusCount($db, $v['Guid_salesrep'], '1' ); //28->Submitted (Specimen Collected) ?></td>
 				</tr>
 			    <?php
 				$i++;
@@ -545,12 +581,7 @@ require_once ('navbar.php');
 	    orderCellsTop: true,
 	    fixedHeader: true,
 	    //searching: false,
-	    lengthChange: false,
-	    "aoColumnDefs": [
-	      {
-		  "bSortable": false,
-		  "aTargets": [ 9,10 ] }
-	    ]
+	    lengthChange: false
 	});
     }
 
