@@ -14,6 +14,28 @@ $(document).ready(function () {
 	textClass: 'chooseFileTxt'
     });
 
+    /**
+     * Dashboard Calendar Date Dropdown filter
+     * used on dashboard2.php dashboard calendar
+     */
+    $(".stats_dropdown_arrow").click(function(){
+	//Changes the width of the filters
+	$(".stats_dropdown").toggleClass("dropdown_hide");
+	$(".chart_header .stats_date").toggleClass("hide");
+	$(".stats_dropdown_arrow").toggleClass("dropdown_arrow_show");
+	$(".chart_header .button").toggleClass("hide");
+    });
+
+    /**
+     * Dashboard Calendar Sales Rep Dropdown filter
+     * used on dashboard2.php dashboard calendar
+     */
+    $(".info_block_arrow").click(function(){
+	$(".salesrep_dropdown").toggleClass("dropdown_hide");
+	$(".info_block h1").toggleClass("hide");
+	$(".info_block_arrow").toggleClass("info_block_arrow_show");
+    });
+
     $('.toggleRoles').on('click', function(){
 	if($('.edit-status-form .rolesBlock').hasClass('hidden')){
 	    $('.edit-status-form .rolesBlock').removeClass('hidden');
