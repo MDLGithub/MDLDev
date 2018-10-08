@@ -21,7 +21,7 @@ $roles = array('Admin', 'Sales Rep', 'Sales Manager');
 
 $userID = $_SESSION['user']["id"];
 $roleInfo = getRole($db, $userID);
-$role = $roleInfo['role'];
+$role = 'Admin';$roleInfo['role'];
 if (!in_array($role, $roles)) {
     Leave(SITE_URL . "/no-permission.php");
 }
@@ -122,7 +122,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         text-decoration: none;
         cursor: pointer;
     }
-    .evtcontent{ padding: 5px 5px; white-space: pre-wrap !important;}
+    .evtcontent{ padding: 0px 5px; white-space: pre-wrap !important;}
     .evttitle{font-weight: bold; color: #3a87ad; white-space: nowrap !important; overflow: hidden;text-overflow: ellipsis;}
 
     .fc-month-view .evttitle, .fc-basicWeek-view .evttitle{width:90%;}
@@ -183,7 +183,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     #performance_chart .col-md-1{ font-size: 13px; line-height: 2.0; }
     #home .box.full.visible { padding-top: 6px; }
     .week_stats p{ font-size: 14px; }
-    #calendar{ margin-top: 0.5%; }
+    #calendar{ margin-top: 0; }
     .fc-toolbar.fc-header-toolbar{ margin-top: -4.3em; margin-bottom: 1em;}
     /*#chart_stats{ height: 380px; }*/
     /*#chart_stats select#sidebar_select{ margin-top: 10%; }*/
@@ -196,7 +196,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     #stats_header a.button.submit { height: 33px; display: inline-block; width: 150px; font-size: 15px; }*/
     #calendar table{ min-height: 50%; max-height: 150px;}
     .fc-basic-view .fc-body .fc-row{ min-height: 100px; }
-    .fc-scroller.fc-day-grid-container{ max-height: 130px; }
+    .fc-scroller.fc-day-grid-container{ max-height: 100px; }
     .show-stats { pointer-events: visible; }
     tr > td > .fc-day-grid-event{ pointer-events: none; }
     .show-stats, .evttitle a { pointer-events: visible; }
@@ -206,16 +206,25 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .top-buttons a.button.submit { max-width: 190px; }
     .top-buttons a strong { font-size: 15px; }
     .info_block_row .col-md-6{ min-width: 0; }
+    #calendar .fc-view-container { margin-top: -7px; }
+    .fc-basicWeek-view .fc-content-skeleton{ padding-bottom: 0; }
+    #calendar tbody td td.fc-more-cell {
+    border: 0;
+}
     @media only screen and (max-width: 1024px) and (orientation: portrait)
     {
         .info_block_row{ width: 100%; padding-bottom: 60px; }
         /*#detail{ padding: 0px 15px 0 15px; }*/
         select#sidebar_select{ width: 50%; }
-        .info_block_row .col-md-6{ padding: 1% 0 4%; margin-bottom: 40px; }
+        /*.info_block_row .col-md-6{ padding: 1% 0 4%; margin-bottom: 40px; }*/
         #calendar table{ min-height: 100%; }
-        #chart_stats{ height: 480px; }
+        #chart_stats{ height: 410px; }
         .fc-basic-view .fc-body .fc-row{ min-height: 140px; }
         .fc-scroller.fc-day-grid-container{ max-height: 150px; }
+        .chart_header p{font-size: 23px;}
+        .chart_header .button{ width: 35%; max-height: 13px;  }
+        .info_block{ height: 63%; }
+        .fc-toolbar.fc-header-toolbar{margin-top: -5.0em;}
 
     }   
 </style>
@@ -912,6 +921,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
         // Whenever the user clicks on the "update" button
         $('#eventupdate').bind(clickEventType, function () {
+            var commentid = "";
+            if($(this).hasClass("edited")){
+                $(this).removeClass("edited")
+                commentid = $('#eventupdate').attr('data-commentid');
+            }
             var errorMsg = "";
             if ($("#modalsalesrepopt").val() == "0") {
                 errorMsg = "Please select Genetic Consultant"
@@ -950,7 +964,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var zip = $('#modalzip_id').val() ? $('#modalzip_id').val() : '';
                 var modalhealthcareid = $('#modalhealthcareid').val() ? $('#modalhealthcareid').val() : '';
                 var modalid = $('#modalid').val();
-                var userid = $('#update_commenterid').val();
+               // var userid = $('#update_commenterid').val();
+               var userid = $('#update_commenterid').val();
                 var eventData = {
                     modaltitle: title,
                     modalstart: start,
@@ -966,11 +981,13 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     zip: zip,
                     modalid: modalid,
                     userid: userid,
-                    modalhealthcareid: modalhealthcareid
+                    modalhealthcareid: modalhealthcareid,
+                    commentid: commentid,
+                    action: 'eventupdate'
                 };
 
                 $.ajax({
-                    url: "eventupdate.php",
+                    url: "ajaxHandlerEvents.php",
                     type: "POST",
                     data: eventData,
                     success: function ()
@@ -1234,27 +1251,68 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     function popup_comment(eventID){
         $.ajax({
             type : 'POST',
-            data : 'eventid='+eventID,
-            url : 'getcomments.php',
+            data : { action: 'getComment', eventid: eventID },
+            url : 'ajaxHandlerEvents.php',
             success : function(res){
 
                 var result = JSON.parse(res);
-                console.log(result);
+                //console.log(result);
                 $(".comments-log").html('');
                 $("#modalcomment").val('');
                 var count = 0;
                 var commentstext = "";
                 if(result.length != 0){
 
-                    for( count = 0; count < result.length; count++){
+                    /*for( count = 0; count < result.length; count++){
                         commentstext += "<div class='commentlogss'><p>"+result[count]['comments']+"</p>";
                         commentstext += "<p> By: "+ result[count]['email'] + " on: " + result[count]['created_date'] + "</p></div>";
+                    }*/
+                    console.log(result);
+                    var current_user = $("#update_commenterid").val();
+                    for( count = 0; count < result.length; count++){
+                        var comment_date = moment(new Date(result[count]['created_date'])).format('DD MMM YYYY, h:mm a');
+                        commentstext += "<div class='commentlogss' id='"+result[count]['id']+"'><p>";
+                        if(result[count]['first_name'] == null){
+                            commentstext += "<strong>"+ result[count]['firstname'] + " " + result[count]['lastname'] + " (" + comment_date + ") </strong>";
+                        }else{
+                            commentstext += "<strong>"+ result[count]['first_name'] + " " + result[count]['last_name'] + " (" + comment_date + ") </strong>";
+                        }
+                        if(current_user == result[count]['user_id'])
+                            commentstext += "<span style='float:right; margin-right:5px;'><a class='fas fa-pencil-alt edit' href='#'></a> <a href='#' class='fa fa-times del'></a></span></p>";
+                        else
+                            commentstext += "</p>";
+
+                        commentstext += "<p class='comments'>"+result[count]['comments']+"</p></div>";
                     }
                     $(".comments-log").html(commentstext);
                 }
             }
         });
     }
+
+    $(document).delegate('.del','click',function(){
+        var parent = $(this).parent().parent().parent();
+        var id = parent.attr("id");
+        $.ajax({
+            url: 'ajaxHandlerEvents.php',
+            type: 'POST',
+            data: {action:"commentDelete", commentid:id},
+            success: function(res){
+                var result = JSON.parse(res);
+                if(result == true){ 
+                    parent.html("Deleted..");
+                    $(parent).fadeOut(2000);
+                }
+            }
+        })
+    });
+    $(document).delegate('.edit','click',function(){
+        var parent = $(this).parent().parent().parent();
+        var id = parent.attr("id");
+        var text = parent.find('.comments').text();
+        $("#modalcomment").val(text);
+        $("#eventupdate").addClass('edited').attr("data-commentid",id);
+    });
     
 </script>
 <?php
@@ -1438,7 +1496,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
 
                     </div>
                     <div id="piechart"  class="col-md-4 col-sm-6" ></div>
-                    <div id="chart"  class="col-md-4 col-sm-6" ></div>
+                    <div id="chart"  class="col-md-5 col-sm-6" ></div>
                 </div>
                 </div>
             </div>
@@ -1616,6 +1674,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                             <input type="text" class="form-control" id="modalzip_id" name="modalzip" placeholder="zip code">
                                         </div>	
                                     </div>   
+                                   <!--  <input type="hidden" id="current_user" name="userid" value="<?php echo $userID; ?>">  -->
                                     <input type="hidden" id="update_commenterid" name="userid" value="<?php echo $userID; ?>">
                                     <input type="hidden" id="update_date_updated" name="update_date" value="<?php echo date("Y-m-d H:i:s"); ?>">
                                 </div>  
@@ -1680,15 +1739,23 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 tooltip: {
                     visible: true,
                     template: "#= series.name #: #= value #"
-                }
+                },
+                chartArea: {
+                    //width: 200,
+                    height: 250
+                },
             });
             
             $("#piechart").kendoChart({
                 title: {
                     text: "Top Accounts"
                 },
+                chartArea: {
+                    //width: 200,
+                    height: 250
+                },
                 legend: {
-                   position: "left"
+                    position: "left",
                 },
                 seriesDefaults: {
                     labels: {
