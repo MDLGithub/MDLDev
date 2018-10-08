@@ -240,7 +240,7 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
                                     </div>
                                     <div class="col-md-6">
                                         Submitted
-                                        <span class="pull-right"><?php echo getAccountStatusCount($db, $v['account'], '1' ); //28->Submitted (Specimen Collected) ?></span>
+                                        <span class="pull-right"><?php echo getAccountStatusCount($db, $accountActive['account'], '1' ); //28->Submitted (Specimen Collected) ?></span>
                                     </div>
                                 </div>
                             </div>

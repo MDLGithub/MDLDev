@@ -757,6 +757,15 @@ function getAccountStatusCount($db, $account, $Guid_status ){
     $result = $db->row($q, array('account'=>$account,'Guid_status'=>$Guid_status));    
     return $result['count'];
 }
+function getSalesrepStatusCount($db, $Guid_salesrep, $Guid_status ){     
+    $q = "SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l "
+        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
+        . "WHERE l.Guid_status =:Guid_status AND l.Guid_salesrep=:Guid_salesrep AND u.marked_test='0'"; 
+    
+    $result = $db->row($q, array('Guid_salesrep'=>$Guid_salesrep,'Guid_status'=>$Guid_status));    
+    return $result['count'];
+}
+
 
 
 

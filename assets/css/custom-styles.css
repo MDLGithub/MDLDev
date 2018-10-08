@@ -1633,6 +1633,8 @@ td.tdAccount:hover .account_name{
     float: left;
     margin-right: 6px;
     margin-bottom: 5px;
+    text-transform: lowercase;
+    width: 70px;
 }
 .colorBox .item{
   display: inline-block;
