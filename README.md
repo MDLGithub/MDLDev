@@ -37,3 +37,16 @@ Columns:
 - created_date: DATETIME
 - updated_date: DATETIME
 
+#Updated file lists on 08-Oct-2018
+- /login/dashboard2.php
+- /login/eventschedule.php
+- /login/assets/css/calendar.css
+
+#Added new file on 08-Oct-2018
+- /login/ajaxHandlerEvents.php
+
+#Alter table tbluser on 08-Oct-2018
+Since need to show comments with Names instead of emailID, but there was no fields existed related to Username or Name in tbluser. There are names existed only for Salesrep (in tblsalesrep), but for remaining users it is null.
+For this reason, I have altered tbluser (Added 2 fields):
+- firstname varchar(255)
+- lastname varchar(255)
