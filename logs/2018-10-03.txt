@@ -1,0 +1,269 @@
+Time : 22:11:02
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 19:38:52
+SQLSTATE[HY000] [1049] Unknown database 'elmirak_mdlab_shareddb'
+
+Time : 19:38:51
+SQLSTATE[HY000] [1049] Unknown database 'elmirak_mdlab_shareddb'
+
+Time : 19:38:18
+SQLSTATE[HY000] [2002] php_network_getaddresses: getaddrinfo failed: Name or service not known
+
+Time : 19:38:17
+SQLSTATE[HY000] [2002] php_network_getaddresses: getaddrinfo failed: Name or service not known
+
+Time : 19:37:42
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 19:18:38
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tblaccessbyroles' doesn't exist
+Raw SQL : SELECT * FROM `tblaccessbyroles` WHERE key_id=:key
+
+Time : 19:18:21
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tbluserrole' doesn't exist
+Raw SQL : SELECT * FROM tblrole r LEFT JOIN tbluserrole u ON r.Guid_role = u.Guid_role WHERE u.Guid_user = 181
+
+Time : 19:18:17
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tbluserrole' doesn't exist
+Raw SQL : SELECT * FROM tblrole r LEFT JOIN tbluserrole u ON r.Guid_role = u.Guid_role WHERE u.Guid_user = 181
+
+Time : 19:17:33
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tbluserrole' doesn't exist
+Raw SQL : SELECT * FROM tblrole r LEFT JOIN tbluserrole u ON r.Guid_role = u.Guid_role WHERE u.Guid_user = 181
+
+Time : 19:17:14
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tbluserrole' doesn't exist
+Raw SQL : SELECT * FROM tblrole r LEFT JOIN tbluserrole u ON r.Guid_role = u.Guid_role WHERE u.Guid_user = 181
+
+Time : 19:17:12
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tbluserrole' doesn't exist
+Raw SQL : SELECT * FROM tblrole r LEFT JOIN tbluserrole u ON r.Guid_role = u.Guid_role WHERE u.Guid_user = 181
+
+Time : 19:10:44
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tblaccessbyroles' doesn't exist
+Raw SQL : SELECT * FROM `tblaccessbyroles` WHERE key_id=:key
+
+Time : 19:09:34
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tbluserrole' doesn't exist
+Raw SQL : SELECT r.Guid_role, r.role FROM tblrole r LEFT JOIN tbluserrole u ON r.Guid_role = u.Guid_role WHERE u.Guid_user=:Guid_user
+
+Time : 19:09:33
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tbluserrole' doesn't exist
+Raw SQL : SELECT r.Guid_role, r.role FROM tblrole r LEFT JOIN tbluserrole u ON r.Guid_role = u.Guid_role WHERE u.Guid_user=:Guid_user
+
+Time : 19:09:22
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tbluserrole' doesn't exist
+Raw SQL : SELECT r.Guid_role, r.role FROM tblrole r LEFT JOIN tbluserrole u ON r.Guid_role = u.Guid_role WHERE u.Guid_user=:Guid_user
+
+Time : 19:09:21
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tbluserrole' doesn't exist
+Raw SQL : SELECT r.Guid_role, r.role FROM tblrole r LEFT JOIN tbluserrole u ON r.Guid_role = u.Guid_role WHERE u.Guid_user=:Guid_user
+
+Time : 18:45:48
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tblaccessbyroles' doesn't exist
+Raw SQL : SELECT * FROM `tblaccessbyroles` WHERE key_id=:key
+
+Time : 18:45:47
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tblaccessbyroles' doesn't exist
+Raw SQL : SELECT * FROM `tblaccessbyroles` WHERE key_id=:key
+
+Time : 18:45:46
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tblaccessbyroles' doesn't exist
+Raw SQL : SELECT * FROM `tblaccessbyroles` WHERE key_id=:key
+
+Time : 18:35:11
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tblaccessbyroles' doesn't exist
+Raw SQL : SELECT * FROM `tblaccessbyroles` WHERE key_id=:key
+
+Time : 18:35:11
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tblaccessbyroles' doesn't exist
+Raw SQL : SELECT * FROM `tblaccessbyroles` WHERE key_id=:key
+
+Time : 18:35:11
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tblaccessbyroles' doesn't exist
+Raw SQL : SELECT * FROM `tblaccessbyroles` WHERE key_id=:key
+
+Time : 18:35:11
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tblaccessbyroles' doesn't exist
+Raw SQL : SELECT * FROM `tblaccessbyroles` WHERE key_id=:key
+
+Time : 18:35:10
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tblaccessbyroles' doesn't exist
+Raw SQL : SELECT * FROM `tblaccessbyroles` WHERE key_id=:key
+
+Time : 18:35:10
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tblaccessbyroles' doesn't exist
+Raw SQL : SELECT * FROM `tblaccessbyroles` WHERE key_id=:key
+
+Time : 18:35:10
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tblaccessbyroles' doesn't exist
+Raw SQL : SELECT * FROM `tblaccessbyroles` WHERE key_id=:key
+
+Time : 18:35:09
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tblaccessbyroles' doesn't exist
+Raw SQL : SELECT * FROM `tblaccessbyroles` WHERE key_id=:key
+
+Time : 18:35:09
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tblaccessbyroles' doesn't exist
+Raw SQL : SELECT * FROM `tblaccessbyroles` WHERE key_id=:key
+
+Time : 18:33:29
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dev_shareddb.tblaccessbyroles' doesn't exist
+Raw SQL : SELECT * FROM `tblaccessbyroles` WHERE key_id=:key
+
+Time : 18:28:42
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:28:25
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:26:39
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:21:07
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:20:47
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:20:47
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:20:46
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:20:46
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:20:46
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:20:46
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:20:46
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:20:46
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:20:45
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:20:45
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:20:45
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:20:45
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:20:45
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:20:45
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:20:44
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:20:44
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:20:00
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:59
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:59
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:59
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:58
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:13
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:13
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:13
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:13
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:13
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:12
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:12
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:12
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:12
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:12
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:11
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:11
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:11
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:11
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:10
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:10
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:10
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:10
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:10
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:10
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:09
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:09
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:09
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:09
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:09
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:19:08
+SQLSTATE[HY000] [2002] No such file or directory
+
+Time : 18:15:04
+SQLSTATE[HY000] [2002] No such file or directory

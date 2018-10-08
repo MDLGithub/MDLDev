@@ -1,0 +1,7 @@
+Time : 12:55:19
+SQLSTATE[HY093]: Invalid parameter number: parameter was not defined
+Raw SQL : SELECT time FROM tbluser_login_attempts WHERE Guid_user = ? AND time > '1536051319'
+
+Time : 12:54:48
+SQLSTATE[HY093]: Invalid parameter number: parameter was not defined
+Raw SQL : SELECT time FROM tbluser_login_attempts WHERE Guid_user = ? AND time > '1536051288'
