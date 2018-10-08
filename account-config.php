@@ -491,7 +491,7 @@ require_once ('navbar.php');
 						    </a>
 						    <?php } ?>
 						    <?php if(isFieldVisibleByRole($isActionDelete, $roleID)) {?>
-						    <a onclick="javascript:confirmationDeleteAccount($(this));return false;" href="<?php echo SITE_URL; ?>/accounts.php?delete=<?php echo $v['Guid_account'] ?>&id=<?php echo $v['account']; ?>">
+						    <a onclick="javascript:confirmationDeleteAccount($(this));return false;" href="<?php echo SITE_URL; ?>/account-config.php?delete=<?php echo $v['Guid_account'] ?>&id=<?php echo $v['account']; ?>">
 							<span class="far fa-trash-alt" aria-hidden="true"></span>
 						    </a>
 						    <?php } ?>
