@@ -35,12 +35,13 @@ $(document).ready(function () {
             $(this).removeClass('fa-eye').addClass('fa-eye-slash');
         }       
     });
-    
-    $('td.clickable').delegate('.details','click', function(){
+    //Accounts page show account Details on click
+    $(document).on('click', 'td.clickable .details', function(e){
+        e.preventDefault();
         $('td.clickable .moreInfo').hide();
         $(this).parent().find('.moreInfo').show();
     });
-    $('td.clickable .moreInfo').delegate('.close','click', function(){       
+    $(document).on('click','td.clickable .moreInfo', function(){       
         $('.moreInfo').hide();
     });
     
