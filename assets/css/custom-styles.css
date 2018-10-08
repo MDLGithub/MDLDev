@@ -1565,12 +1565,6 @@ table.valignTop td{
     margin: 0 auto;
 }
 
-tr.mdl_patient{
-    background: #ffa7a7!important;
-}
-tr.marked_test{
-    background: #eaff75!important;
-}
 table.dataTable.display tbody tr:hover>.sorting_1, 
 table.dataTable.order-column tbody tr>.sorting_1, 
 table.dataTable.order-column tbody tr>.sorting_2, 
@@ -1662,8 +1656,100 @@ td.tdAccount:hover .account_name{
     color: #bd4646;
     padding-left: 10px;
     padding-right: 10px;
-    font-size: 12px;
     font-weight: bold;
-    background: linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%);
+}
+.user-managemnet-bg .admin{
+    color: #b1ffcd;
+}
+.user-managemnet-bg .mdl_patient{
+    color: #b186fd;
+}
+.user-managemnet-bg .marked_test{
+    color: #ffc747;
+}
+.user-managemnet-bg .salesrep{
+    color: #eab8d9;
+}
+.user-managemnet-bg .provider{
+    color: #b5d1f3;
+}
+
+tr.admin{
+    background: #b1ffcdba!important;
+}
+tr.salesrep{
+    background: #eab8d9ba!important;
+}
+tr.provider{
+    background: #b5d1f3ba!important;
+}
+tr.mdl_patient{
+    background: #b186fdba!important;
+}
+tr.marked_test{
+    background: #ffc747ba!important;
+}
+table.dataTable th{
+        box-sizing: border-box!important;
+}
+td.clickable{
+    position: relative;
+}
+td.clickable .details{
+    cursor: pointer;
+}
+td.clickable .moreInfo:after{
+    content: " ";
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 15px 10px 15px 0;
+    border-color: transparent #c7cdda transparent transparent;
+    position: absolute;
+    top: 0;
+    left: -10px;
+}
+td.clickable .moreInfo{
+    display: none;
+    position: absolute;    
+    top: 3px;
+    left: 70px;
+    background: #eee;
+    width: 360px;
+    z-index: 100;
+    border: 1px solid #c7cdda;
+}
+td.clickable .moreInfo .content{
+    position: relative;
+    padding-top: 20px;
+    box-shadow: 0 2px 5px rgb(177, 189, 200);
+}
+td.clickable .moreInfo .content>p{
+    padding: 0 20px;
+}
+td.clickable .moreInfo .content label{
+    min-width: 80px;
+    padding-right: 5px;
+}
+td.clickable .moreInfo .close{
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+    top: 0;
+    color: #fff;
+    width: 20px;
+    height: 20px;
+    background: #bd2b2b;
+    text-align: center;
+    line-height: 1.5;
+    font-weight: bold;
+}
+.status_chart{
+    padding: 10px 0;
+    background: #eee;
+    border: 1px solid #d3d3d3;
+    border-radius: 5px;
+}
+.status_chart span{
     
 }

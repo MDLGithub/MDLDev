@@ -28,7 +28,7 @@ function login($email, $password, $db) {
             // Account is locked 
             // Send an email to user saying their account is locked 
             $showMsg = false;
-            $message = "Your Account locked for 2 hours for security reason.";
+            $message = "Your account has been locked for 2 hours due to the multiple failed login attempts. Please try again later. If you need immediate assistance, please contact your support team.";
             $returnData = array('status'=>false, $showMsg=>false, 'message'=>$message);
             return $returnData;
         } else {            
