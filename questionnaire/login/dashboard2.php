@@ -21,7 +21,7 @@ $roles = array('Admin', 'Sales Rep', 'Sales Manager');
 
 $userID = $_SESSION['user']["id"];
 $roleInfo = getRole($db, $userID);
-$role = 'Admin';$roleInfo['role'];
+$role = $roleInfo['role'];
 if (!in_array($role, $roles)) {
     Leave(SITE_URL . "/no-permission.php");
 }
@@ -225,7 +225,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         .chart_header .button{ width: 35%; max-height: 13px;  }
         .info_block{ height: 63%; }
         .fc-toolbar.fc-header-toolbar{margin-top: -5.0em;}
-
+        .fc-content.evtcontent.summary div {font-size: 13px;}
+        .fc-content.evtcontent.summary { padding: 0 !important; }
     }   
 </style>
 <script>
@@ -529,7 +530,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 if (event.evtCnt) {
                     $("#summary").addClass("details_button").removeClass("summary_button");
                     $("#detail").addClass("summary_button").removeClass("details_button");
-                    var content = '<div class="fc-content evtcontent days-' + eventDate + '" style="padding: 0 20px; font-size: 15px; line-height: 16px;">';
+                    var content = '<div class="fc-content evtcontent summary days-' + eventDate + '" style="padding: 0 20px; font-size: 15px; line-height: 16px;">';
                     content += '<div class="numberCircleContainer"><span class="numberCircle">' + event.evtCnt + '</span></div>';
                     content += '<div>Registered <span style="float:right">' + event.registeredCnt + '</span></div>';
                     content += '<div>Completed <span style="float:right">' + event.qualifiedCnt + '</span></div>';
@@ -542,7 +543,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     $("#summary").addClass("summary_button").removeClass("details_button");
                     if (parsedEventTime < parsedNow) {
                         var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable days-' + eventDate + '"  style="' + borderColor + '">' +
-                                '<div class="fc-content evtcontent">' +
+                                '<div class="fc-content evtcontent summary">' +
                                 '<div class="' + icon + '"></div>' +
                                 '<div class="fc-title evttitle"><a href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>' +
                                 salesrep + cmts +
