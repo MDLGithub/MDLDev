@@ -1037,25 +1037,14 @@ $(document).ready(function () {
      * Add revenue table row
      */
     $('#add-revenue').on('click', function(){
-	var formData = '<tr>\n\
-			<td><input required name="revenueAdd[date_paid][]" class="deductable-first datepicker" autocomplete="off" class="revenue-first" placeholder="Date Paid" type="text" /></td>\n\
-			<td><input required name="revenueAdd[payor][]" placeholder="Payor" type="text" /></td>\n\
-			<td>$ <input required name="revenueAdd[insurance][]" placeholder="Insurance" type="number"  min=\"0.00\" step=\"0.01\"/></td>\n\
-			<td>$ <input required name="revenueAdd[patient][]" placeholder="Patient" type="number"  min=\"0.00\" step=\"0.01\"/></td>\n\
-			<td class="text-center"><a class="color-red removeTableRow"><span class="fas fa-minus-circle" aria-hidden="true"></span></a></td>\n\
-			</tr>';
+	var formData = '<tr><td><input required name="revenueAdd[date_paid][]" class="deductable-first datepicker" autocomplete="off" class="revenue-first" placeholder="Date Paid" type="text" /></td><td><input required name="revenueAdd[payor][]" placeholder="Payor" type="text" /></td><td>$ <input required name="revenueAdd[insurance][]" placeholder="Insurance" type="number"  min=\"0.00\" step=\"0.01\"/></td><td>$ <input required name="revenueAdd[patient][]" placeholder="Patient" type="number"  min=\"0.00\" step=\"0.01\"/></td><td class="text-center"><a class="color-red removeTableRow"><span class="fas fa-minus-circle" aria-hidden="true"></span></a></td></tr>';
 	$('#revenue-table .priceSum').before(formData);
     });
     /**
      * Add deductable table row
      */
     $('#add-deductable-log').on('click', function(){
-	var formData = '<tr>\n\
-			    <td><input required name="deductableAdd[date_checked][]" class="deductable-first datepicker" autocomplete="off" placeholder="Date Checked" type="text" /></td>\n\
-			    <td><input required name="deductableAdd[checked_by][]" placeholder="Checked By" type="text" /></td>\n\
-			    <td>$ <input required name="deductableAdd[deductable][]" placeholder="Deductible" type="number" min=\"0.00\" step=\"0.01\" /></td>\n\
-			    <td class="text-center"><a class="color-red removeTableRow"><span class="fas fa-minus-circle" aria-hidden="true"></span></a></td>\n\
-			</tr>';
+	var formData = '<tr><td><input required name="deductableAdd[date_checked][]" class="deductable-first datepicker" autocomplete="off" placeholder="Date Checked" type="text" /></td><td><input required name="deductableAdd[checked_by][]" placeholder="Checked By" type="text" /></td><td>$ <input required name="deductableAdd[deductable][]" placeholder="Deductible" type="number" min=\"0.00\" step=\"0.01\" /></td><td class="text-center"><a class="color-red removeTableRow"><span class="fas fa-minus-circle" aria-hidden="true"></span></a></td></tr>';
 	$('#deductable-table .priceSum').before(formData);
     });
 
