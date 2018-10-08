@@ -766,9 +766,6 @@ function getSalesrepStatusCount($db, $Guid_salesrep, $Guid_status ){
     return $result['count'];
 }
 
-
-
-
 function getProviderSalesRep($db, $providerID) {
     $query = "SELECT 
 	p.`Guid_provider`, p.`account_id`, 
