@@ -203,7 +203,8 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
 	    <div id="accounts">
 		<div class="row">
 		    <div class="col-md-8">
-		    <div class="selectAccountBlock">
+		    <div class="selectAccountBlock row ">
+			<div class="col-md-8 padd-0">
 			<label >Select Account</label><br/>
 			<select class="form-control" id="selectAccount">
 			    <?php
@@ -216,10 +217,34 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
 			    <option <?php echo $selected; ?> data-guid="<?php echo $v['Guid_account']; ?>" value="<?php echo $v['account']; ?>"><?php echo $v['account']." - ".ucwords(strtolower($v['name'])); ?></option>
 			    <?php  } ?>
 			</select>
-
 			<a href="<?php echo SITE_URL;?>/account-config.php?action=edit&id=<?php echo $accountActive['Guid_account']; ?>" id="edit-selected-account" class="add-new-account">
 			    <span class="fas fa-pencil-alt" aria-hidden="true"></span>
 			</a>
+			</div>
+			<div class="col-md-4  padd-0">
+			    <div class="status_chart">
+				<div class="row">
+				    <div class="col-md-6">
+					Registered
+					<span class="pull-right"><?php echo getAccountStatusCount($db, $accountActive['account'], '28' ); //28->Registered ?></span>
+				    </div>
+				    <div class="col-md-6">
+					Completed
+					<span class="pull-right"><?php echo getAccountStatusCount($db, $accountActive['account'], '36'); //36->Questionnaire Completed ?></span>
+				    </div>
+				</div>
+				<div class="row">
+				    <div class="col-md-6">
+					Qualified
+					<span class="pull-right"><?php echo getAccountStatusCount($db, $accountActive['account'], '29'); //29->Questionnaire Completed->Qualified ?></span>
+				    </div>
+				    <div class="col-md-6">
+					Submitted
+					<span class="pull-right"><?php echo getAccountStatusCount($db, $v['account'], '1' ); //28->Submitted (Specimen Collected) ?></span>
+				    </div>
+				</div>
+			    </div>
+			</div>
 		    </div>
 
 		    <div class="providersTable">

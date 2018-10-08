@@ -36,6 +36,14 @@ $(document).ready(function () {
 	}
     });
 
+    $('td.clickable').delegate('.details','click', function(){
+	$('td.clickable .moreInfo').hide();
+	$(this).parent().find('.moreInfo').show();
+    });
+    $('td.clickable .moreInfo').delegate('.close','click', function(){
+	$('.moreInfo').hide();
+    });
+
     $('#dataTable').delegate('.locked-user','click', function(){
 	var email = $(this).attr('data-user-email');
 	var ajaxUrl = baseUrl+'/ajaxHandler.php';

@@ -89,7 +89,8 @@ foreach ($userTables as $k=>$v){
 	    $attemptsQ = "SELECT email FROM tbluser_login_attempts WHERE time > '$valid_attempts' GROUP BY `email`";
 	    $lockedEmails = $db->query($attemptsQ);
 	    $emails = '';
-	    if($lockedEmails){
+	    //var_dump($lockedEmails);
+	    if(!empty($lockedEmails)){
 		foreach ($lockedEmails as $key=>$val){
 		    $emails .= "'".$val['email']."', ";
 		}
@@ -97,6 +98,8 @@ foreach ($userTables as $k=>$v){
 	    }
 	    if($emails){
 		$selectQ .= " AND u.email IN(".$emails.")";
+	    } else {
+		$selectQ = "";
 	    }
 	}
     }
@@ -219,7 +222,7 @@ require_once ('navbar.php');
 
 		<div>
 		    <input id="show-tests" name="marked_test" value="1" type="checkbox" <?php echo ((!isset($_POST['clear'])) && (isset($_POST['marked_test']) && ($_POST['marked_test'] == 1)) ? " checked" : ""); ?> />
-		    <label for="show-tests">Marked Test</label>
+		    <label for="show-tests">Mark As Test</label>
 		</div>
 		<div>
 		    <input id="locked_users" name="locked_users" value="1" type="checkbox" <?php echo ((!isset($_POST['clear'])) && (isset($_POST['locked_users']) && ($_POST['locked_users'] == 1)) ? " checked" : ""); ?> />
@@ -267,11 +270,15 @@ require_once ('navbar.php');
 			<span class="fas fa-user-plus" aria-hidden="true"></span> Add
 		    </a>
 		    <a id="delete-marked-test-users" class="add-new-button pull-right">
-			<span class="fas fa-history" ></span> Delete Marked Test Users
+			<span class="fas fa-history" ></span> Delete Test Users
 		    </a>
-<!--                    <form action="" method="POST">
-			<button name="show-duplicates" type="submit" value="1" class="pull-right button  add-new-button"><i class="fas fa-clone"></i> Show User Duplicates</button>
-		    </form>-->
+		</div>
+		<div class="col-md-12 text-right user-managemnet-bg">
+		    <span class="admin">&#9726; Admin</span>
+		    <span class="salesrep">&#9726; Sales Rep</span>
+		    <span class="provider">&#9726; Physician</span>
+		    <span class="marked_test">&#9726; Test Users</span>
+		    <span class="mdl_patient">&#9726; MDL Patient</span>
 		</div>
 	    </div>
 	    <div class="row">
@@ -294,6 +301,15 @@ require_once ('navbar.php');
 			    $trClass = "";
 			    if($user['marked_test']=='1'){
 				$trClass = "marked_test";
+			    }
+			    if($user['Guid_role']=='1'){
+				$trClass = "admin";
+			    }
+			    if($user['Guid_role']=='2'){
+				$trClass = "provider";
+			    }
+			    if($user['Guid_role']=='4' || $user['Guid_role']=='5'){
+				$trClass = "salesrep";
 			    }
 			    if($user['Guid_role']=='6'){
 				$trClass = "mdl_patient";
@@ -332,7 +348,7 @@ require_once ('navbar.php');
 				    <a href="<?php echo SITE_URL; ?>/user-management.php?action=update<?php echo $editUrl; ?>">
 					<span class="fas fa-pencil-alt" aria-hidden="true"></span>
 				    </a>
-				    <?php if($user['marked_test']=='1'){?>
+				    <?php if($user['marked_test']=='1' && $user['Guid_role']!='6'){?>
 				    <a id="test-user" class="deleteUser" title="Remove User and History" data-user-id="<?php echo $user['Guid_user']; ?>" >
 					<span class="fas fa-trash" aria-hidden="true"></span>
 				    </a>

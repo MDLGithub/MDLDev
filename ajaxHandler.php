@@ -45,7 +45,7 @@ function  unlock_user($db, $email){
 }
 
 function get_loced_user_log($db, $email){
-    $userLoginLog = $db->query('SELECT ip, time FROM tbluser_login_attempts WHERE email=:email', array('email'=>$email));
+    $userLoginLog = $db->query('SELECT ip, time FROM tbluser_login_attempts WHERE email=:email ORDER BY `time` DESC', array('email'=>$email));
     $content = "";
     foreach ($userLoginLog as $k=>$v){
 	$date = date('Y-m-d H:i:s', $v['time']);
@@ -151,7 +151,7 @@ function delete_marked_test_users($db){
 
     //tbl_ss_qualify
     $SSQualifyQuery = "SELECT Guid_qualify, Guid_user FROM `tbl_ss_qualify` "
-	    . "WHERE Guid_user IN(SELECT Guid_user FROM  `tbluser` WHERE marked_test='1')";
+	    . "WHERE Guid_user IN(SELECT Guid_user FROM `tbluser` WHERE marked_test='1')";
     $SSQualify = $db->query($SSQualifyQuery);
     $clinupSSQualifyTables = array(
 	'tbl_ss_qualifyfam',
@@ -174,7 +174,8 @@ function delete_marked_test_users($db){
     }
 
     //tblqualify
-    $qualifyQuery = "SELECT Guid_qualify, Guid_user FROM `tblqualify` WHERE Guid_user IN(SELECT Guid_user FROM  `tbluser` WHERE marked_test='1')";
+    $qualifyQuery = "SELECT Guid_qualify, Guid_user FROM `tblqualify` "
+	    . "WHERE Guid_user IN(SELECT Guid_user FROM  `tbluser` WHERE marked_test='1')";
     $Qualify = $db->row($qualifyQuery);
     $clinupQualifyTables = array(
 	'tblqualifyfam',
@@ -208,12 +209,12 @@ function delete_marked_test_users($db){
 	'tbl_mdl_note',
 	'tbl_mdl_number',
 	'tbl_revenue',
-	'tbl_mdl_status_log',
-	'tblpatient'
+	'tbl_mdl_status_log'
     );
 
     foreach ($cleanupTables as $k=>$thisTable){
-	$sql = "DELETE FROM $thisTable WHERE Guid_user IN(SELECT Guid_user FROM  `tbluser` WHERE marked_test='1')";
+	$sql = "DELETE FROM $thisTable WHERE Guid_user "
+		. "IN(SELECT Guid_user FROM  `tbluser` WHERE marked_test='1')";
 	$delete =  $db->query($sql);
 	if ($delete) {
 	    $arrMsg[] = "Marked Test users from ".$thisTable." table deleted successfully";
@@ -222,8 +223,14 @@ function delete_marked_test_users($db){
 	}
     }
 
-    //delete from users table too
-    $deleteUsers = $db->query("DELETE FROM `tbluser` WHERE marked_test='1' ");
+
+    //Delete patient
+    $deletePatient = $db->query("DELETE FROM tblpatient WHERE Guid_user "
+		. "IN(SELECT Guid_user FROM  `tbluser` WHERE marked_test='1' AND Guid_role<>'6')");
+
+    //delete from users table
+    $deleteUsers = $db->query("DELETE FROM `tbluser` WHERE marked_test='1' and Guid_role<>6");
+
 
     echo json_encode(array('message'=>$arrMsg));
     exit();
