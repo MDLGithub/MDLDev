@@ -698,6 +698,7 @@ and (max-device-width : 1024px)
 and (orientation : landscape) { 
 
 .fc-scroller.fc-day-grid-container{ max-height: 150px !important; }
+#mdl{ width: 7.0em; height: 7em; }
 
 #stats{
   min-height:500px;
@@ -838,7 +839,7 @@ and (orientation : landscape) {
 }
 
 #chart_stats{
-  height:350px;
+  height:300px;
 }
 
 }
