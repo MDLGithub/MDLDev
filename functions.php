@@ -700,7 +700,7 @@ function getDevicesWithSalesRepInfo($db, $flag=FALSE){
 function getDeviceInvsWithSalesRepInfo($db, $flag=FALSE){
     $query = "SELECT "
                     . "tbldevice.device_name, "
-                    . "tbldeviceinv.id, tbldeviceinv.deviceid, tbldeviceinv.serial_number, tbldeviceinv.comment, tbldeviceinv.inservice_date, tbldeviceinv.outservice_date, "
+                    . "tbldeviceinv.id, tbldeviceinv.Guid_salesrep, tbldeviceinv.deviceid, tbldeviceinv.serial_number, tbldeviceinv.comment, tbldeviceinv.inservice_date, tbldeviceinv.outservice_date, "
                     . "tblsalesrep.first_name, tblsalesrep.last_name "
                     . "FROM tbldeviceinv LEFT JOIN `tbldevice` "
                     . "ON tbldevice.deviceid = tbldeviceinv.deviceid "
@@ -749,6 +749,13 @@ function getAccountAndSalesrep($db, $accountGuid=NULL, $getRow=NULL){
     }    
     return $result;
 }
+/**
+ * Get Account Status Count By account number
+ * @param type $db
+ * @param type $account
+ * @param type $Guid_status
+ * @return type
+ */
 function getAccountStatusCount($db, $account, $Guid_status ){     
     $q = "SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l "
         . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
@@ -757,6 +764,13 @@ function getAccountStatusCount($db, $account, $Guid_status ){
     $result = $db->row($q, array('account'=>$account,'Guid_status'=>$Guid_status));    
     return $result['count'];
 }
+/**
+ * Get Slasrep Status count By Guid salesrep
+ * @param type $db
+ * @param type $Guid_salesrep
+ * @param type $Guid_status
+ * @return type
+ */
 function getSalesrepStatusCount($db, $Guid_salesrep, $Guid_status ){     
     $q = "SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l "
         . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
@@ -765,6 +779,44 @@ function getSalesrepStatusCount($db, $Guid_salesrep, $Guid_status ){
     $result = $db->row($q, array('Guid_salesrep'=>$Guid_salesrep,'Guid_status'=>$Guid_status));    
     return $result['count'];
 }
+/**
+ * Get Device Status count By Guid_salesrep
+ * @param type $db
+ * @param type $Guid_salesrep
+ * @param type $Guid_status
+ * @return type
+ */
+function getDeviceStatusCount($db, $Guid_salesrep, $Guid_status ){     
+    $q = "SELECT COUNT(*) AS `count` FROM `tbldeviceinv` d "
+        . "LEFT JOIN `tbl_mdl_status_log` l ON d.Guid_salesrep=l.Guid_salesrep "
+        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
+        . "WHERE l.Guid_status =:Guid_status AND l.Guid_salesrep=:Guid_salesrep AND u.marked_test='0'"; 
+    
+    $result = $db->row($q, array('Guid_salesrep'=>$Guid_salesrep,'Guid_status'=>$Guid_status));    
+    return $result['count'];
+}
+/**
+ * Ge provider Status count by given account id 
+ * @param type $db
+ * @param type $account
+ * @param type $Guid_status
+ * @return type
+ */
+function getProviderStatusCount($db, $account, $Guid_provider, $Guid_status ){     
+    $q = "SELECT COUNT(*) AS `count` FROM `tblprovider` p "
+        . "LEFT JOIN `tbl_mdl_status_log` l ON p.account_id=l.account "
+        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
+        . "WHERE l.Guid_status =$Guid_status "
+        . "AND p.Guid_provider=$Guid_provider "
+        . "AND l.account=$account "
+        . "AND u.marked_test='0' "
+        . " "; 
+
+    $result = $db->row($q, array('account'=>$account,'Guid_provider'=>$Guid_provider, 'Guid_status'=>$Guid_status));    
+    return $result['count'];
+}
+
+
 
 function getProviderSalesRep($db, $providerID) {
     $query = "SELECT 

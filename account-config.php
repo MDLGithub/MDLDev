@@ -208,34 +208,41 @@ require_once ('navbar.php');
                         </div>
                         <form method="POST" enctype="multipart/form-data">  
                             <div class="row pB-30">
-                                <div class="col-md-8">
+                                <div class="col-md-6">
                                     <button id="saveForm" name="submit_account" type="submit" class="btn-inline">Save</button>
                                     <button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>                   
                                     <!--<a href="<?php echo SITE_URL."/account-config.php";?>" class="btn-inline btn-cancel">Cancel</a>-->                       
                                 </div>
-                                <div class="col-md-4  padd-0">
+                                
+                                <div class="col-md-6">
+                                    <?php if(isset($_GET['action']) && $_GET['action']=='edit'){ ?>
                                     <div class="status_chart">
                                         <div class="row">
-                                            <div class="col-md-6">
-                                                Registered
-                                                <span class="pull-right"><?php echo getAccountStatusCount($db, $account, '28' ); //28->Registered ?></span>
-                                            </div>
-                                            <div class="col-md-6">
-                                                Completed
-                                                <span class="pull-right"><?php echo getAccountStatusCount($db, $account, '36'); //36->Questionnaire Completed ?></span>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                Qualified
-                                                <span class="pull-right"><?php echo getAccountStatusCount($db, $account, '29'); //29->Questionnaire Completed->Qualified ?></span>
-                                            </div>
-                                            <div class="col-md-6">
-                                                Submitted
-                                                <span class="pull-right"><?php echo getAccountStatusCount($db, $account, '1' ); //28->Submitted (Specimen Collected) ?></span>
+                                            <div class="col-md-12">
+                                                <span class="registred">
+                                                    Registered
+                                                    <img src="assets/eventschedule/icons/silhouette_icon.png">
+                                                    <?php echo getAccountStatusCount($db, $account, '28' ); //28->Registered ?>
+                                                </span>
+                                                <span class="completed">
+                                                    Completed
+                                                    <img src="assets/eventschedule/icons/checkmark_icon.png">
+                                                    <?php echo getAccountStatusCount($db, $account, '36'); //36->Questionnaire Completed ?>
+                                                </span>
+                                                <span class="qualified">
+                                                    Qualified
+                                                    <img src="assets/eventschedule/icons/dna_icon.png">
+                                                    <?php echo getAccountStatusCount($db, $account, '29'); //29->Questionnaire Completed->Qualified ?>
+                                                </span>
+                                                <span class="submitted">
+                                                    Submitted
+                                                    <img src="assets/eventschedule/icons/flask_icon.png">
+                                                    <?php echo getAccountStatusCount($db, $account, '1' ); //28->Submitted (Specimen Collected) ?>
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
+                                    <?php } ?>
                                 </div>
                                 <div class="col-md-12">
                                     <?php 

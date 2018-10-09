@@ -308,7 +308,7 @@ if(isset($_POST['mark_as_test'])){
     }    
 }
 
-$sqlTbl = "SELECT q.*, p.*, a.name as account_name, u.email, u.marked_test, "
+$sqlTbl = "SELECT q.*, p.*, a.name as account_name, u.email, u.marked_test,  u.Guid_role, "
         . "q.Date_created AS date FROM tbl_ss_qualify q "
         . "LEFT JOIN tblaccount a ON q.account_number = a.account "
         . "LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user "
@@ -335,7 +335,8 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
     if (isset($_POST['meets_mn']) && strlen($_POST['meets_mn'])) {
         $whereTest = "";
         if($_POST['meets_mn']=='incomplete'){
-            $sqlTbl  = "SELECT q.*,p.*, a.name as account_name, u.email, u.marked_test, q.Date_created AS `date`, 
+            $sqlTbl  = "SELECT q.*,p.*, a.name as account_name, 
+                        u.email, u.marked_test, u.Guid_role, q.Date_created AS `date`, 
                         '1' AS incomplete FROM tblqualify q  
                         LEFT JOIN tblaccount a ON q.account_number = a.account  
                         LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user  
@@ -578,9 +579,15 @@ $num_estimates = $qualify_requests;
                                 $isIncomplete=TRUE;
                                 $dataPrintable = '2';
                             }
+                            $trClass='';
+                            $trClass = ($qualify_request['marked_test']=='1')?' marked_test':'';
+                            if($qualify_request['Guid_role']=='6'){
+                                $trClass = ' mdl_patient';
+                            }
                     ?>
-                            <tr data-id="<?php //echo $estimate_request['Guid_brcaestimate']; ?>" class="t_row">
-                                    <td class="printSelectBlock text-center">
+                            <tr class="t_row <?php echo $trClass; ?>">
+                                
+                                <td class="printSelectBlock text-center">
                                         <?php if(isset($qualify_request['qualified']) && $qualify_request['qualified']=='Unknown'){ ?>
                                             <input name="markedRow[user][<?php echo $qualify_request['Guid_user']; ?>]" type="checkbox" class="print1 report1" data-prinatble="0" data-selected_questionnaire="<?php echo $qualify_request['Guid_qualify']; ?>" data-selected_date="<?php echo $qualify_request['date']; ?>" />
                                         <?php } else { ?>

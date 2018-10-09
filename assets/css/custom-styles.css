@@ -463,7 +463,7 @@ th.zip input{
     display: inline-block;
 }
 .selectAccountBlock #selectAccount{
-    width: 90%;
+    width: 80%;
     float: left;
     margin-bottom: 10px;
 }
@@ -471,6 +471,8 @@ th.zip input{
     font-size: 22px;
     margin-left: 15px;
     margin-top: 5px;
+    width: 15%;
+    float: left;
 }
 
 .modalBlock{
@@ -1575,7 +1577,7 @@ table.dataTable.display tbody tr>.sorting_3{
     background: none!important;
 }
 .homeIcon{
-    background: rgb(255,255,255,0.34) url(../images/house_icon.png) center center no-repeat !important;
+    background: rgba(255,255,255,0.34) url(../images/house_icon.png) center center no-repeat !important;
     width: 23px;
     height: 38px;
     padding: 0 1.5em!important;
@@ -1751,7 +1753,15 @@ td.clickable .moreInfo .close{
     background: #eee;
     border: 1px solid #d3d3d3;
     border-radius: 5px;
+    text-align: center;
+    font-size: 14px;
 }
 .status_chart span{
-    
+    border-right: 1px solid #999;
+    display: inline-block;
+    padding: 0 5px 0 2px;
+    line-height: 1;
+}
+.status_chart span:last-child{
+     border-right: none;
 }
