@@ -365,12 +365,12 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
     //First Name
     if (isset($_POST['first_name']) && strlen(trim($_POST['first_name']))) {
         $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
-        $where .= " p.firstname = '" . $_POST['first_name'] . "'";
+        $where .= " p.firstname LIKE '%" . $_POST['first_name'] . "%'";
     }
     //Last Name
     if (isset($_POST['last_name']) && strlen(trim($_POST['last_name']))) {
         $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
-        $where .= " p.lastname = '" . $_POST['last_name'] . "'";
+        $where .= " p.lastname LIKE '%" . $_POST['last_name'] . "%'";
     }
     //Insurance
     if (isset($_POST['insurance']) && strlen($_POST['insurance'])) {
