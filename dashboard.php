@@ -611,14 +611,14 @@ $num_estimates = $qualify_requests;
                                     ?>
                                     <?php if(isFieldVisibleByRole($roleIDs['first_name']['view'], $roleID)) {?>
                                         <td>
-                                            <a target="_blank" href="<?php echo SITE_URL."/patient-info.php?patient=".$qualify_request['Guid_user'].$accountStr.$incompleteStr; ?>">
+                                            <a href="<?php echo SITE_URL."/patient-info.php?patient=".$qualify_request['Guid_user'].$accountStr.$incompleteStr; ?>">
                                             <?php echo ucfirst(strtolower($qualify_request['firstname'])); ?>
                                             </a>
                                         </td>
                                     <?php } ?>
                                     <?php if(isFieldVisibleByRole($roleIDs['last_name']['view'], $roleID)) {?>
                                         <td>
-                                            <a target="_blank" href="<?php echo SITE_URL."/patient-info.php?patient=". $qualify_request['Guid_user'].$accountStr.$incompleteStr; ?>">
+                                            <a href="<?php echo SITE_URL."/patient-info.php?patient=". $qualify_request['Guid_user'].$accountStr.$incompleteStr; ?>">
                                                 <?php echo ucfirst(strtolower($qualify_request['lastname'])); ?>
                                             </a>
                                         </td>

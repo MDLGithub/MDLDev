@@ -1680,7 +1680,7 @@ function get_status_table_rows($db, $parent = 0, $searchData=array()) {
                 } 
                 $content .= "<tr id='".$status['Guid_status']."' class='parent ".$optionClass."'>";
                 $content .= "<td class='text-left'><span>".$status['status'].'</span></td>';            
-                $content .= '<td><a target="_blank" href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].$filterUrlStr.'">'.$stats['count'].'</a></td>';
+                $content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].$filterUrlStr.'">'.$stats['count'].'</a></td>';
                 if ( !empty($checkCildren) ) {
                     $content .= get_status_child_rows( $db, $status['Guid_status'], "&nbsp;", $searchData );
                 }            
@@ -1707,7 +1707,7 @@ function get_status_child_rows($db, $parent = 0,  $level = '', $searchData=array
                 }  
                 $content .= "<tr id='".$status['Guid_status']."' data-parent-id='".$parent."' class='sub ".$optionClass."'>";
                 $content .= "<td class='text-left'><span>".$level . " " .$status['status'].'</span></td>';
-                $content .= '<td><a target="_blank" href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].'&parent='.$parent.$filterUrlStr.'">'.$stats['count']. '</a></td>';
+                $content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].'&parent='.$parent.$filterUrlStr.'">'.$stats['count']. '</a></td>';
                 if ( !empty($checkCildren) ) {
                     $prefix .= '&nbsp;';
                     $content .= get_status_child_rows( $db, $status['Guid_status'], $level . "&nbsp;" );
