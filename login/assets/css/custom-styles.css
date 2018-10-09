@@ -618,6 +618,9 @@ input:checked + .slider:before {
 .add-new-device{
      width: 100px;
 }
+.add-new-device.export_matrix{
+     width: 250px;
+}
 /* The switch - the box around the slider */
 .no-bg{
     background: none !important;

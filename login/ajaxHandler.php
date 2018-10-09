@@ -558,6 +558,9 @@ function get_account_info($db, $accountId){
 }
 
 function exportUsers($db) {
+    print_r($_POST);
+    die;
+
     $tests = $db->query("SELECT q.Date_created AS date, CONCAT(srep.first_name, ' ', srep.last_name) as 'sales', mdl.mdl_number as 'mdl',
     (SELECT sp.Date FROM tbl_mdl_status_log sp WHERE sp.account = a.account AND sp.Guid_patient = p.Guid_patient AND sp.Guid_status = 2) as 'accessioned',
     (SELECT trr.Date FROM tbl_mdl_status_log trr WHERE trr.account = a.account AND trr.Guid_patient = p.Guid_patient AND trr.Guid_status = 22) as 'reported',
@@ -689,19 +692,15 @@ function exportUsers($db) {
     }
 
     $filename = date('his', time()).'_geneveda_matrix.xlsx';
-    $directory = SITE_ROOT . '/downloads/';
+    $directory = SITE_ROOT . '/uploads/';
     header('Content-Type: application/vnd.ms-excel');
     header('Content-Disposition: attachment;filename="' . $filename . '"');
     header('Cache-Control: max-age=0');
     $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
-    $oldmask = umask(0);
-    mkdir($directory, 0775, true);
-    umask($oldmask);
     ob_start();
     $objWriter->save($directory . $filename);
     ob_end_clean();
 
-
-    echo json_encode(['file' => '/downloads/'.$filename]);
+    echo json_encode(['file' => SITE_URL.'/uploads/'.$filename]);
     exit();
 }

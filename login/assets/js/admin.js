@@ -323,9 +323,8 @@ $('#export').click(function () {
 	},
       success: function (response) {
 	var result = JSON.parse(response);
-	console.log(response);
 	var file = $("<a>");
-	file.attr("href", response.file);
+	file.attr("href", result.file);
 	$("body").append(file);
 	file.attr("download", "geneveda_matrix.xls");
 	file[0].click();

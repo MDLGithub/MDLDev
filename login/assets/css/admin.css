@@ -1368,3 +1368,7 @@ and (orientation : portrait){
 
 }
 /*gabby end*/
+
+.export_filters {
+    padding: 90px 300px 300px 300px;
+}
