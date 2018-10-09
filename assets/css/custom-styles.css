@@ -335,7 +335,10 @@ table.prev_settings thead > tr > th,
 
 }
 
-
+select {
+    -webkit-appearance: menulist!important;
+    -moz-appearance:  menulist!important;
+}
 .btn-inline {
     display: inline-block!important;
     min-width: 100px;
@@ -616,6 +619,9 @@ input:checked + .slider:before {
 }
 .add-new-device{
      width: 100px;
+}
+.add-new-device.export_matrix{
+     width: 250px;
 }
 /* The switch - the box around the slider */
 .no-bg{
@@ -1764,4 +1770,8 @@ td.clickable .moreInfo .close{
 }
 .status_chart span:last-child{
      border-right: none;
+}
+a.button.cancel.half{
+    display: inline-table;
+    float: right;
 }
