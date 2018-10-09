@@ -558,9 +558,6 @@ function get_account_info($db, $accountId){
 }
 
 function exportUsers($db) {
-    print_r($_POST);
-    die;
-
     $tests = $db->query("SELECT q.Date_created AS date, CONCAT(srep.first_name, ' ', srep.last_name) as 'sales', mdl.mdl_number as 'mdl',
     (SELECT sp.Date FROM tbl_mdl_status_log sp WHERE sp.account = a.account AND sp.Guid_patient = p.Guid_patient AND sp.Guid_status = 2) as 'accessioned',
     (SELECT trr.Date FROM tbl_mdl_status_log trr WHERE trr.account = a.account AND trr.Guid_patient = p.Guid_patient AND trr.Guid_status = 22) as 'reported',
