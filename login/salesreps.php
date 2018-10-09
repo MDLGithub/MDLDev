@@ -384,8 +384,8 @@ require_once ('navbar.php');
                     <a class="add-new-device" href="<?php echo SITE_URL; ?>/salesreps.php?action=add">
                         <span class="fas fa-plus-circle"></span> Add
                     </a>
-                    <a id="export">
-                        <span class="fas fa-plus-circle"></span> Export
+                    <a class="add-new-device export_matrix" id="export">
+                        <span class="fas fa-arrow-up"></span> Export Geneveda Matrix
                     </a>
                 </div>
                 <?php } ?>

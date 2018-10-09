@@ -82,70 +82,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         </div>
                     </div>
                 <?php } ?>
-                <?php if(isFieldVisibleByRole($roleIDs['meets_mn']['view'], $roleID)) {?>
-                    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['meets_mn'])) && (strlen($_POST['meets_mn']))) ? " show-label valid" : ""; ?>">
-                        <label class="dynamic" for="meets_mn"><span>Medical Necessity</span></label>
-
-                        <div class="group">
-                            <select id="meets_mn" name="meets_mn" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['meets_mn'])) && (strlen($_POST['meets_mn']))) ? "" : "no-selection"; ?>">
-                                <option value="">Medical Necessity</option>
-                                <option value="yes"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['meets_mn']) && ($_POST['meets_mn'] == "yes")) ? " selected" : ""); ?>>Yes</option>
-                                <option value="no"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['meets_mn']) && ($_POST['meets_mn'] == "no")) ? " selected" : ""); ?>>No</option>
-                                <option value="unknown"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['meets_mn']) && ($_POST['meets_mn'] == "unknown")) ? " selected" : ""); ?>>Unknown</option>
-                                <option value="incomplete"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['meets_mn']) && ($_POST['meets_mn'] == "incomplete")) ? " selected" : ""); ?>>Incomplete</option>
-                            </select>
-
-                            <p class="f_status">
-                                <span class="status_icons"><strong></strong></span>
-                            </p>
-                        </div>
-                    </div>
-                <?php } ?>                
-                <?php if(isFieldVisibleByRole($roleIDs['first_name']['view'], $roleID)) {?>
-                    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['first_name'])) && (strlen(trim($_POST['first_name'])))) ? " show-label valid" : ""; ?>">
-                        <label class="dynamic" for="first_name"><span>First Name</span></label>
-
-                        <div class="group">
-                            <input id="first_name" name="first_name" type="text" value="<?php echo ((!isset($_POST['clear'])) && isset($_POST['first_name']) && strlen(trim($_POST['first_name']))) ? trim($_POST['first_name']) : ""; ?>" placeholder="First Name">
-
-                            <p class="f_status">
-                                <span class="status_icons"><strong></strong></span>
-                            </p>
-                        </div>
-                    </div>
-                <?php } ?>
-                <?php if(isFieldVisibleByRole($roleIDs['last_name']['view'], $roleID)) {?>
-                <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['last_name'])) && (strlen(trim($_POST['last_name'])))) ? " show-label valid" : ""; ?>">
-                    <label class="dynamic" for="last_name"><span>Last Name</span></label>
-
-                    <div class="group">
-                        <input id="last_name" name="last_name" type="text" value="<?php echo ((!isset($_POST['clear'])) && isset($_POST['last_name']) && strlen(trim($_POST['last_name']))) ? trim($_POST['last_name']) : ""; ?>" placeholder="Last Name">
-
-                        <p class="f_status">
-                            <span class="status_icons"><strong></strong></span>
-                        </p>
-                    </div>
-                </div>
-                <?php } ?>
-                <?php if(isFieldVisibleByRole($roleIDs['insurance']['view'], $roleID)) {?>
-                    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['insurance'])) && (strlen($_POST['insurance']))) ? " show-label valid" : ""; ?>">
-                        <label class="dynamic" for="insurance"><span>Insurance</span></label>
-
-                        <div class="group">
-                            <select id="insurance" name="insurance" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['insurance'])) && (strlen($_POST['insurance']))) ? "" : "no-selection"; ?>">
-                                <option value="">Insurance</option>
-                                <option value="aetna"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['insurance']) && ($_POST['insurance'] == "aetna")) ? " selected" : ""); ?>>Aetna</option>
-                                <option value="medicare"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['insurance']) && ($_POST['insurance'] == "medicare")) ? " selected" : ""); ?>>Medicare</option>
-                                <option value="other"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['insurance']) && ($_POST['insurance'] == "other")) ? " selected" : ""); ?>>Other</option>
-                                <option value="none"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['insurance']) && ($_POST['insurance'] == "none")) ? " selected" : ""); ?>>None</option>
-                            </select>
-
-                            <p class="f_status">
-                                <span class="status_icons"><strong></strong></span>
-                            </p>
-                        </div>
-                    </div>
-                <?php }?>
                 <?php
                 if (($role == "Sales Rep") || ((isset($_POST['salesrep']) && strlen($_POST['salesrep']) && (!isset($_POST['clear']))))) {
                     $query = "SELECT 
@@ -168,7 +104,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
                 $accounts = $db->query($query);
                 ?>
-                
                 <?php if(isFieldVisibleByRole($roleIDs['account']['view'], $roleID)) {?>
                     <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['account'])) && (strlen(trim($_POST['account'])))) ? " show-label valid" : ""; ?>">
                         <label class="dynamic" for="account"><span>Account</span></label>
@@ -194,59 +129,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         </div>
                     </div>
                 <?php } ?>
-                
-                <?php if(isFieldVisibleByRole($roleIDs['provider']['view'], $roleID)) {?>
-                    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['provider'])) && (strlen($_POST['provider']))) ? " show-label valid" : ""; ?>">
-                        <label class="dynamic" for="provider"><span>Provider</span></label>
-
-                        <div class="group">
-                            <select id="provider" name="provider" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['provider'])) && (strlen($_POST['provider']))) ? "" : "no-selection"; ?>">
-                                <option value="">Provider</option>							
-                                <?php
-                                $default_account = ltrim($default_account, ',');
-                                if($default_account){
-                                $query = "SELECT * FROM tblprovider WHERE account_id IN (" . $default_account . ") GROUP BY first_name";
-
-                                $providers = $db->query($query);
-                                foreach ($providers as $provider) {
-                                    ?>
-                                    <option value="<?php echo $provider['Guid_provider']; ?>"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['provider']) && ($_POST['provider'] == $provider['Guid_provider'])) ? " selected" : ""); ?>><?php echo $provider['first_name']." ".$provider['last_name']; ?></option>
-                                    <?php
-                                }
-                                }
-                                ?>
-                            </select>
-
-                            <p class="f_status">
-                                <span class="status_icons"><strong></strong></span>
-                            </p>
-                        </div>
-                    </div>
-                <?php } ?>
-                <?php if(isFieldVisibleByRole($roleIDs['location']['view'], $roleID)) {?>
-                    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['location'])) && (strlen($_POST['location']))) ? " show-label valid" : ""; ?>">
-                        <label class="dynamic" for="location"><span>Location</span></label>
-
-                        <div class="group">
-                            <select id="location" name="location" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['location'])) && (strlen($_POST['location']))) ? "" : "no-selection"; ?>">
-                                <option value="">Location</option>							
-                                <?php
-                                $locations = $db->query("SELECT description FROM tblsource");
-
-                                foreach ($locations as $location) {
-                                    ?>
-                                    <option value="<?php echo $location['description']; ?>"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['location']) && ($_POST['location'] == $location['description'])) ? " selected" : ""); ?>><?php echo $location['description']; ?></option>
-                                    <?php
-                                }
-                                ?>
-                            </select>
-
-                            <p class="f_status">
-                                <span class="status_icons"><strong></strong></span>
-                            </p>
-                        </div>
-                    </div>
-                <?php  } ?>
                 <?php if(isFieldVisibleByRole($roleIDs['salesrep']['view'], $roleID)) {?>
                     <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrep'])) && (strlen($_POST['salesrep']))) ? " show-label valid" : ""; ?>">
                         <label class="dynamic" for="salesrep"><span>Genetic Consultant</span></label>
@@ -271,14 +153,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         </div>
                     </div>
                 <?php }   ?>
-                <?php if($role != 'Physician') { ?>
-                <div>
-                    <input id="show-tests" name="mark_test" value="1" type="checkbox" <?php echo ((!isset($_POST['clear'])) && (isset($_POST['mark_test']) && ($_POST['mark_test'] == 1)) ? " checked" : ""); ?> />
-                    <label for="show-tests">Show Tests</label>                     
-                </div>
-                <?php } ?>
 
-                <button id="filter" value="1" name="search" type="submit" class="button filter half"><strong>Search</strong></button>
+                <button id="export_matrix" value="1" name="search" type="submit" class="button filter half"><strong>Export</strong></button>
                 <button type="submit" name="clear" class="button cancel half"><strong>Clear</strong></button>
             </form>
         </div>
