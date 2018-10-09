@@ -314,3 +314,20 @@ $(document).ready(function () {
 	});
     }
 });
+$('#export').click(function () {
+    $.ajax('ajaxHandler.php', {
+	type: 'POST',
+	data: {
+	   exportUsers: 'ok'
+	},
+      success: function (response) {
+	var result = JSON.parse(response);
+	var file = $("<a>");
+	file.attr("href", result.file);
+	$("body").append(file);
+	file.attr("download", "geneveda_matrix.xls");
+	file[0].click();
+	file.remove();
+      }
+    });
+});
