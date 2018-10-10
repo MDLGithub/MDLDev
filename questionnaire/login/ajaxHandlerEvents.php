@@ -12,7 +12,8 @@ require_once ('functions.php');
 
 /* --------------------- Event Update ------------------------- */
 
-if(isset($_POST['modalhealthcareid']) && isset($_POST['action']) && $_POST['action'] == "eventupdate"){
+if(isset($_POST['modalhealthcareid']) && isset($_POST['action']) && $_POST['action'] == "healthEventupdate"){
+    
     $healthCare = array(
          'name' => $_POST['full_name'],
          'street1' => $_POST['street1'],
@@ -24,6 +25,26 @@ if(isset($_POST['modalhealthcareid']) && isset($_POST['action']) && $_POST['acti
      $where = array('Guid_healthcare' => $_POST['modalhealthcareid']);
     
      updateTable($db,'tblhealthcare',$healthCare,$where);
+
+     if($_POST['commentid'] && $_POST['commentid'] !=""){
+        $updateArrComments = array(
+                            'comments' => $_POST['modalcomments'],
+                            'eventid' => $_POST['modalid'],
+                            'user_id' => $_POST['userid'],
+                            'updated_date' => $_POST['updated_date'],
+                        );
+        $where = array('id' => $_POST['commentid']);
+        updateTable($db, 'tblcomments', $updateArrComments, $where );
+    }else{
+        $addArrComments = array(
+                            'comments' => $_POST['modalcomments'],
+                            'eventid' => $_POST['modalid'],
+                            'user_id' => $_POST['userid'],
+                            'created_date' => $_POST['updated_date'],
+                            'updated_date' => $_POST['updated_date'],
+                        );
+        insertIntoTable($db, 'tblcomments', $addArrComments);
+    }
 }
 
 if(isset($_POST["modalid"]) && isset($_POST['action']) && $_POST['action'] == "eventupdate")
@@ -43,7 +64,7 @@ if(isset($_POST["modalid"]) && isset($_POST['action']) && $_POST['action'] == "e
 
     /* ------- Update Comment ------- */
 
-    if($_POST['commentid']){
+    if($_POST['commentid'] && $_POST['commentid'] != ""){
         $updateArrComments = array(
                             'comments' => $_POST['modalcomments'],
                             'eventid' => $_POST['modalid'],
@@ -61,8 +82,7 @@ if(isset($_POST["modalid"]) && isset($_POST['action']) && $_POST['action'] == "e
                             'updated_date' => $_POST['updated_date'],
                         );
         insertIntoTable($db, 'tblcomments', $addArrComments);
-    }
-    
+    }  
 }
 
 /* --------------------- Get Comment ------------------------- */
@@ -216,11 +236,24 @@ if(isset($_POST['action']) && $_POST['action'] == 'meeventcount'){
 
 /* --------------------- Account Setup Popup  ------------------------- */
 
-/*if(isset($_POST['action']) && $_POST['action'] == "getAccountSetup"){
+if(isset($_POST['action']) && $_POST['action'] == "getAccountSetup"){
     $account_id = $_POST['id'];
-    
-    echo json_encode($account_id);
-}*/
+    $options = "";
+    $accounts = $db->selectAll('tblaccount', ' ORDER BY `account` ASC');
+    $accountInfo = "";
+    $i=0;
+    foreach ($accounts as $k=>$v){
+        $selected = ( isset($account_id) && $account_id == $v['Guid_account'] ) ? " selected='selected'" : "";
+        $i++;
+        $options .='<option '. $selected .' data-guid="'. $v['Guid_account'] .'" value="'. $v['account'] .'">'. $v['account']." - ".ucwords(strtolower($v['name'])).'</option>';
+    }
+
+    $data = array(
+                    'options' => $options
+                );
+
+    echo json_encode($data);
+}
 
 /**/
 
