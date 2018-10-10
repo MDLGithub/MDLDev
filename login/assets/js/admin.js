@@ -82,6 +82,19 @@ function checkFields() {
 }
 
 $(document).ready(function () {
+    // $.ajax('ajaxHandler.php', {
+    //     type: 'POST',
+    //     data: {
+    //        date_type: 'week'
+    //     },
+    //   success: function (response) {
+    //     var result = JSON.parse(response);
+
+    //     $('#matrix_parameters .datepicker_from').datepicker("setDate", result.start );
+    //     $('#matrix_parameters .datepicker_to').datepicker("setDate", result.end );
+    //   }
+    // });
+
     $('.toggle').click(function () {
 	var show = $(this).attr('data-on'),
 		$this = $(this);
@@ -315,13 +328,19 @@ $(document).ready(function () {
     }
 });
 
-$('#export').click(function () {
+$('#matrix_parameters').submit(function(event) {
+    $('body').LoadingOverlay('show');
     $.ajax('ajaxHandler.php', {
 	type: 'POST',
 	data: {
-	   exportUsers: 'ok'
+	   exportUsers: 'ok',
+	   from: $('.export_filters #from_date').val(),
+	   to: $('.export_filters #to_date').val(),
+	   consultant: $('.export_filters #salesrep').val(),
+	   account: $('.export_filters #account').val()
 	},
       success: function (response) {
+	$('body').LoadingOverlay('hide');
 	var result = JSON.parse(response);
 	var file = $("<a>");
 	file.attr("href", result.file);
@@ -331,4 +350,64 @@ $('#export').click(function () {
 	file.remove();
       }
     });
-  });
+
+    event.preventDefault();
+});
+
+$('#matrix_parameters #clear_filters').click(function() {
+    $('.export_filters #from_date').val('');
+    $('.export_filters #to_date').val('');
+    $('.export_filters #salesrep').val('');
+    $('.export_filters #account').val('');
+});
+
+$('#matrix_parameters #date_type').on('change', function() {
+    $.ajax('ajaxHandler.php', {
+	type: 'POST',
+	data: {
+	   date_type: $(this).val()
+	},
+      success: function (response) {
+	var result = JSON.parse(response);
+
+	$('.datepicker_from').datepicker("setDate", result.start );
+	$('.datepicker_to').datepicker("setDate", result.end );
+
+	// $('#matrix_parameters #date_from').val(result.start);
+	// $('#matrix_parameters #date_to').val(result.end);
+      }
+    });
+});
+
+// $('#export_matrix').click(function () {
+//     $.ajax('ajaxHandler.php', {
+//         type: 'POST',
+//         data: {
+//            exportUsers: 'ok',
+//            from: $('.export_filters #from_date').val(),
+//            to: $('.export_filters #to_date').val(),
+//         },
+//       success: function (response) {
+//         var result = JSON.parse(response);
+//         var file = $("<a>");
+//         file.attr("href", result.file);
+//         $("body").append(file);
+//         file.attr("download", "geneveda_matrix.xls");
+//         file[0].click();
+//         file.remove();
+//       }
+//     });
+//   });
+
+  $('.export_matrix').on('click', function () {
+      var genevedaModal = $('.modalBlock#geneveda-export-modal');
+      if ($(genevedaModal).hasClass('hidden')) {
+	$(genevedaModal).removeClass('hidden');
+      } else {
+	$(genevedaModal).addClass('hidden');
+      }
+  })
+
+  $('.modalBlock#geneveda-export-modal .close').on('click', function() {
+    $('.modalBlock#geneveda-export-modal').addClass('hidden');
+  })

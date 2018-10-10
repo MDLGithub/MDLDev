@@ -1525,6 +1525,14 @@ function formatDate($date){
     }
 }
 
+function dbDateFormat($date){
+    if (empty($date)) {
+	return '';
+    } else {
+	return date("Y-m-d H:i:s", strtotime($date));
+    }
+}
+
 /**
  * Get Stats info
  * @param type $db
