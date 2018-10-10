@@ -199,12 +199,44 @@ require_once ('navbar.php');
                         <div class="col-md-2"></div>
                         <div class="col-md-8">
                             <div class="row pB-30">
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <button name="save_device_inv" type="submit" class="btn-inline">Save</button>
                                     <button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>                   
                                     <!--<a href="<?php echo SITE_URL."/devicesInventory.php";?>" class="btn-inline btn-cancel">Cancel</a>-->                                   
                                 </div>
-                                <div class="col-md-4 text-center">
+                                
+                                <div class="col-md-6 ">
+                                    <?php if(isset($_GET['action']) && $_GET['action']=='edit') { ?>
+                                    <div class="status_chart">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <span class="registred">                                                    
+                                                    Registered 
+                                                    <img src="assets/eventschedule/icons/silhouette_icon.png">
+                                                    <?php echo getDeviceStatusCount($db, $Guid_salesrep, '28' ); //28->Registered ?>
+                                                </span>
+                                                <span class="completed">
+                                                    Completed
+                                                    <img src="assets/eventschedule/icons/checkmark_icon.png">
+                                                    <?php echo getDeviceStatusCount($db, $Guid_salesrep, '36'); //36->Questionnaire Completed ?>
+                                                </span>
+                                                <span class="qualified">                                                    
+                                                    Qualified
+                                                    <img src="assets/eventschedule/icons/dna_icon.png">
+                                                    <?php echo getDeviceStatusCount($db, $Guid_salesrep, '29'); //29->Questionnaire Completed->Qualified ?>
+                                                </span>
+                                                <span class="submitted">                                                    
+                                                    Submitted
+                                                    <img src="assets/eventschedule/icons/flask_icon.png">
+                                                    <?php echo getDeviceStatusCount($db, $Guid_salesrep, '1' ); //28->Submitted (Specimen Collected) ?>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <?php } ?>
+                                </div>
+                                
+                                <div class="col-md-12 text-center">
                                     <span class="error" id="message"></span>
                                 </div>
                             </div>
@@ -334,18 +366,10 @@ require_once ('navbar.php');
                                 <?php if(isFieldVisibleByRole($isSerialView, $roleID)) {?>
                                     <th>Serial Number</th>
                                 <?php } ?>
-                                <?php if(isFieldVisibleByRole($isCommentView, $roleID)) {?>
-                                    <th class="noFilter">Comment</th>
-                                <?php } ?>
-                                <?php if(isFieldVisibleByRole($isInserviceDateView, $roleID)) {?>
-                                    <th class="noFilter">In-Service Date</th>
-                                <?php } ?>
-                                <?php if(isFieldVisibleByRole($isOutserviceDateView, $roleID)) {?>
-                                    <th class="noFilter">Out-Of-Service Date</th>
-                                <?php } ?>
-                                <?php if( isFieldVisibleByRole($isActionEdit, $roleID) || isFieldVisibleByRole($isActionDelete, $roleID)) {?>
-                                    <th class="noFilter actions text-center">Actions</th>
-                                <?php } ?>
+                                <th class="">Registered</th>           
+                                <th class="">Completed</th>           
+                                <th class="">Qualified</th>           
+                                <th class="">Submitted</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -356,37 +380,61 @@ require_once ('navbar.php');
                             ?>
                             <tr>                                
                                 <?php if(isFieldVisibleByRole($isSalesRepView, $roleID)) {?>
-                                    <td><?php echo $v['first_name']." ".$v['last_name']; ?></td>
+                                    <td class="clickable">
+                                        <a class="details"><?php echo $v['first_name']." ".$v['last_name']; ?></a>
+                                        
+                                        <div class="moreInfo">
+                                            <div class="content">
+                                                <span class="close">X</span> 
+                                                
+                                                <?php if(isFieldVisibleByRole($isInserviceDateView, $roleID)) {?>
+                                                    <p>
+                                                        <label>In-Service Date: </label>
+                                                        <?php echo (!preg_match("/0{4}/" , $v['inservice_date'])) ? date('n/j/Y', strtotime($v['inservice_date'])) : ""; ?>
+                                                    </p>
+                                                <?php } ?>
+                                                <?php if(isFieldVisibleByRole($isOutserviceDateView, $roleID)) {?>
+                                                    <p>
+                                                        <label>Out-Of-Service Date: </label>
+                                                        <?php echo (!preg_match("/0{4}/" , $v['outservice_date'])) ? date('n/j/Y', strtotime($v['outservice_date'])) : ""; ?>
+                                                    </p>
+                                                <?php } ?>
+                                                <?php if(isFieldVisibleByRole($isCommentView, $roleID)) {?>
+                                                    <p><label>Comment: </label><?php echo substr($v['comment'], 0, 50); ?></p>
+                                                <?php } ?>
+                                                    
+                                                <?php if( isFieldVisibleByRole($isActionEdit, $roleID) || isFieldVisibleByRole($isActionDelete, $roleID)) {?>
+                                                    <div class="text-right pT-15 pB-10">
+                                                         <?php if( isFieldVisibleByRole($isActionEdit, $roleID) ) {?>
+                                                        <a href="<?php echo SITE_URL; ?>/devicesInventory.php?action=edit&id=<?php echo $v['id']; ?>">
+                                                            <span class="fas fa-pencil-alt" aria-hidden="true"></span>
+                                                        </a>&nbsp;&nbsp;
+                                                        <?php } ?>
+                                                        <?php if(isFieldVisibleByRole($isActionDelete, $roleID)) {?>
+                                                        <a onclick="javascript:confirmationDeleteDevice($(this));return false;" href="<?php echo SITE_URL; ?>/devicesInventory.php?delete=<?php echo $v['id'] ?>&id=<?php echo $v['serial_number']; ?>">
+                                                            <span class="far fa-trash-alt" aria-hidden="true"></span> 
+                                                        </a>
+                                                        <?php } ?>
+                                                    </div>
+                                                <?php } ?> 
+                                                
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                    </td>
                                 <?php } ?>
                                 <?php if(isFieldVisibleByRole($isDeviceNameView, $roleID)) {?>
                                     <td><?php echo $v['device_name']; ?></td>
                                 <?php } ?>
                                 <?php if(isFieldVisibleByRole($isSerialView, $roleID)) {?>
                                     <td><?php echo $v['serial_number']; ?></td>
-                                <?php } ?>
-                                <?php if(isFieldVisibleByRole($isCommentView, $roleID)) {?>
-                                    <td><?php echo substr($v['comment'], 0, 50); ?></td>
-                                <?php } ?>
-                                <?php if(isFieldVisibleByRole($isInserviceDateView, $roleID)) {?>
-                                    <td><?php echo (!preg_match("/0{4}/" , $v['inservice_date'])) ? date('n/j/Y', strtotime($v['inservice_date'])) : ""; ?></td>
-                                <?php } ?>
-                                <?php if(isFieldVisibleByRole($isOutserviceDateView, $roleID)) {?>
-                                    <td><?php echo (!preg_match("/0{4}/" , $v['outservice_date'])) ? date('n/j/Y', strtotime($v['outservice_date'])) : ""; ?></td>
-                                <?php } ?>
-                                <?php if( isFieldVisibleByRole($isActionEdit, $roleID) || isFieldVisibleByRole($isActionDelete, $roleID)) {?>
-                                    <td class="text-center">
-                                         <?php if( isFieldVisibleByRole($isActionEdit, $roleID) ) {?>
-                                        <a href="<?php echo SITE_URL; ?>/devicesInventory.php?action=edit&id=<?php echo $v['id']; ?>">
-                                            <span class="fas fa-pencil-alt" aria-hidden="true"></span>
-                                        </a>&nbsp;&nbsp;
-                                        <?php } ?>
-                                        <?php if(isFieldVisibleByRole($isActionDelete, $roleID)) {?>
-                                        <a onclick="javascript:confirmationDeleteDevice($(this));return false;" href="<?php echo SITE_URL; ?>/devicesInventory.php?delete=<?php echo $v['id'] ?>&id=<?php echo $v['serial_number']; ?>">
-                                            <span class="far fa-trash-alt" aria-hidden="true"></span> 
-                                        </a>
-                                        <?php } ?>
-                                    </td>
-                                <?php } ?>                                
+                                <?php } ?>  
+                                    
+                                <td><?php echo getDeviceStatusCount($db, $v['Guid_salesrep'], '28' ); //28->Registered ?></td>
+                                <td><?php echo getDeviceStatusCount($db, $v['Guid_salesrep'], '36'); //36->Questionnaire Completed ?></td>
+                                <td><?php echo getDeviceStatusCount($db, $v['Guid_salesrep'], '29'); //29->Questionnaire Completed->Qualified ?></td>
+                                <td><?php echo getDeviceStatusCount($db, $v['Guid_salesrep'], '1' ); //28->Submitted (Specimen Collected) ?></td>
                             </tr>
                         <?php
                             $i++;

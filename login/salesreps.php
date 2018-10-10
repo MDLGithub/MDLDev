@@ -214,33 +214,39 @@ require_once ('navbar.php');
                 <div class="col-md-8 col-md-offset-2">
                     <form method="POST" enctype="multipart/form-data"> 
                         <div class="row pB-30">
-                            <div class="col-md-8">
+                            <div class="col-md-6">
                                 <button name="manage_salesrep" type="submit" class="btn-inline">Save</button>
                                 <button type="button" class="btn-inline btn-cancel" onclick="goBack()">Cancel</button>
                             </div>
-                            <div class="col-md-4 padd-0">
+                            <div class="col-md-6 ">
+                                <?php if(isset($_GET['action']) && $_GET['action']=='edit') { ?>
                                 <div class="status_chart">
                                     <div class="row">
-                                        <div class="col-md-6">
-                                            Registered
-                                            <span class="pull-right"><?php echo getSalesrepStatusCount($db, $Guid_salesrep, '28' ); //28->Registered ?></span>
-                                        </div>
-                                        <div class="col-md-6">
-                                            Completed
-                                            <span class="pull-right"><?php echo getSalesrepStatusCount($db, $Guid_salesrep, '36'); //36->Questionnaire Completed ?></span>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            Qualified
-                                            <span class="pull-right"><?php echo getSalesrepStatusCount($db, $Guid_salesrep, '29'); //29->Questionnaire Completed->Qualified ?></span>
-                                        </div>
-                                        <div class="col-md-6">
-                                            Submitted
-                                            <span class="pull-right"><?php echo getSalesrepStatusCount($db, $Guid_salesrep, '1' ); //28->Submitted (Specimen Collected) ?></span>
+                                        <div class="col-md-12">
+                                            <span class="registred">
+                                                Registered
+                                                <img src="assets/eventschedule/icons/silhouette_icon.png">
+                                                <?php echo getSalesrepStatusCount($db, $Guid_salesrep, '28' ); //28->Registered ?>
+                                            </span>
+                                            <span class="completed">
+                                                Completed
+                                                <img src="assets/eventschedule/icons/checkmark_icon.png">
+                                                <?php echo getSalesrepStatusCount($db, $Guid_salesrep, '36'); //36->Questionnaire Completed ?>
+                                            </span>
+                                            <span class="qualified">
+                                                Qualified
+                                                <img src="assets/eventschedule/icons/dna_icon.png">
+                                                <?php echo getSalesrepStatusCount($db, $Guid_salesrep, '29'); //29->Questionnaire Completed->Qualified ?>
+                                            </span>
+                                            <span class="submitted">
+                                                Submitted
+                                                <img src="assets/eventschedule/icons/flask_icon.png">
+                                                <?php echo getSalesrepStatusCount($db, $Guid_salesrep, '1' ); //28->Submitted (Specimen Collected) ?>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
+                                <?php } ?>
                             </div>
                             <div class="col-md-12 text-center">
                                 <span class="error" id="message"></span>
@@ -445,6 +451,9 @@ require_once ('navbar.php');
                 <div class="col-md-12">
                     <a class="add-new-device" href="<?php echo SITE_URL; ?>/salesreps.php?action=add">
                         <span class="fas fa-plus-circle"></span> Add
+                    </a>
+					<a class="add-new-device export_matrix" id="export">
+                        <span class="fas fa-arrow-up"></span> Export Geneveda Matrix
                     </a>
                 </div>
                 <?php } ?>

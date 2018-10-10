@@ -204,43 +204,47 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
                 <div class="row">
                     <div class="col-md-8">
                     <div class="selectAccountBlock row ">
-                        <div class="col-md-8 padd-0">
-                        <label >Select Account</label><br/>
-                        <select class="form-control" id="selectAccount">
-                            <?php 
-                            $accountInfo = "";
-                            $i=0;
-                            foreach ($accounts as $k=>$v){
-                                $selected = (isset($_GET['account_id'])&&$_GET['account_id']==$v['Guid_account']) ? " selected='selected'" : "";
-                            $i++;
-                            ?>
-                            <option <?php echo $selected; ?> data-guid="<?php echo $v['Guid_account']; ?>" value="<?php echo $v['account']; ?>"><?php echo $v['account']." - ".ucwords(strtolower($v['name'])); ?></option>
-                            <?php  } ?>
-                        </select>
-                        <a href="<?php echo SITE_URL;?>/account-config.php?action=edit&id=<?php echo $accountActive['Guid_account']; ?>" id="edit-selected-account" class="add-new-account">
-                            <span class="fas fa-pencil-alt" aria-hidden="true"></span>
-                        </a>
+                        <div class="col-md-6 padd-0">
+                            <label >Select Account</label><br/>
+                            <select class="form-control" id="selectAccount">
+                                <?php 
+                                $accountInfo = "";
+                                $i=0;
+                                foreach ($accounts as $k=>$v){
+                                    $selected = (isset($_GET['account_id'])&&$_GET['account_id']==$v['Guid_account']) ? " selected='selected'" : "";
+                                $i++;
+                                ?>
+                                <option <?php echo $selected; ?> data-guid="<?php echo $v['Guid_account']; ?>" value="<?php echo $v['account']; ?>"><?php echo $v['account']." - ".ucwords(strtolower($v['name'])); ?></option>
+                                <?php  } ?>
+                            </select>
+                            <a href="<?php echo SITE_URL;?>/account-config.php?action=edit&id=<?php echo $accountActive['Guid_account']; ?>" id="edit-selected-account" class="add-new-account">
+                                <span class="fas fa-pencil-alt" aria-hidden="true"></span>
+                            </a>
                         </div>
-                        <div class="col-md-4  padd-0">
+                        <div class="col-md-6 padd-0 pT-20">
                             <div class="status_chart">
                                 <div class="row">
-                                    <div class="col-md-6">
-                                        Registered
-                                        <span class="pull-right"><?php echo getAccountStatusCount($db, $accountActive['account'], '28' ); //28->Registered ?></span>
-                                    </div>
-                                    <div class="col-md-6">
-                                        Completed
-                                        <span class="pull-right"><?php echo getAccountStatusCount($db, $accountActive['account'], '36'); //36->Questionnaire Completed ?></span>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        Qualified
-                                        <span class="pull-right"><?php echo getAccountStatusCount($db, $accountActive['account'], '29'); //29->Questionnaire Completed->Qualified ?></span>
-                                    </div>
-                                    <div class="col-md-6">
-                                        Submitted
-                                        <span class="pull-right"><?php echo getAccountStatusCount($db, $accountActive['account'], '1' ); //28->Submitted (Specimen Collected) ?></span>
+                                    <div class="col-md-12">
+                                        <span class="registred">
+                                            Registered
+                                            <img src="assets/eventschedule/icons/silhouette_icon.png">
+                                            <?php echo getAccountStatusCount($db, $accountActive['account'], '28' ); //28->Registered ?>
+                                        </span>
+                                        <span class="completed">
+                                            Completed
+                                            <img src="assets/eventschedule/icons/checkmark_icon.png">
+                                            <?php echo getAccountStatusCount($db, $accountActive['account'], '36'); //36->Questionnaire Completed ?>
+                                        </span>
+                                        <span class="qualified">
+                                            Qualified
+                                            <img src="assets/eventschedule/icons/dna_icon.png">
+                                            <?php echo getAccountStatusCount($db, $accountActive['account'], '29'); //29->Questionnaire Completed->Qualified ?>
+                                        </span>
+                                        <span class="submitted">
+                                            Submitted
+                                            <img src="assets/eventschedule/icons/flask_icon.png">
+                                            <?php echo getAccountStatusCount($db, $accountActive['account'], '1' ); //28->Submitted (Specimen Collected) ?>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -260,10 +264,11 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
                                 <tr>                        
                                     <th>UPIN</th>
                                     <th>Title</th>
-                                    <th class="">First Name</th>
-                                    <th class="">Last Name</th>
-                                    <th class="">Image</th>
-                                    <th class="noFilter actions text-center">Actions</th>
+                                    <th>Name</th>
+                                    <th class="">Registered</th>           
+                                    <th class="">Completed</th>           
+                                    <th class="">Qualified</th>           
+                                    <th class="">Submitted</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -277,23 +282,36 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
                                         $providerGuid=$v['Guid_provider'];
                                 ?>
                                 <tr>                            
-                                    <td><?php echo $v['provider_id']; ?></td>
+                                    <td class="clickable">
+                                        <a class="details"><?php echo $v['provider_id']; ?></a>
+                                        <div class="moreInfo">
+                                            <div class="content">
+                                                <span class="close">X</span>
+                                                
+                                                <p>
+                                                    <?php $photoImg = ($v['photo_filename']=="")? "/assets/images/default.png" : "/images/users/".$v['photo_filename'];   ?>
+                                                    <img width="40" src="<?php echo SITE_URL.$photoImg; ?>" />
+                                                </p>
+                                                
+                                                <div class="text-right pT-15 pB-10">
+                                                    <!--<a class="edit-provider" data-provider-guid="<?php echo $v['Guid_provider']; ?>">-->
+                                                    <a href="<?php echo SITE_URL."/accounts.php?account_id=$Guid_account&provider_guid=$providerGuid"; ?>">
+                                                        <span class="fas fa-pencil-alt" aria-hidden="true"></span>
+                                                    </a>
+                                                    <a onclick="javascript:confirmationDeleteProvider($(this));return false;" href="?delete=<?php echo $providerGuid ?>&provider-id=<?php echo $v['provider_id']; ?>&account-id=<?php echo $Guid_account; ?>&user-id=<?php echo $v['Guid_user']; ?>">
+                                                        <span class="far fa-trash-alt" aria-hidden="true"></span> 
+                                                    </a>
+                                                </div>
+                                                
+                                            </div>
+                                        </div>
+                                    </td>
                                     <td><?php echo $v['title']; ?></td>
-                                    <td><?php echo $v['first_name']; ?></td>
-                                    <td><?php echo $v['last_name']; ?></td>
-                                    <td>
-                                        <?php $photoImg = ($v['photo_filename']=="")? "/assets/images/default.png" : "/images/users/".$v['photo_filename'];   ?>
-                                        <img width="40" src="<?php echo SITE_URL.$photoImg; ?>" />
-                                    </td>
-                                    <td class="text-center">
-                                        <!--<a class="edit-provider" data-provider-guid="<?php echo $v['Guid_provider']; ?>">-->
-                                        <a href="<?php echo SITE_URL."/accounts.php?account_id=$Guid_account&provider_guid=$providerGuid"; ?>">
-                                            <span class="fas fa-pencil-alt" aria-hidden="true"></span>
-                                        </a>
-                                        <a onclick="javascript:confirmationDeleteProvider($(this));return false;" href="?delete=<?php echo $providerGuid ?>&provider-id=<?php echo $v['provider_id']; ?>&account-id=<?php echo $Guid_account; ?>&user-id=<?php echo $v['Guid_user']; ?>">
-                                            <span class="far fa-trash-alt" aria-hidden="true"></span> 
-                                        </a>
-                                    </td>
+                                    <td><?php echo $v['first_name']." ". $v['last_name']; ?></td>                                    
+                                    <td><?php echo getProviderStatusCount($db, $v['account_id'], $v['Guid_provider'], '28' ); //28->Registered ?></td>
+                                    <td><?php echo getProviderStatusCount($db, $v['account_id'], $v['Guid_provider'], '36'); //36->Questionnaire Completed ?></td>
+                                    <td><?php echo getProviderStatusCount($db, $v['account_id'], $v['Guid_provider'], '29'); //29->Questionnaire Completed->Qualified ?></td>
+                                    <td><?php echo getProviderStatusCount($db, $v['account_id'], $v['Guid_provider'], '1' ); //28->Submitted (Specimen Collected) ?></td>
                                 </tr>
                                 <?php } ?>
                             <?php } ?>

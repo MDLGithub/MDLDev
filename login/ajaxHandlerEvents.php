@@ -8,6 +8,7 @@
 
 require_once('config.php');
 require_once ('functions_event.php');
+require_once ('functions.php');
 
 /* --------------------- Event Update ------------------------- */
 
@@ -85,5 +86,18 @@ if(isset($_POST['commentid']) && isset($_POST['action']) && $_POST['action'] == 
     $commentid = $_POST['commentid'];
     $query = "DELETE FROM `tblcomments` WHERE id=".$commentid;
     $result = $db->query($query);
+    echo json_encode($result);
+}
+
+
+/* --------------------- Event Stats ------------------------- */
+
+if(isset($_POST['account']) && isset($_POST['action']) && $_POST['action'] == "getStates"){
+
+    $reg = getAccountStatusCount($db, $_POST['account'], $_POST['regitered']);
+    $qua = getAccountStatusCount($db, $_POST['account'], $_POST['qualified']);
+    $com = getAccountStatusCount($db, $_POST['account'], $_POST['completed']);
+    $sub = getAccountStatusCount($db, $_POST['account'], $_POST['submitted']);
+    $result = array("reg"=>$reg, "qua"=>$qua, "com"=>$com, "sub"=>$sub);
     echo json_encode($result);
 }
