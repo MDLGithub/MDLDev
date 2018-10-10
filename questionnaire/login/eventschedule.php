@@ -36,16 +36,11 @@ $error = array();
 $roleID = $roleInfo['Guid_role'];
 
 $default_account = "";
-/*
-$accessRole = getAccessRoleByKey('home');
-$roleIDs = unserialize($accessRole['role_ids']);
-$dataViewAccess = isUserHasAnyAccess($roleIDs, $roleID, 'view');*/
 
 if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to_date']))) {
     verify_input($error);
 }
 ?>
-<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">-->
 <link rel="stylesheet" href="assets/eventschedule/css/fullcalendar.css" />
 <link rel="stylesheet" href="assets/eventschedule/css/bootstrap-datetimepicker.min.css">
 <script src="assets/eventschedule/js/jquery.min.js"></script>
@@ -119,22 +114,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .fc-month-view .evttitle, .fc-basicWeek-view .evttitle{width:90%;}
     .fc-basicWeek-view .fc-comments{width: 90%;}
     .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px; pointer-events: visible;}
-    .rightCircleicon2{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_health_fair.png"); background-repeat: no-repeat;background-size: 20px 20px;}
-    /*.numberCircle {
-        behavior: url(PIE.htc); 
-        width: 16px;
-        height: 66px;
-        padding: 8px;
-        text-align: center;
-        position: relative;
-        top: -43px;
-        left: 10px;
-        font-size: 30px;
-        font-family: "Open Sans";
-        color: rgb(255, 255, 255);
-        font-weight: bold;
-        text-shadow: 0px 0px 10px #654c07;
-        }*/
+    .rightCircleicon2{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_health_fair.png"); background-repeat: no-repeat;background-size: 20px 20px;pointer-events: visible;}
+   
     .numberCircle {
         padding: 14px;
         text-align: center;
@@ -217,7 +198,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         margin:auto;
         font-size: 1.2em;
         padding-top: 1em;
-        width:110%;
+        width:100%;
     }
 
     .day_stats p {
@@ -248,7 +229,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .fc-salesrep a{ margin-bottom: 5px; }
     .show-stats, .evttitle a, .fc-salesrep a { pointer-events: visible; }
     #action_palette{ padding-top: 4.5em; }
-    main{ padding-top: 6.6em; }
+    main{ padding-top: 6.9em; }
     .summary_brca_icon {
         height: 50px;
     }
@@ -279,7 +260,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         .fc-basicDay-view .fc-logo{
             width: 100%;
         }
-
+    }
+    @media only screen 
+    and (min-device-width : 768px) 
+    and (max-device-width : 1024px) 
+    and (orientation : landscape) { 
 
     }
     
@@ -326,11 +311,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         $("input[name='modaleventtype']").click(function () {
             var modalevtType = $(this).val();
             if (modalevtType == 2) {
-                $("div.modalaccounttype").hide();
-                $("div.modalhealthcare").show();
+                $("div.modalaccounttype").addClass('hide').removeClass('show');//  hide();
+                $("div.modalhealthcare").addClass('show').removeClass('hide'); //show();
             } else {
-                $("div.modalaccounttype").show();
-                $("div.modalhealthcare").hide();
+                $("div.modalaccounttype").addClass('show').removeClass('hide'); //show();
+                $("div.modalhealthcare").addClass('hide').removeClass('show'); //hide();
             }
         });
         
@@ -394,8 +379,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $("#detail").css("background", "linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");
         });
 
+        var state_count = 0, count = 0, state_count1 =0, count1 = 0;
+
         var calendar = $('#calendar').fullCalendar({
-            eventLimit: 3,
             header: {
                 left: 'prev,next today',
                 center: 'title',
@@ -450,10 +436,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         $("#modalaccountopt").val(event.accountid);
                     }
                 });
-                //$("#modalsalesrepopt option:contains(" + event.salesrep + ")").attr('selected', 'selected');
-                //$("#modalaccountopt option:contains(" + event.account + ")").attr('selected', 'selected');
-                //var eventID = event.id;
-
+                
                 popup_comment(event.id);
                 
                 $("#modalfull_name_id").val(event.hltname);
@@ -552,23 +535,38 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
                 var view = $('#calendar').fullCalendar('getView');
                 if(view.name == 'basicDay'){
-                    
+                   
                     cmts = '<div class="fc-number"><span>Account Number: </span>' + event.account + '</div>';
                     
-                    cmts += '<div class = "day_stats">';
-                    cmts += '<p class="show-stats"><span class="silhouette">' + event.registeredCnt + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ event.qualifiedCnt + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ event.completedCnt + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">0 <img src="assets/eventschedule/icons/flask_icon.png"></span></p>' +
-                                '</div>';
-                    cmts += '</div>'
+                    cmts += '<div class = "day_stats" id="state-count'+ state_count +'" >';
+                    var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1};
+                    $.ajax({
+                        url: "ajaxHandlerEvents.php",
+                        type: "POST",
+                        data: eventData,
+                        success: function (res)
+                        {
+                            var result = JSON.parse(res);
+                            
+                            console.log(result.reg);
+                            html = '<p class="show-stats"><span class="silhouette">' + result.reg + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ result.qua + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ result.com + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">'+result.sub+'<img src="assets/eventschedule/icons/flask_icon.png"></span></p>' +
+                                '';
+                            $('#state-count'+count).html(html);
+                            count += 1;
+                        }
+                    });
+                    
+                    cmts += '</div></div>'
                     cmts += '<div class="fc-comments"><h1>Comments</h1><div class = "day-comments">';
                     if(event.comments != null) 
                           cmts += event.comments;
                     cmts += '</div></div>'
                     if(event.logo != null)
                         cmts += '<div class="fc-logo"><img src = "../login/images/practice/' + event.logo + '" onError="imgError(this);"/></div>';
-                    //else cmts += '<div class="fc-logo"><img src = "../login/images/practice/logo-placeholder.png"/></div>';
+                    else
+                        cmts += '<div class="fc-logo"><img src = "../login/images/logo-placeholder.png" onError="imgError(this);"/></div>';
+                    state_count = state_count+1;
                 }
-                /*if (view.name == 'basicWeek' && event.comments)
-                    cmts = '<div class="fc-comments">' + event.comments + '</div>'*/
 
                 var icon = '';
                 if (event.title == 'BRCA Day') {
@@ -585,17 +583,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 if (event.color) {
                     borderColor = "border: 2px solid " + event.color + " !important";
                 }
-                /*
-                 var modifiedName = sentenceCase(name.substring(0, 15));
-                 if (name.length > 15)
-                 modifiedName += "...";
-                 */
                 
                 var modifiedName = sentenceCase(name);
                 
                 var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable" style="' + borderColor + '">' +
                         '<div class="fc-content evtcontent">' +
-                        '<div class="fc-title evttitle"><a href=accounts.php?account_id="' + event.accountid + '">' + modifiedName + '</a></div>' +
+                        '<div class="fc-title evttitle"><a class="account-click" id="acc-'+event.accountid+'"  href="#">' + modifiedName + '</a></div>' +
                         salesrep + cmts +
                         '<div class="' + icon + '"></div>' +
                         '</div>' +
@@ -618,13 +611,30 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     if (parsedEventTime < parsedNow) {
                         var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable days-' + eventDate + '"  style="' + borderColor + '">' +
                                 '<div class="fc-content evtcontent">'+                                
-                                '<div class="fc-title evttitle"><a href="accounts.php?account_id=' + event.accountid + '">' + modifiedName + '</a></div>' + salesrep + cmts;
+                                '<div class="fc-title evttitle"><a class="account-click" id="acc-'+event.accountid+'"  href="#">' + modifiedName + '</a></div>' + salesrep + cmts;
+                            content += "<div id='state2_count"+ state_count1 +"'>"
                                 if(view.name != 'basicDay'){
-                                    content += '<div class="show-stats"><span class="silhouette">' + event.registeredCnt + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ event.qualifiedCnt + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ event.completedCnt + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">0 <img src="assets/eventschedule/icons/flask_icon.png"></span></div>'
+                                    
+                                    var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1};
+                                    $.ajax({
+                                        url: "ajaxHandlerEvents.php",
+                                        type: "POST",
+                                        data: eventData,
+                                        success: function (res)
+                                        {
+                                            var result = JSON.parse(res);
+                                            var html = '<div class="show-stats"><span class="silhouette">' + result.reg + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ result.qua + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ result.com + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">'+ result.sub +' <img src="assets/eventschedule/icons/flask_icon.png"></span></div>';
+                                            $('#state2_count'+count1).html(html);
+                                            count1 += 1;
+                                    
+                                        }
+                                    });
                                 }
-                            content += '<div class="' + icon + '"></div>';   
+                            content += '</div><div class="' + icon + '"></div>';   
                             content += '</div> </div>';
+                            state_count1 += 1;
                         return $(content);
+                        
                     } else {
                         return $(content);
                     }
@@ -652,11 +662,19 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 
             },
             eventAfterAllRender: function (event, element, view) {
-                //$(".days-06:first").css("display", "block");
                 $("td.fc-event-container").each(function() {
-                    //$(this).removeAttr('rowspan');
                 });
             },
+            /*dayClick: function( date, jsEvent, view ){
+                console.log('Clicked on: ' + date.format());
+                console.log('Coordinates: ' + jsEvent.pageX + ',' + jsEvent.pageY);
+                console.log('Current view: ' + view.name);
+
+                // Here you load the modal
+                //$('#myModal').load('nestable_list.php', {event_date: date.format()}, function(){
+                  //  $('#myModal').modal();
+                //});
+            },*/
         });
 
         // Whenever the user clicks on the "save" button
@@ -724,8 +742,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             }
         });
 
-        $("#modalcomment").bind("keyup change", function(e) {
-            $(this).addClass('updated');
+        $("#modalcomment, #modalfull_name_id, #modalstreet1_id, #modalstreet2_id, #modalcity_id, #modalstate_id, #modalzip_id").bind("keyup change", function(e) {
+            /*$(this).addClass('updated');*/
             if($(this).val() != '')
                 $('button#eventupdate').prop('disabled', false);
             else
@@ -737,6 +755,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         })*/
         // Whenever the user clicks on the "update" button
         $('#eventupdate').bind(clickEventType, function () {
+
+            var current_time = get_date();
+            $('button#eventupdate').prop('disabled', true);
             var commentid = "";
             if($(this).hasClass("edited")){
                 $(this).removeClass("edited")
@@ -788,6 +809,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     userid: userid,
                     modalhealthcareid: modalhealthcareid,
                     commentid: commentid,
+                    updated_date : current_time,
                     action: 'eventupdate'
                 };
 
@@ -1140,8 +1162,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var commentstext = "";
                 if(result.length != 0){
                     for( count = 0; count < result.length; count++){
-                        var comment_date = moment(new Date(result[count]['created_date'])).format('DD MMM YYYY, h:mm a');
-                        commentstext += "<div class='commentlogss' id='"+result[count]['id']+"'><p>";
+                        var comment_date = result[count]['updated_date'].replace(/-/g, '/');
+                        comment_date = moment(new Date(comment_date)).format('DD MMM YYYY');
+                        commentstext += "<label for='modalcomment'>Comments History: </label><div class='commentlogss' id='"+result[count]['id']+"'><p>";
                         if(result[count]['repfname'] != null){
                             commentstext += "<strong>"+ result[count]['repfname'] + " " + result[count]['replname'] + " (" + comment_date + ") </strong>";
                         }else{
@@ -1186,6 +1209,24 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         $("#modalcomment").val(text);
         $("#eventupdate").addClass('edited').attr("data-commentid",id);
     });
+
+    $(document).delegate('.account-click', 'click', function(e){
+        e.preventDefault();
+        var acc_id = $(this).attr('id').substring(4);
+        $("#updateEvent").addClass('hide');
+        $("#popup-accounts").show();
+        $.ajax({
+            url: 'ajaxHandlerEvents.php',
+            type: 'POST',
+            data: { action: "getAccountSetup", id: acc_id },
+            success: function(res){
+                var result = JSON.parse(res);
+                //$(".schedulemodal-content").html(result)
+            }
+        })
+
+        return false;
+    })
 
 </script>
 <aside id="action_palette" class="action_palette_width">		
@@ -1423,7 +1464,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 </ol>      
             </h4>
             <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>
-            <a href="https://www.mdlab.com/dev/login/dashboard2.php" class="button homeIcon"></a>
+            <a href="<?php echo SITE_URL; ?>/dashboard2.php" class="button homeIcon"></a>
             <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
         </section>
         <div class="scroller event-schedule">
@@ -1433,6 +1474,10 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                         <div>
                             <div>
                                 <div class="row">
+                                    <div id="stats-summary">
+
+                                    </div>
+
                                     <div class="col-md-1"><label>Filter by:</label></div>
                                     <div class='col-md-2'>
                                         <div class="form-group">
@@ -1552,18 +1597,17 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                         </div>
                                     </div></div>
                                 <div class="row">
-                                    <div class='col-md-7 col-sm-6 modalaccounttype'> 
+                                    <div class="col-md-6 col-sm-6">
+                                        <div class="comments-log">
+                                            
+                                        </div>
+                                    </div>
+                                    <div class='col-md-6 col-sm-6 modalaccounttype'> 
                                         <div class="form-group">
                                             <label for="modalcomment">Add Comments: </label>
                                             <textarea class="form-control" name="modalcomment" rows="10" id="modalcomment" placeholder="Comments" required></textarea>
                                         </div> 
                                     </div>  
-                                    <div class="col-md-5 col-sm-6">
-                                        <label for="modalcomment">Event Comments: </label>
-                                        <div class="comments-log">
-                                            
-                                        </div>
-                                    </div>
                                 </div>
                                 <div class="row modalhealthcare" style="display: none;">
                                     <div class='col-md-4'>
@@ -1663,6 +1707,113 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                         </div>
 
                     </form> 
+
+                    <div id="popup-accounts" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-8">
+                            <div class="selectAccountBlock">
+                                <label >Select Account</label><br/>
+                                <select class="form-control" id="selectAccount">
+                                    
+                                    <option  data-guid="" value=""><?php //echo $v['account']." - ".ucwords(strtolower($v['name'])); ?></option>
+                                    
+                                </select>
+                                
+                                <a href="<?php //echo SITE_URL;?>/account-config.php?action=edit&id=<?php //echo $accountActive['Guid_account']; ?>" id="edit-selected-account" class="add-new-account">
+                                    <span class="fas fa-pencil-alt" aria-hidden="true"></span>
+                                </a>
+                            </div>
+                            
+                            <div class="providersTable">                        
+                                <h4 id="physiciansListLabel" class="accounts">
+                                    Physicians       
+                                    <a href="<?php //echo SITE_URL;?>/accounts.php?account_id=<?php //echo $thisAccountID;?>&provider_guid=add" class="pull-right" id="add-account-provider">
+                                        <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
+                                    </a>
+                                </h4>
+                        
+                                <table class="table providersTable">
+                                    <thead>
+                                        <tr>                        
+                                            <th>UPIN</th>
+                                            <th>Title</th>
+                                            <th class="">First Name</th>
+                                            <th class="">Last Name</th>
+                                            <th class="">Image</th>
+                                            <th class="noFilter actions text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php 
+                                        
+                                        ?>
+                                        <tr>                            
+                                            
+                                            <td>
+                                                <?php //$photoImg = ($v['photo_filename']=="")? "/assets/images/default.png" : "/images/users/".$v['photo_filename'];   ?>
+                                                <img width="40" src="<?php //echo SITE_URL.$photoImg; ?>" />
+                                            </td>
+                                            <td class="text-center">
+                                                <!--<a class="edit-provider" data-provider-guid="<?php //echo $v['Guid_provider']; ?>">-->
+                                                <a href="<?php //echo SITE_URL."/accounts.php?account_id=$Guid_account&provider_guid=$providerGuid"; ?>">
+                                                    <span class="fas fa-pencil-alt" aria-hidden="true"></span>
+                                                </a>
+                                                <a onclick="javascript:confirmationDeleteProvider($(this));return false;" href="?delete=<?php //echo $providerGuid ?>&provider-id=<?php //echo $v['provider_id']; ?>&account-id=<?php //echo $Guid_account; ?>">
+                                                    <span class="far fa-trash-alt" aria-hidden="true"></span> 
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>  <!-- /.providersTable -->
+                        </div>
+                            <div class="col-md-4 pL-50">
+                            <div id="officeLogo">
+                                <?php //$logo = $logo ? "/../images/practice/".$logo : "/assets/images/default.png"; ?>
+                                <img class="salesrepLogo" src="<?php //echo SITE_URL.$logo; ?>" />
+                            </div>
+                            <div class="addressInfoBlock">
+                                <label >Address</label>
+                                <div id="officeAddress">
+                                    <div>
+                                    
+                                    </div>
+                                    
+                                        <div><i class="fas fa-phone"></i> <a class="phone_us" href="tel:"></a></div>
+                                    
+                                    
+                                        <div><i class="fas fa-fax"></i> <a class="phone_us" href="tel:"></a></div>
+                                    
+                                   
+                                        <div><i class="fas fa-globe"></i> <a target="_blank" href=""></a></div>                   
+                                    
+                                </div>
+                            </div>
+                            <div class="salesrepInfoBlock">
+                                <label >Genetic Consultant</label>
+                                <div class="imageBox">
+                                    <div class="pic">
+                                        
+                                        <img width="50" class="salesrepProfilePic" src="<?php //echo SITE_URL.$salesrepPhoto; ?>" />
+                                    </div>
+                                    <div class="name text-center">
+                                        
+                                    </div>
+                                </div>
+                                
+                                <div id="salesrepInfo1">
+                                    
+                                    
+                                        <div><i class="fas fa-envelope"></i> <a href="mailto:"></a></div>
+                                    
+                                    
+                                        <div><i class="fas fa-phone"></i> <a class="phone_us" href="tel:<?php //echo $salesrepPhone; ?>"></a></div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        </div> <!-- /.row -->        
+                    </div>
                 </div>
 
             </div>
@@ -1679,6 +1830,27 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             buttonImage: 'assets/eventschedule/images/calendar.gif'
         });
     });
+
+    function get_date(){
+        var d = new Date();
+        var hr = d.getHours();
+        var min = d.getMinutes();
+        if (min < 10) {
+            min = "0" + min;
+        }
+        var sec = d.getSeconds();
+        /*var ampm = "am";
+        if( hr > 12 ) {
+            hr -= 12;
+            ampm = "pm";
+        }*/
+        var date = d.getDate();
+        var month = d.getMonth()+1;
+        var year = d.getFullYear();
+        var current_time = year + "-" + month + "-" + date + " " +hr + ":" + min + ":" + sec ;
+        return current_time;
+    }
+
 </script>
 <?php require_once 'scripts.php'; ?>
 <?php require_once 'footer.php'; ?>

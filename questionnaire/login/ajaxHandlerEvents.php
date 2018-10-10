@@ -8,6 +8,7 @@
 
 require_once('config.php');
 require_once ('functions_event.php');
+require_once ('functions.php');
 
 /* --------------------- Event Update ------------------------- */
 
@@ -47,7 +48,7 @@ if(isset($_POST["modalid"]) && isset($_POST['action']) && $_POST['action'] == "e
                             'comments' => $_POST['modalcomments'],
                             'eventid' => $_POST['modalid'],
                             'user_id' => $_POST['userid'],
-                            'updated_date' => date("Y-m-d H:i:s"),
+                            'updated_date' => $_POST['updated_date'],
                         );
         $where = array('id' => $_POST['commentid']);
         updateTable($db, 'tblcomments', $updateArrComments, $where );
@@ -56,8 +57,8 @@ if(isset($_POST["modalid"]) && isset($_POST['action']) && $_POST['action'] == "e
                             'comments' => $_POST['modalcomments'],
                             'eventid' => $_POST['modalid'],
                             'user_id' => $_POST['userid'],
-                            'created_date' => date("Y-m-d H:i:s"),
-                            'updated_date' => date("Y-m-d H:i:s"),
+                            'created_date' => $_POST['updated_date'],
+                            'updated_date' => $_POST['updated_date'],
                         );
         insertIntoTable($db, 'tblcomments', $addArrComments);
     }
@@ -87,3 +88,148 @@ if(isset($_POST['commentid']) && isset($_POST['action']) && $_POST['action'] == 
     $result = $db->query($query);
     echo json_encode($result);
 }
+
+
+/* --------------------- Event Stats ------------------------- */
+
+if(isset($_POST['account']) && isset($_POST['action']) && $_POST['action'] == "getStates"){
+
+    $reg = getAccountStatusCount($db, $_POST['account'], $_POST['regitered']);
+    $qua = getAccountStatusCount($db, $_POST['account'], $_POST['qualified']);
+    $com = getAccountStatusCount($db, $_POST['account'], $_POST['completed']);
+    $sub = getAccountStatusCount($db, $_POST['account'], $_POST['submitted']);
+    $result = array("reg"=>$reg, "qua"=>$qua, "com"=>$com, "sub"=>$sub);
+    echo json_encode($result);
+}
+
+
+/* --------------------- Render Piechart Data ------------------------- */
+
+if( isset($_POST['action']) && $_POST['action'] == 'piechart' ){
+
+    $datecreated = isset($_POST['startdate'])? $_POST['startdate'] : 0;
+    
+    $query = "SELECT acc.Guid_account, CONCAT(acc.name) as accname, "
+                . "(SELECT  count(*) FROM tblqualify tblqf "
+                            . "INNER JOIN tblaccount tblacc ON tblqf.account_number = tblacc.account "
+                            . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
+                            . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
+                            . "WHERE tblacc.Guid_account = acc.Guid_account AND YEARWEEK(tblqf.Date_created)=YEARWEEK(:datecreated) ) as registeredCnt, "
+                    . "(SELECT count(*) FROM tbl_ss_qualify tblqfss "
+                            . "LEFT JOIN tblqualify tblqf ON tblqfss.Guid_qualify = tblqf.Guid_qualify "
+                            . "INNER JOIN tblaccount tblacc ON tblqf.account_number = tblacc.account "
+                            . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
+                            . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
+                            . "WHERE tblacc.Guid_account = acc.Guid_account "
+                            . "AND tblqfss.qualified = 'Yes') as qualifiedCnt, "
+                    . "(SELECT count(*) FROM tbl_ss_qualify tblqfss "
+                            . "LEFT JOIN tblqualify tblqf ON tblqfss.Guid_qualify = tblqf.Guid_qualify "
+                            . "INNER JOIN tblaccount tblacc ON tblqf.account_number = tblacc.account "
+                            . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
+                            . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
+                            . "WHERE tblacc.Guid_account = acc.Guid_account "
+                            . "AND tblqfss.qualified IN ('Yes','No','Unknown')) as completedCnt "
+                . "FROM tblaccount acc "
+                . "GROUP BY acc.Guid_account  ORDER BY registeredCnt DESC LIMIT 5";
+
+    $result = $db->query($query,array("datecreated"=>$datecreated));
+
+    $colors = array('#00713D','#89CB46','#3065B1','#00B7D0','#7C55A5');
+    $i = 0;
+    foreach($result as $row){
+        $acc = wordwrap(ucwords(strtolower($row['accname'])), 40, "\n");
+        $piedata[] = array('category' => $acc, 'value' => (int)$row['registeredCnt'], 'color'=> $colors[$i]);
+        $i++;
+    }
+    $data = array(  'type' => 'pie',
+                    'data' => $piedata
+            );
+    echo json_encode($data);
+}
+
+
+/* --------------------- BRCA Days Member Account  ------------------------- */
+
+if(isset($_POST['action']) && $_POST['action'] == 'mebrcacount'){
+
+    $userId = isset($_POST['userid'])? $_POST['userid'] : 0;
+    $startdate = isset($_POST['startdate'])? $_POST['startdate'] : 0;
+
+    $query = "SELECT count(*) as cnt FROM tblevents evt "
+            . "INNER JOIN tblsalesrep sp "
+            . "ON evt.salesrepid = sp.Guid_salesrep "
+            . "WHERE evt.title = 'BRCA Day' AND sp.Guid_user =:userid "
+            . "AND YEARWEEK(evt.start_event)=YEARWEEK(:datecreated)";
+
+    $result = $db->query($query, array("userid"=>$userId,"datecreated"=>$startdate));
+
+    foreach($result as $row){
+        $data[] = array(
+                    'mebrcacount' => $row['cnt']
+                );
+    }
+    echo json_encode($data);
+}
+
+/* --------------------- BRCA Days Top Account  ------------------------- */
+
+if(isset($_POST['action']) && $_POST['action'] == 'topbrcacount'){
+    $startdate = isset($_POST['startdate'])? $_POST['startdate'] : 0;
+
+    $query = "SELECT count(*) as cnt, evt.* FROM tblevents evt "
+            . "INNER JOIN tblsalesrep sp "
+            . "ON evt.salesrepid = sp.Guid_salesrep "
+            . "WHERE evt.title = 'BRCA Day' AND YEARWEEK(evt.start_event)=YEARWEEK(:datecreated) "
+            . "GROUP BY evt.salesrepid ORDER  BY cnt DESC LIMIT 1";
+
+    $result = $db->query($query, array("datecreated"=>$startdate));
+
+    foreach($result as $row){
+        $data[] = array(
+                    'topbrcacount' => $row['cnt']
+                );
+    }
+    echo json_encode($data);
+}
+
+/* --------------------- Dashboard Event Count  ------------------------- */
+
+if(isset($_POST['action']) && $_POST['action'] == 'meeventcount'){
+    $userId = isset($_POST['userid'])? $_POST['userid'] : 0;
+    $startdate = isset($_POST['startdate'])? $_POST['startdate'] : 0;
+
+    $query = "SELECT count(*) as cnt FROM tblevents evt "
+            . "INNER JOIN tblsalesrep sp "
+            . "ON evt.salesrepid = sp.Guid_salesrep "
+            . "WHERE sp.Guid_user =:userid "
+            . "AND YEARWEEK(evt.start_event)=YEARWEEK(:datecreated)";
+
+    $result = $db->query($query, array("userid"=>$userId,"datecreated"=>$startdate));
+
+    foreach($result as $row){
+        $data[] = array(
+                    'meeventcount' => $row['cnt']
+                );
+    }
+    echo json_encode($data);
+}
+
+/* --------------------- Account Setup Popup  ------------------------- */
+
+/*if(isset($_POST['action']) && $_POST['action'] == "getAccountSetup"){
+    $account_id = $_POST['id'];
+    
+    echo json_encode($account_id);
+}*/
+
+/**/
+
+
+/*function getAvgAccountCount($db, $account, $Guid_status ){     
+    $q = "SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l "
+        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
+        . "WHERE l.Guid_status =:Guid_status AND l.account=:account AND u.marked_test='0'"; 
+    
+    $result = $db->row($q, array('account'=>$account,'Guid_status'=>$Guid_status));    
+    return $result['count'];
+}*/

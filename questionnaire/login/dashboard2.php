@@ -146,27 +146,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         font-weight: bold;
         text-shadow: 0px 0px 10px #654c07;
         }*/
-    .numberCircle {
-        padding: 14px;
-        text-align: center;
-        position: relative;
-        top: 0;
-        left: 0;
-        font-size: 20px;
-        font-family: "Open Sans";
-        color: rgb(255, 255, 255);
-        font-weight: bold;
-        text-shadow: 0px 0px 10px #654c07;
-        background: url(assets/eventschedule/icons/icon_brca_day.png);
-        background-size: 90%;
-        background-repeat: no-repeat;
-        background-position: center;
-    }
-    .numberCircleContainer {
-        margin: 10px 0;
-        text-align: center;
-    }
-    #calendar .fc-body td {vertical-align: top !important;}  
+
+    /*#calendar .fc-body td {vertical-align: top !important;}  
     .fc-event-container > a {min-height: 65px;}    
     #mebrcacnt,#meregcnt,#mecomcnt,#meeventcnt,#mequalcnt,#mesubcnt{color:blue}
     #topbrcacnt,#topregcnt,#topcomcnt,#topeventcnt,#topqualcnt,#topsubcnt{color:#edba23;}
@@ -184,17 +165,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     #home .box.full.visible { padding-top: 6px; }
     .week_stats p{ font-size: 14px; }
     #calendar{ margin-top: 0; }
-    .fc-toolbar.fc-header-toolbar{ margin-top: -4.3em; margin-bottom: 1em;}
-    /*#chart_stats{ height: 380px; }*/
-    /*#chart_stats select#sidebar_select{ margin-top: 10%; }*/
+    .fc-toolbar.fc-header-toolbar{ margin-top: -4.3em; margin-bottom: 1em;} */
+    
     select#sidebar_select { border: 1px solid #ccc; border-radius: 20px; width: 100%; padding: 5px 8px;   margin-bottom: 8px;}
+    /*.info_block h1{ font-size: 20px; } 
     #stats_header .info-button{ padding: .3em 1.5em .357em 1.5em; }
-    .info_block h1{ font-size: 20px; }
-    /*#stats_header .info-button{ padding: 2px 15px 3px 15px; }
-    button#summary { margin: 0 15px;}*/
-    /*#stats_header a.button > strong{ display: block; font-size: 15px;}
-    #stats_header a.button.submit { height: 33px; display: inline-block; width: 150px; font-size: 15px; }*/
-    #calendar table{ min-height: 50%; max-height: 150px;}
+   #calendar table{ min-height: 50%; max-height: 150px;} 
     .fc-basic-view .fc-body .fc-row{ min-height: 100px; }
     .fc-scroller.fc-day-grid-container{ max-height: 100px; }
     .show-stats { pointer-events: visible; }
@@ -208,15 +184,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .info_block_row .col-md-6{ min-width: 0; }
     #calendar .fc-view-container { margin-top: -7px; }
     .fc-basicWeek-view .fc-content-skeleton{ padding-bottom: 0; }
-    #calendar tbody td td.fc-more-cell {
-    border: 0;
-}
-    @media only screen and (max-width: 1024px) and (orientation: portrait)
+    #calendar tbody td td.fc-more-cell { border: 0; } */
+    /*#chart_stats .chart_header { width: 30%; }*/
+    /*@media only screen and (max-width: 1024px) and (orientation: portrait)
     {
         .info_block_row{ width: 100%; padding-bottom: 60px; }
-        /*#detail{ padding: 0px 15px 0 15px; }*/
+        #detail{ padding: 0px 15px 0 15px; }
         select#sidebar_select{ width: 50%; }
-        /*.info_block_row .col-md-6{ padding: 1% 0 4%; margin-bottom: 40px; }*/
+        .info_block_row .col-md-6{ padding: 1% 0 4%; margin-bottom: 40px; }
         #calendar table{ min-height: 100%; }
         #chart_stats{ height: 410px; }
         .fc-basic-view .fc-body .fc-row{ min-height: 140px; }
@@ -225,9 +200,15 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         .chart_header .button{ width: 35%; max-height: 13px;  }
         .info_block{ height: 63%; }
         .fc-toolbar.fc-header-toolbar{margin-top: -5.0em;}
-        .fc-content.evtcontent.summary div {font-size: 13px;}
-        .fc-content.evtcontent.summary { padding: 0 !important; }
+        .fc-content.evtcontent.summarybrca div {font-size: 13px;}
+        .fc-content.evtcontent.summarybrca { padding: 0 !important; }
     }   
+    @media only screen 
+    and (min-device-width : 768px) 
+    and (max-device-width : 1024px) 
+    and (orientation : landscape) { 
+        #chart_stats { height: 280px; }
+    }*/
 </style>
 <script>
     
@@ -306,9 +287,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $("#detail").addClass("details_button").removeClass("summary_button");
             $("#summary").addClass("summary_button").removeClass("details_button");
         });
-
+        var state_count1 = 0, count1 = 0;
         var calendar = $('#calendar').fullCalendar({
-            eventLimit: 2,
             header: {
                 left: 'prev,next today',
                 center: 'title',
@@ -389,30 +369,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
                 //var eventID = event.id;
                 popup_comment(event.id);
-                /*$.ajax({
-                    type : 'POST',
-                    data : 'eventid='+eventID,
-                    url : 'getcomments.php',
-                    success : function(res){
-
-                        var result = JSON.parse(res);
-                        console.log(result);
-                        $(".comments-log").html('');
-                        $("#modalcomment").val('');
-                        var count = 0;
-                        var commentstext = "";
-                        if(result.length != 0){
-                            $("#modalcomment").val(result[0]['comments']);
-                            lastComment = result[0]['comments'];
-                            for( count = 0; count < result.length; count++){
-                                commentstext += "<div class='commentlogss'><p>"+result[count]['comments']+"</p>";
-                                commentstext += "<p> By: "+ result[count]['email'] + " on: " + result[count]['created_date'] + "</p></div>";
-                            }
-                            $(".comments-log").html(commentstext);
-                        }
-                    }
-                });*/
-
+                
                 if (event.title == 'BRCA Day') {
                     $('#brcaradio').prop("checked", true);
                     var modalevtType = $(this).val();
@@ -518,7 +475,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                  modifiedName += "...";
                  */
                 var modifiedName = sentenceCase(name);
-
+                
                 var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable" style="' + borderColor + '">' +
                         '<div class="fc-content evtcontent">' +
                         '<div class="' + icon + '"></div>' +
@@ -530,7 +487,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 if (event.evtCnt) {
                     $("#summary").addClass("details_button").removeClass("summary_button");
                     $("#detail").addClass("summary_button").removeClass("details_button");
-                    var content = '<div class="fc-content evtcontent summary days-' + eventDate + '" style="padding: 0 20px; font-size: 15px; line-height: 16px;">';
+                    var content = '<div class="fc-content evtcontent summarybrca days-' + eventDate + '" style="padding: 0 20px; font-size: 15px; line-height: 16px;">';
                     content += '<div class="numberCircleContainer"><span class="numberCircle">' + event.evtCnt + '</span></div>';
                     content += '<div>Registered <span style="float:right">' + event.registeredCnt + '</span></div>';
                     content += '<div>Completed <span style="float:right">' + event.qualifiedCnt + '</span></div>';
@@ -543,13 +500,31 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     $("#summary").addClass("summary_button").removeClass("details_button");
                     if (parsedEventTime < parsedNow) {
                         var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable days-' + eventDate + '"  style="' + borderColor + '">' +
-                                '<div class="fc-content evtcontent summary">' +
+                                '<div class="fc-content evtcontent summarybrca">' +
                                 '<div class="' + icon + '"></div>' +
-                                '<div class="fc-title evttitle"><a href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>' +
-                                salesrep + cmts +
-                                '<div class="show-stats"><span class="silhouette">' + event.registeredCnt + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ event.qualifiedCnt + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ event.completedCnt + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">0 <img src="assets/eventschedule/icons/flask_icon.png"></span></div>' +
-                                '</div>' +
-                                '</div>';
+                                '<div class="fc-title evttitle"><a href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>' + salesrep + cmts;
+
+                        content += "<div id='state2_count"+ state_count1 +"'>";
+
+                        var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1};
+                        $.ajax({
+                            url: "ajaxHandlerEvents.php",
+                            type: "POST",
+                            data: eventData,
+                            success: function (res)
+                            {
+                                var result = JSON.parse(res);
+                                var html = '<div class="show-stats"><span class="silhouette">' + result.reg + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ result.qua + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ result.com + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">'+ result.sub +' <img src="assets/eventschedule/icons/flask_icon.png"></span></div>';
+                                $('#state2_count'+count1).html(html);
+                                count1 += 1;
+                        
+                            }
+                        });
+
+                                /*'<div class="show-stats"><span class="silhouette">' + event.registeredCnt + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ event.qualifiedCnt + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ event.completedCnt + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">0 <img src="assets/eventschedule/icons/flask_icon.png"></span></div>';*/
+                    content += '</div></div></div>';
+                    state_count1 += 1;
+
                         return $(content);
                     } else {
                         return $(content);
@@ -598,9 +573,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 
                 $.ajax({
                     type : 'POST',
-                    data : inputparam,
+                    data : { userid:<?php echo $userID; ?>, startdate:start, action:'mebrcacount' },//inputparam,
                     dataType: 'json',
-                    url : 'mebrcacount.php',
+                    url : 'ajaxHandlerEvents.php',
                     success : function(data){
                         $.each(data, function(k, v) {
                             if(v.mebrcacount) $('#mebrcacnt').html(v.mebrcacount);
@@ -609,9 +584,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 });
                 $.ajax({
                     type : 'POST',
-                    data : inputparam,
+                    data : { userid:<?php echo $userID; ?>, startdate:start, action:'topbrcacount' },//inputparam,
                     dataType: 'json',
-                    url : 'topbrcacount.php',
+                    url : 'ajaxHandlerEvents.php',
                     success : function(data){
                         $.each(data, function(k, v) {
                             if(v.topbrcacount) $('#topbrcacnt').html(v.topbrcacount);
@@ -619,9 +594,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             
                             if($('#mebrcacnt').html() < $('#topbrcacnt').html()) $('#mebrcacnt').addClass('decrease');
                             if($('#mebrcacnt').html() > $('#topbrcacnt').html()) $('#mebrcacnt').addClass('increase');
-                            //$('#mebrcacnt').html('1');
-                            //$('#topbrcacnt').html('1');
-                            
                             if($('#mebrcacnt').html() === $('#topbrcacnt').html()){
                                 $('#mebrcacnt').addClass('gold_stat gold_stat_star');
                                 $('#topbrcacnt').addClass('gold_stat');
@@ -633,8 +605,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         if($('#mebrcacnt').html() != 0 && $('#topbrcacnt').html() != 0){
                             if($('#mebrcacnt').html() < $('#topbrcacnt').html()) $('#mebrcacnt').addClass('decrease');
                             if($('#mebrcacnt').html() > $('#topbrcacnt').html()) $('#mebrcacnt').addClass('increase');
-                            //$('#mebrcacnt').html('1');
-                            //$('#topbrcacnt').html('1');
                             if($('#mebrcacnt').html() === $('#topbrcacnt').html()){
                                 $('#mebrcacnt').addClass('gold_stat gold_stat_star');
                                 $('#topbrcacnt').addClass('gold_stat');
@@ -645,9 +615,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 
                 $.ajax({
                     type : 'POST',
-                    data : inputparam,
+                    data : { userid:<?php echo $userID; ?>, startdate:start, action:'meeventcount' },//inputparam,
                     dataType: 'json',
-                    url : 'meeventcount.php',
+                    url : 'ajaxHandlerEvents.php',
                     success : function(data){
                         $.each(data, function(k, v) {
                             if(v.meeventcount) $('#meeventcnt').html(v.meeventcount);
@@ -831,9 +801,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 
                 $.ajax({
                     type : 'POST',
-                    data : inputparam,
+                    data : { userid:<?php echo $userID; ?>, startdate:start, action:'piechart' },//inputparam,
                     dataType: 'json',
-                    url : 'topaccounts.php',
+                    url : 'ajaxHandlerEvents.php',
                     success : function(returndata){
                         console.log(JSON.stringify(returndata))
                     var chart = $("#piechart").data("kendoChart");
@@ -1364,18 +1334,19 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 <div class="row info_block_row">
                         <div class = "info_block">
                             <h1>
-                            All<i class="fas fa-angle-down" style = "float:right;"></i>
+                            All<i class="fas fa-angle-down info_block_arrow" style = "float:right;"></i>
                             <br>Genetic
                             <br>Consultants</h1> 
-                            <!-- <i class="fas fa-angle-down info_block_arrow"></i>
                             <div class = "salesrep_dropdown dropdown_hide">
-                                <ul>
-                                    <a href = "#"><li>Name</li></a>
-                                    <a href = "#"><li>Name</li></a>
-                                </ul>
-                            </div>   --> 
-                        
-                        <div class="col-md-6 top-buttons">
+                                <i class="fas fa-angle-down info_block_arrow" style = "float:right;"></i>
+                                <div class = "salesrep_list">
+                                    <ul>
+                                        <li><a href = "#">Name</a></li>
+                                        <li><a href = "#">Name</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        <div class="col-lg-7 col-md-5 top-buttons">
                         <button type="button" name="Detail" id="detail" class="info-button details_button">Detail</button>
                         <button type="button" name="Summary" id="summary" class="info-button summary_button">Summary</button>
                         <a href="eventschedule.php" class="button submit"><strong>Full Calendar</strong></a>   
@@ -1385,18 +1356,19 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 </div>
                 <div id="calendar"></div>
                 <div id = "chart_stats">
-                    <div class = "chart_header col-md-3 col-sm-6">
+                    <div class = "chart_header  col-lg-12 col-md-12">
                             <p class = "stats_date">
-                                <span id="calendarmonth"></span><br>
-                                <span id="calendaryear"></span><br>
-                                <span>Stats</span>
+                                <span>Stats for Week of</span>
+                                <span id="calendarmonth"></span>
+                                <span id="calendaryear"></span>
+                                <span></span>
                             </p> 
-                             <i class="fas fa-angle-down stats_dropdown_arrow"></i>
+                             <!-- <i class="fas fa-angle-down stats_dropdown_arrow"></i>
                             <div class = "stats_dropdown dropdown_hide">
                                 <form id="filter_form" class = "stats_dropdown_flex" action="" method="post"> 
                                     <?php //if(isFieldVisibleByRole($roleIDs['from_date']['view'], $roleID)) {?>
                             
-                                    <div class = "dropdown_container" style = "display:flex">
+                                    <div class = "dropdown_container">
                                         <div class="f2">
                                        
 
@@ -1423,7 +1395,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                         ?>
                                         <?php //if(isFieldVisibleByRole($roleIDs['to_date']['view'], $roleID)) {?>
                                             <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['to_date'])) && (strlen($_POST['to_date']))) ? " show-label" : ""; ?><?php echo $date_error; ?>">
-                                                <!--<label class="dynamic" for="to_date"><span>To Date</span></label>-->
+                                                <label class="dynamic" for="to_date"><span>To Date</span></label>
 
                                                 <div class="group">                       
                                                     <input readonly class="datepicker" type="text" id="to_date" name="to_date" value="<?php echo ((!isset($_POST['clear'])) && isset($_POST['to_date']) && strlen($_POST['to_date'])) ? $_POST['to_date'] : ""; ?>" placeholder="To Date" max="<?php echo date('Y-m-d'); ?>">
@@ -1437,7 +1409,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                     
                                     <div class = "dropdown_container">     
                                         <div class="f2">
-                                            <!--<label class="dynamic" for="to_date"><span>Current Week</span></label>-->
+                                            <!--<label class="dynamic" for="to_date"><span>Current Week</span></label>
 
                                             <div class="group">                       
                                                 <input readonly type="text" id="to_date" name="to_date" value="" placeholder="Current Week">
@@ -1448,7 +1420,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                             </div>
                                         </div>
                                         <div class="f2">
-                                            <!--<label class="dynamic" for="to_date"><span>Month</span></label>-->
+                                            <!--<label class="dynamic" for="to_date"><span>Month</span></label>
 
                                             <div class="group">                       
                                                 <input readonly type="text" id="to_date" name="to_date" value="" placeholder="Month">
@@ -1461,7 +1433,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                     </div>
                                     <div class = "dropdown_container">
                                         <div class="f2">
-                                            <!--<label class="dynamic" for="to_date"><span>Quarter</span></label>-->
+                                            <!--<label class="dynamic" for="to_date"><span>Quarter</span></label>
 
                                             <div class="group">                       
                                                 <input readonly type="text" id="to_date" name="to_date" value="" placeholder="Quarter">
@@ -1472,7 +1444,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                             </div>
                                         </div>
                                         <div class="f2">
-                                            <!--<label class="dynamic" for="to_date"><span>Year</span></label>-->
+                                            <!--<label class="dynamic" for="to_date"><span>Year</span></label>
 
                                             <div class="group">                       
                                                 <input readonly type="text" id="to_date" name="to_date" value="" placeholder="Year">
@@ -1486,13 +1458,13 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
 
                                 <a class = "stats_filter" href="#"></a>
                             </form>
-                        </div>
+                        </div> -->
 
                             <a href="mdl-stats.php" target="_blank" class="button submit smaller_button"><strong>View All Stats</strong></a>
 
                     </div>
-                    <div id="piechart"  class="col-md-4 col-sm-6" ></div>
-                    <div id="chart"  class="col-md-5 col-sm-6" ></div>
+                    <div id="piechart"  class="col-md-6 col-sm-12" ></div>
+                    <div id="chart"  class="col-md-6 col-sm-12" style="padding:0;"></div>
                 </div>
                 </div>
             </div>
@@ -1737,8 +1709,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     template: "#= series.name #: #= value #"
                 },
                 chartArea: {
-                    //width: 200,
-                    height: 250
+                    width: 600,
+                    height: 230
                 },
             });
             
@@ -1747,7 +1719,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     text: "Top Accounts"
                 },
                 chartArea: {
-                    //width: 200,
+                    width: 600,
                     height: 250
                 },
                 legend: {
@@ -1765,16 +1737,19 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 tooltip: {
                     //visible: true,
                     template: "#= category # - #= kendo.format('{0:P}', percentage) #"
-                }
+                },
             });
 
-            function labelTemplate(e) {
-                return e.value.split(" ").join("\n");
-            }
+            function labelTemplate (e) { 
+                var text = e.value;
+                var first = "";
+                if ((screen.width<=950))
+                    first = text.slice(0, text.indexOf(" "));
+                else
+                    first = e.value.split(" ").join("\n");
+                return first;
+            };
         }
-
-       // $(document).ready(createChart);
-       // $(document).bind("kendo:skinChange", createChart);
     </script>
 <?php require_once 'scripts.php'; ?>
 <?php require_once 'footer.php'; ?>
