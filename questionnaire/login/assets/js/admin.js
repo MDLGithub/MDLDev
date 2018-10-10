@@ -117,112 +117,25 @@ $(document).ready(function () {
 
     
 
-    $(".print").click(function (e) {
+    $(".print").click(function(e) {
         e.preventDefault();
 
         $('body').addClass('loading');
 
-        $("#pedigree > ul").css({
-            '-webkit-transform': 'scale(1) translate(0%, 0%)',
-            'transform': 'scale(1) translate(0%, 0%)'
-        });
-
-        // var selected_questionnaire = $(this).data("selected_questionnaire");
-        // var selected_date = $(this).data("selected_date");
-
-        // $("#selected_questionnaire").val(selected_questionnaire);
-        // $("#selected_date").val(selected_date);
-        // $("#patient_information").submit();
         $.post("genreport.php", {selected_questionnaire: $(this).data("selected_questionnaire"), selected_date: $(this).data("selected_date")}, function (data, status) {
             $("#admin_print").html(data);
-
-            resizeLine();
-
-            var $el = $("#pedigree > ul");
-            var elHeight = $el.outerHeight();
-            var elWidth = $el.outerWidth();
-
-            var wrapWidth = '302';
-            var wrapHeight = '302';
-
-            var scale2 = Math.min(
-                    wrapWidth / elWidth,
-                    wrapHeight / elHeight
-                    );
-
-
-            $el.css({
-                '-webkit-transform': 'scale(' + scale2 + ') translate(0%, 0%)',
-                'transform': 'scale(' + scale2 + ') translate(0%, 0%)'
-            });
-
-            window.onafterprint = function() {
-                $(window).off('mousemove', window.onafterprint);
-                console.log('Print Dialog Closed..');
-                $('body').removeClass('loading');
-            };
-
-            $("#admin_print").printThis({
-                debug: false,
-                importCSS: false,
-                importStyle: false,
-                printContainer: false,
-                loadCSS: "style.min.css",
-                printDelay: 700,
-                base: "../../dev/"
-            });
-
-            setTimeout(function () {
-                $(window).one('mousemove', window.onafterprint);
-            }, 1);
-
+            scalePedigree();
         });
-    });
-	
-	var window_focus;
-
-	$(window).focus(function() {
-		window_focus = true;
-	}).blur(function() {
-		window_focus = false;
-	});
-
-	//$("#bulkPrint").click(function (event) {
-    $("#bulkPrint").on('click', function () {
-        //event.preventDefault();
-		$('body').addClass('loading');
-        $("#admin_print").html('');
-        //var i = 0;
-        var newArr = [];
-        var searchIDs = $("input:checkbox:checked").map(function () {
-            newArr = [[$(this).data("selected_date"), $(this).data("selected_questionnaire")]];
-            return newArr;
-
-        }).toArray();
-
-        console.log(searchIDs);
-        var iCount = searchIDs.length;
-        for (var i = 0; i < iCount; i++) {
-            var selected_questionnaire = searchIDs[i][1];
-            var selected_date = searchIDs[i][0];
-
-            $.post("genreport.php", {selected_questionnaire: selected_questionnaire, selected_date: selected_date
-                        //searchIDs
-            }, function (data, status) { 
-                $("#admin_print").append(data);
-                scalePedigree();
-            });
-        }
-
-        $("#admin_print").printThis({
+		
+		$("#admin_print").printThis({
             debug: true,
             importCSS: false,
             importStyle: false,
             printContainer: false,
-            loadCSS: "css/style.min.css",
+            loadCSS: "/dev/style.min.css",
             printDelay: 1000,
 			removeScripts: true,
-            base: "/dev/login/assets/",
+            base: "https://www.mdlab.com",
 			afterPrint: testFun
         });
 		
@@ -249,7 +162,97 @@ $(document).ready(function () {
 				window.clearInterval(interval);
 			}
 		}
-		return false;
+    });
+	
+	var window_focus;
+
+	$(window).focus(function() {
+		window_focus = true;
+	}).blur(function() {
+		window_focus = false;
+	});
+
+    //$("#bulkPrint").click(function (event) {
+    $("#bulkPrint").on('click', function () {
+        //event.preventDefault();
+        
+        var newArr = [];
+        var searchIDs = $("input:checkbox:checked").map(function () {
+            newArr = [[$(this).data("selected_date"), $(this).data("selected_questionnaire"), $(this).data("prinatble")]];
+            return newArr;
+        }).toArray();
+        
+        var iCount = searchIDs.length;
+        var notPrintableMsg = "";
+        var pritableCount = 0;
+        for (var i = 0; i < iCount; i++) {            
+            var data_printable= searchIDs[i][2];
+            if(data_printable=='1'){
+                pritableCount++;
+            }
+        }
+        
+        if(pritableCount>0){
+            $('body').addClass('loading');
+            $("#admin_print").html('');
+        }
+        
+        for (var i = 0; i < iCount; i++) {
+            var selected_questionnaire = searchIDs[i][1];
+            var selected_date = searchIDs[i][0];
+            var data_printable= searchIDs[i][2];
+            if(data_printable=='1'){
+                $.post("genreport.php", {selected_questionnaire: selected_questionnaire, selected_date: selected_date
+                //searchIDs
+                }, function (data, status) { 
+                    $("#admin_print").append(data);
+                    scalePedigree();
+                });
+            } else if (data_printable=='2') {
+                notPrintableMsg = "The summary report for questionnaires with Incomplete medical necessity result cannot be printed.";
+            } else {
+                notPrintableMsg = "The summary report for questionnaires with Unknown medical necessity result cannot be printed.";
+            }            
+        }
+        if(notPrintableMsg!=""){
+            alert(notPrintableMsg);
+        }
+        if(pritableCount>0){
+            $("#admin_print").printThis({
+                debug: true,
+                importCSS: false,
+                importStyle: false,
+                printContainer: false,
+                loadCSS: "/dev/style.min.css",
+                printDelay: 1000,
+                removeScripts: true,
+                base: "https://www.mdlab.com",
+                            afterPrint: testFun
+            });
+        }
+		
+        var interval = null;
+		
+        function reload(){
+            if(window_focus === true) {
+                $('body').removeClass('loading');
+                window.clearInterval(interval);
+            }			
+            if( /iPhone|iPad/i.test(navigator.userAgent) ) {
+                $('body').removeClass('loading');
+                window.clearInterval(interval);
+            }			
+        }
+		
+        function testFun(){
+            if ( /^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+                interval = window.setInterval(reload, 500);
+            } else {
+                $('body').removeClass('loading');
+                window.clearInterval(interval);
+            }
+        }
+        return false;
     });
 	
 	function scalePedigree(){
@@ -310,4 +313,21 @@ $(document).ready(function () {
             }
         });
     }
+});
+$('#export').click(function () {
+    $.ajax('ajaxHandler.php', {
+        type: 'POST',
+        data: {
+           exportUsers: 'ok'
+        },
+      success: function (response) {
+        var result = JSON.parse(response);
+        var file = $("<a>");
+        file.attr("href", result.file);
+        $("body").append(file);
+        file.attr("download", "geneveda_matrix.xls");
+        file[0].click();
+        file.remove();
+      }
+    });
 });

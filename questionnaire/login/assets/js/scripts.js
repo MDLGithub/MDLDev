@@ -3,7 +3,7 @@ $(document).ready(function () {
    // $('.h-filters .date').mask("00/00/0000", {placeholder: "__/__/____"});
     $('.h-filters .stat_mdl_number').mask("0000000");
     
-    /*$('#file.accountLogoInput').inputFileText( {
+    $('#file.accountLogoInput').inputFileText( {
         text: 'Account Logo',  
         buttonCLass: 'cooseFileBtn',
         textClass: 'chooseFileTxt' 
@@ -12,7 +12,29 @@ $(document).ready(function () {
         text: 'Upload User\'s Photo',  
         buttonCLass: 'cooseFileBtn',
         textClass: 'chooseFileTxt' 
-    });*/
+    });
+    
+    /**
+     * Dashboard Calendar Date Dropdown filter
+     * used on dashboard2.php dashboard calendar
+     */
+    $(".stats_dropdown_arrow").click(function(){
+        //Changes the width of the filters
+        $(".stats_dropdown").toggleClass("dropdown_hide");
+        $(".chart_header .stats_date").toggleClass("hide");
+        $(".stats_dropdown_arrow").toggleClass("dropdown_arrow_show");
+        $(".chart_header .button").toggleClass("hide"); 
+    }); 
+
+    /**
+     * Dashboard Calendar Sales Rep Dropdown filter
+     * used on dashboard2.php dashboard calendar
+     */
+    $(".info_block_arrow").click(function(){
+        $(".salesrep_dropdown").toggleClass("dropdown_hide");
+        $(".info_block h1").toggleClass("hide");
+        $(".info_block_arrow").toggleClass("info_block_arrow_show");
+    });  
     
     $('.toggleRoles').on('click', function(){
         if($('.edit-status-form .rolesBlock').hasClass('hidden')){
@@ -34,6 +56,70 @@ $(document).ready(function () {
             rolesBlock.addClass('hidden');
             $(this).removeClass('fa-eye').addClass('fa-eye-slash');
         }       
+    });
+    //Accounts page show account Details on click
+    $(document).on('click', 'td.clickable .details', function(e){
+        e.preventDefault();
+        $('td.clickable .moreInfo').hide();
+        $(this).parent().find('.moreInfo').show();
+    });
+    $(document).on('click','td.clickable .moreInfo', function(){       
+        $('.moreInfo').hide();
+    });
+    
+    $('#dataTable').delegate('.locked-user','click', function(){
+        var email = $(this).attr('data-user-email');        
+        var ajaxUrl = baseUrl+'/ajaxHandler.php';
+        $.ajax( ajaxUrl , {
+            type: 'POST',
+            data: {
+               get_loced_user_data: '1',
+               email: email
+            },
+            success: function(response) {
+                $('#login-attempt-log-box').show();
+                $('#locked-user-email').html(email);
+                $('#unlock-user').attr('data-unlock-user-email', email);
+                var result = JSON.parse(response);
+                console.log(result);
+                if(result['content']){
+                    $('#login-attempt-log-content').html(result['content']);
+                }                
+            },
+            error: function() {
+                console.log('0');
+            }
+        });
+    });   
+    
+    $('#unlock-user').on('click', function(e){
+        var email = $(this).attr('data-unlock-user-email');
+        var message = "Are you sure you want to unlock this user?";        
+        var ajaxUrl = baseUrl+'/ajaxHandler.php';
+        var redirectUrl = baseUrl+'/user-management.php';
+        var conf = confirm(message);
+        if(conf){            
+            $.ajax( ajaxUrl , {
+                type: 'POST',
+                data: {
+                   unlock_this_user: '1',
+                   email: email
+                },
+                success: function(response) {                   
+                    var result = JSON.parse(response);
+                    console.log(result); 
+                    window.location.replace(redirectUrl);
+                },
+                error: function() {
+                    console.log('0');
+                }
+            });
+        }
+    });
+    
+    $('#login-attempt-log-box .close').on('click', function(e){
+        e.preventDefault();
+        $('#login-attempt-log-box ').hide();
     });
     
     //formatting number to currency
@@ -75,43 +161,6 @@ $(document).ready(function () {
         var val = $(this).val(); 
         $(this).val(val.replace(/\D/g,''));
     });  
-
-    /**
-     * Dashboard Calendar Date Dropdown filter
-     * used on dashboard2.php dashboard calendar
-     */
-        $(".stats_dropdown_arrow").click(function(){
-        //Changes the width of the filters
-            $(".stats_dropdown").toggleClass("dropdown_hide");
-            $(".chart_header p").toggleClass("dropdown_hide");
-            $(".chart_header .button").toggleClass("dropdown_hide");
-            $(".stats_dropdown_arrow").toggleClass("dropdown_arrow_show");
-        /*$(this).toggleClass("toggle_move");
-
-        if($("#action_palette_toggle i").hasClass("fa-angle-left")){
-            $("#action_palette_toggle i").removeClass('fa-angle-left').addClass('fa-angle-right');
-        }else{
-            $("#action_palette_toggle i").removeClass('fa-angle-right').addClass('fa-angle-left');
-        } */           
-    });  
-
-    /**
-     * Dashboard Calendar Date Dropdown filter
-     * used on dashboard2.php dashboard calendar
-     */
-        /*$(".salesrep_dropdown_arrow").click(function(){
-            $(".salesrep_dropdown").toggleClass("dropdown_hide");
-            $(".info_block h1").toggleClass("dropdown_hide");
-            $(".chart_header .button").toggleClass("dropdown_hide");
-            $(".sales_rep_dropdown_arrow").toggleClass("dropdown_arrow_show");*/
-        /*$(this).toggleClass("toggle_move");
-
-        if($("#action_palette_toggle i").hasClass("fa-angle-left")){
-            $("#action_palette_toggle i").removeClass('fa-angle-left').addClass('fa-angle-right');
-        }else{
-            $("#action_palette_toggle i").removeClass('fa-angle-right').addClass('fa-angle-left');
-        } */           
-    /*});  */
     
     /**
      * MDL# allow only input 7 digits
@@ -238,6 +287,21 @@ $(document).ready(function () {
             $("#url-config-settings #pin").prop("disabled", true);
         } else {
             $("#url-config-settings #pin").prop("disabled", false);
+        }
+        if(location=='F'){
+            $('#url-config-settings #pass').prop('checked', false);
+            $('#url-config-settings #pin').prop('checked', true);
+            $("#url-config-settings #pass").prop("disabled", true);
+        } else {
+            $("#url-config-settings #pass").prop("disabled", false);
+        }
+        var locaArr = ['D', 'DE', 'O', 'L', 'PM'];
+        for (var i=0; i<locaArr.length; i++ ){
+            if(locaArr[i]==location){
+                //#noemail must be active
+                $('#url-config-settings #pin, #url-config-settings #pass').prop('checked', false);
+                $('#url-config-settings #noemail').prop('checked', true);
+            } 
         }
     });
     /**
@@ -528,8 +592,9 @@ $(document).ready(function () {
      *  Generate Url button on click foncion
      */
     $('.url_config').on('click', function (event) {      
-        var id = $(this).attr('id');        
-        $.ajax( 'ajaxHandler.php', {
+        var id = $(this).attr('id'); 
+        var ajaxUrl = baseUrl+'/ajaxHandler.php';
+        $.ajax( ajaxUrl, {
             type: 'POST',
             data: {
                url_config: '1',
@@ -625,8 +690,8 @@ $(document).ready(function () {
             }
             $('#officeAddress').prepend(addressInfo);        
             $('#physiciansList, #physiciansListLabel').html("");  
-
-            $.ajax( 'ajaxHandler.php', {
+            var ajaxUrl = baseUrl+'/ajaxHandler.php';
+            $.ajax( ajaxUrl, {
                 type: 'POST',
                 data: {
                    get_providers: '1',
@@ -972,25 +1037,14 @@ $(document).ready(function () {
      * Add revenue table row
      */
     $('#add-revenue').on('click', function(){       
-        var formData = '<tr>\n\
-                        <td><input required name="revenueAdd[date_paid][]" class="deductable-first datepicker" autocomplete="off" class="revenue-first" placeholder="Date Paid" type="text" /></td>\n\
-                        <td><input required name="revenueAdd[payor][]" placeholder="Payor" type="text" /></td>\n\
-                        <td>$ <input required name="revenueAdd[insurance][]" placeholder="Insurance" type="number"  min=\"0.00\" step=\"0.01\"/></td>\n\
-                        <td>$ <input required name="revenueAdd[patient][]" placeholder="Patient" type="number"  min=\"0.00\" step=\"0.01\"/></td>\n\
-                        <td class="text-center"><a class="color-red removeTableRow"><span class="fas fa-minus-circle" aria-hidden="true"></span></a></td>\n\
-                        </tr>';
+        var formData = '<tr><td><input required name="revenueAdd[date_paid][]" class="deductable-first datepicker" autocomplete="off" class="revenue-first" placeholder="Date Paid" type="text" /></td><td><input required name="revenueAdd[payor][]" placeholder="Payor" type="text" /></td><td>$ <input required name="revenueAdd[insurance][]" placeholder="Insurance" type="number"  min=\"0.00\" step=\"0.01\"/></td><td>$ <input required name="revenueAdd[patient][]" placeholder="Patient" type="number"  min=\"0.00\" step=\"0.01\"/></td><td class="text-center"><a class="color-red removeTableRow"><span class="fas fa-minus-circle" aria-hidden="true"></span></a></td></tr>';
         $('#revenue-table .priceSum').before(formData);
     });
     /**
      * Add deductable table row
      */
     $('#add-deductable-log').on('click', function(){       
-        var formData = '<tr>\n\
-                            <td><input required name="deductableAdd[date_checked][]" class="deductable-first datepicker" autocomplete="off" placeholder="Date Checked" type="text" /></td>\n\
-                            <td><input required name="deductableAdd[checked_by][]" placeholder="Checked By" type="text" /></td>\n\
-                            <td>$ <input required name="deductableAdd[deductable][]" placeholder="Deductible" type="number" min=\"0.00\" step=\"0.01\" /></td>\n\
-                            <td class="text-center"><a class="color-red removeTableRow"><span class="fas fa-minus-circle" aria-hidden="true"></span></a></td>\n\
-                        </tr>';        
+        var formData = '<tr><td><input required name="deductableAdd[date_checked][]" class="deductable-first datepicker" autocomplete="off" placeholder="Date Checked" type="text" /></td><td><input required name="deductableAdd[checked_by][]" placeholder="Checked By" type="text" /></td><td>$ <input required name="deductableAdd[deductable][]" placeholder="Deductible" type="number" min=\"0.00\" step=\"0.01\" /></td><td class="text-center"><a class="color-red removeTableRow"><span class="fas fa-minus-circle" aria-hidden="true"></span></a></td></tr>';        
         $('#deductable-table .priceSum').before(formData);
     });
     
@@ -1005,7 +1059,7 @@ $(document).ready(function () {
     
     
     /**
-     *  Delete 
+     *  Delete Market test user
      */
     $('.deleteUser').on('click', function (event) {     
         var thisUserClass = $(this);
@@ -1014,11 +1068,11 @@ $(document).ready(function () {
         var message = 'Are you sure you want to delete #'+userId+' MDL User History?';
         if(userType=='test-user'){
             message = 'Are you sure you want to delete #'+userId+' Test User Data and All The History of that User?';
-        }
-        
+        }        
         var conf = confirm(message);
+        var ajaxUrl = baseUrl+'/ajaxHandler.php';
         if(conf){
-        $.ajax( 'ajaxHandler.php', {
+        $.ajax( ajaxUrl, {
             type: 'POST',
             data: {
                deleteUser: '1',
@@ -1043,7 +1097,27 @@ $(document).ready(function () {
         });
         }
     });
-    
+    //Delete All marked test users and history
+    $('#delete-marked-test-users').on('click', function (event) { 
+        var message = 'Are you sure you want to delete All Marked Test Users Data and History?';
+        var ajaxUrl = baseUrl+'/ajaxHandler.php';
+        var redirectUrl =  baseUrl+'/user-management.php'
+        var conf = confirm(message);
+        if(conf){
+            $.ajax( ajaxUrl, {
+                type: 'POST',
+                data: { deleteMarkedTestUsers: '1'},
+                success: function(response) {
+                    var result = JSON.parse(response);               
+                    console.log(result);
+                    window.location.replace(redirectUrl);
+                },
+                error: function() {
+                    console.log('0');
+                }
+            });
+        }
+    });
     
 });
 
