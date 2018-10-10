@@ -121,6 +121,10 @@ input:focus, select:focus, textarea:focus, button:focus {
     text-align: center;
 }
 
+.ef_box {
+    padding: 0 20px;
+}
+
 #action_palette .box_top {
     padding: 1em 0;
     position: absolute;
@@ -599,6 +603,15 @@ main {
 }
 
 .button.filter > strong {
+    color: #1c487b;
+}
+
+.button.export::before {
+    content: "";
+    background: url(../images/arrow-up.png) no-repeat center;
+}
+
+.button.export > strong {
     color: #1c487b;
 }
 
@@ -1369,6 +1382,6 @@ and (orientation : portrait){
 }
 /*gabby end*/
 
-.export_filters {
-    padding: 90px 300px 300px 300px;
+.hidden {
+    display: none;
 }

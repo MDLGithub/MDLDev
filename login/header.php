@@ -21,6 +21,8 @@
     <link href="assets/libs/jquery-ui/jquery-ui.min.css" rel="stylesheet">
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-loading-overlay/2.1.6/loadingoverlay.min.js"></script>
     <script type="text/javascript"> var baseUrl = "<?php echo SITE_URL; ?>";</script>
 </head>
 <body id = "home">

@@ -446,9 +446,11 @@ require_once ('navbar.php');
                     <a class="add-new-device" href="<?php echo SITE_URL; ?>/salesreps.php?action=add">
                         <span class="fas fa-plus-circle"></span> Add
                     </a>
-                    <a class="add-new-device export_matrix" id="export">
-                        <span class="fas fa-arrow-up"></span> Export Geneveda Matrix
-                    </a>
+                    <?php if ($roleID == 1) { ?>
+                        <a class="add-new-device export_matrix" id="export">
+                            <span class="fas fa-arrow-up"></span> Export Geneveda Matrix
+                        </a>
+                    <?php } ?>
                 </div>
                 <?php } ?>
             </div>
@@ -571,7 +573,120 @@ require_once ('navbar.php');
             <h4> Sorry, You Don't have Access to this page content. </h4>
         </div>
     <?php }  ?>
+    <div id="geneveda-export-modal" class="modalBlock hidden">
+    <div class="contentBlock">
+        <a class="close">X</a>        
+        
+        <h5 class="title">
+            Geneveda Matrix Export Parameters
+        </h5>
+        <div class="content">
+        <form id="matrix_parameters" class="export_filters" action="" method="post">	
+                <!-- <div class="f2"> 
+                    <label class="dynamic" for="date_type"><span>Date range</span></label>
+                    <div class="group">
+                        <select id="date_type" name="date_type" class="no-selection">
+                            <option value="week" selected>Current week</option>	
+                            <option value="month">Current month</option>
+                            <option value="quarter">Current quarter</option>
+                            <option value="year">Current year</option>
+                        </select>
+                        <p class="f_status">
+                            <span class="status_icons"><strong></strong></span>
+                        </p>
+                    </div>
+                </div> -->
+                <?php
+                    $date_error = " valid";
+                ?>
+                <?php if(isFieldVisibleByRole($roleIDs['from_date']['view'], $roleID)) {?>
+                <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['from_date'])) && (strlen($_POST['from_date']))) ? " show-label" : ""; ?><?php echo $date_error; ?>">
+                    <label class="dynamic" for="from_date"><span>From Date</span></label>
+
+                    <div class="group">                       
+                        <input readonly class="datepicker_from" type="text" id="from_date" name="from_date" placeholder="From Date">
+
+                        <p class="f_status"></p>
+                    </div>
+                </div>
+                <?php } ?>
+                <?php
+                $date_error = " valid";
+                ?>
+                <?php if(isFieldVisibleByRole($roleIDs['to_date']['view'], $roleID)) {?>
+                    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['to_date'])) && (strlen($_POST['to_date']))) ? " show-label" : ""; ?><?php echo $date_error; ?>">
+                        <label class="dynamic" for="to_date"><span>To Date</span></label>
+
+                        <div class="group">                       
+                            <input readonly class="datepicker_to" type="text" id="to_date" name="to_date" placeholder="To Date" max="<?php echo date('Y-m-d'); ?>">
+
+                            <p class="f_status"></p>
+                        </div>
+                    </div>
+                <?php } ?>
+                <?php
+                $query = "SELECT * FROM tblaccount ORDER BY account";
+                $accounts = $db->query($query);
+                ?>
+                <?php if(isFieldVisibleByRole($roleIDs['account']['view'], $roleID)) {?>
+                    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['account'])) && (strlen(trim($_POST['account'])))) ? " show-label valid" : ""; ?>">
+                        <label class="dynamic" for="account"><span>Account</span></label>
+
+                        <div class="group">
+                            <select id="account" name="account" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['account'])) && (strlen($_POST['account']))) ? "" : "no-selection"; ?>">
+                                <option value="">Account</option>	
+                                <?php
+                                foreach ($accounts as $account) {
+                                    $default_account .= $account['account'] . ",";
+                                    ?>
+                                    <option value="<?php echo $account['account']; ?>"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['account']) && ($_POST['account'] == $account['account'])) ? " selected" : ""); ?>><?php echo $account['account'] . " - " . ucwords(strtolower($account['name'])); ?></option>
+                                    <?php
+                                }
+
+                                $default_account = rtrim($default_account, ',');
+                                ?>
+                            </select>
+
+                            <p class="f_status">
+                                <span class="status_icons"><strong></strong></span>
+                            </p>
+                        </div>
+                    </div>
+                <?php } ?>
+                <?php if(isFieldVisibleByRole($roleIDs['salesrep']['view'], $roleID)) {?>
+                    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrep'])) && (strlen($_POST['salesrep']))) ? " show-label valid" : ""; ?>">
+                        <label class="dynamic" for="salesrep"><span>Genetic Consultant</span></label>
+
+                        <div class="group">
+                            <select id="salesrep" name="salesrep" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrep'])) && (strlen($_POST['salesrep']))) ? "" : "no-selection"; ?>">
+                                <option value="">Genetic Consultant</option>							
+                                <?php
+                                $salesreps = $db->query("SELECT * FROM tblsalesrep GROUP BY first_name");
+
+                                foreach ($salesreps as $salesrep) {
+                                    ?>
+                                    <option value="<?php echo $salesrep['Guid_salesrep']; ?>"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrep']) && ($_POST['salesrep'] == $salesrep['Guid_user'])) ? " selected" : ""); ?>><?php echo $salesrep['first_name']." ".$salesrep['last_name']; ?></option>
+                                    <?php
+                                }
+                                ?>
+                            </select>
+
+                            <p class="f_status">
+                                <span class="status_icons"><strong></strong></span>
+                            </p>
+                        </div>
+                    </div>
+                <?php }   ?>
+
+                <button value="1" name="search" class="button export half"><strong>Export</strong></button>
+                <button id="clear_filters" name="clear" class="button cancel half"><strong>Clear</strong></button>
+            </form>
+        </div>
+    </div>
+</div>
 </main>
+
+
 
 <?php require_once('scripts.php');?>
 

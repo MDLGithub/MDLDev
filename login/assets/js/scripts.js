@@ -1,4 +1,16 @@
 $(document).ready(function () {
+    var opt = {
+        beforeShow: function() {
+            setTimeout(function(){
+                $('.ui-datepicker').css('z-index', 1001);
+            }, 0);
+        },
+        showOn:'focus', 
+        dateFormat: 'm/d/yy' 
+    };
+
+    $('.datepicker_from').not('.hasDatePicker').datepicker(opt);
+    $('.datepicker_to').not('.hasDatePicker').datepicker(opt);
     $('.phone_us').mask('(000) 000-0000');
    // $('.h-filters .date').mask("00/00/0000", {placeholder: "__/__/____"});
     $('.h-filters .stat_mdl_number').mask("0000000");
@@ -64,7 +76,6 @@ $(document).ready(function () {
     });
     
     //show calendar on click to input with .datepicker class 
-    var opt = { showOn:'focus', dateFormat: 'm/d/yy' };
     $('body').on('click','.datepicker', function() {
        // $(this).datepicker('destroy').datepicker({showOn:'focus',dateFormat: 'm/d/yy'}).focus();
        $(this).not('.hasDatePicker').datepicker(opt).focus();
@@ -1128,4 +1139,22 @@ function goBack() {
     str=force ? str.toLowerCase() : str;
     return str.replace(/^(.)|\s(.)/g, function($1){ return $1.toUpperCase( ); });
 }
+
+$('.export_filters #salesrep').on('change', function() {
+    var ajaxUrl = baseUrl+'/ajaxHandler.php';
+    $.ajax(ajaxUrl, {
+        type: 'POST',
+        data: {
+           updateAccounts: 'ok',
+           salesrep: $('.export_filters #salesrep').val()
+        },
+      success: function (response) {
+        var result = JSON.parse(response);
+        $("#matrix_parameters #account").empty();
+        $("#matrix_parameters #account").removeClass('no-selection');
+        $("#matrix_parameters #account").parent().parent().removeClass('show-label valid');
+        $("#matrix_parameters #account").append(result.accounts_html);
+      }
+    });
+});
 
