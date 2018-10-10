@@ -14,6 +14,28 @@ $(document).ready(function () {
         textClass: 'chooseFileTxt' 
     });
     
+    /**
+     * Dashboard Calendar Date Dropdown filter
+     * used on dashboard2.php dashboard calendar
+     */
+    $(".stats_dropdown_arrow").click(function(){
+        //Changes the width of the filters
+        $(".stats_dropdown").toggleClass("dropdown_hide");
+        $(".chart_header .stats_date").toggleClass("hide");
+        $(".stats_dropdown_arrow").toggleClass("dropdown_arrow_show");
+        $(".chart_header .button").toggleClass("hide"); 
+    }); 
+
+    /**
+     * Dashboard Calendar Sales Rep Dropdown filter
+     * used on dashboard2.php dashboard calendar
+     */
+    $(".info_block_arrow").click(function(){
+        $(".salesrep_dropdown").toggleClass("dropdown_hide");
+        $(".info_block h1").toggleClass("hide");
+        $(".info_block_arrow").toggleClass("info_block_arrow_show");
+    });  
+    
     $('.toggleRoles').on('click', function(){
         if($('.edit-status-form .rolesBlock').hasClass('hidden')){
             $('.edit-status-form .rolesBlock').removeClass('hidden');
@@ -254,6 +276,21 @@ $(document).ready(function () {
     });
     
     /**
+     *  Salesrep page open color Box 
+     */
+    $('#color-block').delegate( ".openColorBox", "click", function() {
+        if($(this).parent().find('.colorBox').hasClass('closed')){
+            $(this).parent().find('.colorBox').removeClass('closed').show();
+        }else{
+            $(this).parent().find('.colorBox').addClass('closed').hide();
+        }        
+    });
+    $('#color-block .colorBox label').on( "click", function() {
+        $('#color-block .colorBox label').removeClass('checked');
+        $(this).addClass('checked');
+    });
+    
+    /**
      *  When Location Selected Web
      *  disable Pin checkbox and set Password to checked
      */
@@ -317,28 +354,33 @@ $(document).ready(function () {
         var val =  this.value;
         //console.log(accountId);
         $(this).parent().parent().nextAll().remove();
+        getGetSubDropdown(val);
+    }); 
+    
+    function getGetSubDropdown(val){        
         var ajaxUrl = baseUrl+'/ajaxHandler.php';
         if(val && val!="0"){
             $.ajax( ajaxUrl , {
-
                 type: 'POST',
                 data: {
                    status_dropdown: '1',
                    parent_id: val,
                 },
                 success: function(response) {
-                    var result = JSON.parse(response);
+                    var result = JSON.parse(response);                    
                     if(result.content !=""){
                         var content = result.content
                         $('#status-dropdowns-box').append(content);
                     }
+                    var newVal = result['statusID'];
+                    getGetSubDropdown(newVal)                     
                 },
                 error: function() {
                     console.log('0');
                 }
             });
         }
-    });    
+    }
     
     /**
      * Homepage Filter 
@@ -1015,25 +1057,14 @@ $(document).ready(function () {
      * Add revenue table row
      */
     $('#add-revenue').on('click', function(){       
-        var formData = '<tr>\n\
-                        <td><input required name="revenueAdd[date_paid][]" class="deductable-first datepicker" autocomplete="off" class="revenue-first" placeholder="Date Paid" type="text" /></td>\n\
-                        <td><input required name="revenueAdd[payor][]" placeholder="Payor" type="text" /></td>\n\
-                        <td>$ <input required name="revenueAdd[insurance][]" placeholder="Insurance" type="number"  min=\"0.00\" step=\"0.01\"/></td>\n\
-                        <td>$ <input required name="revenueAdd[patient][]" placeholder="Patient" type="number"  min=\"0.00\" step=\"0.01\"/></td>\n\
-                        <td class="text-center"><a class="color-red removeTableRow"><span class="fas fa-minus-circle" aria-hidden="true"></span></a></td>\n\
-                        </tr>';
+        var formData = '<tr><td><input required name="revenueAdd[date_paid][]" class="deductable-first datepicker" autocomplete="off" class="revenue-first" placeholder="Date Paid" type="text" /></td><td><input required name="revenueAdd[payor][]" placeholder="Payor" type="text" /></td><td>$ <input required name="revenueAdd[insurance][]" placeholder="Insurance" type="number"  min=\"0.00\" step=\"0.01\"/></td><td>$ <input required name="revenueAdd[patient][]" placeholder="Patient" type="number"  min=\"0.00\" step=\"0.01\"/></td><td class="text-center"><a class="color-red removeTableRow"><span class="fas fa-minus-circle" aria-hidden="true"></span></a></td></tr>';
         $('#revenue-table .priceSum').before(formData);
     });
     /**
      * Add deductable table row
      */
     $('#add-deductable-log').on('click', function(){       
-        var formData = '<tr>\n\
-                            <td><input required name="deductableAdd[date_checked][]" class="deductable-first datepicker" autocomplete="off" placeholder="Date Checked" type="text" /></td>\n\
-                            <td><input required name="deductableAdd[checked_by][]" placeholder="Checked By" type="text" /></td>\n\
-                            <td>$ <input required name="deductableAdd[deductable][]" placeholder="Deductible" type="number" min=\"0.00\" step=\"0.01\" /></td>\n\
-                            <td class="text-center"><a class="color-red removeTableRow"><span class="fas fa-minus-circle" aria-hidden="true"></span></a></td>\n\
-                        </tr>';        
+        var formData = '<tr><td><input required name="deductableAdd[date_checked][]" class="deductable-first datepicker" autocomplete="off" placeholder="Date Checked" type="text" /></td><td><input required name="deductableAdd[checked_by][]" placeholder="Checked By" type="text" /></td><td>$ <input required name="deductableAdd[deductable][]" placeholder="Deductible" type="number" min=\"0.00\" step=\"0.01\" /></td><td class="text-center"><a class="color-red removeTableRow"><span class="fas fa-minus-circle" aria-hidden="true"></span></a></td></tr>';        
         $('#deductable-table .priceSum').before(formData);
     });
     

@@ -214,33 +214,39 @@ require_once ('navbar.php');
                 <div class="col-md-8 col-md-offset-2">
                     <form method="POST" enctype="multipart/form-data"> 
                         <div class="row pB-30">
-                            <div class="col-md-8">
+                            <div class="col-md-6">
                                 <button name="manage_salesrep" type="submit" class="btn-inline">Save</button>
                                 <button type="button" class="btn-inline btn-cancel" onclick="goBack()">Cancel</button>
                             </div>
-                            <div class="col-md-4 padd-0">
+                            <div class="col-md-6 ">
+                                <?php if(isset($_GET['action']) && $_GET['action']=='edit') { ?>
                                 <div class="status_chart">
                                     <div class="row">
-                                        <div class="col-md-6">
-                                            Registered
-                                            <span class="pull-right"><?php echo getSalesrepStatusCount($db, $Guid_salesrep, '28' ); //28->Registered ?></span>
-                                        </div>
-                                        <div class="col-md-6">
-                                            Completed
-                                            <span class="pull-right"><?php echo getSalesrepStatusCount($db, $Guid_salesrep, '36'); //36->Questionnaire Completed ?></span>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            Qualified
-                                            <span class="pull-right"><?php echo getSalesrepStatusCount($db, $Guid_salesrep, '29'); //29->Questionnaire Completed->Qualified ?></span>
-                                        </div>
-                                        <div class="col-md-6">
-                                            Submitted
-                                            <span class="pull-right"><?php echo getSalesrepStatusCount($db, $Guid_salesrep, '1' ); //28->Submitted (Specimen Collected) ?></span>
+                                        <div class="col-md-12">
+                                            <span class="registred">
+                                                Registered
+                                                <img src="assets/eventschedule/icons/silhouette_icon.png">
+                                                <?php echo getSalesrepStatusCount($db, $Guid_salesrep, '28' ); //28->Registered ?>
+                                            </span>
+                                            <span class="completed">
+                                                Completed
+                                                <img src="assets/eventschedule/icons/checkmark_icon.png">
+                                                <?php echo getSalesrepStatusCount($db, $Guid_salesrep, '36'); //36->Questionnaire Completed ?>
+                                            </span>
+                                            <span class="qualified">
+                                                Qualified
+                                                <img src="assets/eventschedule/icons/dna_icon.png">
+                                                <?php echo getSalesrepStatusCount($db, $Guid_salesrep, '29'); //29->Questionnaire Completed->Qualified ?>
+                                            </span>
+                                            <span class="submitted">
+                                                Submitted
+                                                <img src="assets/eventschedule/icons/flask_icon.png">
+                                                <?php echo getSalesrepStatusCount($db, $Guid_salesrep, '1' ); //28->Submitted (Specimen Collected) ?>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
+                                <?php } ?>
                             </div>
                             <div class="col-md-12 text-center">
                                 <span class="error" id="message"></span>
@@ -325,9 +331,12 @@ require_once ('navbar.php');
                                 <?php if(isFieldVisibleByRole($isColorView, $roleID)) {?>
                                 <div class="form-group">
                                     <div class="row">                                
-                                        <div class="col-md-12 padd-0">
-                                            <label>Select Event Color</label>
-                                            <div class="colorBox">
+                                        <div id="color-block" class="col-md-12 padd-0">
+                                            <div class="openColorBox">
+                                                Select Color 
+                                                <i class="fas fa-chevron-down pull-right" ></i>
+                                            </div>
+                                            <div class="colorBox closed">
                                                 <?php 
                                                     $colorsArr = array('f99d1b','16a44a','3869b3', 'd4c038', 'c13f95', '3ec5cd', '9dbd1d','FF8170','9490FF','f599ff','d8d8d8','FFDAB1','9cffb1','D9BB93','C2E7F2','ea7898' );
                                                     $getSelectedColors = $db->query("SELECT color FROM tblsalesrep WHERE color<>'' ");
@@ -336,16 +345,17 @@ require_once ('navbar.php');
                                                         $disableColors[] = $v['color'];
                                                     }
                                                     $disabled = '';
+                                                   
                                                     foreach ($colorsArr as $k=>$v){
                                                         $selected = ($color=='#'.$v)?' checked':'';
-                                                        $disabled = (in_array('#'.$v, $disableColors)&&($color!='#'.$v)) ? ' disabled' : '';
+                                                        if(($color=='#'.$v) || !in_array('#'.$v, $disableColors)){
                                                 ?>
-                                                    <div class="item <?php echo $disabled; ?>">
-                                                        <input <?php echo $selected.' '.$disabled; ?> id="<?php echo $v; ?>" type="radio" name="color" value="#<?php echo $v; ?>" />
-                                                        <label style="background:#<?php echo $v; ?>;" for="<?php echo $v; ?>">#<?php echo $v; ?></label>
+                                                    <div class="item">
+                                                        <input <?php echo $selected; ?> id="<?php echo $v; ?>" type="radio" name="color" value="#<?php echo $v; ?>" />
+                                                        <label  class="<?php echo $selected; ?>" style="background:#<?php echo $v; ?>;" for="<?php echo $v; ?>"></label>
                                                     </div>
-                                                <?php } ?>
-                                            </div>                                            
+                                                    <?php } }?>
+                                            </div>                                             
                                         </div>
                                     </div>
                                 </div>
@@ -445,6 +455,9 @@ require_once ('navbar.php');
                 <div class="col-md-12">
                     <a class="add-new-device" href="<?php echo SITE_URL; ?>/salesreps.php?action=add">
                         <span class="fas fa-plus-circle"></span> Add
+                    </a>
+					<a class="add-new-device export_matrix" id="export">
+                        <span class="fas fa-arrow-up"></span> Export Geneveda Matrix
                     </a>
                 </div>
                 <?php } ?>
