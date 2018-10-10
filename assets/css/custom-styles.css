@@ -768,6 +768,9 @@ textarea.form-control {
 #app_data > form#patient_information{
     display: block!important;
 }
+#app_data > form#patient_information.Physician_table{
+    height: 86%;
+}
 .error#message{
     font-weight: bold;
     color: #f00;
@@ -1633,16 +1636,26 @@ td.tdAccount:hover .account_name{
     float: left;
     margin-top: 8px;
     margin-right: 3px;
+    display: none;
+}
+.colorBox {
+    padding: 10px;
+    background: #f2f2f2;
+    border: 2px solid #bac5c5;
+    border-radius: 7px;
+    display: none;
 }
 .colorBox label{
-    padding: 3px 5px;
-    font-size: 13px;
-    line-height: 1.5;
-    float: left;
-    margin-right: 6px;
-    margin-bottom: 5px;
-    text-transform: lowercase;
-    width: 70px;
+    margin-bottom: 0;
+    margin-left: 5px;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+.colorBox label.checked,
+.colorBox label:hover{
+    border: 2px solid #000;
 }
 .colorBox .item{
   display: inline-block;
@@ -1774,4 +1787,19 @@ td.clickable .moreInfo .close{
 a.button.cancel.half{
     display: inline-table;
     float: right;
+}
+.openColorBox .fas{
+    margin-top: 5px;
+}
+.openColorBox{
+    width: 100%;
+    padding: 5px 19px;
+    font-weight: 600;
+    border: 2px solid #bac5c5;
+    border-radius: 7px;
+    line-height: 1.6;
+    cursor: pointer;
+    width: 100%;
+    height: 2.3em;
+    max-width: 100%;
 }

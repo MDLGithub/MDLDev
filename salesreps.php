@@ -331,9 +331,12 @@ require_once ('navbar.php');
                                 <?php if(isFieldVisibleByRole($isColorView, $roleID)) {?>
                                 <div class="form-group">
                                     <div class="row">                                
-                                        <div class="col-md-12 padd-0">
-                                            <label>Select Event Color</label>
-                                            <div class="colorBox">
+                                        <div id="color-block" class="col-md-12 padd-0">
+                                            <div class="openColorBox">
+                                                Select Color 
+                                                <i class="fas fa-chevron-down pull-right" ></i>
+                                            </div>
+                                            <div class="colorBox closed">
                                                 <?php 
                                                     $colorsArr = array('f99d1b','16a44a','3869b3', 'd4c038', 'c13f95', '3ec5cd', '9dbd1d','FF8170','9490FF','f599ff','d8d8d8','FFDAB1','9cffb1','D9BB93','C2E7F2','ea7898' );
                                                     $getSelectedColors = $db->query("SELECT color FROM tblsalesrep WHERE color<>'' ");
@@ -342,16 +345,17 @@ require_once ('navbar.php');
                                                         $disableColors[] = $v['color'];
                                                     }
                                                     $disabled = '';
+                                                   
                                                     foreach ($colorsArr as $k=>$v){
                                                         $selected = ($color=='#'.$v)?' checked':'';
-                                                        $disabled = (in_array('#'.$v, $disableColors)&&($color!='#'.$v)) ? ' disabled' : '';
+                                                        if(($color=='#'.$v) || !in_array('#'.$v, $disableColors)){
                                                 ?>
-                                                    <div class="item <?php echo $disabled; ?>">
-                                                        <input <?php echo $selected.' '.$disabled; ?> id="<?php echo $v; ?>" type="radio" name="color" value="#<?php echo $v; ?>" />
-                                                        <label style="background:#<?php echo $v; ?>;" for="<?php echo $v; ?>">#<?php echo $v; ?></label>
+                                                    <div class="item">
+                                                        <input <?php echo $selected; ?> id="<?php echo $v; ?>" type="radio" name="color" value="#<?php echo $v; ?>" />
+                                                        <label  class="<?php echo $selected; ?>" style="background:#<?php echo $v; ?>;" for="<?php echo $v; ?>"></label>
                                                     </div>
-                                                <?php } ?>
-                                            </div>                                            
+                                                    <?php } }?>
+                                            </div>                                             
                                         </div>
                                     </div>
                                 </div>

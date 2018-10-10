@@ -389,7 +389,9 @@ require_once ('navbar.php');
         } else {
             $userData['marked_test'] = '0';
         }   
-        
+        if(isset($_POST['last_name']) && $_POST['last_name']=='Doe'){
+            $userData['marked_test'] = '1';
+        }
         if(isset($Guid_role) && $Guid_role != ""){
             if($Guid_role=='1'){
                 $userData['user_type'] = 'admin';
