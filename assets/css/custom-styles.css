@@ -1585,13 +1585,13 @@ table.dataTable.display tbody tr>.sorting_2,
 table.dataTable.display tbody tr>.sorting_3{
     background: none!important;
 }
-.homeIcon{
+/*.homeIcon{
     background: rgba(255,255,255,0.34) url(../images/house_icon.png) center center no-repeat !important;
     width: 23px;
     height: 38px;
     padding: 0 1.5em!important;
     margin-left: 5px;
-}
+}*/
 #urlLink{
     font-size: 18px;
     font-weight: bold;
@@ -1787,6 +1787,15 @@ td.clickable .moreInfo .close{
 a.button.cancel.half{
     display: inline-table;
     float: right;
+}
+.homeIcon {
+    background-image: url(../images/house_icon.png) !important;
+    width: 23px;
+    height: 38px;
+    padding: 0 1.5em!important;
+    margin-left: 5px;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
 }
 .openColorBox .fas{
     margin-top: 5px;
