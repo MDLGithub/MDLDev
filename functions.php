@@ -749,6 +749,18 @@ function getAccountAndSalesrep($db, $accountGuid=NULL, $getRow=NULL){
     }
     return $result;
 }
+function getSalesrepAccounts($db, $Guid_user){
+    $salesrepAccountIDs = $db->query("SELECT acc.account FROM tblsalesrep srep
+					LEFT JOIN tblaccountrep arep ON arep.Guid_salesrep=srep.Guid_salesrep
+					LEFT JOIN tblaccount acc ON arep.Guid_account=acc.Guid_account
+					WHERE srep.Guid_user=:Guid_user", array('Guid_user'=>$Guid_user));
+    $accountIds = "";
+    foreach ($salesrepAccountIDs as $k=>$v){
+	$accountIds .= "'".$v['account']."', ";
+    }
+    $accountIds = rtrim($accountIds, ', ');
+    return $accountIds;
+}
 /**
  * Get Account Status Count By account number
  * @param type $db

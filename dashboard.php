@@ -410,10 +410,10 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
 }
 
 if($role == 'Physician'){
-    $physicianInfo = $db->row('SELECT Guid_provider FROM tblprovider WHERE Guid_user='.$userID);
-    $physicianID = $physicianInfo['Guid_provider'];
+    $physicianInfo = $db->row('SELECT account_id FROM tblprovider WHERE Guid_user='.$userID);
+    $account_id = $physicianInfo['account_id'];
     $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
-    $where .= " q.provider_id='".$physicianID."'";
+    $where .= " q.account_number IN (" . $account_id . ")";
 }
 
 $where  .= " AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%test%' "
@@ -426,8 +426,9 @@ if( !(isset($_POST['meets_mn']) && $_POST['meets_mn']=='incomplete')){
 
 
 if($role == "Sales Rep"){
-
-
+    $salesrepInfo = $db->row('SELECT Guid_salesrep FROM tblsalesrep WHERE Guid_user='.$userID);
+    $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
+    $where .= " srep.Guid_salesrep = '" . $salesrepInfo['Guid_salesrep'] . "'";
 }
 
 $sqlTbl .= $whereTest;
@@ -436,7 +437,7 @@ $sqlTbl .= $where;
 
 //$sqlTbl .= " GROUP BY p.Guid_user";
 $sqlTbl .= " ORDER BY date DESC";
-
+//var_dump($sqlTbl);
 
 $qualify_requests = $db->query($sqlTbl);
 
@@ -500,7 +501,7 @@ $num_estimates = $qualify_requests;
 		<?php } ?>
 	    </div>
 
-	    <form id="patient_information" action="" method="post">
+	    <form id="patient_information" action="" method="post" class="<?php echo $role."_table";?>">
 
 		<div class="actions">
 		    <button class="btn-styled btn-home" id="bulkPrint"><i class="fas fa-print"></i> Print Selected</button>

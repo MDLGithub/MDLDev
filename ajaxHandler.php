@@ -356,22 +356,28 @@ function save_specimen_into_logs($db, $date, $Guid_user, $account){
 function __status_dropdown($db, $parent) {
     $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
     $content = "";
+    $hasSub = "";
+    $statusID = "";
     if ( !empty($statuses) ) {
-    $content .= '<div class="f2  ">
+	$content .= '<div class="f2  ">
 		    <div class="group">
 			<select data-parent="'.$parent.'" required class="status-dropdown" name="status[]" id="">
 			   ';
-
+	$i = 1;
 	foreach ( $statuses as $status ) {
 	    $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
-
 	    $optionClass = '';
 	    if ( !empty($checkCildren) ) {
 		$optionClass = 'has_sub_menu';
+		if($i==1){//checking if first option has sub in order to generate next dropdown
+		    $hasSub = '1';
+		    $statusID = $status['Guid_status'];
+		}
 	    }
 	    $content .= "<option value='".$status['Guid_status']."' class='".$optionClass."'>".$status['status'];
 
 	    $content .= '</option>';
+	    $i++;
 	}
 
     $content .= "</select>";
@@ -380,7 +386,7 @@ function __status_dropdown($db, $parent) {
 			    </p></div></div>';
     }
 
-    echo json_encode( array('content'=>$content));
+    echo json_encode( array('content'=>$content, 'hasSub'=>$hasSub, 'statusID'=>$statusID));
     exit();
 }
 

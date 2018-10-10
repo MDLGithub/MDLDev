@@ -282,8 +282,10 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
 					$providerGuid=$v['Guid_provider'];
 				?>
 				<tr>
+				    <td><?php echo $v['provider_id']; ?></td>
+				    <td><?php echo $v['title']; ?></td>
 				    <td class="clickable">
-					<a class="details"><?php echo $v['provider_id']; ?></a>
+					<a class="details"><?php echo $v['first_name']." ". $v['last_name']; ?></a>
 					<div class="moreInfo">
 					    <div class="content">
 						<span class="close">X</span>
@@ -306,8 +308,6 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
 					    </div>
 					</div>
 				    </td>
-				    <td><?php echo $v['title']; ?></td>
-				    <td><?php echo $v['first_name']." ". $v['last_name']; ?></td>
 				    <td><?php echo getProviderStatusCount($db, $v['account_id'], $v['Guid_provider'], '28' ); //28->Registered ?></td>
 				    <td><?php echo getProviderStatusCount($db, $v['account_id'], $v['Guid_provider'], '36'); //36->Questionnaire Completed ?></td>
 				    <td><?php echo getProviderStatusCount($db, $v['account_id'], $v['Guid_provider'], '29'); //29->Questionnaire Completed->Qualified ?></td>
@@ -325,7 +325,7 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
 			<img class="salesrepLogo" src="<?php echo SITE_URL.$logo; ?>" />
 		    </div>
 		    <div class="addressInfoBlock">
-			<label >Address</label>
+			<label >Account Address</label>
 			<div id="officeAddress">
 			    <div>
 				<?php
@@ -348,11 +348,11 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
 			    <?php } ?>
 			</div>
 		    </div>
-		    <div class="salesrepInfoBlock">
+		    <div class="salesrepInfoBlock pT-20">
 			<label >Genetic Consultant</label>
 			<div class="imageBox">
 			    <div class="pic">
-				<?php $salesrepPhoto = isset($salesrepPhoto) ? "/images/users/".$salesrepPhoto : "/assets/images/default.png"?>
+				<?php $salesrepPhoto = (isset($salesrepPhoto)&&$salesrepPhoto!="") ? "/images/users/".$salesrepPhoto : "/assets/images/default.png"?>
 				<img width="50" class="salesrepProfilePic" src="<?php echo SITE_URL.$salesrepPhoto; ?>" />
 			    </div>
 			    <div class="name text-center">
