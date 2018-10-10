@@ -222,7 +222,7 @@ require_once ('navbar.php');
 
 		<div>
 		    <input id="show-tests" name="marked_test" value="1" type="checkbox" <?php echo ((!isset($_POST['clear'])) && (isset($_POST['marked_test']) && ($_POST['marked_test'] == 1)) ? " checked" : ""); ?> />
-		    <label for="show-tests">Mark As Test</label>
+		    <label for="show-tests">Marked As Test</label>
 		</div>
 		<div>
 		    <input id="locked_users" name="locked_users" value="1" type="checkbox" <?php echo ((!isset($_POST['clear'])) && (isset($_POST['locked_users']) && ($_POST['locked_users'] == 1)) ? " checked" : ""); ?> />
@@ -389,7 +389,9 @@ require_once ('navbar.php');
 	} else {
 	    $userData['marked_test'] = '0';
 	}
-
+	if(isset($_POST['last_name']) && $_POST['last_name']=='Doe'){
+	    $userData['marked_test'] = '1';
+	}
 	if(isset($Guid_role) && $Guid_role != ""){
 	    if($Guid_role=='1'){
 		$userData['user_type'] = 'admin';

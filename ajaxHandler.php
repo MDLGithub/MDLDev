@@ -38,7 +38,9 @@ if(isset($_POST['get_loced_user_data'])){
 if(isset($_POST['unlock_this_user'])){
     unlock_user($db, $_POST['email']);
 }
-
+if (isset($_POST['exportUsers'])) {
+    exportUsers($db);
+}
 function  unlock_user($db, $email){
     deleteByField($db, 'tbluser_login_attempts', 'email',  $_POST['email']);
     echo json_encode(array('delete'=>TRUE));
@@ -354,22 +356,28 @@ function save_specimen_into_logs($db, $date, $Guid_user, $account){
 function __status_dropdown($db, $parent) {
     $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
     $content = "";
+    $hasSub = "";
+    $statusID = "";
     if ( !empty($statuses) ) {
-    $content .= '<div class="f2  ">
+	$content .= '<div class="f2  ">
 		    <div class="group">
 			<select data-parent="'.$parent.'" required class="status-dropdown" name="status[]" id="">
 			   ';
-
+	$i = 1;
 	foreach ( $statuses as $status ) {
 	    $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
-
 	    $optionClass = '';
 	    if ( !empty($checkCildren) ) {
 		$optionClass = 'has_sub_menu';
+		if($i==1){//checking if first option has sub in order to generate next dropdown
+		    $hasSub = '1';
+		    $statusID = $status['Guid_status'];
+		}
 	    }
 	    $content .= "<option value='".$status['Guid_status']."' class='".$optionClass."'>".$status['status'];
 
 	    $content .= '</option>';
+	    $i++;
 	}
 
     $content .= "</select>";
@@ -378,7 +386,7 @@ function __status_dropdown($db, $parent) {
 			    </p></div></div>';
     }
 
-    echo json_encode( array('content'=>$content));
+    echo json_encode( array('content'=>$content, 'hasSub'=>$hasSub, 'statusID'=>$statusID));
     exit();
 }
 
@@ -666,4 +674,149 @@ function get_account_info($db, $accountId){
     $providers = $db->query($queryProviders, array("id"=>$accountId));
 
     echo json_encode( array('accountInfo'=>$acountInfo, 'providers'=>$providers) );  exit();
+}
+
+function exportUsers($db) {
+    $tests = $db->query("SELECT q.Date_created AS date, CONCAT(srep.first_name, ' ', srep.last_name) as 'sales', mdl.mdl_number as 'mdl',
+    (SELECT sp.Date FROM tbl_mdl_status_log sp WHERE sp.account = a.account AND sp.Guid_patient = p.Guid_patient AND sp.Guid_status = 2) as 'accessioned',
+    (SELECT trr.Date FROM tbl_mdl_status_log trr WHERE trr.account = a.account AND trr.Guid_patient = p.Guid_patient AND trr.Guid_status = 22) as 'reported',
+    (SELECT aps.status FROM tbl_mdl_status_log ap
+     LEFT JOIN tbl_mdl_status aps ON ap.Guid_status = aps.Guid_status
+     WHERE ap.account = a.account AND ap.Guid_patient = p.Guid_patient AND ap.Guid_status IN (78, 79, 80, 81, 82)) as 'test_ordered',
+    (SELECT pr.Date FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 53) as 'last_paid',
+    (CASE WHEN (SELECT pr.Date FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 9) THEN 'Declined'
+	 WHEN (SELECT pr.Date FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 18) THEN 'Approved'
+	 ELSE '' END) as 'insurance_app',
+    a.account as 'account',
+    a.name as 'account_name',
+    q.qualified as 'med_necessity',
+    q.source as 'event',
+    q.Guid_user as 'user_id',
+    srep.color as 'sales_color'
+
+
+    FROM tbl_ss_qualify q
+    LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user
+    LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user
+    LEFT JOIN tblaccount a ON a.account = q.account_number
+    LEFT JOIN tblaccountrep ar ON ar.Guid_account = a.Guid_account
+    LEFT JOIN tblsalesrep srep ON ar.Guid_salesrep = srep.Guid_salesrep
+    LEFT JOIN tbl_mdl_status_log sl ON sl.Guid_salesrep = srep.Guid_salesrep
+    LEFT JOIN tbl_mdl_status s ON sl.Guid_status = s.Guid_status
+    LEFT JOIN tbl_mdl_number mdl ON q.Guid_user = mdl.Guid_user
+
+    WHERE  u.marked_test = '0' AND q.account_number = a.account AND a.Guid_account = ar.Guid_account AND ar.Guid_salesrep = srep.Guid_salesrep AND mdl.mdl_number IS NOT NULL
+
+    AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%test%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Smith%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Doe%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%Jane Doe%'
+
+    GROUP BY mdl.mdl_number ORDER BY date DESC");
+
+
+    $objPHPExcel = new \PHPExcel();
+    $objPHPExcel->setActiveSheetIndex(0);
+
+    $objPHPExcel->getActiveSheet()->getStyle('A1:D1')->getFont()->setBold(true)->setSize(16);
+    $objPHPExcel->getActiveSheet()->SetCellValue('A1', 'Geneveda Matrix');
+
+    $rowCount = 3;
+    $styleArray = array(
+      'borders' => array(
+	'allborders' => array(
+	  'style' => \PHPExcel_Style_Border::BORDER_THIN
+	)
+      )
+    );
+
+    $headerStyleArray = array(
+      'fill' => array(
+	'type' => \PHPExcel_Style_Fill::FILL_SOLID,
+	'color' => array('rgb' => 'EFF0F1')
+      ),
+      'font' => array(
+	'bold' => true
+      )
+    );
+
+    $objPHPExcel->getActiveSheet()->getStyle('A' . $rowCount . ':M' . $rowCount)->applyFromArray($headerStyleArray);
+    $objPHPExcel->getActiveSheet()->SetCellValue('A' . $rowCount, 'Accessioned');
+    $objPHPExcel->getActiveSheet()->SetCellValue('B' . $rowCount, 'MDL #');
+    $objPHPExcel->getActiveSheet()->SetCellValue('C' . $rowCount, 'Test Ordered');
+    $objPHPExcel->getActiveSheet()->SetCellValue('D' . $rowCount, 'Sales Rep');
+    $objPHPExcel->getActiveSheet()->SetCellValue('E' . $rowCount, 'Account #');
+    $objPHPExcel->getActiveSheet()->SetCellValue('F' . $rowCount, 'Account Name');
+    $objPHPExcel->getActiveSheet()->SetCellValue('G' . $rowCount, 'Med Necessity');
+    $objPHPExcel->getActiveSheet()->SetCellValue('H' . $rowCount, 'Event');
+    $objPHPExcel->getActiveSheet()->SetCellValue('I' . $rowCount, 'Insurance App/Dec');
+    $objPHPExcel->getActiveSheet()->SetCellValue('J' . $rowCount, 'Reported');
+    $objPHPExcel->getActiveSheet()->SetCellValue('K' . $rowCount, 'Last Paid');
+    $objPHPExcel->getActiveSheet()->SetCellValue('L' . $rowCount, 'Payer(s)');
+    $objPHPExcel->getActiveSheet()->SetCellValue('M' . $rowCount, 'Total Paid');
+
+    if (!empty($tests)) {
+      foreach ($tests as $data) {
+	$revenueQuery = 'SELECT r.*, p.name AS payor, cpt.code '
+		    . 'FROM tbl_revenue r '
+		    . 'LEFT JOIN tbl_mdl_payors p ON r.Guid_payor=p.Guid_payor '
+		    . 'LEFT JOIN tbl_mdl_cpt_code cpt ON r.Guid_cpt=cpt.Guid_cpt '
+		    . 'WHERE Guid_user=:Guid_user AND p.name != \'Patient\'';
+	$revenues = $db->query($revenueQuery, array('Guid_user'=>$data['user_id']));
+
+	$revSum = 0;
+	$revPayers = [];
+	if (!empty($revenues)) {
+	    foreach ($revenues as $k=>$v) {
+		if (!in_array($v['payor'], $revPayers)) {
+		    $revPayers[] = $v['payor'];
+		}
+		if($v['amount']!=""){
+		    $revSum += $v['amount'];
+		}
+	    }
+	}
+
+	$payersNames = implode(', ', $revPayers);
+	$total = '$ '.number_format($revSum, 2);
+
+	$rowCount++;
+
+	if (isset($data['sales_color'])) {
+	    $objPHPExcel->getActiveSheet()->getStyle('A'.$rowCount.':M'.$rowCount)->getFill()->applyFromArray(array(
+		'type' => PHPExcel_Style_Fill::FILL_SOLID,
+		'startcolor' => array(
+		     'rgb' => substr($data['sales_color'], 1)
+		)
+	    ));
+	}
+
+	$account_name = strtolower($data['account_name']);
+	$account_name = ucfirst($account_name);
+
+	$objPHPExcel->getActiveSheet()->SetCellValue('A' . $rowCount, formatDate($data['accessioned']));
+	$objPHPExcel->getActiveSheet()->SetCellValue('B' . $rowCount, $data['mdl']);
+	$objPHPExcel->getActiveSheet()->SetCellValue('C' . $rowCount, $data['test_ordered']);
+	$objPHPExcel->getActiveSheet()->SetCellValue('D' . $rowCount, $data['sales']);
+	$objPHPExcel->getActiveSheet()->SetCellValue('E' . $rowCount, $data['account']);
+	$objPHPExcel->getActiveSheet()->SetCellValue('F' . $rowCount, $account_name);
+	$objPHPExcel->getActiveSheet()->SetCellValue('G' . $rowCount, substr($data['med_necessity'], 0, 1));
+	$objPHPExcel->getActiveSheet()->SetCellValue('H' . $rowCount, $data['event']);
+	$objPHPExcel->getActiveSheet()->SetCellValue('I' . $rowCount, $data['insurance_app']);
+	$objPHPExcel->getActiveSheet()->SetCellValue('J' . $rowCount, formatDate($data['reported']));
+	$objPHPExcel->getActiveSheet()->SetCellValue('K' . $rowCount, formatDate($data['last_paid']));
+	$objPHPExcel->getActiveSheet()->SetCellValue('L' . $rowCount, $payersNames);
+	$objPHPExcel->getActiveSheet()->SetCellValue('M' . $rowCount, $total);
+      }
+    }
+
+    $filename = date('his', time()).'_geneveda_matrix.xlsx';
+    $directory = SITE_ROOT . '/uploads/';
+    header('Content-Type: application/vnd.ms-excel');
+    header('Content-Disposition: attachment;filename="' . $filename . '"');
+    header('Cache-Control: max-age=0');
+    $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+    ob_start();
+    $objWriter->save($directory . $filename);
+    ob_end_clean();
+
+    echo json_encode(['file' => SITE_URL.'/uploads/'.$filename]);
+    exit();
 }
