@@ -25,7 +25,8 @@
 		</div>
 
 		<ul>
-		    <li><a href="<?php echo SITE_URL; ?>">Home</a></li>
+		    <li><a href="<?php echo SITE_URL; ?>/dashboard2.php">Home</a></li>
+		    <li><a href="<?php echo SITE_URL; ?>">Patients</a></li>
 		    <?php if($role !== 'Physician' && $role != 'Patient') { ?>
 			<li><a href="<?php echo SITE_URL; ?>/url-configuration.php">URL</a></li>
 			<li><a href="<?php echo SITE_URL; ?>/account-config.php">Accounts</a></li>

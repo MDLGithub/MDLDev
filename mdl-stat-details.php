@@ -21,17 +21,6 @@ if($role!="Admin"){
 }
 $users = getUsersAndRoles($db);
 
-//this is just for test, will remove it later
-if(isset($_GET['get_patient_ids'])){
-    $patientEmptyIds = $db->query("SELECT * FROM `tbl_mdl_status_log` WHERE Guid_patient='0'");
-    foreach ($patientEmptyIds as $k=>$v){
-	$getPatient = $db->row("SELECT Guid_patient FROM `tblpatient` WHERE Guid_user=:Guid_user", array('Guid_user'=>$v['Guid_user']));
-	$patientID = $getPatient['Guid_patient'];
-	//updateTable($db, 'tbl_mdl_stats', array('Guid_patient'=>$patientID), array('Guid_user'=>$v['Guid_user']));
-	var_dump("Guid_patient: ".$patientID."; Guid_user: ".$v['Guid_user']);
-    }
-}//remove it after all tests
-
 //exclude test users from mdl stats
 $testUserIds = getTestUserIDs($db);
 $markedTestUserIds = getMarkedTestUserIDs($db);
@@ -131,6 +120,7 @@ require_once ('navbar.php');
 		</ol>
 	    </h4>
 	    <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>
+	    <a href="<?php echo SITE_URL; ?>/dashboard2.php" class="button homeIcon"></a>
 	    <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
 	</section>
 
@@ -168,10 +158,19 @@ require_once ('navbar.php');
 			<tbody>
 			    <?php foreach ($initData as $k=>$v){ ?>
 			    <?php
+				$Guid_user = $v['Guid_user'];
 				$revenue = getRevenueStat($db, $v['Guid_user']);
 				$patientInfoUrl = SITE_URL.'/patient-info.php?patient='.$v['Guid_user'];
 				if($v['account_number'] && $v['account_number']!=''){
 				    $patientInfoUrl .= '&account='.$v['account_number'];
+				}
+				$incomplateStr = "";
+				$incomplateQ = "SELECT q.Guid_qualify,q.Guid_user, '1' AS incomplete FROM tblqualify q
+						WHERE NOT EXISTS(SELECT qs.Guid_qualify FROM tbl_ss_qualify qs WHERE q.Guid_qualify=qs.Guid_qualify)
+						AND q.Guid_user=$Guid_user";
+				$incomplateR = $db->query($incomplateQ);
+				if($incomplateR){
+				    $incomplateStr = "&incomplete=1";
 				}
 			    ?>
 			    <tr class="text-left">
@@ -181,11 +180,11 @@ require_once ('navbar.php');
 				<?php } ?>
 
 				<?php if(isFieldVisibleForStatus($db, 'first_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'first_name', $roleID)){ ?>
-				<td><a href="<?php echo $patientInfoUrl; ?>"><?php echo ucfirst(strtolower($v['firstname']));?></a></td>
+				<td><a href="<?php echo $patientInfoUrl.$incomplateStr; ?>"><?php echo ucfirst(strtolower($v['firstname']));?></a></td>
 				<?php } ?>
 
 				<?php if(isFieldVisibleForStatus($db, 'last_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'last_name', $roleID)){ ?>
-				<td><a href="<?php echo $patientInfoUrl; ?>"><?php echo ucfirst(strtolower($v['lastname']));?></a></td>
+				<td><a href="<?php echo $patientInfoUrl.$incomplateStr; ?>"><?php echo ucfirst(strtolower($v['lastname'])); ?></a></td>
 				<?php } ?>
 
 				<?php if(isFieldVisibleForStatus($db, 'account', $_GET['status_id']) && isFieldVisibleForRole($db, 'account', $roleID)){ ?>
@@ -242,20 +241,20 @@ require_once ('navbar.php');
 			<tfoot class="strong">
 			    <?php if(isFieldVisibleForStatus($db, 'insurance_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'insurance_paid', $roleID)){ ?>
 			    <tr>
-				<td class=" text-right" colspan="1">Insurance Total: </td>
-				<td colspan="2"><?php echo "$".formatMoney($userRevenuTotals['insurance_total']); ?></td>
+				<td class=" text-right" colspan="2">Insurance Total: </td>
+				<td class=" text-left" colspan="2"><?php echo "$".formatMoney($userRevenuTotals['insurance_total']); ?></td>
 			    </tr>
 			    <?php } ?>
 			    <?php if(isFieldVisibleForStatus($db, 'patient_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'patient_paid', $roleID)){ ?>
 			    <tr>
-				<td class=" text-right" colspan="1">Patient Total: </td>
-				<td colspan="2"><?php echo "$".formatMoney($userRevenuTotals['patient_total']); ?></td>
+				<td class=" text-right" colspan="2">Patient Total: </td>
+				<td class=" text-left" colspan="2"><?php echo "$".formatMoney($userRevenuTotals['patient_total']); ?></td>
 			    </tr>
 			    <?php } ?>
 			    <?php if(isFieldVisibleForStatus($db, 'total_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'total_paid', $roleID)){ ?>
 			    <tr>
-				<td class=" text-right" colspan="1">Total: </td>
-				<td colspan="2"><?php echo "$".formatMoney($userRevenuTotals['total']); ?></td>
+				<td class=" text-right" colspan="2">Total: </td>
+				<td class=" text-left" colspan="2"><?php echo "$".formatMoney($userRevenuTotals['total']); ?></td>
 			    </tr>
 			    <?php } ?>
 			</tfoot>

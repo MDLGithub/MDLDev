@@ -196,29 +196,59 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
 	    </ol>
 	    </h4>
 	    <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>
+	    <a href="<?php echo SITE_URL; ?>/dashboard2.php" class="button homeIcon"></a>
 	    <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
 	</section>
 	<div id="app_data" class="scroller">
 	    <div id="accounts">
 		<div class="row">
 		    <div class="col-md-8">
-		    <div class="selectAccountBlock">
-			<label >Select Account</label><br/>
-			<select class="form-control" id="selectAccount">
-			    <?php
-			    $accountInfo = "";
-			    $i=0;
-			    foreach ($accounts as $k=>$v){
-				$selected = (isset($_GET['account_id'])&&$_GET['account_id']==$v['Guid_account']) ? " selected='selected'" : "";
-			    $i++;
-			    ?>
-			    <option <?php echo $selected; ?> data-guid="<?php echo $v['Guid_account']; ?>" value="<?php echo $v['account']; ?>"><?php echo $v['account']." - ".ucwords(strtolower($v['name'])); ?></option>
-			    <?php  } ?>
-			</select>
-
-			<a href="<?php echo SITE_URL;?>/account-config.php?action=edit&id=<?php echo $accountActive['Guid_account']; ?>" id="edit-selected-account" class="add-new-account">
-			    <span class="fas fa-pencil-alt" aria-hidden="true"></span>
-			</a>
+		    <div class="selectAccountBlock row ">
+			<div class="col-md-6 padd-0">
+			    <label >Select Account</label><br/>
+			    <select class="form-control" id="selectAccount">
+				<?php
+				$accountInfo = "";
+				$i=0;
+				foreach ($accounts as $k=>$v){
+				    $selected = (isset($_GET['account_id'])&&$_GET['account_id']==$v['Guid_account']) ? " selected='selected'" : "";
+				$i++;
+				?>
+				<option <?php echo $selected; ?> data-guid="<?php echo $v['Guid_account']; ?>" value="<?php echo $v['account']; ?>"><?php echo $v['account']." - ".ucwords(strtolower($v['name'])); ?></option>
+				<?php  } ?>
+			    </select>
+			    <a href="<?php echo SITE_URL;?>/account-config.php?action=edit&id=<?php echo $accountActive['Guid_account']; ?>" id="edit-selected-account" class="add-new-account">
+				<span class="fas fa-pencil-alt" aria-hidden="true"></span>
+			    </a>
+			</div>
+			<div class="col-md-6 padd-0 pT-20">
+			    <div class="status_chart">
+				<div class="row">
+				    <div class="col-md-12">
+					<span class="registred">
+					    Registered
+					    <img src="assets/eventschedule/icons/silhouette_icon.png">
+					    <?php echo getAccountStatusCount($db, $accountActive['account'], '28' ); //28->Registered ?>
+					</span>
+					<span class="completed">
+					    Completed
+					    <img src="assets/eventschedule/icons/checkmark_icon.png">
+					    <?php echo getAccountStatusCount($db, $accountActive['account'], '36'); //36->Questionnaire Completed ?>
+					</span>
+					<span class="qualified">
+					    Qualified
+					    <img src="assets/eventschedule/icons/dna_icon.png">
+					    <?php echo getAccountStatusCount($db, $accountActive['account'], '29'); //29->Questionnaire Completed->Qualified ?>
+					</span>
+					<span class="submitted">
+					    Submitted
+					    <img src="assets/eventschedule/icons/flask_icon.png">
+					    <?php echo getAccountStatusCount($db, $accountActive['account'], '1' ); //28->Submitted (Specimen Collected) ?>
+					</span>
+				    </div>
+				</div>
+			    </div>
+			</div>
 		    </div>
 
 		    <div class="providersTable">
@@ -234,10 +264,11 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
 				<tr>
 				    <th>UPIN</th>
 				    <th>Title</th>
-				    <th class="">First Name</th>
-				    <th class="">Last Name</th>
-				    <th class="">Image</th>
-				    <th class="noFilter actions text-center">Actions</th>
+				    <th>Name</th>
+				    <th class="">Registered</th>
+				    <th class="">Completed</th>
+				    <th class="">Qualified</th>
+				    <th class="">Submitted</th>
 				</tr>
 			    </thead>
 			    <tbody>
@@ -253,21 +284,34 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
 				<tr>
 				    <td><?php echo $v['provider_id']; ?></td>
 				    <td><?php echo $v['title']; ?></td>
-				    <td><?php echo $v['first_name']; ?></td>
-				    <td><?php echo $v['last_name']; ?></td>
-				    <td>
-					<?php $photoImg = ($v['photo_filename']=="")? "/assets/images/default.png" : "/images/users/".$v['photo_filename'];   ?>
-					<img width="40" src="<?php echo SITE_URL.$photoImg; ?>" />
+				    <td class="clickable">
+					<a class="details"><?php echo $v['first_name']." ". $v['last_name']; ?></a>
+					<div class="moreInfo">
+					    <div class="content">
+						<span class="close">X</span>
+
+						<p>
+						    <?php $photoImg = ($v['photo_filename']=="")? "/assets/images/default.png" : "/images/users/".$v['photo_filename'];   ?>
+						    <img width="40" src="<?php echo SITE_URL.$photoImg; ?>" />
+						</p>
+
+						<div class="text-right pT-15 pB-10">
+						    <!--<a class="edit-provider" data-provider-guid="<?php echo $v['Guid_provider']; ?>">-->
+						    <a href="<?php echo SITE_URL."/accounts.php?account_id=$Guid_account&provider_guid=$providerGuid"; ?>">
+							<span class="fas fa-pencil-alt" aria-hidden="true"></span>
+						    </a>
+						    <a onclick="javascript:confirmationDeleteProvider($(this));return false;" href="?delete=<?php echo $providerGuid ?>&provider-id=<?php echo $v['provider_id']; ?>&account-id=<?php echo $Guid_account; ?>&user-id=<?php echo $v['Guid_user']; ?>">
+							<span class="far fa-trash-alt" aria-hidden="true"></span>
+						    </a>
+						</div>
+
+					    </div>
+					</div>
 				    </td>
-				    <td class="text-center">
-					<!--<a class="edit-provider" data-provider-guid="<?php echo $v['Guid_provider']; ?>">-->
-					<a href="<?php echo SITE_URL."/accounts.php?account_id=$Guid_account&provider_guid=$providerGuid"; ?>">
-					    <span class="fas fa-pencil-alt" aria-hidden="true"></span>
-					</a>
-					<a onclick="javascript:confirmationDeleteProvider($(this));return false;" href="?delete=<?php echo $providerGuid ?>&provider-id=<?php echo $v['provider_id']; ?>&account-id=<?php echo $Guid_account; ?>&user-id=<?php echo $v['Guid_user']; ?>">
-					    <span class="far fa-trash-alt" aria-hidden="true"></span>
-					</a>
-				    </td>
+				    <td><?php echo getProviderStatusCount($db, $v['account_id'], $v['Guid_provider'], '28' ); //28->Registered ?></td>
+				    <td><?php echo getProviderStatusCount($db, $v['account_id'], $v['Guid_provider'], '36'); //36->Questionnaire Completed ?></td>
+				    <td><?php echo getProviderStatusCount($db, $v['account_id'], $v['Guid_provider'], '29'); //29->Questionnaire Completed->Qualified ?></td>
+				    <td><?php echo getProviderStatusCount($db, $v['account_id'], $v['Guid_provider'], '1' ); //28->Submitted (Specimen Collected) ?></td>
 				</tr>
 				<?php } ?>
 			    <?php } ?>
@@ -281,7 +325,7 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
 			<img class="salesrepLogo" src="<?php echo SITE_URL.$logo; ?>" />
 		    </div>
 		    <div class="addressInfoBlock">
-			<label >Address</label>
+			<label >Account Address</label>
 			<div id="officeAddress">
 			    <div>
 				<?php
@@ -304,11 +348,11 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
 			    <?php } ?>
 			</div>
 		    </div>
-		    <div class="salesrepInfoBlock">
+		    <div class="salesrepInfoBlock pT-20">
 			<label >Genetic Consultant</label>
 			<div class="imageBox">
 			    <div class="pic">
-				<?php $salesrepPhoto = isset($salesrepPhoto) ? "/images/users/".$salesrepPhoto : "/assets/images/default.png"?>
+				<?php $salesrepPhoto = (isset($salesrepPhoto)&&$salesrepPhoto!="") ? "/images/users/".$salesrepPhoto : "/assets/images/default.png"?>
 				<img width="50" class="salesrepProfilePic" src="<?php echo SITE_URL.$salesrepPhoto; ?>" />
 			    </div>
 			    <div class="name text-center">

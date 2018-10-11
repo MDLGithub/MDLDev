@@ -18,6 +18,11 @@ $roleID = $roleInfo['Guid_role'];
 $role = $roleInfo['role'];
 $default_account = "";
 
+//check if patient (the same as Guid_user) empty
+if(!isset($_GET['patient']) || $_GET['patient']==''){
+    Leave(SITE_URL);
+}
+
 $accessRole = getAccessRoleByKey('home');
 $roleIDs = unserialize($accessRole['value']);
 $dataViewAccess = isUserHasAnyAccess($roleIDs, $roleID, 'view');
@@ -29,14 +34,15 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     if( isset($_GET['account']) &&$_GET['account']!=""){
 	$patientInfoUrl .= '&account='.$_GET['account'];
     }
-    if( isset($_GET['incomplete']) && $_GET['incomplete']=="1"){
+    if( isset($_GET['incomplete']) &&$_GET['incomplete']=="1"){
 	$patientInfoUrl .= '&incomplete=1';
     }
 
     $sqlQualify = "SELECT q.Guid_qualify,q.Guid_user,q.insurance,
-		    q.other_insurance,q.Date_created,q.provider_id,
+		    q.other_insurance,q.Date_created as qDate,q.provider_id, q.source,
 		    CONCAT(prov.first_name,' ',prov.last_name) provider,
 		    p.*, u.email, u.marked_test ";
+
     if(isset($_GET['incomplete'])){
 	$sqlQualify .= "FROM tblqualify q ";
     } else {
@@ -45,8 +51,24 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     $sqlQualify .= "LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user
 		    LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user
 		    LEFT JOIN tblprovider prov ON prov.Guid_provider = q.provider_id
-		    WHERE q.Guid_user=:Guid_user ORDER BY q.`Date_created` DESC LIMIT 1";
+		    WHERE q.Guid_user=:Guid_user ";
+    if($role == 'Sales Rep'){
+	$salesrepAccountIDs = getSalesrepAccounts($db, $userID);
+	$sqlQualify .= " AND q.account_number IN (" . $salesrepAccountIDs . ") ";
+    }
+    if($role=='Physician'){
+	$physicianInfo = $db->row('SELECT account_id FROM tblprovider WHERE Guid_user='.$userID);
+	$account_id = $physicianInfo['account_id'];
+	$sqlQualify .= " AND q.account_number IN (" . $account_id . ")";
+    }
+    $sqlQualify .= "ORDER BY q.`Date_created` DESC LIMIT 1";
     $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$Guid_user));
+
+    //If one is a physician or sales rep,
+    //should not be able to see other patients that they are not allowed to
+    if(!$qualifyResult){
+	Leave(SITE_URL);
+    }
 
     $mdlInfoQ = "SELECT * FROM tbl_mdl_number WHERE Guid_user=:Guid_user";
     $mdlInfo = $db->row($mdlInfoQ, array('Guid_user'=>$Guid_user));
@@ -98,28 +120,39 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		updateTable($db, 'tblpatient', array('total_deductible'=> $_POST['total_deductible']), array('Guid_user'=>$_GET['patient']));
 	    }
 
+	    if(isset($_POST['source']) && $_POST['source']!=""){
+		$Guid_qualify = $_POST['Guid_qualify'];
+		$dateCreated = $_POST['qDate'];
+		$source = $_POST['source'];
+		if(isset($_POST['incomplate'])){
+		    $updateQualify = " UPDATE `tblqualify` SET `source`=:source WHERE `Date_created`=:Date_created AND Guid_qualify=:Guid_qualify";
+		}else{
+		    $updateQualify = " UPDATE `tbl_ss_qualify` SET `source`=:source WHERE `Date_created`=:Date_created AND Guid_qualify=:Guid_qualify";
+		}
+		$db->query($updateQualify, array('source'=>$source ,'Guid_qualify'=>$Guid_qualify, 'Date_created'=>$dateCreated));
+
+	    }
+
 	     //update patient table for reason and cpecimen collected values
 	    $wherePatient = array('Guid_user'=>$_GET['patient']);
 	    $patientData = array();
-//            if(isset($_POST['specimen_collected'])&&$_POST['specimen_collected']!=""){
-//                $patientData['specimen_collected']=$_POST['specimen_collected'];
-//            }
-//            if(isset($_POST['Guid_reason'])&&$_POST['Guid_reason']!=""){
-//                $patientData['Guid_reason']=$_POST['Guid_reason'];
-//            } else {
-//                $patientData['Guid_reason']="";
-//            }
+	    $userID = $_GET['patient'];
 	    if(!empty($patientData)){
 		$updatePatient = updateTable($db, 'tblpatient', $patientData, $wherePatient);
 	    }
+	    if(isset($_POST['test_kit'])){
+		updateTable($db,'tblpatient', array('test_kit'=>'1'), array('Guid_user'=>$userID));
+	    } else {
+		updateTable($db,'tblpatient', array('test_kit'=>'0'), array('Guid_user'=>$userID));
+	    }
 
 	    //mark user as a test
-	    $markedUserID = $_GET['patient'];
 	    if(isset($_POST['mark_as_test'])){
-		updateTable($db,'tbluser', array('marked_test'=>'1'), array('Guid_user'=>$markedUserID));
+		updateTable($db,'tbluser', array('marked_test'=>'1'), array('Guid_user'=>$userID));
 	    } else {
-		updateTable($db,'tbluser', array('marked_test'=>'0'), array('Guid_user'=>$markedUserID));
+		updateTable($db,'tbluser', array('marked_test'=>'0'), array('Guid_user'=>$userID));
 	    }
+
 
 	    //Update MDL# info
 	    if(isset($_POST['mdl_number'])){
@@ -272,6 +305,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		</ol>
 	    </h4>
 	    <a href="<?php echo SITE_URL; ?>/patient-info.php?logout=1" name="log_out" class="button red back logout"></a>
+	    <a href="<?php echo SITE_URL; ?>/dashboard2.php" class="button homeIcon"></a>
 	    <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit smaller_button"><strong>View Questionnaire</strong></a>
 	</section>
 
@@ -286,6 +320,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 		<form id="mdlInfoForm" action="" method="POST" >
 			<input type="hidden" name="save" value="1"/>
 			<input type="hidden" name="account" value="<?php echo isset($_GET['account'])?$_GET['account']:(isset($mdlInfo['account'])?$mdlInfo['account']:""); ?>"/>
+			<input type="hidden" name="qDate" value="<?php echo $qualifyResult['qDate']; ?>"/>
+			<input type="hidden" name="Guid_qualify" value="<?php echo $qualifyResult['Guid_qualify']; ?>"/>
 			<div class="row">
 			    <div class="col-md-6 pInfo">
 				<p><label>Date of Birth: </label><input type="text" name="dob" class="datepicker" value="<?php echo ($qualifyResult['dob']!="")?date("n/j/Y", strtotime($qualifyResult['dob'])):""; ?>" autocomplete="off" /></p>
@@ -306,7 +342,19 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 				<p><label>Genetic Consultant: </label><?php echo $accountInfo['salesrep_name']; ?></p>
 				<?php } ?>
 				<p><label>Health Care Providers: </label><?php echo $qualifyResult['provider']; ?>
-
+				<p>
+				    <label>Location: </label>
+				    <select name="source">
+					<option value="">Select Location</option>
+					<?php
+					$sources = $db->selectAll('tblsource', ' ORDER BY `description` ASC');
+					foreach ($sources as $k=>$v){
+					$selected = $qualifyResult['source']==$v['description'] ? ' selected' : '';
+					?>
+					<option <?php echo $selected; ?> value="<?php echo $v['description']; ?>" ><?php echo $v['description']; ?></option>
+					<?php } ?>
+				    </select>
+				</p>
 			    </div>
 			    <div class="col-md-6 pB-30">
 				<div class="row">
@@ -354,23 +402,6 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 					    </div>
 					</div>
 				    </div>
-<!--                                    <div id="select-reson" class="col-md-8 <?php echo ( is_null($qualifyResult['specimen_collected']) || $qualifyResult['specimen_collected']=='Yes')?"hidden":"";?>">
-					<div class="f2">
-					    <label class="dynamic" for="reason_not"><span>Reasons for not taking the test</span></label>
-					    <?php //$reasons = $db->selectAll('tbl_reasons');?>
-					    <div class="group">
-						<select id="reason" name="Guid_reason" class="no-selection">
-						    <option value="">Reasons for not taking the test</option>
-						    <?php foreach ($reasons as $k=>$v){?>
-							<option <?php echo ($qualifyResult['Guid_reason']==$v['Guid_reason'])?"selected":""; ?> value="<?php echo $v['Guid_reason']; ?>"><?php echo $v['reason']; ?></option>
-						    <?php } ?>
-						</select>
-						<p class="f_status">
-						    <span class="status_icons"><strong></strong></span>
-						</p>
-					    </div>
-					</div>
-				    </div>-->
 				    <?php if( isset($qualifyResult['specimen_collected']) && $qualifyResult['specimen_collected']!=NULL && $qualifyResult['specimen_collected']!='0' ){ ?>
 				    <div id="mdlInfoBox" class="pInfo <?php echo ($qualifyResult['specimen_collected']!='Yes')?'hidden':"";?>">
 					<p>
@@ -551,9 +582,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			<div id="statusLogs"  class="col-md-6">
 			    <h5>
 				Test Status Change Log:
-				<?php
-				//Here ! ! !
-				if(isset($qualifyResult['specimen_collected']) && $qualifyResult['specimen_collected']=='Yes'){ ?>
+				<?php if(isset($qualifyResult['specimen_collected']) && $qualifyResult['specimen_collected']=='Yes'){ ?>
 				<?php if($role=='Admin'){ ?>
 				<a title="Add New Test Status Log" class="pull-right" href="<?php echo $patientInfoUrl."&status_log=add";?>">
 				    <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
@@ -776,11 +805,17 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 			<div class="col-md-12">
 			    <?php if($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager' ){ ?>
 			    <span class="pull-left markTest">
-				<input <?php echo $qualifyResult['marked_test']=='1'?' checked': ''; ?>  type="checkbox" name="mark_as_test" value="1" />
-
+				<input id="test-kit" <?php echo $qualifyResult['test_kit']=='1'?' checked': ''; ?>  type="checkbox" name="test_kit" value="1" />
+				<label for="test-kit">Test kit has been given to the patient.</label>
+			    </span><br/>
+			    <?php } ?>
+			    <?php if($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager' ){ ?>
+			    <span class="pull-left markTest">
+				<input id="mark-as-test" <?php echo $qualifyResult['marked_test']=='1'?' checked': ''; ?>  type="checkbox" name="mark_as_test" value="1" />
 				<label for="mark-as-test">Mark As Test</label>
 			    </span>
 			    <?php } ?>
+
 			    <button id="save-patient-info" name="save" type="submit" class="button btn-inline pull-right">Save</button>
 			</div>
 		    </div>

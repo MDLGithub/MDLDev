@@ -159,6 +159,7 @@ require_once ('navbar.php');
 		<?php } ?>
 	    </h4>
 	    <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>
+	    <a href="<?php echo SITE_URL; ?>/dashboard2.php" class="button homeIcon"></a>
 	    <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
 	</section>
 	<div class="scroller">
@@ -207,12 +208,43 @@ require_once ('navbar.php');
 			</div>
 			<form method="POST" enctype="multipart/form-data">
 			    <div class="row pB-30">
-				<div class="col-md-4">
+				<div class="col-md-6">
 				    <button id="saveForm" name="submit_account" type="submit" class="btn-inline">Save</button>
 				    <button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>
 				    <!--<a href="<?php echo SITE_URL."/account-config.php";?>" class="btn-inline btn-cancel">Cancel</a>-->
 				</div>
-				<div class="col-md-8">
+
+				<div class="col-md-6">
+				    <?php if(isset($_GET['action']) && $_GET['action']=='edit'){ ?>
+				    <div class="status_chart">
+					<div class="row">
+					    <div class="col-md-12">
+						<span class="registred">
+						    Registered
+						    <img src="assets/eventschedule/icons/silhouette_icon.png">
+						    <?php echo getAccountStatusCount($db, $account, '28' ); //28->Registered ?>
+						</span>
+						<span class="completed">
+						    Completed
+						    <img src="assets/eventschedule/icons/checkmark_icon.png">
+						    <?php echo getAccountStatusCount($db, $account, '36'); //36->Questionnaire Completed ?>
+						</span>
+						<span class="qualified">
+						    Qualified
+						    <img src="assets/eventschedule/icons/dna_icon.png">
+						    <?php echo getAccountStatusCount($db, $account, '29'); //29->Questionnaire Completed->Qualified ?>
+						</span>
+						<span class="submitted">
+						    Submitted
+						    <img src="assets/eventschedule/icons/flask_icon.png">
+						    <?php echo getAccountStatusCount($db, $account, '1' ); //28->Submitted (Specimen Collected) ?>
+						</span>
+					    </div>
+					</div>
+				    </div>
+				    <?php } ?>
+				</div>
+				<div class="col-md-12">
 				    <?php
 					if( isset($errorMessage) && $errorMessage != ""){
 					    echo "<div class='error-text'>".$errorMessage."</div>";
@@ -414,7 +446,7 @@ require_once ('navbar.php');
 		</div>
 		<div class="row">
 		    <div class="col-md-12">
-			<table id="dataTable" class="table">
+			<table id="dataTable" class="table accountsTable">
 			<thead>
 			    <tr>
 			    <?php if(isFieldVisibleByRole($isAccountView, $roleID)) {?>
@@ -423,33 +455,19 @@ require_once ('navbar.php');
 			    <?php if(isFieldVisibleByRole($isNameView, $roleID)) {?>
 				<th>Account Name</th>
 			    <?php } ?>
-			    <?php if(isFieldVisibleByRole($isAddressView, $roleID)) {?>
-				<th class="">Account Address</th>
-			    <?php } ?>
 			    <?php if(isFieldVisibleByRole($isCityView, $roleID)) {?>
 				<th class="">City</th>
 			    <?php } ?>
 			    <?php if(isFieldVisibleByRole($isStateView, $roleID)) {?>
 				<th class="">State</th>
 			    <?php } ?>
-			    <?php if(isFieldVisibleByRole($isZipView, $roleID)) {?>
-				<th class="">Zip</th>
-			    <?php } ?>
-			    <?php if(isFieldVisibleByRole($isPhoneView, $roleID)) {?>
-				<th class="">Phone</th>
-			    <?php } ?>
-			    <?php if(isFieldVisibleByRole($isFaxView, $roleID)) {?>
-				<th class="">Fax</th>
-			    <?php } ?>
 			    <?php if(isFieldVisibleByRole($isSalesrepView, $roleID)) {?>
 				<th class="">Genetic Consultant</th>
 			    <?php } ?>
-			    <?php if(isFieldVisibleByRole($isLogoView, $roleID)) {?>
-				<th class="noFilter text-center">Logo</th>
-			    <?php } ?>
-			    <?php if( isFieldVisibleByRole($isActionEdit, $roleID) || isFieldVisibleByRole($isActionDelete, $roleID)) {?>
-				<th class="noFilter actions text-center">Actions</th>
-			    <?php } ?>
+			    <th class="">Registered</th>
+			    <th class="">Completed</th>
+			    <th class="">Qualified</th>
+			    <th class="">Submitted</th>
 			    </tr>
 			</thead>
 			<tbody>
@@ -460,13 +478,62 @@ require_once ('navbar.php');
 			    ?>
 				<tr>
 				<?php if(isFieldVisibleByRole($isAccountView, $roleID)) {?>
-				    <td><?php echo $v['account']; ?></td>
+				    <td class="clickable">
+					<a class="details"><?php echo $v['account']; ?></a>
+					<div class="moreInfo">
+					    <div class="content">
+						<span class="close">X</span>
+
+						<?php if(isFieldVisibleByRole($isLogoView, $roleID)) {?>
+						    <p>
+							<a target="_blank" href="<?php echo ($v['website']!="")? $v['website'] : "#"; ?>">
+							    <?php $logo = $v['logo'] ? "/../images/practice/".$v['logo'] : "/assets/images/default.png";?>
+							    <img width="40" src="<?php echo SITE_URL.$logo; ?>" >
+							</a>
+						    </p>
+						<?php } ?>
+						 <?php if(isFieldVisibleByRole($isAddressView, $roleID)) {?>
+						    <?php if($v['address']!=""){ ?>
+							<p><label>Address: </label><?php echo $v['address']; ?></p>
+						    <?php } ?>
+						<?php } ?>
+						<?php if($v['zip']!="") {?>
+						    <?php if(isFieldVisibleByRole($isZipView, $roleID)) {?>
+							<p><label>Zip: </label><?php echo $v['zip']; ?></p>
+						    <?php } ?>
+						<?php } ?>
+						<?php if($v['phone_number']!="") {?>
+						    <?php if(isFieldVisibleByRole($isPhoneView, $roleID)) {?>
+							<p><label>Phone: </label><span class="phone_us"><?php echo $v['phone_number']; ?></span></p>
+						    <?php } ?>
+						<?php } ?>
+						<?php if($v['fax']!="") {?>
+						    <?php if(isFieldVisibleByRole($isFaxView, $roleID)) {?>
+							<p><label>Fax: </label><span class="phone_us"><?php echo $v['fax']; ?></span></p>
+						    <?php } ?>
+						<?php } ?>
+
+						<?php if( isFieldVisibleByRole($isActionEdit, $roleID) || isFieldVisibleByRole($isActionDelete, $roleID)) {?>
+						<div class="text-right pT-15 pB-10">
+						    <?php if(isFieldVisibleByRole($isActionEdit, $roleID)) {?>
+						    <a href="<?php echo SITE_URL; ?>/accounts.php?account_id=<?php echo $v['Guid_account']; ?>">
+							<span class="fas fa-pencil-alt" aria-hidden="true"></span>
+						    </a>
+						    <?php } ?>
+						    <?php if(isFieldVisibleByRole($isActionDelete, $roleID)) {?>
+						    <a onclick="javascript:confirmationDeleteAccount($(this));return false;" href="<?php echo SITE_URL; ?>/account-config.php?delete=<?php echo $v['Guid_account'] ?>&id=<?php echo $v['account']; ?>">
+							<span class="far fa-trash-alt" aria-hidden="true"></span>
+						    </a>
+						    <?php } ?>
+						</div>
+						<?php } ?>
+
+					    </div>
+					</div>
+				    </td>
 				<?php } ?>
 				<?php if(isFieldVisibleByRole($isNameView, $roleID)) {?>
 				    <td><?php echo ucwords(strtolower($v['name'])); ?></td>
-				<?php } ?>
-				<?php if(isFieldVisibleByRole($isAddressView, $roleID)) {?>
-				    <td><?php echo $v['address']; ?></td>
 				<?php } ?>
 				<?php if(isFieldVisibleByRole($isCityView, $roleID)) {?>
 				    <td><?php echo $v['city']; ?></td>
@@ -474,40 +541,14 @@ require_once ('navbar.php');
 				<?php if(isFieldVisibleByRole($isStateView, $roleID)) {?>
 				   <td><?php echo $v['state']; ?></td>
 				<?php } ?>
-				<?php if(isFieldVisibleByRole($isZipView, $roleID)) {?>
-				    <td><?php echo $v['zip']; ?></td>
-				<?php } ?>
-				<?php if(isFieldVisibleByRole($isPhoneView, $roleID)) {?>
-				    <td><span class="phone_us"><?php echo $v['phone_number']; ?></span></td>
-				<?php } ?>
-				<?php if(isFieldVisibleByRole($isFaxView, $roleID)) {?>
-				    <td><span class="phone_us"><?php echo $v['fax']; ?></span></td>
-				<?php } ?>
 				<?php if(isFieldVisibleByRole($isSalesrepView, $roleID)) {?>
 				    <td><?php echo $v['salesrepFName']." ".$v['salesrepLName']?></td>
 				<?php } ?>
-				<?php if(isFieldVisibleByRole($isLogoView, $roleID)) {?>
-				    <td class="text-center">
-					<a target="_blank" href="<?php echo ($v['website']!="")? $v['website'] : "#"; ?>">
-					    <?php $logo = $v['logo'] ? "/../images/practice/".$v['logo'] : "/assets/images/default.png";?>
-					    <img width="40" src="<?php echo SITE_URL.$logo; ?>" >
-					</a>
-				    </td>
-				<?php } ?>
-				<?php if( isFieldVisibleByRole($isActionEdit, $roleID) || isFieldVisibleByRole($isActionDelete, $roleID)) {?>
-				    <td class="text-center">
-					<?php if(isFieldVisibleByRole($isActionEdit, $roleID)) {?>
-					<a href="accounts.php?account_id=<?php echo $v['Guid_account']; ?>">
-					    <span class="fas fa-pencil-alt" aria-hidden="true"></span>
-					</a>
-					<?php } ?>
-					<?php if(isFieldVisibleByRole($isActionDelete, $roleID)) {?>
-					<a onclick="javascript:confirmationDeleteAccount($(this));return false;" href="?delete=<?php echo $v['Guid_account'] ?>&id=<?php echo $v['account']; ?>">
-					    <span class="far fa-trash-alt" aria-hidden="true"></span>
-					</a>
-					<?php } ?>
-				    </td>
-				<?php } ?>
+				<td><?php echo getAccountStatusCount($db, $v['account'], '28' ); //28->Registered ?></td>
+				<td><?php echo getAccountStatusCount($db, $v['account'], '36'); //36->Questionnaire Completed ?></td>
+				<td><?php echo getAccountStatusCount($db, $v['account'], '29'); //29->Questionnaire Completed->Qualified ?></td>
+				<td><?php echo getAccountStatusCount($db, $v['account'], '1' ); //28->Submitted (Specimen Collected) ?></td>
+
 				</tr>
 			    <?php
 				$i++;
@@ -535,12 +576,7 @@ require_once ('navbar.php');
 	    fixedHeader: true,
 	    //searching: false,
 	    lengthChange: false,
-	    "order": [[ 1, "asc" ]],
-	    "aoColumnDefs": [
-	      {
-		  "bSortable": false,
-		  "aTargets": [ 8,9 ] }
-	    ]
+	    "order": [[ 1, "asc" ]]
 	});
     }
 

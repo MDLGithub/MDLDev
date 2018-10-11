@@ -700,7 +700,7 @@ function getDevicesWithSalesRepInfo($db, $flag=FALSE){
 function getDeviceInvsWithSalesRepInfo($db, $flag=FALSE){
     $query = "SELECT "
 		    . "tbldevice.device_name, "
-		    . "tbldeviceinv.id, tbldeviceinv.deviceid, tbldeviceinv.serial_number, tbldeviceinv.comment, tbldeviceinv.inservice_date, tbldeviceinv.outservice_date, "
+		    . "tbldeviceinv.id, tbldeviceinv.Guid_salesrep, tbldeviceinv.deviceid, tbldeviceinv.serial_number, tbldeviceinv.comment, tbldeviceinv.inservice_date, tbldeviceinv.outservice_date, "
 		    . "tblsalesrep.first_name, tblsalesrep.last_name "
 		    . "FROM tbldeviceinv LEFT JOIN `tbldevice` "
 		    . "ON tbldevice.deviceid = tbldeviceinv.deviceid "
@@ -735,7 +735,7 @@ function getAccountAndSalesrep($db, $accountGuid=NULL, $getRow=NULL){
 	    . "tblsalesrep.state AS salesrepState, tblsalesrep.zip AS salesrepZip, tblsalesrep.photo_filename AS salesrepPhoto "
 	    . "FROM tblaccount "
 	    . "LEFT JOIN tblaccountrep ON tblaccount.Guid_account = tblaccountrep.Guid_account "
-	    . "LEFT JOIN tblsalesrep ON tblsalesrep.Guid_salesrep=tblaccountrep.Guid_salesrep";
+	    . "LEFT JOIN tblsalesrep ON tblsalesrep.Guid_salesrep=tblaccountrep.Guid_salesrep ";
 
     if($accountGuid){
 	$query .= " WHERE tblaccount.Guid_account=:id";
@@ -744,11 +744,91 @@ function getAccountAndSalesrep($db, $accountGuid=NULL, $getRow=NULL){
     elseif ($getRow) {
 	$result = $db->row($query);
     }else{
+	$query .= " GROUP BY tblaccount.Guid_account";
 	$result = $db->query($query);
     }
-
     return $result;
 }
+function getSalesrepAccounts($db, $Guid_user){
+    $salesrepAccountIDs = $db->query("SELECT acc.account FROM tblsalesrep srep
+					LEFT JOIN tblaccountrep arep ON arep.Guid_salesrep=srep.Guid_salesrep
+					LEFT JOIN tblaccount acc ON arep.Guid_account=acc.Guid_account
+					WHERE srep.Guid_user=:Guid_user", array('Guid_user'=>$Guid_user));
+    $accountIds = "";
+    foreach ($salesrepAccountIDs as $k=>$v){
+	$accountIds .= "'".$v['account']."', ";
+    }
+    $accountIds = rtrim($accountIds, ', ');
+    return $accountIds;
+}
+/**
+ * Get Account Status Count By account number
+ * @param type $db
+ * @param type $account
+ * @param type $Guid_status
+ * @return type
+ */
+function getAccountStatusCount($db, $account, $Guid_status ){
+    $q = "SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l "
+	. "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
+	. "WHERE l.Guid_status =:Guid_status AND l.account=:account AND u.marked_test='0'";
+
+    $result = $db->row($q, array('account'=>$account,'Guid_status'=>$Guid_status));
+    return $result['count'];
+}
+/**
+ * Get Slasrep Status count By Guid salesrep
+ * @param type $db
+ * @param type $Guid_salesrep
+ * @param type $Guid_status
+ * @return type
+ */
+function getSalesrepStatusCount($db, $Guid_salesrep, $Guid_status ){
+    $q = "SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l "
+	. "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
+	. "WHERE l.Guid_status =:Guid_status AND l.Guid_salesrep=:Guid_salesrep AND u.marked_test='0'";
+
+    $result = $db->row($q, array('Guid_salesrep'=>$Guid_salesrep,'Guid_status'=>$Guid_status));
+    return $result['count'];
+}
+/**
+ * Get Device Status count By Guid_salesrep
+ * @param type $db
+ * @param type $Guid_salesrep
+ * @param type $Guid_status
+ * @return type
+ */
+function getDeviceStatusCount($db, $Guid_salesrep, $Guid_status ){
+    $q = "SELECT COUNT(*) AS `count` FROM `tbldeviceinv` d "
+	. "LEFT JOIN `tbl_mdl_status_log` l ON d.Guid_salesrep=l.Guid_salesrep "
+	. "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
+	. "WHERE l.Guid_status =:Guid_status AND l.Guid_salesrep=:Guid_salesrep AND u.marked_test='0'";
+
+    $result = $db->row($q, array('Guid_salesrep'=>$Guid_salesrep,'Guid_status'=>$Guid_status));
+    return $result['count'];
+}
+/**
+ * Ge provider Status count by given account id
+ * @param type $db
+ * @param type $account
+ * @param type $Guid_status
+ * @return type
+ */
+function getProviderStatusCount($db, $account, $Guid_provider, $Guid_status ){
+    $q = "SELECT COUNT(*) AS `count` FROM `tblprovider` p "
+	. "LEFT JOIN `tbl_mdl_status_log` l ON p.account_id=l.account "
+	. "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
+	. "WHERE l.Guid_status =$Guid_status "
+	. "AND p.Guid_provider=$Guid_provider "
+	. "AND l.account=$account "
+	. "AND u.marked_test='0' "
+	. " ";
+
+    $result = $db->row($q, array('account'=>$account,'Guid_provider'=>$Guid_provider, 'Guid_status'=>$Guid_status));
+    return $result['count'];
+}
+
+
 
 function getProviderSalesRep($db, $providerID) {
     $query = "SELECT
@@ -1247,7 +1327,12 @@ function get_nested_status_ids($db, $Guid_status, $Guid_user, $Log_group) {
 
 
 function get_selected_log_dropdown($db, $Log_group, $parent="0") {
-    $selectedStatuses = $db->query("SELECT Guid_status FROM tbl_mdl_status_log WHERE `Log_group`= ".$Log_group);
+    $selectedStatuses = $db->query(
+		"SELECT sl.Guid_status, st.status, st.parent_id FROM tbl_mdl_status_log sl "
+		. " LEFT JOIN tbl_mdl_status st ON st.Guid_status=sl.Guid_status"
+		. " WHERE `Log_group`= ".$Log_group
+		. " ORDER BY st.parent_id ASC, st.order_by ASC"
+    );
     $content = "";
     foreach ($selectedStatuses as $k => $v){
 	$getParent = $db->row("SELECT parent_id FROM tbl_mdl_status WHERE Guid_status=:Guid_status", array('Guid_status'=>$v['Guid_status']));
@@ -1620,7 +1705,7 @@ function get_status_table_rows($db, $parent = 0, $searchData=array()) {
 		}
 		$content .= "<tr id='".$status['Guid_status']."' class='parent ".$optionClass."'>";
 		$content .= "<td class='text-left'><span>".$status['status'].'</span></td>';
-		$content .= '<td><a target="_blank" href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].$filterUrlStr.'">'.$stats['count'].'</a></td>';
+		$content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].$filterUrlStr.'">'.$stats['count'].'</a></td>';
 		if ( !empty($checkCildren) ) {
 		    $content .= get_status_child_rows( $db, $status['Guid_status'], "&nbsp;", $searchData );
 		}
@@ -1647,7 +1732,7 @@ function get_status_child_rows($db, $parent = 0,  $level = '', $searchData=array
 		}
 		$content .= "<tr id='".$status['Guid_status']."' data-parent-id='".$parent."' class='sub ".$optionClass."'>";
 		$content .= "<td class='text-left'><span>".$level . " " .$status['status'].'</span></td>';
-		$content .= '<td><a target="_blank" href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].'&parent='.$parent.$filterUrlStr.'">'.$stats['count']. '</a></td>';
+		$content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].'&parent='.$parent.$filterUrlStr.'">'.$stats['count']. '</a></td>';
 		if ( !empty($checkCildren) ) {
 		    $prefix .= '&nbsp;';
 		    $content .= get_status_child_rows( $db, $status['Guid_status'], $level . "&nbsp;" );
@@ -1917,11 +2002,14 @@ function getRevenueStat($db, $Guid_user){
  * @return type array
  */
 function getStatusRevenueTotals($db, $Guid_status, $searchData=array()){
-    $usersQ = "SELECT * FROM `tbl_mdl_status_log` sl LEFT JOIN tbl_mdl_number mn ON sl.Guid_user=mn.Guid_user ";
+    $usersQ = "SELECT sl.*, mn.mdl_number FROM `tbl_mdl_status_log` sl "
+	    . "LEFT JOIN tbl_mdl_number mn "
+	    . "ON sl.Guid_user=mn.Guid_user ";
 
-    $usersQ .= " WHERE Guid_status=$Guid_status AND currentstatus='Y' ";
+    $usersQ .= " WHERE sl.Guid_status=:Guid_status AND sl.currentstatus='Y' ";
 
     if(!empty($searchData)){
+
 	//adding filter conditions
 	if(isset($searchData['Guid_salesrep'])&&$searchData['Guid_salesrep']!=""){
 	    $usersQ .= 'AND sl.Guid_salesrep='.$searchData['Guid_salesrep'].' ';
@@ -1941,16 +2029,18 @@ function getStatusRevenueTotals($db, $Guid_status, $searchData=array()){
 	}
     }
 
-
-    $users = $db->query($usersQ);
+    $users = $db->query($usersQ, array('Guid_status'=>$Guid_status, ));
 
     $patientTotal = 0;
     $insuranceTotal = 0;
     $total = 0;
     $revenueTotalsData = array();
     if(!empty($users)){
+
 	foreach ($users as $user){
+
 	    $revenuDetails = getRevenueStat($db, $user['Guid_user']);
+
 	    if(!empty($revenuDetails)){
 		$patientTotal += $revenuDetails['patient_paid'];
 		$insuranceTotal += $revenuDetails['insurance_paid'];

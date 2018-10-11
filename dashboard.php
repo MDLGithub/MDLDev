@@ -231,7 +231,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 			    <select id="location" name="location" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['location'])) && (strlen($_POST['location']))) ? "" : "no-selection"; ?>">
 				<option value="">Location</option>
 				<?php
-				$locations = $db->query("SELECT description FROM tblsource");
+				$locations = $db->query("SELECT description FROM tblsource ORDER BY description ASC");
 
 				foreach ($locations as $location) {
 				    ?>
@@ -252,14 +252,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 			<label class="dynamic" for="salesrep"><span>Genetic Consultant</span></label>
 
 			<div class="group">
-			    <select id="salesrep" name="salesrep" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrep'])) && (strlen($_POST['salesrep']))) ? "" : "no-selection"; ?>">
+			    <select id="salesrep" name="Guid_salesrep" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['Guid_salesrep'])) && (strlen($_POST['Guid_salesrep']))) ? "" : "no-selection"; ?>">
 				<option value="">Genetic Consultant</option>
 				<?php
 				$salesreps = $db->query("SELECT * FROM tblsalesrep GROUP BY first_name");
 
 				foreach ($salesreps as $salesrep) {
 				    ?>
-				    <option value="<?php echo $salesrep['Guid_user']; ?>"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrep']) && ($_POST['salesrep'] == $salesrep['Guid_user'])) ? " selected" : ""); ?>><?php echo $salesrep['first_name']." ".$salesrep['last_name']; ?></option>
+				    <option value="<?php echo $salesrep['Guid_salesrep']; ?>"<?php echo ((!isset($_POST['clear'])) && (isset($_POST['Guid_salesrep']) && ($_POST['Guid_salesrep'] == $salesrep['Guid_salesrep'])) ? " selected" : ""); ?>><?php echo $salesrep['first_name']." ".$salesrep['last_name']; ?></option>
 				    <?php
 				}
 				?>
@@ -278,15 +278,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 		</div>
 		<?php } ?>
 
-		<!-- <fieldset class="cbox">
-		     <label for="auto_apply">
-			 <input id="auto_apply" type="checkbox" checked>
-			 <strong>Auto Apply</strong>
-		     </label>
-		 </fieldset> -->
+
 
 		<button id="filter" value="1" name="search" type="submit" class="button filter half"><strong>Search</strong></button>
-		<button type="submit" name="clear" class="button cancel half"><strong>Clear</strong></button>
+		<a href="<?php ?>" class="button cancel half"><strong>Clear</strong></a>
 	    </form>
 	    <!--********************   SEARCH BY PALETTE END    ******************** -->
 
@@ -308,9 +303,16 @@ if(isset($_POST['mark_as_test'])){
     }
 }
 
-$sqlTbl  =  "SELECT q.*, p.*, u.email, u.marked_test, q.Date_created AS date FROM tbl_ss_qualify q "
-	    . "LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user "
-	    . "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user";
+$sqlTbl = "SELECT q.*, p.*, "
+	. "a.name as account_name, "
+	. "CONCAT (srep.first_name, ' ', srep.last_name) AS salesrep_name, srep.Guid_salesrep, "
+	. "u.email, u.marked_test,  u.Guid_role, "
+	. "q.Date_created AS date FROM tbl_ss_qualify q "
+	. "LEFT JOIN tblaccount a ON q.account_number = a.account "
+	. "LEFT JOIN tblaccountrep arep ON arep.Guid_account = a.Guid_account "
+	. "LEFT JOIN tblsalesrep srep ON srep.Guid_salesrep = arep.Guid_salesrep "
+	. "LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user "
+	. "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user";
 $where = "";
 $whereTest = (strlen($where)) ? " AND " : " WHERE ";
 $whereTest .= " u.marked_test='0' ";
@@ -321,7 +323,7 @@ $whereIncomplete  = "";
 if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
 
     $where = "";  $whereTest = "";  $whereIncomplete  = "";
-
+    //Marked as test
     if (isset($_POST['mark_test']) && strlen($_POST['mark_test'])) {
 	$whereTest = (strlen($where)) ? " AND " : " WHERE ";
 	$whereTest .= " u.marked_test = '1'";
@@ -330,21 +332,7 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
 	$whereTest .= " u.marked_test = '0'";
     }
 
-    if (isset($_POST['meets_mn']) && strlen($_POST['meets_mn'])) {
-	$whereTest = "";
-	if($_POST['meets_mn']=='incomplete'){
-	    $sqlTbl  = "SELECT q.*,p.*, u.email, u.marked_test, q.Date_created AS `date`, '1' AS incomplete FROM tblqualify q
-			LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user
-			LEFT JOIN tbluser u ON p.Guid_user = u.Guid_user";
-	    $where = " WHERE NOT EXISTS(SELECT * FROM tbl_ss_qualify qs WHERE q.Guid_qualify=qs.Guid_qualify) AND u.marked_test='0'";
-
-	}else{
-	    $where = (strlen($where)) ? " AND " : " WHERE ";
-	    $where .= " q.qualified = '" . $_POST['meets_mn'] . "'";
-	}
-    }
-
-    //if (isset($_POST['date_rng'])) {
+    //From date - To Date range
     if (strlen($_POST['from_date']) && strlen($_POST['to_date'])) {
 	if ($_POST['from_date'] == $_POST['to_date']) {
 	    $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
@@ -354,33 +342,42 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
 	    $where .= " q.Date_created BETWEEN '" . date("Y-m-d", strtotime($_POST['from_date'])) . "' AND '" . date("Y-m-d", strtotime($_POST['to_date'])) . "'";
 	}
     }
+    //Medical Necessity
+    if (isset($_POST['meets_mn']) && strlen($_POST['meets_mn'])) {
+	$whereTest = "";
+	if($_POST['meets_mn']=='incomplete'){
+	    $sqlTbl  = "SELECT q.*,p.*, a.name as account_name,
+			CONCAT (srep.first_name, ' ', srep.last_name) AS salesrep_name, srep.Guid_salesrep,
+			u.email, u.marked_test, u.Guid_role, q.Date_created AS `date`,
+			'1' AS incomplete FROM tblqualify q
+			LEFT JOIN tblaccount a ON q.account_number = a.account
+			LEFT JOIN tblaccountrep arep ON arep.Guid_account = a.Guid_account
+			LEFT JOIN tblsalesrep srep ON srep.Guid_salesrep = arep.Guid_salesrep
+			LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user
+			LEFT JOIN tbluser u ON p.Guid_user = u.Guid_user";
+	    $where = " WHERE NOT EXISTS(SELECT * FROM tbl_ss_qualify qs WHERE q.Guid_qualify=qs.Guid_qualify) AND u.marked_test='0'";
 
+	}else{
+	    $where = (strlen($where)) ? " AND " : " WHERE ";
+	    $where .= " q.qualified = '" . $_POST['meets_mn'] . "'";
+	}
+    }
+    //First Name
     if (isset($_POST['first_name']) && strlen(trim($_POST['first_name']))) {
 	$where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
-	$where .= " p.firstname = '" . $_POST['first_name'] . "'";
+	$where .= " p.firstname LIKE '%" . $_POST['first_name'] . "%'";
     }
-
+    //Last Name
     if (isset($_POST['last_name']) && strlen(trim($_POST['last_name']))) {
 	$where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
-	$where .= " p.lastname = '" . $_POST['last_name'] . "'";
+	$where .= " p.lastname LIKE '%" . $_POST['last_name'] . "%'";
     }
-
+    //Insurance
     if (isset($_POST['insurance']) && strlen($_POST['insurance'])) {
 	$where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
 	$where .= " q.insurance = '" . $_POST['insurance'] . "'";
     }
-
-    if (isset($_POST['provider']) && strlen($_POST['provider'])) {
-	$where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
-	$where .= " q.provider_id = '" . $_POST['provider'] . "'";
-    }
-
-    if (isset($_POST['location']) && strlen($_POST['location'])) {
-	$where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
-	$where .= " q.source = '" . $_POST['location'] . "'";
-    }
-
-
+    //Account
     if (isset($_POST['account']) && strlen($_POST['account'])) {
 	$where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
 	$where .= " q.account_number = '" . $_POST['account'] . "'";
@@ -388,6 +385,22 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
 	$where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
 	$where .= " q.account_number IN (" . $default_account . ")";
     }
+    //Provider
+    if (isset($_POST['provider']) && strlen($_POST['provider'])) {
+	$where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
+	$where .= " q.provider_id = '" . $_POST['provider'] . "'";
+    }
+    //Location
+    if (isset($_POST['location']) && strlen($_POST['location'])) {
+	$where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
+	$where .= " q.source = '" . $_POST['location'] . "'";
+    }
+    //Genetic Consultant
+    if (isset($_POST['Guid_salesrep']) && strlen($_POST['Guid_salesrep'])) {
+	$where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
+	$where .= " srep.Guid_salesrep = '" . $_POST['Guid_salesrep'] . "'";
+    }
+
 
     $postAccount = isset($_POST['account']) ? $_POST['account'] : "";
     if ((isset($role) && $role == "Sales Rep") && (!strlen($postAccount))) {
@@ -397,10 +410,10 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
 }
 
 if($role == 'Physician'){
-    $physicianInfo = $db->row('SELECT Guid_provider FROM tblprovider WHERE Guid_user='.$userID);
-    $physicianID = $physicianInfo['Guid_provider'];
+    $physicianInfo = $db->row('SELECT account_id FROM tblprovider WHERE Guid_user='.$userID);
+    $account_id = $physicianInfo['account_id'];
     $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
-    $where .= " q.provider_id='".$physicianID."'";
+    $where .= " q.account_number IN (" . $account_id . ")";
 }
 
 $where  .= " AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%test%' "
@@ -413,8 +426,9 @@ if( !(isset($_POST['meets_mn']) && $_POST['meets_mn']=='incomplete')){
 
 
 if($role == "Sales Rep"){
-
-
+    $salesrepInfo = $db->row('SELECT Guid_salesrep FROM tblsalesrep WHERE Guid_user='.$userID);
+    $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
+    $where .= " srep.Guid_salesrep = '" . $salesrepInfo['Guid_salesrep'] . "'";
 }
 
 $sqlTbl .= $whereTest;
@@ -423,8 +437,7 @@ $sqlTbl .= $where;
 
 //$sqlTbl .= " GROUP BY p.Guid_user";
 $sqlTbl .= " ORDER BY date DESC";
-
-// print_r($sqlTbl);
+//var_dump($sqlTbl);
 
 $qualify_requests = $db->query($sqlTbl);
 
@@ -439,6 +452,7 @@ $num_estimates = $qualify_requests;
 	<section id="palette_top" class="shorter_palette_top">
 	    <h4><?php echo count($num_estimates) . " Results"; ?></h4>
 	    <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>
+	    <a href="<?php echo SITE_URL; ?>/dashboard2.php" class="button homeIcon"></a>
 	    <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit smaller_button"><strong>View Questionnaire</strong></a>
 	</section>
 
@@ -487,7 +501,7 @@ $num_estimates = $qualify_requests;
 		<?php } ?>
 	    </div>
 
-	    <form id="patient_information" action="" method="post">
+	    <form id="patient_information" action="" method="post" class="<?php echo $role."_table";?>">
 
 		<div class="actions">
 		    <button class="btn-styled btn-home" id="bulkPrint"><i class="fas fa-print"></i> Print Selected</button>
@@ -560,23 +574,21 @@ $num_estimates = $qualify_requests;
 				    $provider_name = "";
 				}
 			    }
-			    if(isset($qualify_request['account_number'])&&$qualify_request['account_number']!=""){
-				$q = "SELECT CONCAT(sr.first_name, ' ', sr.last_name) AS name FROM tblaccount a LEFT JOIN tblaccountrep ar ON a.Guid_account=ar.Guid_account LEFT JOIN tblsalesrep sr ON ar.Guid_salesrep = sr.Guid_salesrep WHERE a.account = '" . $qualify_request['account_number'] . "'";
-
-				$salesrep = $db->row($q);
-				$salesrep = $salesrep['name'];
-			    } else {
-				$salesrep = "";
-			    }
 			    $isIncomplete=FALSE;
 			    $dataPrintable = "1";
 			    if(isset($qualify_request['incomplete'])){
 				$isIncomplete=TRUE;
 				$dataPrintable = '2';
 			    }
+			    $trClass='';
+			    $trClass = ($qualify_request['marked_test']=='1')?' marked_test':'';
+			    if($qualify_request['Guid_role']=='6'){
+				$trClass = ' mdl_patient';
+			    }
 		    ?>
-			    <tr data-id="<?php //echo $estimate_request['Guid_brcaestimate']; ?>" class="t_row">
-				    <td class="printSelectBlock text-center">
+			    <tr class="t_row <?php echo $trClass; ?>">
+
+				<td class="printSelectBlock text-center">
 					<?php if(isset($qualify_request['qualified']) && $qualify_request['qualified']=='Unknown'){ ?>
 					    <input name="markedRow[user][<?php echo $qualify_request['Guid_user']; ?>]" type="checkbox" class="print1 report1" data-prinatble="0" data-selected_questionnaire="<?php echo $qualify_request['Guid_qualify']; ?>" data-selected_date="<?php echo $qualify_request['date']; ?>" />
 					<?php } else { ?>
@@ -600,28 +612,36 @@ $num_estimates = $qualify_requests;
 				    ?>
 				    <?php if(isFieldVisibleByRole($roleIDs['first_name']['view'], $roleID)) {?>
 					<td>
-					    <a target="_blank" href="<?php echo SITE_URL."/patient-info.php?patient=".$qualify_request['Guid_user'].$accountStr.$incompleteStr; ?>">
-					    <?php echo ucfirst($qualify_request['firstname']); ?>
+					    <a href="<?php echo SITE_URL."/patient-info.php?patient=".$qualify_request['Guid_user'].$accountStr.$incompleteStr; ?>">
+					    <?php echo ucfirst(strtolower($qualify_request['firstname'])); ?>
 					    </a>
 					</td>
 				    <?php } ?>
 				    <?php if(isFieldVisibleByRole($roleIDs['last_name']['view'], $roleID)) {?>
 					<td>
-					    <a target="_blank" href="<?php echo SITE_URL."/patient-info.php?patient=". $qualify_request['Guid_user'].$accountStr.$incompleteStr; ?>">
-						<?php echo ucfirst($qualify_request['lastname']); ?>
+					    <a href="<?php echo SITE_URL."/patient-info.php?patient=". $qualify_request['Guid_user'].$accountStr.$incompleteStr; ?>">
+						<?php echo ucfirst(strtolower($qualify_request['lastname'])); ?>
 					    </a>
 					</td>
 				    <?php } ?>
 
 				    <?php if(isFieldVisibleByRole($roleIDs['account']['view'], $roleID)) {?>
-					<td><?php echo ($qualify_request['account_number']!="" && !is_null($qualify_request['account_number']) && $qualify_request['account_number']!="NULL")?$qualify_request['account_number']:""; ?></td>
+					<td class="tdAccount"><?php
+					    if( $qualify_request['account_number']!="" && !is_null($qualify_request['account_number']) && $qualify_request['account_number']!="NULL"){
+						echo $qualify_request['account_number'];
+						if($qualify_request['account_name']!=""){
+						echo "<span class='account_name'>".ucwords(strtolower($qualify_request['account_name']))."</span>";
+						}
+					    }
+					    ?>
+					</td>
 				    <?php } ?>
 
 				    <?php if(isFieldVisibleByRole($roleIDs['location']['view'], $roleID)) {?>
 					<td><?php echo $qualify_request['source']; ?></td>
 				    <?php } ?>
 				    <?php if(isFieldVisibleByRole($roleIDs['salesrep']['view'], $roleID)) {?>
-					<td><?php echo $salesrep ? $salesrep : ''; ?></td>
+					<td><?php echo $qualify_request['salesrep_name']; ?></td>
 				    <?php } ?>
 				    <?php if(isFieldVisibleByRole($roleIDs['salesrep']['view'], $roleID)) {?>
 					<td class="mn">
@@ -670,5 +690,23 @@ $num_estimates = $qualify_requests;
 			]
 		    });
     }
+
+    jQuery.fn.dataTableExt.oSort['uk_date-pre']  = function(a) {
+	a = a.slice(0, -2) + ' ' + a.slice(-2);
+	var date = Date.parse(a);
+	return typeof date === 'number' ? date : -1;
+    }
+    jQuery.fn.dataTableExt.oSort['uk_date-asc']  = function(a,b) {
+	return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+    }
+    jQuery.fn.dataTableExt.oSort['uk_date-desc'] = function(a,b) {
+	return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+    }
+
+    var table = $('#example').DataTable({
+	aoColumns: [
+	  { sType: 'uk_date' }
+	]
+    });
 </script>
 <?php require_once 'footer.php'; ?>

@@ -466,7 +466,7 @@ th.zip input{
     display: inline-block;
 }
 .selectAccountBlock #selectAccount{
-    width: 90%;
+    width: 80%;
     float: left;
     margin-bottom: 10px;
 }
@@ -474,6 +474,8 @@ th.zip input{
     font-size: 22px;
     margin-left: 15px;
     margin-top: 5px;
+    width: 15%;
+    float: left;
 }
 
 .modalBlock{
@@ -731,13 +733,23 @@ input:checked + .slider:before {
 /****** Gabby Johnson *********/
 
 .form-control textarea{
-	height: 42px!important;
+    height: 42px!important;
 }
+
 .role_tables p{
     padding: 10px 20px;
 }
 textarea.form-control {
     height: 42px!important;
+}
+.f2 .group.fullWidth{
+    padding: 0!important;
+    width: 100%!important;
+}
+.fullWidth textarea.form-control{
+    height: auto!important;
+    border: 2px solid #b9b9b9;
+    border-radius: .438em;
 }
 .addPlusIconBox{
     margin-top: 15px;
@@ -755,6 +767,9 @@ textarea.form-control {
 }
 #app_data > form#patient_information{
     display: block!important;
+}
+#app_data > form#patient_information.Physician_table{
+    height: 86%;
 }
 .error#message{
     font-weight: bold;
@@ -1043,6 +1058,12 @@ and (orientation : landscape) {
 	margin-top:-4.5px;
     }
 
+
+    #app_data .url_config_box input[type='radio'], input[type='radio']:checked{
+
+	height:18px;
+    }
+
 }
 
 /*iPad portrait*/
@@ -1124,6 +1145,13 @@ and (orientation : portrait) {
 	width:165%;
     }
 
+    #app_data .url_config_box input[type='radio'], input[type='radio']:checked{
+
+	height:18px;
+    }
+
+
+
 }
 
 /* iPad Pro Landscape */
@@ -1156,6 +1184,13 @@ and (orientation : portrait) {
 	width: 93% !important;
     }
 
+    #app_data .url_config_box input[type='radio'], input[type='radio']:checked{
+
+	height:30px;
+    }
+
+
+
 }
 
 
@@ -1176,7 +1211,9 @@ and (orientation : portrait) {
     }
 
     #dataTableHome tbody{
-	margin-top:20px;
+
+	margin-top: 60px;
+
     }
 
     #dataTableHome tbody td {
@@ -1190,6 +1227,17 @@ and (orientation : portrait) {
 
     .wider-bar{
 	width: 93%!important;
+    }
+
+    #app_data .url_config_box  div.col-md-7 .col-md-6:nth-child(1){
+	    padding-right: 0px;
+	    padding-left: 22px;
+    }
+
+
+    #app_data .url_config_box input[type='radio'], input[type='radio']:checked{
+
+	height:18px;
     }
 
 }
@@ -1528,12 +1576,6 @@ table.valignTop td{
     margin: 0 auto;
 }
 
-tr.mdl_patient{
-    background: #ffa7a7!important;
-}
-tr.marked_test{
-    background: #eaff75!important;
-}
 table.dataTable.display tbody tr:hover>.sorting_1,
 table.dataTable.order-column tbody tr>.sorting_1,
 table.dataTable.order-column tbody tr>.sorting_2,
@@ -1542,4 +1584,231 @@ table.dataTable.display tbody tr>.sorting_1,
 table.dataTable.display tbody tr>.sorting_2,
 table.dataTable.display tbody tr>.sorting_3{
     background: none!important;
+}
+/*.homeIcon{
+    background: rgba(255,255,255,0.34) url(../images/house_icon.png) center center no-repeat !important;
+    width: 23px;
+    height: 38px;
+    padding: 0 1.5em!important;
+    margin-left: 5px;
+}*/
+#urlLink{
+    font-size: 18px;
+    font-weight: bold;
+}
+td.tdAccount{
+    position: relative;
+    cursor: pointer;
+}
+td.tdAccount .account_name {
+    position: absolute;
+    left:0;
+    top: 36px;
+    background: #dee3e8;
+    width: max-content;
+    z-index: 1000;
+    padding: 3px 10px;
+    display: none;
+
+}
+td.tdAccount .account_name:after{
+  content: " ";
+  position: absolute;
+  left: 15px;
+  top: -6px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 10px 8px 10px;
+  border-color: transparent transparent #dee3e8 transparent;
+}
+td.tdAccount:hover .account_name{
+    display: block;
+}
+.select_device_dropdown{
+    padding-left:0px !important;
+}
+.colorBox{
+    display: inline-block;
+    width: 100%;
+}
+.colorBox input[type='radio']{
+    float: left;
+    margin-top: 8px;
+    margin-right: 3px;
+    display: none;
+}
+.colorBox {
+    padding: 10px;
+    background: #f2f2f2;
+    border: 2px solid #bac5c5;
+    border-radius: 7px;
+    display: none;
+}
+.colorBox label{
+    margin-bottom: 0;
+    margin-left: 5px;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+.colorBox label.checked,
+.colorBox label:hover{
+    border: 2px solid #000;
+}
+.colorBox .item{
+  display: inline-block;
+  padding: 0;
+  border: 0;
+}
+.fa-user-lock{
+    color: #f00;
+    cursor: pointer;
+}
+#login-attempt-log-box{
+    display: none;
+}
+#locked-user-email{
+    color: #f00;
+    font-size: 13px;
+    text-align: center;
+    font-style: italic;
+}
+#delete-marked-test-users{
+    color: #bd4646;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-weight: bold;
+}
+.user-managemnet-bg .admin{
+    color: #b1ffcd;
+}
+.user-managemnet-bg .mdl_patient{
+    color: #b186fd;
+}
+.user-managemnet-bg .marked_test{
+    color: #ffc747;
+}
+.user-managemnet-bg .salesrep{
+    color: #eab8d9;
+}
+.user-managemnet-bg .provider{
+    color: #b5d1f3;
+}
+
+tr.admin{
+    background: #b1ffcdba!important;
+}
+tr.salesrep{
+    background: #eab8d9ba!important;
+}
+tr.provider{
+    background: #b5d1f3ba!important;
+}
+tr.mdl_patient{
+    background: #b186fdba!important;
+}
+tr.marked_test{
+    background: #ffc747ba!important;
+}
+table.dataTable th{
+	box-sizing: border-box!important;
+}
+td.clickable{
+    position: relative;
+}
+td.clickable .details{
+    cursor: pointer;
+}
+td.clickable .moreInfo:after{
+    content: " ";
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 15px 10px 15px 0;
+    border-color: transparent #c7cdda transparent transparent;
+    position: absolute;
+    top: 0;
+    left: -10px;
+}
+td.clickable .moreInfo{
+    display: none;
+    position: absolute;
+    top: 3px;
+    left: 70px;
+    background: #eee;
+    width: 360px;
+    z-index: 100;
+    border: 1px solid #c7cdda;
+}
+td.clickable .moreInfo .content{
+    position: relative;
+    padding-top: 20px;
+    box-shadow: 0 2px 5px rgb(177, 189, 200);
+}
+td.clickable .moreInfo .content>p{
+    padding: 0 20px;
+}
+td.clickable .moreInfo .content label{
+    min-width: 80px;
+    padding-right: 5px;
+}
+td.clickable .moreInfo .close{
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+    top: 0;
+    color: #fff;
+    width: 20px;
+    height: 20px;
+    background: #bd2b2b;
+    text-align: center;
+    line-height: 1.5;
+    font-weight: bold;
+}
+.status_chart{
+    padding: 10px 0;
+    background: #eee;
+    border: 1px solid #d3d3d3;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 14px;
+}
+.status_chart span{
+    border-right: 1px solid #999;
+    display: inline-block;
+    padding: 0 5px 0 2px;
+    line-height: 1;
+}
+.status_chart span:last-child{
+     border-right: none;
+}
+a.button.cancel.half{
+    display: inline-table;
+    float: right;
+}
+.homeIcon {
+    background-image: url(../images/house_icon.png) !important;
+    width: 23px;
+    height: 38px;
+    padding: 0 1.5em!important;
+    margin-left: 5px;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+}
+.openColorBox .fas{
+    margin-top: 5px;
+}
+.openColorBox{
+    width: 100%;
+    padding: 5px 19px;
+    font-weight: 600;
+    border: 2px solid #bac5c5;
+    border-radius: 7px;
+    line-height: 1.6;
+    cursor: pointer;
+    width: 100%;
+    height: 2.3em;
+    max-width: 100%;
 }

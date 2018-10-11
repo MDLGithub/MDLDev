@@ -26,7 +26,7 @@ $userTables = array(
     'salesrepmgr'=>'tblsalesrep',
     'provider'=>'tblprovider'
 );
-$selectQ = "";$adminQ="";$patientsQ="";$salesrepsQ="";$providersQ="";
+$selectQ = "";$adminQ="";$patientsQ="";$mdlpatientsQ="";$salesrepsQ="";$salesrepsMgrQ="";$providersQ="";
 
 foreach ($userTables as $k=>$v){
     $thisTable = $v;
@@ -82,6 +82,26 @@ foreach ($userTables as $k=>$v){
 	if(isset($_POST['marked_test']) && $_POST['marked_test']=="1"){
 	    $selectQ .= " AND u.marked_test = '1'";
 	}
+	if(isset($_POST['locked_users']) && $_POST['locked_users']=="1"){
+	    //$getLockedEmails = checkbrute($user['email'], $db);
+	    $now = time();
+	    $valid_attempts = $now - (2 * 60 * 60);
+	    $attemptsQ = "SELECT email FROM tbluser_login_attempts WHERE time > '$valid_attempts' GROUP BY `email`";
+	    $lockedEmails = $db->query($attemptsQ);
+	    $emails = '';
+	    //var_dump($lockedEmails);
+	    if(!empty($lockedEmails)){
+		foreach ($lockedEmails as $key=>$val){
+		    $emails .= "'".$val['email']."', ";
+		}
+		$emails = rtrim($emails, ', ');
+	    }
+	    if($emails){
+		$selectQ .= " AND u.email IN(".$emails.")";
+	    } else {
+		$selectQ = "";
+	    }
+	}
     }
 
     if($k=='admin'){
@@ -97,16 +117,21 @@ foreach ($userTables as $k=>$v){
     } elseif ($k=='provider') {
 	$providersQ = $selectQ;
     }
+
 }
 
-$query1 = ($adminQ!="")?$db->query($adminQ):array();
-$query2 = ($patientsQ!="")?$db->query($patientsQ):array();
-$query3 = ($mdlpatientsQ!="")?$db->query($mdlpatientsQ):array();
-$query4 = ($salesrepsQ!="")?$db->query($salesrepsQ):array();
-$query5 = ($salesrepsMgrQ!="")?$db->query($salesrepsMgrQ):array();
-$query6 = ($providersQ!="")?$db->query($providersQ):array();
+$query1 = (isset($adminQ) && $adminQ!="")?$db->query($adminQ):array();
+$query2 = (isset($patientsQ) && $patientsQ!="")?$db->query($patientsQ):array();
+$query3 = (isset($mdlpatientsQ) && $mdlpatientsQ!="")?$db->query($mdlpatientsQ):array();
+$query4 = (isset($salesrepsQ) && $salesrepsQ!="")?$db->query($salesrepsQ):array();
+$query5 = (isset($salesrepsMgrQ) && $salesrepsMgrQ!="")?$db->query($salesrepsMgrQ):array();
+$query6 = (isset($providersQ) && $providersQ!="")?$db->query($providersQ):array();
+
+
+
 
 $users = array_merge($query1,$query2,$query3,$query4,$query5,$query6);
+
 $thisMessage="";
 
 if(isset($_GET['delete-user']) && $_GET['delete-user']!=""){
@@ -197,10 +222,12 @@ require_once ('navbar.php');
 
 		<div>
 		    <input id="show-tests" name="marked_test" value="1" type="checkbox" <?php echo ((!isset($_POST['clear'])) && (isset($_POST['marked_test']) && ($_POST['marked_test'] == 1)) ? " checked" : ""); ?> />
-		    <label for="show-tests">Marked Test</label>
+		    <label for="show-tests">Marked As Test</label>
 		</div>
-
-
+		<div>
+		    <input id="locked_users" name="locked_users" value="1" type="checkbox" <?php echo ((!isset($_POST['clear'])) && (isset($_POST['locked_users']) && ($_POST['locked_users'] == 1)) ? " checked" : ""); ?> />
+		    <label for="locked_users">Locked Users</label>
+		</div>
 
 		<button id="filter" value="1" name="search" type="submit" class="button filter half"><strong>Search</strong></button>
 		<button type="submit" name="clear" class="button cancel half"><strong>Clear</strong></button>
@@ -233,20 +260,25 @@ require_once ('navbar.php');
 		</ol>
 	    </h4>
 	    <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>
+	    <a href="<?php echo SITE_URL; ?>/dashboard2.php" class="button homeIcon"></a>
 	    <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
 	</section>
 	<div class="scroller">
 	    <div class="row">
-		<div class="col-md-7">
-
-		</div>
-		<div class="col-md-5">
-		    <a class="add-new-button pull-right" href="<?php echo SITE_URL; ?>/user-management.php?action=add">
+		<div class="col-md-12">
+		    <a class="add-new-button" href="<?php echo SITE_URL; ?>/user-management.php?action=add">
 			<span class="fas fa-user-plus" aria-hidden="true"></span> Add
 		    </a>
-<!--                    <form action="" method="POST">
-			<button name="show-duplicates" type="submit" value="1" class="pull-right button  add-new-button"><i class="fas fa-clone"></i> Show User Duplicates</button>
-		    </form>-->
+		    <a id="delete-marked-test-users" class="add-new-button pull-right">
+			<span class="fas fa-history" ></span> Delete Test Users
+		    </a>
+		</div>
+		<div class="col-md-12 text-right user-managemnet-bg">
+		    <span class="admin">&#9726; Admin</span>
+		    <span class="salesrep">&#9726; Sales Rep</span>
+		    <span class="provider">&#9726; Physician</span>
+		    <span class="marked_test">&#9726; Test Users</span>
+		    <span class="mdl_patient">&#9726; MDL Patient</span>
 		</div>
 	    </div>
 	    <div class="row">
@@ -270,6 +302,15 @@ require_once ('navbar.php');
 			    if($user['marked_test']=='1'){
 				$trClass = "marked_test";
 			    }
+			    if($user['Guid_role']=='1'){
+				$trClass = "admin";
+			    }
+			    if($user['Guid_role']=='2'){
+				$trClass = "provider";
+			    }
+			    if($user['Guid_role']=='4' || $user['Guid_role']=='5'){
+				$trClass = "salesrep";
+			    }
 			    if($user['Guid_role']=='6'){
 				$trClass = "mdl_patient";
 			    }
@@ -281,11 +322,17 @@ require_once ('navbar.php');
 				<td><?php echo $user['email']; ?></td>
 				<td><?php echo isset($user['role'])?$user['role']:'Patient'; ?></td>
 				<td class="text-center fs-20">
-				    <?php if($user['status']=='1') {
-				       echo "<span class='fas fa-user-check mn yes'></span>";
-				    } else {
-					echo "<span class='fas fa-user-alt-slash mn no'></span>";
-				    }?>
+				    <?php
+					if (checkbrute($user['email'], $db) == true){
+					    echo "<span data-user-email='".$user['email']."' class='locked-user fas fa-user-lock'></span>";
+					} else {
+					    if($user['status']=='1') {
+						echo "<span class='fas fa-user-check mn yes'></span>";
+					    } else {
+						echo "<span class='fas fa-user-alt-slash mn no'></span>";
+					    }
+					}
+				    ?>
 				</td>
 				<td class="">
 				    <?php
@@ -301,7 +348,7 @@ require_once ('navbar.php');
 				    <a href="<?php echo SITE_URL; ?>/user-management.php?action=update<?php echo $editUrl; ?>">
 					<span class="fas fa-pencil-alt" aria-hidden="true"></span>
 				    </a>
-				    <?php if($user['marked_test']=='1'){?>
+				    <?php if($user['marked_test']=='1' && $user['Guid_role']!='6'){?>
 				    <a id="test-user" class="deleteUser" title="Remove User and History" data-user-id="<?php echo $user['Guid_user']; ?>" >
 					<span class="fas fa-trash" aria-hidden="true"></span>
 				    </a>
@@ -337,10 +384,14 @@ require_once ('navbar.php');
 	if(isset($_POST['password']) &&$_POST['password'] != ""){
 	    $userData['password'] = encode_password($password);
 	}
-	if(isset($_POST['marked_test']) && $_POST['marked_test'] != ""){
+	if(isset($_POST['mark_as_test']) && $_POST['mark_as_test'] != ""){
+	    $userData['marked_test'] = '1';
+	} else {
+	    $userData['marked_test'] = '0';
+	}
+	if(isset($_POST['last_name']) && $_POST['last_name']=='Doe'){
 	    $userData['marked_test'] = '1';
 	}
-
 	if(isset($Guid_role) && $Guid_role != ""){
 	    if($Guid_role=='1'){
 		$userData['user_type'] = 'admin';
@@ -434,7 +485,12 @@ require_once ('navbar.php');
 	if($_GET['action']=='add'){
 	    $allRoles = $db->query('SELECT * FROM tblrole ORDER BY role ASC');
 	}else{
-	    $allRoles = $db->query('SELECT * FROM tblrole WHERE Guid_role IN(1,4,5) ORDER BY role ASC');
+	    if(in_array($user['Guid_role'], array('1','4','5'))){ //Admin, Sales Rep, Sales mgr
+		$allRoles = $db->query('SELECT * FROM tblrole WHERE Guid_role IN(1,4,5) ORDER BY role ASC');
+	    }
+	    if(in_array($user['Guid_role'], array('3','6'))){ //Patient, MDL Patient
+		$allRoles = $db->query('SELECT * FROM tblrole WHERE Guid_role IN(3,6) ORDER BY role ASC');
+	    }
 	}
 	$patientID = isset($_GET['patient_id'])?$_GET['patient_id']:"";
 	$userDetails = getUserDetails($db, $user['role'], $userID, $patientID);
@@ -467,7 +523,7 @@ require_once ('navbar.php');
 		    <div class="f2 <?php echo ($first_name!="")?"valid show-label":"";?>">
 			<label class="dynamic" for="first_name"><span>First Name</span></label>
 			<div class="group">
-			    <input name="first_name" value="<?php echo $first_name; ?>" type="text" class="form-control" id="first_name" placeholder="First Name">
+			    <input autocomplete="off" name="first_name" value="<?php echo $first_name; ?>" type="text" class="form-control" id="first_name" placeholder="First Name">
 			    <p class="f_status">
 				<span class="status_icons"><strong>*</strong></span>
 			    </p>
@@ -476,13 +532,15 @@ require_once ('navbar.php');
 		    <div class="f2 <?php echo ($last_name!="")?"valid show-label":"";?>">
 			<label class="dynamic" for="last_name"><span>Last Name</span></label>
 			<div class="group">
-			    <input name="last_name" value="<?php echo $last_name; ?>" type="text" class="form-control" id="last_name" placeholder="Last Name">
+			    <input autocomplete="off" name="last_name" value="<?php echo $last_name; ?>" type="text" class="form-control" id="last_name" placeholder="Last Name">
 			    <p class="f_status">
 				<span class="status_icons"><strong>*</strong></span>
 			    </p>
 			</div>
 		    </div>
-		    <?php if( $_GET['action']=='add' || $user['role']=='Admin' || $user['role']=='Sales Rep' || $user['role']=='Sales Manager') { ?>
+		    <?php
+		    $rolesArr = array('Admin', 'Sales Rep', 'Sales Manager', 'Patient', 'MDL Patient');
+		    if( $_GET['action']=='add' || in_array($user['role'], $rolesArr)) { ?>
 		    <div class="f2 required <?php echo ($user['role']!="")?"valid show-label":"";?>">
 			<label class="dynamic" for="reason_not"><span>User Role</span></label>
 			<div class="group">
@@ -550,7 +608,7 @@ require_once ('navbar.php');
 		    <div class="f2 required <?php echo ($user['email']!="")?"valid show-label":"";?>">
 			<label class="dynamic" for="email"><span>Email</span></label>
 			<div class="group">
-			    <input required="" name="email" value="<?php echo $user['email']; ?>" type="text" class="form-control" id="email" placeholder="Email">
+			    <input autocomplete="off" required="" name="email" value="<?php echo $user['email']; ?>" type="text" class="form-control" id="email" placeholder="Email">
 			    <p class="f_status">
 				<span class="status_icons"><strong>*</strong></span>
 			    </p>
@@ -560,7 +618,7 @@ require_once ('navbar.php');
 		    <div class="f2 <?php echo $passRequred; ?> ">
 			<label class="dynamic" for="password"><span>Password</span></label>
 			<div class="group">
-			    <input <?php echo $passRequred; ?> name="password" type="password" class="form-control" id="password" placeholder="Password">
+			    <input autocomplete="off" <?php echo $passRequred; ?> name="password" type="password" class="form-control" id="password" placeholder="Password">
 			    <p class="f_status">
 				<span class="status_icons"><strong>*</strong></span>
 			    </p>
@@ -585,6 +643,25 @@ require_once ('navbar.php');
 			</div>
 		    </div>
 		    <?php } ?>
+		    <?php if(in_array($user['Guid_role'], array('3','6'))){  ?>
+		     <?php
+		     $checked = "";
+		     if(isset($_POST['mark_as_test'])){
+			 $checked = " checked";
+		     } else {
+			 if($user['marked_test']=='1'){
+			     $checked = " checked";
+			 }
+		     }
+		     ?>
+		    <div class="row">
+			<div class="col-md-12">
+			    <input <?php echo $checked; ?> <?php ?> id="show-tests" name="mark_as_test" value="1" type="checkbox">
+			    <label for="show-tests">Mark As Test</label>
+			</div>
+		    </div>
+		    <?php }  ?>
+
 		</div>
 	    </div>
 	    <div class="row actionButtons">
@@ -597,6 +674,28 @@ require_once ('navbar.php');
     </div>
 </div>
 <?php } ?>
+
+<!-- Unlock user and show logs modal Box -->
+<div id="login-attempt-log-box" class="modalBlock">
+    <div class="contentBlock">
+	<a class="close">X</a>
+	<h2 class="text-center">Login Attempts</h2>
+	<h2 id="locked-user-email" class="pB-10"></h2>
+	<table class="table">
+	    <thead>
+		<tr>
+		    <th>IP</th>
+		    <th>Time</th>
+		</tr>
+	    </thead>
+	    <tbody id="login-attempt-log-content">
+	    </tbody>
+	</table>
+	<div class="actions text-center">
+	    <button id="unlock-user" class="btn btn-primary">Unlock User</button>
+	</div>
+    </div>
+</div>
 
 <?php require_once('scripts.php');?>
 <script type="text/javascript">

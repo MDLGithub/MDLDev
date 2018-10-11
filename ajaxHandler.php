@@ -29,9 +29,6 @@ if(isset($_POST['save_specimen_not_collected_into_logs'])){
 if(isset($_POST['deleteUser'])){
     delete_user($db, $_POST['userType'], $_POST['Guid_user']);
 }
-if (isset($_POST['exportUsers'])) {
-    exportUsers($db);
-}
 if (isset($_POST['updateAccounts'])) {
     updateAccounts($db, $_POST['salesrep']);
 }
@@ -49,7 +46,34 @@ if (isset($_POST['date_type'])) {
 	case 'year':
 	    rangeYear();
 	    break;
+	}
+}
+if(isset($_POST['deleteMarkedTestUsers'])){
+    delete_marked_test_users($db);
+}
+if(isset($_POST['get_loced_user_data'])){
+    get_loced_user_log($db, $_POST['email']);
+}
+if(isset($_POST['unlock_this_user'])){
+    unlock_user($db, $_POST['email']);
+}
+if (isset($_POST['exportUsers'])) {
+    exportUsers($db);
+}
+function  unlock_user($db, $email){
+    deleteByField($db, 'tbluser_login_attempts', 'email',  $_POST['email']);
+    echo json_encode(array('delete'=>TRUE));
+}
+
+function get_loced_user_log($db, $email){
+    $userLoginLog = $db->query('SELECT ip, time FROM tbluser_login_attempts WHERE email=:email ORDER BY `time` DESC', array('email'=>$email));
+    $content = "";
+    foreach ($userLoginLog as $k=>$v){
+	$date = date('Y-m-d H:i:s', $v['time']);
+	$ip = $v['ip'];
+	$content.="<tr><td>".$ip."</td><td>".$date."</td></tr>";
     }
+    echo json_encode(array('content'=>$content));
 }
 
 /**
@@ -141,6 +165,95 @@ function delete_user($db, $type, $Guid_user){
     }
 
     echo json_encode(array('message'=>$arrMsg, '$Qualify'=>$Qualify, '$SSQualify'=>$SSQualify));
+    exit();
+}
+
+function delete_marked_test_users($db){
+
+    //tbl_ss_qualify
+    $SSQualifyQuery = "SELECT Guid_qualify, Guid_user FROM `tbl_ss_qualify` "
+	    . "WHERE Guid_user IN(SELECT Guid_user FROM `tbluser` WHERE marked_test='1')";
+    $SSQualify = $db->query($SSQualifyQuery);
+    $clinupSSQualifyTables = array(
+	'tbl_ss_qualifyfam',
+	'tbl_ss_qualifypers',
+	'tbl_ss_qualifyans',
+	'tbl_ss_qualifygene'
+    );
+    if(!empty($SSQualify)){
+	foreach ($SSQualify as $key=>$val){
+	    $Guid_qualify = $val['Guid_qualify'];
+	    foreach ($clinupSSQualifyTables as $k=>$thisTable){
+		$sql = "DELETE FROM $thisTable WHERE Guid_qualify=".$Guid_qualify;
+		if ($db->query($sql)) {
+		    $arrMsg[] = "#".$Guid_qualify." user from ".$thisTable." table deleted successfully.";
+		} else {
+		    $arrMsg[] = "Error deleting #".$Guid_qualify." user from ".$thisTable." table. ";
+		}
+	    }
+	}
+    }
+
+    //tblqualify
+    $qualifyQuery = "SELECT Guid_qualify, Guid_user FROM `tblqualify` "
+	    . "WHERE Guid_user IN(SELECT Guid_user FROM  `tbluser` WHERE marked_test='1')";
+    $Qualify = $db->row($qualifyQuery);
+    $clinupQualifyTables = array(
+	'tblqualifyfam',
+	'tblqualifypers',
+	'tblqualifyans',
+	'tblqualifygene',
+    );
+    if(!empty($Qualify)){
+	foreach ($Qualify as $key=>$val){
+	    if(isset($val['Guid_qualify'])){
+		$Guid_qualify = $val['Guid_qualify'];
+		foreach ($clinupQualifyTables as $k=>$thisTable){
+		    $sql = "DELETE FROM $thisTable WHERE Guid_qualify=".$Guid_qualify;
+		    if ($db->query($sql)) {
+			$arrMsg[] = "#".$Guid_qualify." user from ".$thisTable." table deleted successfully";
+		    } else {
+			$arrMsg[] = "Error deleting #".$Guid_qualify." user from ".$thisTable." table. ";
+		    }
+		}
+	    }
+	}
+    }
+
+    // Delete Marked Test Users
+    $arrMsg = array();
+    $cleanupTables = array(
+	'tbl_ss_qualify',
+	'tblqualify',
+	'tblurlconfig',
+	'tbl_deductable_log',
+	'tbl_mdl_note',
+	'tbl_mdl_number',
+	'tbl_revenue',
+	'tbl_mdl_status_log'
+    );
+
+    foreach ($cleanupTables as $k=>$thisTable){
+	$sql = "DELETE FROM $thisTable WHERE Guid_user "
+		. "IN(SELECT Guid_user FROM  `tbluser` WHERE marked_test='1')";
+	$delete =  $db->query($sql);
+	if ($delete) {
+	    $arrMsg[] = "Marked Test users from ".$thisTable." table deleted successfully";
+	} else {
+	    $arrMsg[] = "Error Marked Test users deleting from ".$thisTable." table. ";
+	}
+    }
+
+
+    //Delete patient
+    $deletePatient = $db->query("DELETE FROM tblpatient WHERE Guid_user "
+		. "IN(SELECT Guid_user FROM  `tbluser` WHERE marked_test='1' AND Guid_role<>'6')");
+
+    //delete from users table
+    $deleteUsers = $db->query("DELETE FROM `tbluser` WHERE marked_test='1' and Guid_role<>6");
+
+
+    echo json_encode(array('message'=>$arrMsg));
     exit();
 }
 
@@ -262,22 +375,28 @@ function save_specimen_into_logs($db, $date, $Guid_user, $account){
 function __status_dropdown($db, $parent) {
     $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
     $content = "";
+    $hasSub = "";
+    $statusID = "";
     if ( !empty($statuses) ) {
-    $content .= '<div class="f2  ">
+	$content .= '<div class="f2  ">
 		    <div class="group">
 			<select data-parent="'.$parent.'" required class="status-dropdown" name="status[]" id="">
 			   ';
-
+	$i = 1;
 	foreach ( $statuses as $status ) {
 	    $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
-
 	    $optionClass = '';
 	    if ( !empty($checkCildren) ) {
 		$optionClass = 'has_sub_menu';
+		if($i==1){//checking if first option has sub in order to generate next dropdown
+		    $hasSub = '1';
+		    $statusID = $status['Guid_status'];
+		}
 	    }
 	    $content .= "<option value='".$status['Guid_status']."' class='".$optionClass."'>".$status['status'];
 
 	    $content .= '</option>';
+	    $i++;
 	}
 
     $content .= "</select>";
@@ -286,7 +405,7 @@ function __status_dropdown($db, $parent) {
 			    </p></div></div>';
     }
 
-    echo json_encode( array('content'=>$content));
+    echo json_encode( array('content'=>$content, 'hasSub'=>$hasSub, 'statusID'=>$statusID));
     exit();
 }
 
@@ -576,34 +695,16 @@ function get_account_info($db, $accountId){
     echo json_encode( array('accountInfo'=>$acountInfo, 'providers'=>$providers) );  exit();
 }
 
-function updateAccounts($db, $salesrep) {
-    $query = "SELECT tblaccount.*
-	FROM tblsalesrep
-	LEFT JOIN `tblaccountrep` ON  tblsalesrep.Guid_salesrep = tblaccountrep.Guid_salesrep
-	LEFT JOIN `tblaccount` ON tblaccountrep.Guid_account = tblaccount.Guid_account
-	WHERE tblsalesrep.Guid_salesrep=:salesrep AND tblaccount.Guid_account IS NOT NULL";
-
-    $accounts = $db->query($query, array("salesrep"=>$salesrep));
-
-    $accountsHtml = '<option value="">Account</option>';
-    foreach ($accounts as $k=>$v){
-       $accountsHtml .= '<option value="'.$v['account'].'">'.$v['account'] ." - ". $v['name'].'</option>';
-    }
-
-    echo json_encode(['accounts_html' => $accountsHtml]);
-    exit();
-}
-
 function exportUsers($db) {
-    $testsSql = "SELECT q.Date_created AS date, CONCAT(srep.first_name, ' ', srep.last_name) as 'sales', mdl.mdl_number as 'mdl',
-    (SELECT MAX(sp.Date) FROM tbl_mdl_status_log sp WHERE sp.account = a.account AND sp.Guid_patient = p.Guid_patient AND sp.Guid_status = 2) as 'accessioned',
-    (SELECT MAX(trr.Date) FROM tbl_mdl_status_log trr WHERE trr.account = a.account AND trr.Guid_patient = p.Guid_patient AND trr.Guid_status = 22) as 'reported',
+    $tests = $db->query("SELECT q.Date_created AS date, CONCAT(srep.first_name, ' ', srep.last_name) as 'sales', mdl.mdl_number as 'mdl',
+    (SELECT sp.Date FROM tbl_mdl_status_log sp WHERE sp.account = a.account AND sp.Guid_patient = p.Guid_patient AND sp.Guid_status = 2) as 'accessioned',
+    (SELECT trr.Date FROM tbl_mdl_status_log trr WHERE trr.account = a.account AND trr.Guid_patient = p.Guid_patient AND trr.Guid_status = 22) as 'reported',
     (SELECT aps.status FROM tbl_mdl_status_log ap
      LEFT JOIN tbl_mdl_status aps ON ap.Guid_status = aps.Guid_status
-     WHERE ap.account = a.account AND ap.Guid_patient = p.Guid_patient AND ap.Guid_status IN (78, 79, 80, 81, 82) ORDER BY ap.Date_created DESC LIMIT 1) as 'test_ordered',
-    (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 53) as 'last_paid',
-    (CASE WHEN (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 9) THEN 'Declined'
-	 WHEN (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 18) THEN 'Approved'
+     WHERE ap.account = a.account AND ap.Guid_patient = p.Guid_patient AND ap.Guid_status IN (78, 79, 80, 81, 82)) as 'test_ordered',
+    (SELECT pr.Date FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 53) as 'last_paid',
+    (CASE WHEN (SELECT pr.Date FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 9) THEN 'Declined'
+	 WHEN (SELECT pr.Date FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 18) THEN 'Approved'
 	 ELSE '' END) as 'insurance_app',
     a.account as 'account',
     a.name as 'account_name',
@@ -633,7 +734,7 @@ function exportUsers($db) {
 
     AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%test%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Smith%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Doe%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%Jane Doe%'
 
-    GROUP BY q.Guid_qualify ORDER BY date DESC";
+    GROUP BY q.Guid_qualify ORDER BY date DESC");
 
     $params = [];
     if ($_POST['account']) {
@@ -743,8 +844,7 @@ function exportUsers($db) {
 	  'allborders' => array(
 	    'style' => PHPExcel_Style_Border::BORDER_THIN
 	  )
-	)
-      );
+	));
 
     $objPHPExcel->getActiveSheet()->getStyle('A3:M' . $rowCount)->applyFromArray($styleArray);
 
@@ -798,43 +898,43 @@ function rangeYear () {
 
   function rangeQuarter($quarter = 'current', $year = null, $format = null)
     {
-	if ( !is_int($year) ) {
-	    $year = (new DateTime)->format('Y');
-	}
-	$current_quarter = ceil((new DateTime)->format('n') / 3);
-	switch (  strtolower($quarter) ) {
-	    case 'this':
-	    case 'current':
-		$quarter = ceil((new DateTime)->format('n') / 3);
-		break;
-	    case 'previous':
-		$year = (new DateTime)->format('Y');
-		if ($current_quarter == 1) {
-		    $quarter = 4;
-		    $year--;
-		} else {
-		    $quarter =  $current_quarter - 1;
-		}
-		break;
-	    case 'first':
-		$quarter = 1;
-		break;
-	    case 'last':
-		$quarter = 4;
-		break;
-	    default:
-		$quarter = (!is_int($quarter) || $quarter < 1 || $quarter > 4) ? $current_quarter : $quarter;
-		break;
-	}
-	if ( $quarter === 'this' ) {
-	    $quarter = ceil((new DateTime)->format('n') / 3);
-	}
-	$start = new DateTime($year.'-'.(3*$quarter-2).'-1 00:00:00');
-	$end = new DateTime($year.'-'.(3*$quarter).'-'.($quarter == 1 || $quarter == 4 ? 31 : 30) .' 23:59:59');
+        if ( !is_int($year) ) {        
+            $year = (new DateTime)->format('Y');
+        }
+        $current_quarter = ceil((new DateTime)->format('n') / 3);
+        switch (  strtolower($quarter) ) {
+            case 'this':
+            case 'current':
+                $quarter = ceil((new DateTime)->format('n') / 3);
+                break;
+            case 'previous':
+                $year = (new DateTime)->format('Y');
+                if ($current_quarter == 1) {
+                    $quarter = 4;
+                    $year--;
+                } else {
+                    $quarter =  $current_quarter - 1;
+                }
+                break;
+            case 'first':
+                $quarter = 1;
+                break;
+            case 'last':
+                $quarter = 4;
+                break;
+            default:
+                $quarter = (!is_int($quarter) || $quarter < 1 || $quarter > 4) ? $current_quarter : $quarter;
+                break;
+        }
+        if ( $quarter === 'this' ) {
+            $quarter = ceil((new DateTime)->format('n') / 3);
+        }
+        $start = new DateTime($year.'-'.(3*$quarter-2).'-1 00:00:00');
+        $end = new DateTime($year.'-'.(3*$quarter).'-'.($quarter == 1 || $quarter == 4 ? 31 : 30) .' 23:59:59');
 
-	echo json_encode(array(
-	    'start' => $start->format('n/j/Y'),
-	    'end' => $end->format('n/j/Y')
-	));
-	exit();
+        echo json_encode(array(
+            'start' => $start->format('n/j/Y'),
+            'end' => $end->format('n/j/Y')
+        ));
+        exit();
     }
