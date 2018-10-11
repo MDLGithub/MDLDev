@@ -340,14 +340,15 @@ $('#matrix_parameters').submit(function(event) {
 	   account: $('.export_filters #account').val()
 	},
       success: function (response) {
-	$('body').LoadingOverlay('hide');
-	var result = JSON.parse(response);
-	var file = $("<a>");
-	file.attr("href", result.file);
-	$("body").append(file);
-	file.attr("download", "geneveda_matrix.xls");
-	file[0].click();
-	file.remove();
+		$('body').LoadingOverlay('hide');
+		$('.modalBlock#geneveda-export-modal').addClass('hidden');
+		var result = JSON.parse(response);
+		var file = $("<a>");
+		file.attr("href", result.file);
+		$("body").append(file);
+		file.attr("download", "geneveda_matrix.xls");
+		file[0].click();
+		file.remove();
       }
     });
 
@@ -378,26 +379,6 @@ $('#matrix_parameters #date_type').on('change', function() {
       }
     });
 });
-
-// $('#export_matrix').click(function () {
-//     $.ajax('ajaxHandler.php', {
-//         type: 'POST',
-//         data: {
-//            exportUsers: 'ok',
-//            from: $('.export_filters #from_date').val(),
-//            to: $('.export_filters #to_date').val(),
-//         },
-//       success: function (response) {
-//         var result = JSON.parse(response);
-//         var file = $("<a>");
-//         file.attr("href", result.file);
-//         $("body").append(file);
-//         file.attr("download", "geneveda_matrix.xls");
-//         file[0].click();
-//         file.remove();
-//       }
-//     });
-//   });
 
   $('.export_matrix').on('click', function () {
       var genevedaModal = $('.modalBlock#geneveda-export-modal');

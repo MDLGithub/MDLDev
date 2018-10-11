@@ -695,17 +695,35 @@ function get_account_info($db, $accountId){
     echo json_encode( array('accountInfo'=>$acountInfo, 'providers'=>$providers) );  exit();
 }
 
+function updateAccounts($db, $salesrep) {
+    $query = "SELECT tblaccount.*                   
+        FROM tblsalesrep 
+        LEFT JOIN `tblaccountrep` ON  tblsalesrep.Guid_salesrep = tblaccountrep.Guid_salesrep
+        LEFT JOIN `tblaccount` ON tblaccountrep.Guid_account = tblaccount.Guid_account                    
+        WHERE tblsalesrep.Guid_salesrep=:salesrep AND tblaccount.Guid_account IS NOT NULL";
+
+    $accounts = $db->query($query, array("salesrep"=>$salesrep));
+
+    $accountsHtml = '<option value="">Account</option>';
+    foreach ($accounts as $k=>$v){
+       $accountsHtml .= '<option value="'.$v['account'].'">'.$v['account'] ." - ". $v['name'].'</option>';
+    }
+
+    echo json_encode(['accounts_html' => $accountsHtml]);  
+    exit();
+}
+
 function exportUsers($db) {
-    $tests = $db->query("SELECT q.Date_created AS date, CONCAT(srep.first_name, ' ', srep.last_name) as 'sales', mdl.mdl_number as 'mdl',
-    (SELECT sp.Date FROM tbl_mdl_status_log sp WHERE sp.account = a.account AND sp.Guid_patient = p.Guid_patient AND sp.Guid_status = 2) as 'accessioned',
-    (SELECT trr.Date FROM tbl_mdl_status_log trr WHERE trr.account = a.account AND trr.Guid_patient = p.Guid_patient AND trr.Guid_status = 22) as 'reported',
-    (SELECT aps.status FROM tbl_mdl_status_log ap
+    $testsSql = "SELECT q.Date_created AS date, CONCAT(srep.first_name, ' ', srep.last_name) as 'sales', mdl.mdl_number as 'mdl',
+    (SELECT MAX(sp.Date) FROM tbl_mdl_status_log sp WHERE sp.account = a.account AND sp.Guid_patient = p.Guid_patient AND sp.Guid_status = 2) as 'accessioned', 
+    (SELECT MAX(trr.Date) FROM tbl_mdl_status_log trr WHERE trr.account = a.account AND trr.Guid_patient = p.Guid_patient AND trr.Guid_status = 22) as 'reported', 
+    (SELECT aps.status FROM tbl_mdl_status_log ap 
      LEFT JOIN tbl_mdl_status aps ON ap.Guid_status = aps.Guid_status
-     WHERE ap.account = a.account AND ap.Guid_patient = p.Guid_patient AND ap.Guid_status IN (78, 79, 80, 81, 82)) as 'test_ordered',
-    (SELECT pr.Date FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 53) as 'last_paid',
-    (CASE WHEN (SELECT pr.Date FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 9) THEN 'Declined'
-	 WHEN (SELECT pr.Date FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 18) THEN 'Approved'
-	 ELSE '' END) as 'insurance_app',
+     WHERE ap.account = a.account AND ap.Guid_patient = p.Guid_patient AND ap.Guid_status IN (78, 79, 80, 81, 82) ORDER BY ap.Date_created DESC LIMIT 1) as 'test_ordered', 
+    (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 53) as 'last_paid',
+    (CASE WHEN (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 9) THEN 'Declined'
+         WHEN (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 18) THEN 'Approved'
+         ELSE '' END) as 'insurance_app',
     a.account as 'account',
     a.name as 'account_name',
     q.qualified as 'med_necessity',
@@ -713,28 +731,28 @@ function exportUsers($db) {
     q.Guid_user as 'user_id',
     srep.color as 'sales_color',
     q.Date_created
-
-    FROM tbl_ss_qualify q
-    LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user
+    
+    FROM tbl_ss_qualify q 
+    LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user 
     LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user
-    LEFT JOIN tblaccount a ON a.account = q.account_number
-    LEFT JOIN tblaccountrep ar ON ar.Guid_account = a.Guid_account
+    LEFT JOIN tblaccount a ON a.account = q.account_number 
+    LEFT JOIN tblaccountrep ar ON ar.Guid_account = a.Guid_account 
     LEFT JOIN tblsalesrep srep ON ar.Guid_salesrep = srep.Guid_salesrep
-    LEFT JOIN tbl_mdl_status_log sl ON sl.Guid_salesrep = srep.Guid_salesrep
-    LEFT JOIN tbl_mdl_status s ON sl.Guid_status = s.Guid_status
+    LEFT JOIN tbl_mdl_status_log sl ON sl.Guid_salesrep = srep.Guid_salesrep 
+    LEFT JOIN tbl_mdl_status s ON sl.Guid_status = s.Guid_status 
     LEFT JOIN tbl_mdl_number mdl ON q.Guid_user = mdl.Guid_user
-
-    WHERE  u.marked_test = '0'
-
+    
+    WHERE  u.marked_test = '0' 
+    
     AND q.account_number = ". ($_POST['account'] == '' ? "a.account" : ":account") ."
-    AND a.Guid_account = ar.Guid_account AND ar.Guid_salesrep = ". ($_POST['consultant'] == '' ? "srep.Guid_salesrep" : ":consultant") ."
-     ". ($_POST['from'] == '' ? " " : "AND q.Date_created >=:from") ."
-     ". ($_POST['to'] == '' ? " " : "AND q.Date_created <=:to") ."
+    AND a.Guid_account = ar.Guid_account AND ar.Guid_salesrep = ". ($_POST['consultant'] == '' ? "srep.Guid_salesrep" : ":consultant") ." 
+     ". ($_POST['from'] == '' ? " " : "AND q.Date_created >=:from") ." 
+     ". ($_POST['to'] == '' ? " " : "AND q.Date_created <=:to") ." 
     AND mdl.mdl_number IS NOT NULL
-
+    
     AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%test%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Smith%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Doe%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%Jane Doe%'
-
-    GROUP BY q.Guid_qualify ORDER BY date DESC");
+    
+    GROUP BY q.Guid_qualify ORDER BY date DESC";
 
     $params = [];
     if ($_POST['account']) {
