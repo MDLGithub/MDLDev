@@ -808,24 +808,108 @@ function getDeviceStatusCount($db, $Guid_salesrep, $Guid_status ){
     return $result['count'];
 }
 /**
- * Ge provider Status count by given account id 
+ * Get provider Status count by medicalNecessity and providerID 
  * @param type $db
- * @param type $account
+ * @param type $medicalNecessity => Completed(Yes+No+Unknown), Incomplete
+ * Registered => Incomplete + Completed(Yes+No+Unknown)
+ * Completed => Completed(Yes+No+Unknown)
+ * Qualified => Yes
+ * Submitted => Specimen collected=>Yes from patients info screen
+ * @param type $Guid_provider 
  * @param type $Guid_status
  * @return type
  */
-function getProviderStatusCount($db, $account, $Guid_provider, $Guid_status ){     
-    $q = "SELECT COUNT(*) AS `count` FROM `tblprovider` p "
-        . "LEFT JOIN `tbl_mdl_status_log` l ON p.account_id=l.account "
-        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
-        . "WHERE l.Guid_status =$Guid_status "
-        . "AND p.Guid_provider=$Guid_provider "
-        . "AND l.account=$account "
-        . "AND u.marked_test='0' "
-        . " "; 
+function getProviderStatusCount($db, $medicalNecessity, $Guid_provider){
+    
+    if($medicalNecessity=='Incomplete'){
+        $table = "tblqualify";
+        $where = "WHERE NOT EXISTS(SELECT * FROM tbl_ss_qualify qs WHERE q.Guid_qualify=qs.Guid_qualify) "
+                . "AND u.marked_test='0' ";
+    } else {
+        $table = "tbl_ss_qualify";
+        $where = "WHERE u.marked_test='0' ";
+        $where .= "AND q.`Date_created` = (SELECT MAX(Date_created) FROM tbl_ss_qualify AS m2 WHERE q.Guid_qualify = m2.Guid_qualify)";
 
-    $result = $db->row($q, array('account'=>$account,'Guid_provider'=>$Guid_provider, 'Guid_status'=>$Guid_status));    
+    }
+    
+    $q  = "SELECT COUNT(*) AS count "
+            . "FROM `".$table."` q "
+            . "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user ";
+    
+    $q .= $where; 
+    
+    if($medicalNecessity=='Yes'){
+        $q .= "AND q.qualified = 'Yes' ";
+    }
+    if($medicalNecessity=='No'){
+        $q .= "AND q.qualified = 'No' ";
+    }
+    if($medicalNecessity=='Unknown'){
+        $q .= "AND q.qualified = 'Unknown' ";
+    }
+    
+    $q .= "AND q.provider_id = '" . $Guid_provider . "' ";
+    
+    $result = $db->row($q);    
     return $result['count'];
+}
+
+/**
+ * Get Provider Submited count (Specimen Collected => Guid_status=1)
+ * @param type $db
+ * @param type $Guid_provider
+ * @return string
+ */
+function getProviderSubmitedCount($db, $Guid_provider ){ 
+    
+    $andQ = "AND q.provider_id = '" . $Guid_provider . "' ";
+    $andQ .= "AND q.`Date_created` = (SELECT MAX(Date_created) FROM tbl_ss_qualify AS m2 WHERE q.Guid_qualify = m2.Guid_qualify)";
+    
+    $completedQ  = "SELECT q.Guid_user "
+                    . "FROM `tbl_ss_qualify` q "
+                    . "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user ";
+    $completedQ  .= "WHERE u.marked_test='0' ";
+    $completedQ  .= $andQ;
+    
+    $incompleteQ  = "SELECT q.Guid_user "
+                    . "FROM `tblqualify` q "
+                    . "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user ";
+    $incompleteQ .= "WHERE NOT EXISTS(SELECT * FROM tbl_ss_qualify qs WHERE q.Guid_qualify=qs.Guid_qualify) "
+                   . "AND u.marked_test='0' ";
+    $incompleteQ .= $andQ;
+    
+    $completedUsers = $db->query($completedQ);
+    $incompleteUsers = $db->query($incompleteQ);
+    $userIds = "";
+    if(!empty($completedUsers)){
+        foreach ($completedUsers as $k=>$v) {
+            $userIds .= "'".$v['Guid_user']."', ";
+        }
+    }
+    if(!empty($incompleteUsers)){
+        foreach ($incompleteUsers as $k=>$v) {
+            $userIds .= "'".$v['Guid_user']."', ";
+        }
+    }    
+    if($userIds!=""){
+        $userIds = rtrim($userIds, ', ');
+        
+        $submitedQ="SELECT COUNT(*) AS count FROM `tbl_mdl_status_log` l
+                LEFT JOIN tbluser u ON u.Guid_user=l.Guid_user
+                WHERE l.Guid_user IN(".$userIds.")
+                AND u.marked_test='0'
+                AND l.Guid_status=1
+                AND l.currentstatus='Y'";
+        $result = $db->row($submitedQ);
+    }
+    
+    if(isset($result['count']) && $result['count']!=""){
+        $count =  $result['count'];
+    } else{
+        $count = '0';
+    }
+    return $count;
+    
 }
 
 
