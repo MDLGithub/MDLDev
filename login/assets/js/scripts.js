@@ -276,6 +276,21 @@ $(document).ready(function () {
     });
     
     /**
+     *  Salesrep page open color Box 
+     */
+    $('#color-block').delegate( ".openColorBox", "click", function() {
+        if($(this).parent().find('.colorBox').hasClass('closed')){
+            $(this).parent().find('.colorBox').removeClass('closed').show();
+        }else{
+            $(this).parent().find('.colorBox').addClass('closed').hide();
+        }        
+    });
+    $('#color-block .colorBox label').on( "click", function() {
+        $('#color-block .colorBox label').removeClass('checked');
+        $(this).addClass('checked');
+    });
+    
+    /**
      *  When Location Selected Web
      *  disable Pin checkbox and set Password to checked
      */
@@ -339,28 +354,33 @@ $(document).ready(function () {
         var val =  this.value;
         //console.log(accountId);
         $(this).parent().parent().nextAll().remove();
+        getGetSubDropdown(val);
+    }); 
+    
+    function getGetSubDropdown(val){        
         var ajaxUrl = baseUrl+'/ajaxHandler.php';
         if(val && val!="0"){
             $.ajax( ajaxUrl , {
-
                 type: 'POST',
                 data: {
                    status_dropdown: '1',
                    parent_id: val,
                 },
                 success: function(response) {
-                    var result = JSON.parse(response);
+                    var result = JSON.parse(response);                    
                     if(result.content !=""){
                         var content = result.content
                         $('#status-dropdowns-box').append(content);
                     }
+                    var newVal = result['statusID'];
+                    getGetSubDropdown(newVal)                     
                 },
                 error: function() {
                     console.log('0');
                 }
             });
         }
-    });    
+    }
     
     /**
      * Homepage Filter 
