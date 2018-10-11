@@ -1711,7 +1711,7 @@ function get_stats_info($db, $statusID, $hasChildren=FALSE, $searchData=array())
     $q .=  "WHERE  statuslogs.`currentstatus`='Y' ";
     
     if(!empty($searchData)){ 
-        if (strlen($searchData['from_date']) && $searchData['to_date']) {
+        if (isset($searchData['from_date']) && $searchData['from_date']!="" && isset($searchData['to_date']) && $searchData['to_date']!="") {
             if ($searchData['from_date'] == $searchData['to_date']) {
                 $q .= " AND statuslogs.Date LIKE '%" . date("Y-m-d", strtotime($searchData['from_date'])) . "%'";
             } else {
@@ -1756,7 +1756,7 @@ function get_stats_info($db, $statusID, $hasChildren=FALSE, $searchData=array())
     return $result;
 }
 
-function get_status_table_rows($db, $parent = 0, $searchData=array()) {   
+function get_status_table_rows($db, $parent = 0, $searchData=array(), $linkArr=array()) {   
     
     $statusQ = "SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC";
     $statuses = $db->query($statusQ);
@@ -1767,16 +1767,25 @@ function get_status_table_rows($db, $parent = 0, $searchData=array()) {
             $checkCildren = $db->query("SELECT * FROM tbl_mdl_status "
                     . "WHERE `parent_id` = ".$status['Guid_status']);
             $stats = get_stats_info($db, $status['Guid_status'], FALSE, $searchData);
-            
+            $link = '';
             if($stats['count']!=0){
                 $optionClass = '';
                 $filterUrlStr = $stats['filterUrlStr'];
+                if(empty($linkArr)){
+                    $link .= SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].$filterUrlStr;
+                } else {
+                    $link .=  SITE_URL.'/account-patients.php?';
+                    foreach ($linkArr as $k=>$v){
+                        $link .= $k.'='.$v.'&';
+                    }
+                    $link = rtrim($link,'&');
+                }
                 if ( !empty($checkCildren) ) { 
                     $optionClass = 'has_sub';                 
                 } 
                 $content .= "<tr id='".$status['Guid_status']."' class='parent ".$optionClass."'>";
                 $content .= "<td class='text-left'><span>".$status['status'].'</span></td>';            
-                $content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].$filterUrlStr.'">'.$stats['count'].'</a></td>';
+                $content .= '<td><a href="'.$link.'">'.$stats['count'].'</a></td>';
                 if ( !empty($checkCildren) ) {
                     $content .= get_status_child_rows( $db, $status['Guid_status'], "&nbsp;", $searchData );
                 }            

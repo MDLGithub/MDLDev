@@ -325,6 +325,19 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
                             </tbody>
                         </table>
                     </div>  <!-- /.providersTable -->
+                    <div class="accountStats">
+                        <table class="table stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th class="wh-100">Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php echo get_status_table_rows($db, '0', array('Guid_account'=>$accountActive['Guid_account']), array('account'=>$account));?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                     <div class="col-md-4 pL-50">
                     <div id="officeLogo">
