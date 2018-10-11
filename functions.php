@@ -1686,7 +1686,19 @@ function getTestUserIDs($db){
 }
 
 function formatDate($date){
-    return date("n/j/Y", strtotime($date));
+    if (empty($date)) {
+	return '';
+    } else {
+	return date("n/j/Y", strtotime($date));
+    }
+}
+
+function dbDateFormat($date){
+    if (empty($date)) {
+	return '';
+    } else {
+	return date("Y-m-d H:i:s", strtotime($date));
+    }
 }
 
 /**
