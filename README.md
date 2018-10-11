@@ -50,3 +50,15 @@ Since need to show comments with Names instead of emailID, but there was no fiel
 For this reason, I have altered tbluser (Added 2 fields):
 - firstname varchar(255)
 - lastname varchar(255)
+
+
+#Updated files list on 11-10-2018
+
+- /login/ajaxHandlerEvents.php
+- /login/eventschedule.php
+- /login/functions_event.php
+- /login/dashboard2.php
+- /login/topgenetic.php
+- /login/assets/css/calendar.css
+- /login/assets/css/custom-styles.css
+

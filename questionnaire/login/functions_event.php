@@ -47,8 +47,8 @@ function getEventSchedule($db,$salesRepId,$accountId,$reqdashboard){
                 }
 
                 if($salesRepId != 0 && $accountId == 0 && $reqdashboard == 0){
-                    $query .= "WHERE evt.salesrepid =:salesrepid "
-                            . "OR evt.accountid =:accountid ";
+                    $query .= "WHERE evt.salesrepid =:salesrepid ";
+                            //. "OR evt.accountid =:accountid ";
                 }
 
                 if($salesRepId != 0 && $accountId == 0 && $reqdashboard == 1){
@@ -58,9 +58,9 @@ function getEventSchedule($db,$salesRepId,$accountId,$reqdashboard){
                 
                 
                 $query .= "ORDER BY evt.id";
-        if($reqdashboard == 0)
+        if($accountId != 0)
             $result = $db->query($query, array("salesrepid"=>$salesRepId,"accountid"=>$accountId));
-        elseif($reqdashboard == 1)
+        elseif($accountId == 0)
             $result = $db->query($query, array("salesrepid"=>$salesRepId));
     }
     else{
