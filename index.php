@@ -4480,6 +4480,10 @@ function save_snap_shot($not_qualified) {
 function perform_login(&$error) {
 	require ("db/dbconnect.php");
 	
+	if (strlen(trim($_POST['first_name'])) && strlen(trim($_POST['last_name'])) && strlen(trim($_POST['dob'])) && isset($_GET['an'])) {
+		perform_dup_search();
+	}
+	
 	$date = new DateTime("now", new DateTimeZone('America/New_York'));
 	
 	if ((!isset($_GET['ln'])) && (!isset($_GET['lc']))) {
@@ -5198,5 +5202,41 @@ function patient_consent($firstname, $lastname) {
 		</section>
 	';
 	return $pconsent;
+}
+
+function perform_dup_search() {
+	require ("db/dbconnect.php");
+
+	$result = $conn->query("select p.Guid_user FROM tblpatient p LEFT JOIN tblqualify q on p.Guid_user = q.Guid_user Where p.firstname = '" . $_POST['first_name'] . "' AND p.lastname = '" . $_POST['last_name'] . "' AND p.dob = '" . $_POST['dob'] . "' AND DATE(p.Date_created) = '" . date("Y-m-d") . "' AND q.account_number = '" . $_GET['an'] . "'");
+	
+	while ($row = $result->fetch_row()) {
+		$conn->query("DELETE FROM tbl_deductable_log where Guid_user IN (" . $row[0]." )");
+		$conn->query("DELETE FROM tbl_mdl_note where Guid_user IN (" . $row[0].")");
+		$conn->query("DELETE FROM tbl_mdl_number WHERE Guid_user IN (" . $row[0].")");
+		$conn->query("DELETE FROM tbl_mdl_stats WHERE Guid_user IN (" . $row[0].")");
+		$conn->query("DELETE FROM tbl_mdl_status_log WHERE Guid_user IN (" . $row[0].")");
+		$conn->query("DELETE FROM tbl_revenue WHERE Guid_user IN (" . $row[0].")");
+		$conn->query("DELETE FROM tblaccountverify WHERE Guid_user IN (" . $row[0].")");
+		$conn->query("DELETE FROM tbladmins WHERE Guid_user IN (" . $row[0].")");
+		$conn->query("DELETE FROM tblphysician WHERE Guid_user IN (" . $row[0].")");
+		$conn->query("DELETE FROM tblurlconfig WHERE Guid_user IN (" . $row[0].")");
+
+		$conn->query("DELETE FROM tbl_ss_qualifyans WHERE Guid_qualify IN (SELECT Guid_qualify FROM tblqualify WHERE Guid_user IN (" . $row[0]."))");
+		$conn->query("DELETE FROM tbl_ss_qualifyfam WHERE Guid_qualify IN (SELECT Guid_qualify FROM tblqualify WHERE Guid_user IN (" . $row[0]."))");
+		$conn->query("DELETE FROM tbl_ss_qualifygene WHERE Guid_qualify IN (SELECT Guid_qualify FROM tblqualify WHERE Guid_user IN (" . $row[0]."))");
+		$conn->query("DELETE FROM tbl_ss_qualifypers WHERE Guid_qualify IN (SELECT Guid_qualify FROM tblqualify WHERE Guid_user IN (" . $row[0]."))");
+		$conn->query("DELETE FROM tblqualifyans WHERE Guid_qualify IN (SELECT Guid_qualify FROM tblqualify WHERE Guid_user IN (" . $row[0]."))");
+		$conn->query("DELETE FROM tblqualifyfam WHERE Guid_qualify IN (SELECT Guid_qualify FROM tblqualify WHERE Guid_user IN (" . $row[0]."))");
+		$conn->query("DELETE FROM tblqualifygene WHERE Guid_qualify IN (SELECT Guid_qualify FROM tblqualify WHERE Guid_user IN (" . $row[0]."))");
+		$conn->query("DELETE FROM tblqualifypers WHERE Guid_qualify IN (SELECT Guid_qualify FROM tblqualify WHERE Guid_user IN (" . $row[0]."))");
+		$conn->query("DELETE FROM tbl_hcf_provider WHERE Guid_qualify IN (SELECT Guid_qualify FROM tblqualify WHERE Guid_user IN (" . $row[0]."))");
+		$conn->query("DELETE FROM tblunknownans WHERE Guid_qualify IN (SELECT Guid_qualify FROM tblqualify WHERE Guid_user IN (" . $row[0]."))");
+		$conn->query("DELETE FROM tblunknowngene WHERE Guid_qualify IN (SELECT Guid_qualify FROM tblqualify WHERE Guid_user IN (" . $row[0]."))");
+
+		$conn->query("DELETE FROM tblqualify WHERE Guid_user IN (" . $row[0].")");
+		$conn->query("DELETE FROM tbl_ss_qualify WHERE Guid_user IN  (" . $row[0].")");
+		$conn->query("DELETE FROM tbluser WHERE Guid_user IN (" . $row[0].")");
+		$conn->query("DELETE FROM tblpatient WHERE Guid_user IN (" . $row[0].")");
+	}
 }
 ?>
