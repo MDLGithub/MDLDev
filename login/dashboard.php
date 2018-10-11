@@ -304,7 +304,7 @@ if(isset($_POST['mark_as_test'])){
 }
 
 $sqlTbl = "SELECT q.*, p.*, "
-        . "a.name as account_name, "
+        . "a.name as account_name, a.Guid_account,"
         . "CONCAT (srep.first_name, ' ', srep.last_name) AS salesrep_name, srep.Guid_salesrep, "
         . "u.email, u.marked_test,  u.Guid_role, "
         . "q.Date_created AS date FROM tbl_ss_qualify q "
@@ -346,7 +346,7 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
     if (isset($_POST['meets_mn']) && strlen($_POST['meets_mn'])) {
         $whereTest = "";
         if($_POST['meets_mn']=='incomplete'){
-            $sqlTbl  = "SELECT q.*,p.*, a.name as account_name, 
+            $sqlTbl  = "SELECT q.*,p.*, a.name as account_name, a.Guid_account,
                         CONCAT (srep.first_name, ' ', srep.last_name) AS salesrep_name, srep.Guid_salesrep, 
                         u.email, u.marked_test, u.Guid_role, q.Date_created AS `date`, 
                         '1' AS incomplete FROM tblqualify q  
@@ -626,13 +626,15 @@ $num_estimates = $qualify_requests;
                                     <?php } ?>                    
                                    
                                     <?php if(isFieldVisibleByRole($roleIDs['account']['view'], $roleID)) {?>
-                                        <td class="tdAccount"><?php 
-                                            if( $qualify_request['account_number']!="" && !is_null($qualify_request['account_number']) && $qualify_request['account_number']!="NULL"){
-                                                echo $qualify_request['account_number']; 
-                                                if($qualify_request['account_name']!=""){
-                                                echo "<span class='account_name'>".ucwords(strtolower($qualify_request['account_name']))."</span>";
+                                        <td class="tdAccount">
+                                            <?php 
+                                                if( $qualify_request['account_number']!="" && !is_null($qualify_request['account_number']) && $qualify_request['account_number']!="NULL"){
+                                                    $accountURL = SITE_URL . '/accounts.php?account_id='.$qualify_request['Guid_account'];
+                                                    echo "<a href='".$accountURL."'>".$qualify_request['account_number']."</a>"; 
+                                                    if($qualify_request['account_name']!=""){
+                                                    echo "<span class='account_name'>".ucwords(strtolower($qualify_request['account_name']))."</span>";
+                                                    }
                                                 }
-                                            }
                                             ?>
                                         </td>
                                     <?php } ?>

@@ -808,24 +808,108 @@ function getDeviceStatusCount($db, $Guid_salesrep, $Guid_status ){
     return $result['count'];
 }
 /**
- * Ge provider Status count by given account id 
+ * Get provider Status count by medicalNecessity and providerID 
  * @param type $db
- * @param type $account
+ * @param type $medicalNecessity => Completed(Yes+No+Unknown), Incomplete
+ * Registered => Incomplete + Completed(Yes+No+Unknown)
+ * Completed => Completed(Yes+No+Unknown)
+ * Qualified => Yes
+ * Submitted => Specimen collected=>Yes from patients info screen
+ * @param type $Guid_provider 
  * @param type $Guid_status
  * @return type
  */
-function getProviderStatusCount($db, $account, $Guid_provider, $Guid_status ){     
-    $q = "SELECT COUNT(*) AS `count` FROM `tblprovider` p "
-        . "LEFT JOIN `tbl_mdl_status_log` l ON p.account_id=l.account "
-        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
-        . "WHERE l.Guid_status =$Guid_status "
-        . "AND p.Guid_provider=$Guid_provider "
-        . "AND l.account=$account "
-        . "AND u.marked_test='0' "
-        . " "; 
+function getProviderStatusCount($db, $medicalNecessity, $Guid_provider){
+    
+    if($medicalNecessity=='Incomplete'){
+        $table = "tblqualify";
+        $where = "WHERE NOT EXISTS(SELECT * FROM tbl_ss_qualify qs WHERE q.Guid_qualify=qs.Guid_qualify) "
+                . "AND u.marked_test='0' ";
+    } else {
+        $table = "tbl_ss_qualify";
+        $where = "WHERE u.marked_test='0' ";
+        $where .= "AND q.`Date_created` = (SELECT MAX(Date_created) FROM tbl_ss_qualify AS m2 WHERE q.Guid_qualify = m2.Guid_qualify)";
 
-    $result = $db->row($q, array('account'=>$account,'Guid_provider'=>$Guid_provider, 'Guid_status'=>$Guid_status));    
+    }
+    
+    $q  = "SELECT COUNT(*) AS count "
+            . "FROM `".$table."` q "
+            . "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user ";
+    
+    $q .= $where; 
+    
+    if($medicalNecessity=='Yes'){
+        $q .= "AND q.qualified = 'Yes' ";
+    }
+    if($medicalNecessity=='No'){
+        $q .= "AND q.qualified = 'No' ";
+    }
+    if($medicalNecessity=='Unknown'){
+        $q .= "AND q.qualified = 'Unknown' ";
+    }
+    
+    $q .= "AND q.provider_id = '" . $Guid_provider . "' ";
+    
+    $result = $db->row($q);    
     return $result['count'];
+}
+
+/**
+ * Get Provider Submited count (Specimen Collected => Guid_status=1)
+ * @param type $db
+ * @param type $Guid_provider
+ * @return string
+ */
+function getProviderSubmitedCount($db, $Guid_provider ){ 
+    
+    $andQ = "AND q.provider_id = '" . $Guid_provider . "' ";
+    $andQ .= "AND q.`Date_created` = (SELECT MAX(Date_created) FROM tbl_ss_qualify AS m2 WHERE q.Guid_qualify = m2.Guid_qualify)";
+    
+    $completedQ  = "SELECT q.Guid_user "
+                    . "FROM `tbl_ss_qualify` q "
+                    . "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user ";
+    $completedQ  .= "WHERE u.marked_test='0' ";
+    $completedQ  .= $andQ;
+    
+    $incompleteQ  = "SELECT q.Guid_user "
+                    . "FROM `tblqualify` q "
+                    . "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user ";
+    $incompleteQ .= "WHERE NOT EXISTS(SELECT * FROM tbl_ss_qualify qs WHERE q.Guid_qualify=qs.Guid_qualify) "
+                   . "AND u.marked_test='0' ";
+    $incompleteQ .= $andQ;
+    
+    $completedUsers = $db->query($completedQ);
+    $incompleteUsers = $db->query($incompleteQ);
+    $userIds = "";
+    if(!empty($completedUsers)){
+        foreach ($completedUsers as $k=>$v) {
+            $userIds .= "'".$v['Guid_user']."', ";
+        }
+    }
+    if(!empty($incompleteUsers)){
+        foreach ($incompleteUsers as $k=>$v) {
+            $userIds .= "'".$v['Guid_user']."', ";
+        }
+    }    
+    if($userIds!=""){
+        $userIds = rtrim($userIds, ', ');
+        
+        $submitedQ="SELECT COUNT(*) AS count FROM `tbl_mdl_status_log` l
+                LEFT JOIN tbluser u ON u.Guid_user=l.Guid_user
+                WHERE l.Guid_user IN(".$userIds.")
+                AND u.marked_test='0'
+                AND l.Guid_status=1
+                AND l.currentstatus='Y'";
+        $result = $db->row($submitedQ);
+    }
+    
+    if(isset($result['count']) && $result['count']!=""){
+        $count =  $result['count'];
+    } else{
+        $count = '0';
+    }
+    return $count;
+    
 }
 
 
@@ -1602,7 +1686,19 @@ function getTestUserIDs($db){
 }
 
 function formatDate($date){
-    return date("n/j/Y", strtotime($date));
+    if (empty($date)) {
+	return '';
+    } else {
+	return date("n/j/Y", strtotime($date));
+    }
+}
+
+function dbDateFormat($date){
+    if (empty($date)) {
+	return '';
+    } else {
+	return date("Y-m-d H:i:s", strtotime($date));
+    }
 }
 
 /**
@@ -1627,7 +1723,7 @@ function get_stats_info($db, $statusID, $hasChildren=FALSE, $searchData=array())
     $q .=  "WHERE  statuslogs.`currentstatus`='Y' ";
     
     if(!empty($searchData)){ 
-        if (strlen($searchData['from_date']) && $searchData['to_date']) {
+        if (isset($searchData['from_date']) && $searchData['from_date']!="" && isset($searchData['to_date']) && $searchData['to_date']!="") {
             if ($searchData['from_date'] == $searchData['to_date']) {
                 $q .= " AND statuslogs.Date LIKE '%" . date("Y-m-d", strtotime($searchData['from_date'])) . "%'";
             } else {
@@ -1672,7 +1768,7 @@ function get_stats_info($db, $statusID, $hasChildren=FALSE, $searchData=array())
     return $result;
 }
 
-function get_status_table_rows($db, $parent = 0, $searchData=array()) {   
+function get_status_table_rows($db, $parent = 0, $searchData=array(), $linkArr=array()) {   
     
     $statusQ = "SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC";
     $statuses = $db->query($statusQ);
@@ -1683,16 +1779,25 @@ function get_status_table_rows($db, $parent = 0, $searchData=array()) {
             $checkCildren = $db->query("SELECT * FROM tbl_mdl_status "
                     . "WHERE `parent_id` = ".$status['Guid_status']);
             $stats = get_stats_info($db, $status['Guid_status'], FALSE, $searchData);
-            
+            $link = '';
             if($stats['count']!=0){
                 $optionClass = '';
                 $filterUrlStr = $stats['filterUrlStr'];
+                if(empty($linkArr)){
+                    $link .= SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].$filterUrlStr;
+                } else {
+                    $link .=  SITE_URL.'/account-patients.php?';
+                    foreach ($linkArr as $k=>$v){
+                        $link .= $k.'='.$v.'&';
+                    }
+                    $link = rtrim($link,'&');
+                }
                 if ( !empty($checkCildren) ) { 
                     $optionClass = 'has_sub';                 
                 } 
                 $content .= "<tr id='".$status['Guid_status']."' class='parent ".$optionClass."'>";
                 $content .= "<td class='text-left'><span>".$status['status'].'</span></td>';            
-                $content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].$filterUrlStr.'">'.$stats['count'].'</a></td>';
+                $content .= '<td><a href="'.$link.'">'.$stats['count'].'</a></td>';
                 if ( !empty($checkCildren) ) {
                     $content .= get_status_child_rows( $db, $status['Guid_status'], "&nbsp;", $searchData );
                 }            

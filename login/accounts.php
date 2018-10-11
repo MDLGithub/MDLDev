@@ -308,16 +308,36 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
                                             </div>
                                         </div>
                                     </td>                                    
-                                    <td><?php echo getProviderStatusCount($db, $v['account_id'], $v['Guid_provider'], '28' ); //28->Registered ?></td>
-                                    <td><?php echo getProviderStatusCount($db, $v['account_id'], $v['Guid_provider'], '36'); //36->Questionnaire Completed ?></td>
-                                    <td><?php echo getProviderStatusCount($db, $v['account_id'], $v['Guid_provider'], '29'); //29->Questionnaire Completed->Qualified ?></td>
-                                    <td><?php echo getProviderStatusCount($db, $v['account_id'], $v['Guid_provider'], '1' ); //28->Submitted (Specimen Collected) ?></td>
+                                    <td>
+                                        <?php 
+                                            $incomplete = getProviderStatusCount($db, 'Incomplete', $v['Guid_provider'] );
+                                            $completed = getProviderStatusCount($db, 'Completed', $v['Guid_provider'] );
+                                            $registred = $incomplete+$completed;
+                                            echo $registred; 
+                                        ?>
+                                    </td>
+                                    <td><?php echo getProviderStatusCount($db, 'Completed', $v['Guid_provider'] ); ?></td>
+                                    <td><?php echo getProviderStatusCount($db, 'Yes', $v['Guid_provider'] ); ?></td>
+                                    <td><?php echo getProviderSubmitedCount($db, $v['Guid_provider'] ); ?></td>
                                 </tr>
                                 <?php } ?>
                             <?php } ?>
                             </tbody>
                         </table>
                     </div>  <!-- /.providersTable -->
+                    <div class="accountStats">
+                        <table class="table stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th class="wh-100">Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php echo get_status_table_rows($db, '0', array('Guid_account'=>$accountActive['Guid_account']), array('account'=>$account));?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                     <div class="col-md-4 pL-50">
                     <div id="officeLogo">
