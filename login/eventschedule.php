@@ -198,7 +198,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         margin:auto;
         font-size: 1.2em;
         padding-top: 1em;
-        width:110%;
+        width:100%;
     }
 
     .day_stats p {
@@ -379,6 +379,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $("#detail").css("background", "linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");
         });
 
+        var state_count = 0, count = 0, state_count1 =0, count1 = 0;
+
         var calendar = $('#calendar').fullCalendar({
             header: {
                 left: 'prev,next today',
@@ -477,9 +479,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         message += ' and ';
                     if (calEvent.account == null && calEvent.title == 'BRCA Day')
                         message += 'Account Number is missing';
-                    var mouseOver = "Registerd: " + calEvent.registeredCnt + "<br />";
-                    mouseOver += "Completed: " + calEvent.completedCnt + "<br />";
-                    mouseOver += "Qualified: " + calEvent.qualifiedCnt;
+                    var mouseOver = "Registered: " + $(this).find('.silhouette span').html() + "<br />";
+                    mouseOver += "Completed: " + $(this).find('.checkmark span').html() + "<br />";
+                    mouseOver += "Qualified: " + $(this).find('.dna span').html() + "<br />";
+                    mouseOver += "Submitted: " + $(this).find('.flask span').html();
                     if (mouseOver != '') {
                         bgclr = '#FF4500';
                         if(message == ""){
@@ -533,10 +536,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
                 var view = $('#calendar').fullCalendar('getView');
                 if(view.name == 'basicDay'){
-                    var html = "";
+                   
                     cmts = '<div class="fc-number"><span>Account Number: </span>' + event.account + '</div>';
                     
-                    cmts += '<div class = "day_stats">';
+                    cmts += '<div class = "day_stats" id="state-count'+ state_count +'" >';
                     var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1};
                     $.ajax({
                         url: "ajaxHandlerEvents.php",
@@ -545,9 +548,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         success: function (res)
                         {
                             var result = JSON.parse(res);
-                            cmts += '<p class="show-stats"><span class="silhouette">' + result["reg"] + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ result["qua"] + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ result["com"] + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">'+result["sub"]+'<img src="assets/eventschedule/icons/flask_icon.png"></span></p>' +
+                            
+                            console.log(result.reg);
+                            html = '<p class="show-stats"><span class="silhouette">' + result.reg + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ result.qua + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ result.com + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">'+result.sub+'<img src="assets/eventschedule/icons/flask_icon.png"></span></p>' +
                                 '';
-                    
+                            $('#state-count'+count).html(html);
+                            count += 1;
                         }
                     });
                     
@@ -558,6 +564,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     cmts += '</div></div>'
                     if(event.logo != null)
                         cmts += '<div class="fc-logo"><img src = "../login/images/practice/' + event.logo + '" onError="imgError(this);"/></div>';
+                    else
+                        cmts += '<div class="fc-logo"><img src = "../login/images/logo-placeholder.png" onError="imgError(this);"/></div>';
+                    state_count = state_count+1;
                 }
 
                 var icon = '';
@@ -580,7 +589,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 
                 var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable" style="' + borderColor + '">' +
                         '<div class="fc-content evtcontent">' +
-                        '<div class="fc-title evttitle"><a href=accounts.php?account_id="' + event.accountid + '">' + modifiedName + '</a></div>' +
+                        '<div class="fc-title evttitle"><a class="account-click" id="acc-'+event.accountid+'"  href="#">' + modifiedName + '</a></div>' +
                         salesrep + cmts +
                         '<div class="' + icon + '"></div>' +
                         '</div>' +
@@ -603,7 +612,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     if (parsedEventTime < parsedNow) {
                         var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable days-' + eventDate + '"  style="' + borderColor + '">' +
                                 '<div class="fc-content evtcontent">'+                                
-                                '<div class="fc-title evttitle"><a href="accounts.php?account_id=' + event.accountid + '">' + modifiedName + '</a></div>' + salesrep + cmts;
+                                '<div class="fc-title evttitle"><a class="account-click" id="acc-'+event.accountid+'"  href="#">' + modifiedName + '</a></div>' + salesrep + cmts;
+                            content += "<div id='state2_count"+ state_count1 +"'>"
                                 if(view.name != 'basicDay'){
                                     
                                     var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1};
@@ -614,16 +624,18 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                                         success: function (res)
                                         {
                                             var result = JSON.parse(res);
-                                            cmts += '<div class="show-stats"><span class="silhouette">' + result["reg"] + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ result["qua"] + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ result["com"] + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">'+result["sub"]+' <img src="assets/eventschedule/icons/flask_icon.png"></span></div>';
+                                            var html = '<div class="show-stats"><span class="silhouette"><span>' + result.reg + '</span> <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"><span> '+ result.qua + '</span> <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna"><span>'+ result.com + '</span> <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask"><span>'+ result.sub +'</span> <img src="assets/eventschedule/icons/flask_icon.png"></span></div>';
+                                            $('#state2_count'+count1).html(html);
+                                            count1 += 1;
                                     
                                         }
                                     });
-                                    /*content += '<div class="show-stats"><span class="silhouette">' + event.registeredCnt + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ event.qualifiedCnt + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ event.completedCnt + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">0 <img src="assets/eventschedule/icons/flask_icon.png"></span></div>';*/
-                                    
                                 }
-                            content += '<div class="' + icon + '"></div>';   
+                            content += '</div><div class="' + icon + '"></div>';   
                             content += '</div> </div>';
+                            state_count1 += 1;
                         return $(content);
+                        
                     } else {
                         return $(content);
                     }
@@ -651,11 +663,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 
             },
             eventAfterAllRender: function (event, element, view) {
-                //$(".days-06:first").css("display", "block");
                 $("td.fc-event-container").each(function() {
-                    //$(this).removeAttr('rowspan');
                 });
             },
+            
         });
 
         // Whenever the user clicks on the "save" button
@@ -675,6 +686,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 alert(errorMsg);
                 return false;
             }
+            if($("#comment").val() == '')
+                return false;
 
             var title = $("input[name='eventtype']:checked").parent('label').text();
             if ($('#eventstart').val() && ($('#salerepid').val() || $('#accountopt').val() != 0)) {
@@ -714,6 +727,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     {
                         //$('#calendar').fullCalendar('renderEvent', eventData, true); // stick? = true
                         $('#calendar').fullCalendar('refetchEvents');
+                        $('#filter_form')[0].reset();
+                        $('#action_palette_toggle').trigger('click');
                         //alert("Added Successfully");
                     }
                 })
@@ -723,8 +738,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             }
         });
 
-        $("#modalcomment, #modalfull_name_id, #modalstreet1_id, #modalstreet2_id, #modalcity_id, #modalstate_id, #modalzip_id").bind("keyup change", function(e) {
-            $(this).addClass('updated');
+        $("#modalcomment, #modalhealthcareComment, #modalfull_name_id, #modalstreet1_id, #modalstreet2_id, #modalcity_id, #modalstate_id, #modalzip_id").bind("keyup change", function(e) {
+            /*$(this).addClass('updated');*/
             if($(this).val() != '')
                 $('button#eventupdate').prop('disabled', false);
             else
@@ -736,6 +751,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         })*/
         // Whenever the user clicks on the "update" button
         $('#eventupdate').bind(clickEventType, function () {
+
+            var current_time = get_date();
+            $('button#eventupdate').prop('disabled', true);
             var commentid = "";
             if($(this).hasClass("edited")){
                 $(this).removeClass("edited")
@@ -760,7 +778,17 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var end = moment($('#modaleventstart').val()).format("YYYY-MM-DD");   
                 var accountId = $('#modalaccountopt').val();
                 var salesrepId = $('#modalsalerepid').val() ? $('#modalsalerepid').val() : 0;
-                var comments = $('#modalcomment').val();
+                
+                var action ="" , comments = "";
+                var radioValue = $("input[name='modaleventtype']:checked").val();
+                if(radioValue == 2 ){
+                    comments = $("#modalhealthcareComment").val();
+                    action = 'healthEventupdate'
+                }else{
+                    comments = $("#modalcomment").val();
+                    action = 'eventupdate'
+                }
+
                 var full_name = $('#modalfull_name_id').val() ? $('#modalfull_name_id').val() : '';
                 var street1 = $('#modalstreet1_id').val() ? $('#modalstreet1_id').val() : '';
                 var street2 = $('#modalstreet2_id').val() ? $('#modalstreet2_id').val() : '';
@@ -787,7 +815,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     userid: userid,
                     modalhealthcareid: modalhealthcareid,
                     commentid: commentid,
-                    action: 'eventupdate'
+                    updated_date : current_time,
+                    action: action
                 };
 
                 $.ajax({
@@ -796,10 +825,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     data: eventData,
                     success: function (res)
                     {
-                        //$('#calendar').fullCalendar('renderEvent', eventData, true); // stick? = true
                         $('#calendar').fullCalendar('refetchEvents');
                         popup_comment(modalid);
-                        //modal.style.display = "none";
+                        $('#modalcomment').val('');
+                        $("#modalhealthcareComment").val('')
                     }
                 })
 
@@ -1133,13 +1162,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             success : function(res){
                 //console.log(res);
                 var result = JSON.parse(res);
-                $(".comments-log").html('');
+                $(".comments-log").html("<label for='modalcomment'>Comments History: </label>");
                 $("#modalcomment").val('');
                 var count = 0;
                 var commentstext = "";
                 if(result.length != 0){
                     for( count = 0; count < result.length; count++){
-                        var comment_date = moment(new Date(result[count]['created_date'])).format('DD MMM YYYY');
+                        var comment_date = result[count]['updated_date'].replace(/-/g, '/');
+                        comment_date = moment(new Date(comment_date)).format('DD MMM YYYY');
                         commentstext += "<div class='commentlogss' id='"+result[count]['id']+"'><p>";
                         if(result[count]['repfname'] != null){
                             commentstext += "<strong>"+ result[count]['repfname'] + " " + result[count]['replname'] + " (" + comment_date + ") </strong>";
@@ -1156,7 +1186,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         commentstext += "<p class='comments'>"+result[count]['comments']+"</p></div>";
                     }
 
-                    $(".comments-log").html(commentstext);
+                    $(".comments-log").append(commentstext);
                 }
             }
         });
@@ -1183,8 +1213,37 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         var id = parent.attr("id");
         var text = parent.find('.comments').text();
         $("#modalcomment").val(text);
+        $("#modalhealthcareComment").val(text);
         $("#eventupdate").addClass('edited').attr("data-commentid",id);
     });
+
+    $(document).delegate('.rightCircleicon1','click', function(){
+        $("#updateEvent").removeClass();
+        $("#popup-accounts").hide();
+    })
+
+    $(document).delegate('.account-click', 'click', function(e){
+        e.preventDefault();
+        var acc_id = $(this).attr('id').substring(4);
+        $("#updateEvent").addClass('hide');
+        
+        $.ajax({
+            url: 'ajaxHandlerEvents.php',
+            type: 'POST',
+            data: { action: "getAccountSetup", id: acc_id },
+            success: function(res){
+                var result = JSON.parse(res);
+                console.log(result);
+                $('#selectAccount').html(result.options);
+                var siteiurl = $('#siteurl').val();
+                $('a#edit-selected-account').prop('href', siteiurl+'/account-config.php?action=edit&id='+acc_id);
+                $('a#add-account-provider').prop('href', siteiurl+'/accounts.php?account_id='+acc_id);
+            }
+        });
+        $("#popup-accounts").show();
+
+        return false;
+    })
 
 </script>
 <aside id="action_palette" class="action_palette_width">		
@@ -1278,7 +1337,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     </div>
                     <div class='f2 accounttype'> 
                         <div class="group">
-                            <textarea class="form-control" rows="10" id="comment" placeholder="Comments" required="required"></textarea>
+                            <textarea class="form-control" rows="10" id="comment" placeholder="Comments" required></textarea>
                         </div> 
                     </div> 
                     <div class="healthcare" style="display: none;">
@@ -1523,7 +1582,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                         <!--<div class='col-md-2'>
                                             <div class="form-group">
                                                 <span><?php
-                                                    echo $salesRepDetails['first_name'] . " " . $salesRepDetails['last_name'];
+                                                    //echo $salesRepDetails['first_name'] . " " . $salesRepDetails['last_name'];
                                                     ?>
                                                 </span>    
                                             </div>
@@ -1555,41 +1614,32 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                         </div>
                                     </div></div>
                                 <div class="row">
-                                    <div class='col-md-7 col-sm-6 modalaccounttype'> 
+                                    <div class="col-md-6 col-sm-6 modalaccounttype">
+                                        <div class="comments-log">
+                                            
+                                        </div>
+                                    </div>
+                                    <div class='col-md-6 col-sm-6 modalaccounttype'> 
                                         <div class="form-group">
                                             <label for="modalcomment">Add Comments: </label>
                                             <textarea class="form-control" name="modalcomment" rows="10" id="modalcomment" placeholder="Comments" required></textarea>
                                         </div> 
                                     </div>  
-                                    <div class="col-md-5 col-sm-6">
-                                        <label for="modalcomment">Comments History: </label>
-                                        <div class="comments-log">
-                                            
-                                        </div>
-                                    </div>
                                 </div>
                                 <div class="row modalhealthcare" style="display: none;">
                                     <div class='col-md-4'>
                                         <div class="form-group"> <!-- Full Name -->
                                             <input type="text" class="form-control" id="modalfull_name_id" name="modalfull_name" placeholder="Full Name">
-                                        </div>	
-                                    </div>    
-                                    <div class='col-md-4'>
+                                        </div>
                                         <div class="form-group"> <!-- Street 1 -->
                                             <input type="text" class="form-control" id="modalstreet1_id" name="modalstreet1" placeholder="Street address, P.O. box, company name, c/o">
-                                        </div>					
-                                    </div>    
-                                    <div class='col-md-4'>    
+                                        </div>
                                         <div class="form-group"> <!-- Street 2 -->
                                             <input type="text" class="form-control" id="modalstreet2_id" name="modalstreet2" placeholder="Apartment, suite, unit, building, floor, etc.">
-                                        </div>	
-                                    </div>    
-                                    <div class='col-md-4'>
+                                        </div>
                                         <div class="form-group"> <!-- City-->
                                             <input type="text" class="form-control" id="modalcity_id" name="modalcity" placeholder="City">
-                                        </div>									
-                                    </div>    
-                                    <div class='col-md-4'>
+                                        </div>  
                                         <div class="form-group"> <!-- State Button -->
                                             <select class="form-control" id="modalstate_id" name="modalstate">
                                                 <option value="">State</option>
@@ -1644,17 +1694,28 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                                 <option value="WV">West Virginia</option>
                                                 <option value="WI">Wisconsin</option>
                                                 <option value="WY">Wyoming</option>
-                                            </select>					
+                                            </select>                   
+                                        </div>
+                                        <div class="form-group"> <!-- Zip Code-->
+                                            <input type="text" class="form-control" id="modalzip_id" name="modalzip" placeholder="zip code">
+                                        </div>
+                                    </div> 
+                                    <div class='col-md-4'>
+                                        
+                                        <div class="form-group">
+                                            <!-- <label for="modalcomment">Add Comments: </label> -->
+                                            <textarea class="form-control" rows="13" id="modalhealthcareComment" placeholder="Comments"></textarea>
                                         </div>
                                     </div>    
                                     <div class='col-md-4'>
-                                        <div class="form-group"> <!-- Zip Code-->
-                                            <input type="text" class="form-control" id="modalzip_id" name="modalzip" placeholder="zip code">
-                                        </div>	
-                                    </div>    
+                                        <div class="comments-log">
+                                            
+                                        </div>
+                                    </div>   
+                                   <!--  <input type="hidden" id="current_user" name="userid" value="<?php echo $userID; ?>">  -->
                                     <input type="hidden" id="update_commenterid" name="userid" value="<?php echo $userID; ?>">
-                                    <input type="hidden" id="update_date_updated" name="update_date" value="<?php echo date("Y-m-d H:i:s"); ?>">  
-                                </div>  
+                                    <input type="hidden" id="update_date_updated" name="update_date" value="<?php echo date("Y-m-d H:i:s"); ?>">
+                                </div> 
                                 <div class="row">
                                     <div class='col-md-10'>
                                         <button type="button" id="eventupdate" class="btn btn-primary" style="cursor: pointer;" disabled="disabled">Update</button>
@@ -1666,6 +1727,113 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                         </div>
 
                     </form> 
+
+                    <div id="popup-accounts" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-8">
+                            <div class="selectAccountBlock">
+                                <label >Select Account</label><br/>
+                                <input type="hidden" name="siteurl" value="<?php echo SITE_URL; ?>" id="siteurl">
+                                <select class="form-control" id="selectAccount">
+                                    
+                                    
+                                </select>
+                                
+                                <a href="" id="edit-selected-account" class="add-new-account">
+                                    <span class="fas fa-pencil-alt" aria-hidden="true"></span>
+                                </a>
+                            </div>
+                            
+                            <div class="providersTable">                        
+                                <h4 id="physiciansListLabel" class="accounts">
+                                    Physicians       
+                                    <a href="<?php //echo SITE_URL;?>/accounts.php?account_id=<?php //echo $thisAccountID;?>&provider_guid=add" class="pull-right" id="add-account-provider">
+                                        <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
+                                    </a>
+                                </h4>
+                        
+                                <table class="table providersTable">
+                                    <thead>
+                                        <tr>                        
+                                            <th>UPIN</th>
+                                            <th>Title</th>
+                                            <th class="">First Name</th>
+                                            <th class="">Last Name</th>
+                                            <th class="">Image</th>
+                                            <th class="noFilter actions text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php 
+                                        
+                                        ?>
+                                        <tr>                            
+                                            
+                                            <td>
+                                                <?php //$photoImg = ($v['photo_filename']=="")? "/assets/images/default.png" : "/images/users/".$v['photo_filename'];   ?>
+                                                <img width="40" src="<?php //echo SITE_URL.$photoImg; ?>" />
+                                            </td>
+                                            <td class="text-center">
+                                                <!--<a class="edit-provider" data-provider-guid="<?php //echo $v['Guid_provider']; ?>">-->
+                                                <a href="<?php //echo SITE_URL."/accounts.php?account_id=$Guid_account&provider_guid=$providerGuid"; ?>">
+                                                    <span class="fas fa-pencil-alt" aria-hidden="true"></span>
+                                                </a>
+                                                <a onclick="javascript:confirmationDeleteProvider($(this));return false;" href="?delete=<?php //echo $providerGuid ?>&provider-id=<?php //echo $v['provider_id']; ?>&account-id=<?php //echo $Guid_account; ?>">
+                                                    <span class="far fa-trash-alt" aria-hidden="true"></span> 
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>  <!-- /.providersTable -->
+                        </div>
+                            <div class="col-md-4 pL-50">
+                            <div id="officeLogo">
+                                <?php //$logo = $logo ? "/../images/practice/".$logo : "/assets/images/default.png"; ?>
+                                <img class="salesrepLogo" src="<?php //echo SITE_URL.$logo; ?>" />
+                            </div>
+                            <div class="addressInfoBlock">
+                                <label >Address</label>
+                                <div id="officeAddress">
+                                    <div>
+                                    
+                                    </div>
+                                    
+                                        <div><i class="fas fa-phone"></i> <a class="phone_us" href="tel:"></a></div>
+                                    
+                                    
+                                        <div><i class="fas fa-fax"></i> <a class="phone_us" href="tel:"></a></div>
+                                    
+                                   
+                                        <div><i class="fas fa-globe"></i> <a target="_blank" href=""></a></div>                   
+                                    
+                                </div>
+                            </div>
+                            <div class="salesrepInfoBlock">
+                                <label >Genetic Consultant</label>
+                                <div class="imageBox">
+                                    <div class="pic">
+                                        
+                                        <img width="50" class="salesrepProfilePic" src="<?php //echo SITE_URL.$salesrepPhoto; ?>" />
+                                    </div>
+                                    <div class="name text-center">
+                                        
+                                    </div>
+                                </div>
+                                
+                                <div id="salesrepInfo1">
+                                    
+                                    
+                                        <div><i class="fas fa-envelope"></i> <a href="mailto:"></a></div>
+                                    
+                                    
+                                        <div><i class="fas fa-phone"></i> <a class="phone_us" href="tel:<?php //echo $salesrepPhone; ?>"></a></div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        </div> <!-- /.row -->        
+                    </div>
                 </div>
 
             </div>
@@ -1682,6 +1850,27 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             buttonImage: 'assets/eventschedule/images/calendar.gif'
         });
     });
+
+    function get_date(){
+        var d = new Date();
+        var hr = d.getHours();
+        var min = d.getMinutes();
+        if (min < 10) {
+            min = "0" + min;
+        }
+        var sec = d.getSeconds();
+        /*var ampm = "am";
+        if( hr > 12 ) {
+            hr -= 12;
+            ampm = "pm";
+        }*/
+        var date = d.getDate();
+        var month = d.getMonth()+1;
+        var year = d.getFullYear();
+        var current_time = year + "-" + month + "-" + date + " " +hr + ":" + min + ":" + sec ;
+        return current_time;
+    }
+
 </script>
 <?php require_once 'scripts.php'; ?>
 <?php require_once 'footer.php'; ?>
