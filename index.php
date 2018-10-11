@@ -4037,13 +4037,10 @@ function display_qualification($qualification_text, $not_qualified) {
 	
 	$content .= '<p><strong>Qualification Status</strong></p>';
 	
-	$qualification_text = "";
-	
 	if ($not_qualified) {
 		$content .= '<p>Not Qualified</p>';
 	} else {
 		$content .= '<p>Qualified</p>';
-		$qualification_text = "Qualified";
 	}
 	
 	$content .= '<p><strong>Guidelines Met</strong></p>';
@@ -4064,7 +4061,7 @@ function display_qualification($qualification_text, $not_qualified) {
 		
 		if (((strtolower($user['firstname']) == "john") && (strtolower($user['lastname']) == "doe")) || ((strtolower($user['firstname']) == "jane") && (strtolower($user['lastname']) == "doe"))) {
 		} else {
-			send_email($content, $title, "questionnaire@mdlab.com", $qualification_text);
+			send_email($content, $title, "questionnaire@mdlab.com", "", $not_qualified);
 			
 			if (strlen($qualify['account_number'])) {			 
 				$email = $conn->query("SELECT email FROM tblaccount a left join tblaccountrep ar ON a.Guid_account = ar.Guid_account left join tblsalesrep sr ON ar.Guid_salesrep = sr.Guid_salesrep WHERE account ='" . $qualify['account_number'] . "'")->fetch_object()->email; 
@@ -4666,7 +4663,7 @@ function update_password(&$error) {
 		$conn->query($sql);	
 	}	
 }
-function send_email($content, $title, $email="", $additional="", $qualification_text="") {
+function send_email($content, $title, $email="", $additional="", $not_qualified="") {
 	require ("db/dbconnect.php");	
 	
 	$result = $conn->query("SELECT * FROM tblqualify WHERE Guid_qualify = " . $_SESSION['id']);
@@ -4688,10 +4685,10 @@ function send_email($content, $title, $email="", $additional="", $qualification_
 	$headers .= 'From: BRCAcare Application <BRCA_Questionnaire_Support@mdlab.com>';
 
 	if (strlen($email)) {
-		if (strlen($qualification_text)) {
-			$subject = "BRCA Questionnaire Completion Notification - Qualified";
+		if ($not_qualified) {
+			$subject = "BRCA Questionnaire Completion Notification - Not Qualified";
 		} else {
-			$subject = "BRCA Questionnaire Completion Notification";			
+			$subject = "BRCA Questionnaire Completion Notification- Qualified";			
 		}
 		mail($email, $subject, $message, $headers);
 	} else {
