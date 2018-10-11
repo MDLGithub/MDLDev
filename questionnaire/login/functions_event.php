@@ -1,5 +1,5 @@
 <?php
-function getEventSchedule($db,$salesRepId,$accountId){
+function getEventSchedule($db,$salesRepId,$accountId,$reqdashboard){
     if($salesRepId != 0 || $accountId != 0){
         $query = "SELECT evt.id, evt.healthcareid, evt.salesrepid, evt.accountid, evt.title, evt.start_event, evt.end_event,"
                 . " CONCAT(salerep.first_name, ' ', salerep.last_name) as salesrep, salerep.color, "
@@ -36,21 +36,32 @@ function getEventSchedule($db,$salesRepId,$accountId){
                 . "LEFT JOIN tblaccount acct ON evt.accountid = acct.Guid_account "
                 . "LEFT JOIN tblhealthcare hltcare ON evt.healthcareid = hltcare.Guid_healthcare ";
 
-                if($salesRepId != 0 && $accountId == 0){
-                    $query .= "WHERE evt.salesrepid =:salesrepid "
-                            . "OR evt.accountid =:accountid ";
-                }
-                if($salesRepId == 0 && $accountId != 0){
-                    $query .= "WHERE evt.accountid =:accountid "
-                            . "OR evt.salesrepid =:salesrepid ";
-                }
                 if($salesRepId != 0 && $accountId != 0){
                     $query .= "WHERE evt.salesrepid =:salesrepid "
                             . "AND evt.accountid =:accountid ";
                 }
+
+                if($salesRepId == 0 && $accountId != 0){
+                    $query .= "WHERE evt.accountid =:accountid "
+                            . "OR evt.salesrepid =:salesrepid ";
+                }
+
+                if($salesRepId != 0 && $accountId == 0 && $reqdashboard == 0){
+                    $query .= "WHERE evt.salesrepid =:salesrepid "
+                            . "OR evt.accountid =:accountid ";
+                }
+
+                if($salesRepId != 0 && $accountId == 0 && $reqdashboard == 1){
+                    $query .= "WHERE evt.salesrepid =:salesrepid ";
+                            //. "OR evt.accountid =:accountid ";
+                }
+                
+                
                 $query .= "ORDER BY evt.id";
-        
-        $result = $db->query($query, array("salesrepid"=>$salesRepId,"accountid"=>$accountId));
+        if($reqdashboard == 0)
+            $result = $db->query($query, array("salesrepid"=>$salesRepId,"accountid"=>$accountId));
+        elseif($reqdashboard == 1)
+            $result = $db->query($query, array("salesrepid"=>$salesRepId));
     }
     else{
         $query = "SELECT evt.id, evt.healthcareid, evt.salesrepid, evt.accountid, evt.title, evt.start_event, evt.end_event,"

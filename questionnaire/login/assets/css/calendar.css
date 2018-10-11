@@ -406,7 +406,7 @@ Author:Gabriela Johnson;
     background: url(../images/stats_background.png) no-repeat;
     background-size: cover;
     box-shadow: inset 0px 16px 0px 0px rgba(254, 253, 240, 0.004);
-    height:280px;
+    /*height:280px;*/
     flex-wrap:wrap;
 }
 
@@ -424,17 +424,20 @@ Author:Gabriela Johnson;
     color: rgb(70, 106, 147);
     font-weight: bold;
     line-height: 1.2;
-    display:inline-block;
     vertical-align: middle;
+    padding-top:20px;
 }
 
 .chart_header .button{
-  margin:auto;
+  /*margin:auto;*/
   min-width:195px;
   /*display:inline-block;
   text-indent: 30px;*/
   height:30px;
   /*vertical-align: middle;*/
+  position:relative;
+  float:right;
+  top:-20px;
 }
 .chart_header .button::before{
   font-size:10px;
@@ -855,6 +858,15 @@ g g g text{
     right: 10px;
 }
 
+.commentlogss {
+    padding: 10px 0 5px;
+    border-bottom: 1px solid #cccccc4f;
+}
+.commentlogss p {
+    font-size: 14px;
+    line-height: 20px;
+}
+
 
 @media (min-width: 992px){
   #performance_chart .col-md-2 {
@@ -899,7 +911,7 @@ g g g text{
     }
 
     #chart_stats{
-      height:300px;
+      /*height:300px;*/
     }
 
     .chart_header .stats_date{
@@ -907,7 +919,7 @@ g g g text{
     }
   }
 
-
+/*iPad landscape*/
 @media only screen 
 and (min-device-width : 768px) 
 and (max-device-width : 1024px) 
@@ -915,249 +927,279 @@ and (orientation : landscape) {
 
 
 
-#stats{
-  min-height:500px;
+    #stats{
+      min-height:500px;
+    }
+
+    #calendar th{
+      font-size:11px;
+    }
+
+    #calendar td{
+      min-width:100px;
+    }
+
+    .week_stats p{
+      font-size:15px;
+    }
+
+    #performance_chart .row{
+      min-width: initial;
+    }
+
+    #performance_chart .col-md-1{
+      font-size:12px;
+      line-height:3;
+      min-width:initial;
+    }
+
+    #performance_chart .col-md-2{
+       padding: 0 10px;
+       display: inherit;
+    }
+
+    #performance_chart .col-md-2 span{
+      width:50px;
+      line-height: 1.7;
+    }
+
+    #mebrcacnt, #meeventcnt, #meregcnt, 
+    #mequalcnt, #mecomcnt, #mesubcnt{
+      font-size: 10px;
+
+    }
+
+    #topbrcacnt, #topeventcnt, #topregcnt,
+    #topqualcnt, #topcomcnt, #topsubcnt{
+      font-size: 10px;
+
+    }
+
+    .gold_stat_star::before{
+      left:32px;
+      bottom:6px;
+    }
+
+    .increase::before{
+      background-size:100% 100%;
+    }
+
+    .decrease::before{
+      background-size:100% 100%;
+    }
+
+    .top-buttons.col-md-5{
+      width:50%;
+    }
+
+    .info_block{
+      height:70%;
+    }
+
+    .info_block_row .col-md-6{
+      width:initial !important;
+      min-width:0;
+      padding:0 15px;
+    }
+
+    .info_block h1{
+      font-size:20px;
+    }
+
+    .info_block .button {
+        height: 33px;
+        font-size: 10px;
+        line-height: inherit;
+    }
+
+    .info_block .button strong {
+        font-size:10px;
+        text-indent:10px;
+    }
+
+    .fc-toolbar.fc-header-toolbar{
+      width:66%;
+      min-width:initial;
+      height:20px;
+      margin-top:-3.5em;
+      margin-bottom:1em;
+
+    }
+
+    .details_button{
+      background: rgb(28, 72, 123) !important;
+      border-radius: 20px;
+      color: white;
+      text-align: center;
+      box-shadow: none !important;
+      padding: 2px 8px;
+      vertical-align: middle;
+      font-size: 10px;
+
+    }
+
+    .summary_button{
+      background-color: rgb(235, 240, 245);
+      border-radius: 20px;
+      color: rgb(55, 86, 123);
+      text-align: center;
+      box-shadow: none !important;
+      padding: 2px 5px;
+      vertical-align: middle;
+      font-size: 10px;
+      font-family: "Open Sans";
+      border-style: solid;
+      border-width: 1px;
+      border-color: rgb(185, 198, 213);
+      height:auto;
+    }
+
+    .fc-toolbar.fc-header-toolbar .fc-center{
+        font-size: 15px;
+        line-height: 1.7;
+    }
+
+    .fc .fc-toolbar > * > *{
+      font-size:0.6em;
+    }
+
+
+    #calendar table{
+        min-height: 150px;
+    }
+
+    .chart_header .button {
+        height:2em;
+        top:-25px;
+
+    }
+
+    .chart_header .button strong{
+        font-size:12px;
+        text-indent:20px;
+        line-height: 2.5
+    }
+
+    .chart_header p{
+      font-size:22px;
+    }
+
+    .show-stats{
+      font-size:10px;
+    }
+
+    #chart_stats{
+      /*height:250px;*/
+    }
+
+    #piechart{
+      /*width:500px !important;
+      height:208px !important;*/
+    }
+
+    #chart{
+      /*width:500px !important;
+      height:208px !important;*/
+    }
+
 }
 
-#calendar th{
-  font-size:11px;
-}
-
-#calendar td{
-  min-width:100px;
-}
-
-.week_stats p{
-  font-size:15px;
-}
-
-#performance_chart .row{
-  min-width: initial;
-}
-
-#performance_chart .col-md-1{
-  font-size:12px;
-  line-height:3;
-  min-width:initial;
-}
-
-#performance_chart .col-md-2{
-   padding: 0 10px;
-   display: inherit;
-}
-
-#performance_chart .col-md-2 span{
-  width:50px;
-  line-height: 1.7;
-}
-
-#mebrcacnt, #meeventcnt, #meregcnt, 
-#mequalcnt, #mecomcnt, #mesubcnt{
-  font-size: 10px;
-
-}
-
-#topbrcacnt, #topeventcnt, #topregcnt,
-#topqualcnt, #topcomcnt, #topsubcnt{
-  font-size: 10px;
-
-}
-
-.gold_stat_star::before{
-  left:32px;
-  bottom:6px;
-}
-
-.top-buttons.col-md-5{
-  width:50%;
-}
-
-.info_block{
-  height:70%;
-}
-
-.info_block_row .col-md-6{
-  width:initial !important;
-  min-width:0;
-  padding:0 15px;
-}
-
-.info_block h1{
-  font-size:20px;
-}
-
-.info_block .button {
-    height: 33px;
-    font-size: 10px;
-    line-height: inherit;
-}
-
-.info_block .button strong {
-    font-size:10px;
-    text-indent:10px;
-}
-
-.fc-toolbar.fc-header-toolbar{
-  width:66%;
-  min-width:initial;
-  height:20px;
-  margin-top:-3.5em;
-  margin-bottom:1em;
-
-}
-
-.details_button{
-  background: rgb(28, 72, 123) !important;
-  border-radius: 20px;
-  color: white;
-  text-align: center;
-  box-shadow: none !important;
-  padding: 2px 8px;
-  vertical-align: middle;
-  font-size: 10px;
-
-}
-
-.summary_button{
-  background-color: rgb(235, 240, 245);
-  border-radius: 20px;
-  color: rgb(55, 86, 123);
-  text-align: center;
-  box-shadow: none !important;
-  padding: 2px 5px;
-  vertical-align: middle;
-  font-size: 10px;
-  font-family: "Open Sans";
-  border-style: solid;
-  border-width: 1px;
-  border-color: rgb(185, 198, 213);
-  height:auto;
-}
-
-.fc-toolbar.fc-header-toolbar .fc-center{
-    font-size: 15px;
-    line-height: 1.7;
-}
-
-.fc .fc-toolbar > * > *{
-  font-size:0.6em;
-}
-
-
-#calendar table{
-    min-height: 150px;
-}
-
-.chart_header .button {
-    height:2em;
-}
-
-.chart_header .button strong{
-    font-size:12px;
-    text-indent:20px;
-    line-height: 2.5
-}
-
-.chart_header p{
-  font-size:22px;
-}
-
-#chart_stats{
-  height:250px;
-}
-
-}
-
-
+/*iPad portrait*/
 @media only screen 
 and (max-width : 1024px) 
 and (orientation : portrait) { 
 
-br{
-  display:none;
-}
+    br{
+      display:none;
+    }
 
-#stats_header{
-  flex-wrap: wrap;
-}
+    #stats_header{
+      flex-wrap: wrap;
+    }
 
-#stats{
-  min-height:500px;
-}
+    #stats{
+      min-height:500px;
+    }
 
-#calendar td{
-  min-width:100px;
-}
+    #calendar td{
+      min-width:100px;
+    }
 
-#performance_chart{
-  margin-bottom:10px;
-}
+    #performance_chart{
+      margin-bottom:10px;
+    }
 
-#performance_chart .row{
-  min-width: initial;
-}
+    #performance_chart .row{
+      min-width: initial;
+    }
 
-#performance_chart .col-md-1{
-  font-size:12px;
-  line-height:4.5;
-  min-width:initial;
-}
+    #performance_chart .col-md-1{
+      font-size:12px;
+      line-height:4.5;
+      min-width:initial;
+    }
 
-.info_block_row{
-  padding-left:0;
-}
+    .info_block_row{
+      padding-left:0;
+    }
 
-.info_block{
-    justify-content: space-between;
-}
+    .info_block{
+        justify-content: space-between;
+    }
 
-.info_block h1{
-  padding: 7px 0 0 0;
-  font-size:20px;
-  flex-grow:0.1;
-}
+    .info_block h1{
+      padding: 7px 0 0 0;
+      font-size:20px;
+      flex-grow:0.1;
+    }
 
-.info_block .col-md-6{
-  flex-grow:0.3;
-  padding:0;
-  display:inherit;
-}
+    .info_block .col-md-6{
+      flex-grow:0.3;
+      padding:0;
+      display:inherit;
+    }
 
-.info_button{
-  vertical-align: middle
-}
-
-
-.info_block .button{
-  width:45%;
-  height:33px;
-  font-size:14px;
-  line-height:inherit;
-  vertical-align:top;
-
-}
-
-.info_block .button strong{
-  font-size:14px;
-  text-indent:22px;
-}
-
-.fc-toolbar.fc-header-toolbar {
-  width:100%;
-  min-width:initial;
-  margin-top:1em;
-}
-
-#chart_stats{
-  flex-wrap:wrap;
-  height:100%;
-}
-
-.chart_header{
-  width:100%;
-  text-align:center;
-}
+    .info_button{
+      vertical-align: middle
+    }
 
 
+    .info_block .button{
+      width:45%;
+      height:33px;
+      font-size:14px;
+      line-height:inherit;
+      vertical-align:top;
+
+    }
+
+    .info_block .button strong{
+      font-size:14px;
+      text-indent:22px;
+    }
+
+    .fc-toolbar.fc-header-toolbar {
+      width:100%;
+      min-width:initial;
+      margin-top:1em;
+    }
+
+    #chart_stats{
+      flex-wrap:wrap;
+      height:100%;
+    }
+
+    .chart_header{
+      width:100%;
+      text-align:center;
+    }
+
+    .chart_header .button{
+      margin:auto;
+      float:none;
+      top:0;
+      text-indent: -20px;
+
+    }
 
 }
