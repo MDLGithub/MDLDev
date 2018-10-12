@@ -14,6 +14,7 @@ if (isset($_GET['logout'])) {
 $userID = $_SESSION['user']["id"];
 $roleInfo = getRole($db, $userID);
 $roleID = $roleInfo['Guid_role'];
+$role = $roleInfo['role'];
 $accessRole = getAccessRoleByKey('account');
 $roleIDs = unserialize($accessRole['value']);
 $dataViewAccess = isUserHasAnyAccess($roleIDs, $roleID, 'view');
@@ -80,7 +81,11 @@ if(isset($_POST['submit_account'])){
             } else {
                 insertIntoTable($db, 'tblaccountrep', array('Guid_account' => $_POST['Guid_account'],'Guid_salesrep' => $_POST['Guid_salesrep']));
             }
-            Leave(SITE_URL.'/account-config.php?update');
+            if($role=='Physician'){
+                Leave(SITE_URL.'/accounts.php?update');
+            }else{
+                Leave(SITE_URL.'/account-config.php?update');
+            }
         } else {
             if($_POST['account']=="0"){
                 $errorMessage = "Account ID can't be <strong>".$_POST['account']."</strong>. Please Type valid ID.";
@@ -113,6 +118,16 @@ if(isset($_POST['submit_account'])){
 }
 $salesreps = $db->selectAll('tblsalesrep');
 $accounts = $db->selectAll('tblaccount', ' ORDER BY name ASC');
+
+if($role=='Physician'){ 
+    //get the Guid_account for that Physician   
+    $thisProvider = $db->row("SELECT a.Guid_account, a.account, a.name FROM `tblprovider` p
+                            LEFT JOIN `tblaccount` a ON a.account=p.`account_id`
+                            WHERE p.Guid_user=$userID");
+    if( !(isset($_GET['action']) && $_GET['action']=='edit')){
+        Leave(SITE_URL.'/accounts.php');
+    }
+}
 
 $tblproviders = $db->selectAll('tblprovider');
 $states = $db->selectAll('tblstates');
@@ -158,15 +173,17 @@ require_once ('navbar.php');
                 </ol>                
                 <?php } ?>
             </h4>
-            <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>
-            <a href="<?php echo SITE_URL; ?>/dashboard2.php" class="button homeIcon"></a>
-            <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
+            <?php echo topNavLinks($role); ?>
         </section>
         <div class="scroller">         
             <?php
             if( isset($_GET['action']) && $_GET['action'] !='' ){ 
                 if($_GET['action'] =='edit'){
-                    $accountInfo = getAccountAndSalesrep($db, $_GET['id']); 
+                    $thisAccountID =  $_GET['id'];
+                    if($role=='Physician'){ 
+                        $thisAccountID = $thisProvider['Guid_account'];
+                    }
+                    $accountInfo = getAccountAndSalesrep($db,$thisAccountID); 
                     if(empty($accountInfo)){
                         Leave(SITE_URL."/account-config.php");
                     }
@@ -449,26 +466,30 @@ require_once ('navbar.php');
                         <table id="dataTable" class="table accountsTable">
                         <thead>
                             <tr>   
-                            <?php if(isFieldVisibleByRole($isAccountView, $roleID)) {?>
-                                <th>Account Number</th>
-                            <?php } ?>
-                            <?php if(isFieldVisibleByRole($isNameView, $roleID)) {?>
-                                <th>Account Name</th>
-                            <?php } ?>    
-                               
-                            <?php if(isFieldVisibleByRole($isCityView, $roleID)) {?>
-                                <th class="">City</th>
-                            <?php } ?>    
-                            <?php if(isFieldVisibleByRole($isStateView, $roleID)) {?>
-                                <th class="">State</th>
-                            <?php } ?> 
-                            <?php if(isFieldVisibleByRole($isSalesrepView, $roleID)) {?>
-                                <th class="">Genetic Consultant</th>           
-                            <?php } ?>  
-                            <th class="">Registered</th>           
-                            <th class="">Completed</th>           
-                            <th class="">Qualified</th>           
-                            <th class="">Submitted</th>
+                                <?php if(isFieldVisibleByRole($isAccountView, $roleID)) {?>
+                                    <th>Account Number</th>
+                                <?php } ?>
+                                <?php if(isFieldVisibleByRole($isNameView, $roleID)) {?>
+                                    <th>Account Name</th>
+                                <?php } ?>    
+
+                                <?php if(isFieldVisibleByRole($isCityView, $roleID)) {?>
+                                    <th class="">City</th>
+                                <?php } ?>    
+                                <?php if(isFieldVisibleByRole($isStateView, $roleID)) {?>
+                                    <th class="">State</th>
+                                <?php } ?> 
+                                <?php if(isFieldVisibleByRole($isSalesrepView, $roleID)) {?>
+                                    <th class="">Genetic Consultant</th>           
+                                <?php } ?>  
+                                <th class="">Registered</th>           
+                                <th class="">Completed</th>           
+                                <th class="">Qualified</th>           
+                                <th class="">Submitted</th>
+                                <?php if( isFieldVisibleByRole($isActionEdit, $roleID) || isFieldVisibleByRole($isActionDelete, $roleID)) {?>
+                                    <th class="noFilter actions text-center">Actions</th>
+                                <?php } ?>
+                            
                             </tr>
                         </thead>
                         <tbody>
@@ -480,57 +501,7 @@ require_once ('navbar.php');
                                 <tr> 
                                 <?php if(isFieldVisibleByRole($isAccountView, $roleID)) {?>
                                     <td class="clickable">
-                                        <a class="details"><?php echo $v['account']; ?></a>
-                                        <div class="moreInfo">
-                                            <div class="content">
-                                                <span class="close">X</span>      
-                                                
-                                                <?php if(isFieldVisibleByRole($isLogoView, $roleID)) {?> 
-                                                    <p>
-                                                        <a target="_blank" href="<?php echo ($v['website']!="")? $v['website'] : "#"; ?>">
-                                                            <?php $logo = $v['logo'] ? "/../images/practice/".$v['logo'] : "/assets/images/default.png";?>
-                                                            <img width="40" src="<?php echo SITE_URL.$logo; ?>" >
-                                                        </a>
-                                                    </p>
-                                                <?php } ?>  
-                                                 <?php if(isFieldVisibleByRole($isAddressView, $roleID)) {?>
-                                                    <?php if($v['address']!=""){ ?>
-                                                        <p><label>Address: </label><?php echo $v['address']; ?></p>
-                                                    <?php } ?>
-                                                <?php } ?>    
-                                                <?php if($v['zip']!="") {?>
-                                                    <?php if(isFieldVisibleByRole($isZipView, $roleID)) {?>
-                                                        <p><label>Zip: </label><?php echo $v['zip']; ?></p>         
-                                                    <?php } ?>    
-                                                <?php } ?>    
-                                                <?php if($v['phone_number']!="") {?>
-                                                    <?php if(isFieldVisibleByRole($isPhoneView, $roleID)) {?>
-                                                        <p><label>Phone: </label><span class="phone_us"><?php echo $v['phone_number']; ?></span></p>         
-                                                    <?php } ?>    
-                                                <?php } ?>    
-                                                <?php if($v['fax']!="") {?>
-                                                    <?php if(isFieldVisibleByRole($isFaxView, $roleID)) {?>
-                                                        <p><label>Fax: </label><span class="phone_us"><?php echo $v['fax']; ?></span></p>          
-                                                    <?php } ?>  
-                                                <?php } ?>  
-                                                
-                                                <?php if( isFieldVisibleByRole($isActionEdit, $roleID) || isFieldVisibleByRole($isActionDelete, $roleID)) {?>
-                                                <div class="text-right pT-15 pB-10">
-                                                    <?php if(isFieldVisibleByRole($isActionEdit, $roleID)) {?>
-                                                    <a href="<?php echo SITE_URL; ?>/accounts.php?account_id=<?php echo $v['Guid_account']; ?>">
-                                                        <span class="fas fa-pencil-alt" aria-hidden="true"></span>
-                                                    </a>
-                                                    <?php } ?>
-                                                    <?php if(isFieldVisibleByRole($isActionDelete, $roleID)) {?>
-                                                    <a onclick="javascript:confirmationDeleteAccount($(this));return false;" href="<?php echo SITE_URL; ?>/account-config.php?delete=<?php echo $v['Guid_account'] ?>&id=<?php echo $v['account']; ?>">
-                                                        <span class="far fa-trash-alt" aria-hidden="true"></span> 
-                                                    </a>
-                                                    <?php } ?>
-                                                </div>
-                                                <?php } ?>
-                                                
-                                            </div>
-                                        </div>                                    
+                                       <a href="<?php echo SITE_URL; ?>/accounts.php?account_id=<?php echo $v['Guid_account']; ?>"><?php echo $v['account']; ?></a>                                                                        
                                     </td>
                                 <?php } ?>
                                 <?php if(isFieldVisibleByRole($isNameView, $roleID)) {?>
@@ -549,7 +520,20 @@ require_once ('navbar.php');
                                 <td><?php echo getAccountStatusCount($db, $v['account'], '36'); //36->Questionnaire Completed ?></td>
                                 <td><?php echo getAccountStatusCount($db, $v['account'], '29'); //29->Questionnaire Completed->Qualified ?></td>
                                 <td><?php echo getAccountStatusCount($db, $v['account'], '1' ); //28->Submitted (Specimen Collected) ?></td>
-                               
+                                <?php if( isFieldVisibleByRole($isActionEdit, $roleID) || isFieldVisibleByRole($isActionDelete, $roleID)) {?>
+                                    <td class="text-center">
+                                        <?php if(isFieldVisibleByRole($isActionEdit, $roleID)) {?>
+                                        <a href="<?php echo SITE_URL; ?>/accounts.php?account_id=<?php echo $v['Guid_account']; ?>">
+                                            <span class="fas fa-pencil-alt" aria-hidden="true"></span>
+                                        </a>
+                                        <?php } ?>
+                                        <?php if(isFieldVisibleByRole($isActionDelete, $roleID)) {?>
+                                        <a onclick="javascript:confirmationDeleteAccount($(this));return false;" href="<?php echo SITE_URL; ?>/account-config.php?delete=<?php echo $v['Guid_account'] ?>&id=<?php echo $v['account']; ?>">
+                                            <span class="far fa-trash-alt" aria-hidden="true"></span> 
+                                        </a>
+                                        <?php } ?>
+                                    </td>
+                                <?php } ?>
                                 </tr>
                             <?php
                                 $i++;

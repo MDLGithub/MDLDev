@@ -13,7 +13,14 @@ if (isset($_POST['email'], $_POST['password'])) {
     $login = login($email, $password, $db);
     if ( $login['status'] == true) {
         // Login success 
-        Leave(SITE_URL.'/dashboard.php');
+        $userID = $_SESSION['user']["id"];
+        $roleInfo = getRole($db, $userID);
+        $role = $roleInfo['role'];
+        if($role=='Physician'){
+            Leave(SITE_URL.'/accounts.php');
+        }else{
+            Leave(SITE_URL.'/dashboard.php');
+        }
     } else {
         $showMsg = '1';
         $message = $login['message'];

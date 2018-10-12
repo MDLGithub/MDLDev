@@ -898,8 +898,8 @@ function getProviderSubmitedCount($db, $Guid_provider ){
                 LEFT JOIN tbluser u ON u.Guid_user=l.Guid_user
                 WHERE l.Guid_user IN(".$userIds.")
                 AND u.marked_test='0'
-                AND l.Guid_status=1
-                AND l.currentstatus='Y'";
+                AND l.Guid_status=1";
+               // AND l.currentstatus='Y'";
         $result = $db->row($submitedQ);
     }
     
@@ -912,7 +912,12 @@ function getProviderSubmitedCount($db, $Guid_provider ){
     
 }
 
-
+/**
+ * 
+ * @param type $db
+ * @param type $providerID
+ * @return type
+ */
 
 function getProviderSalesRep($db, $providerID) {
     $query = "SELECT 
@@ -1786,11 +1791,11 @@ function get_status_table_rows($db, $parent = 0, $searchData=array(), $linkArr=a
                 if(empty($linkArr)){
                     $link .= SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].$filterUrlStr;
                 } else {
-                    $link .=  SITE_URL.'/account-patients.php?';
+                    $link .=  SITE_URL.'/accounts.php?status_id='.$status['Guid_status'].'&';
                     foreach ($linkArr as $k=>$v){
                         $link .= $k.'='.$v.'&';
                     }
-                    $link = rtrim($link,'&');
+                    $link = rtrim($link,'&');                    
                 }
                 if ( !empty($checkCildren) ) { 
                     $optionClass = 'has_sub';                 
@@ -1799,7 +1804,7 @@ function get_status_table_rows($db, $parent = 0, $searchData=array(), $linkArr=a
                 $content .= "<td class='text-left'><span>".$status['status'].'</span></td>';            
                 $content .= '<td><a href="'.$link.'">'.$stats['count'].'</a></td>';
                 if ( !empty($checkCildren) ) {
-                    $content .= get_status_child_rows( $db, $status['Guid_status'], "&nbsp;", $searchData );
+                    $content .= get_status_child_rows( $db, $status['Guid_status'], "&nbsp;", $searchData, $linkArr );
                 }            
                 $content .= "</tr>";
             }
@@ -1808,7 +1813,7 @@ function get_status_table_rows($db, $parent = 0, $searchData=array(), $linkArr=a
    
     return $content;
 }
-function get_status_child_rows($db, $parent = 0,  $level = '', $searchData=array()) {
+function get_status_child_rows($db, $parent = 0,  $level = '', $searchData=array(), $linkArr=array()) {
     $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent."  ORDER BY order_by ASC");
     if ( $statuses ) {
         $content ='';
@@ -1822,105 +1827,25 @@ function get_status_child_rows($db, $parent = 0,  $level = '', $searchData=array
                 if ( !empty($checkCildren) ) { 
                     $optionClass = 'parent has_sub';   
                 }  
+                $link = '';
+                if(empty($linkArr)){
+                    $link .= SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].'&parent='.$parent.$filterUrlStr;
+                } else {
+                    $link .=  SITE_URL.'/accounts.php?status_id='.$status['Guid_status'].'&parent='.$parent.'&';
+                    foreach ($linkArr as $k=>$v){
+                        $link .= $k.'='.$v.'&';
+                    }
+                    $link = rtrim($link,'&');                    
+                }
                 $content .= "<tr id='".$status['Guid_status']."' data-parent-id='".$parent."' class='sub ".$optionClass."'>";
                 $content .= "<td class='text-left'><span>".$level . " " .$status['status'].'</span></td>';
-                $content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].'&parent='.$parent.$filterUrlStr.'">'.$stats['count']. '</a></td>';
+                $content .= '<td><a href="'.$link.'">'.$stats['count']. '</a></td>';
                 if ( !empty($checkCildren) ) {
                     $prefix .= '&nbsp;';
-                    $content .= get_status_child_rows( $db, $status['Guid_status'], $level . "&nbsp;" );
+                    $content .= get_status_child_rows( $db, $status['Guid_status'], $level . "&nbsp;", $searchData, $linkArr );
                 }
                  $content .= "</tr>";
             }
-        }
-    }
-   
-    return $content;
-}
-
-
-function get_status_table_rows___($db, $parent = 0) { 
-    $q ='SELECT statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date` 
-        FROM `tbl_mdl_status` statuses
-        LEFT JOIN `tbl_mdl_status_log` statuslogs
-        ON statuses.`Guid_status`= statuslogs.`Guid_status`
-        WHERE `visibility`="1" 
-        AND statuslogs.`Guid_status_log`<>""
-        AND parent_id="'.$parent.'"     
-        ORDER BY statuslogs.`Date` DESC, statuses.`order_by` DESC';
-    
-    $statuses = $db->query($q);
-    $content  = "";
-
-    if(!empty($statuses)){
-        foreach ($statuses as $k=>$v){
-            $qChild ='SELECT statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date` 
-            FROM `tbl_mdl_status` statuses
-            LEFT JOIN `tbl_mdl_status_log` statuslogs
-            ON statuses.`Guid_status`= statuslogs.`Guid_status`
-            WHERE `visibility`="1" 
-            AND statuslogs.`Guid_status_log`<>""
-            AND parent_id="'.$v['Guid_status'].'"           
-            ORDER BY statuslogs.`Date` DESC, statuses.`order_by`  DESC';
-            $checkChildren = $db->query($qChild);
-            
-            $optionClass = '';
-            if ( !empty($checkChildren) ) { 
-                $optionClass = 'has_sub';  
-                
-            }    
-            $content .= "<tr id='".$v['Guid_status']."' class='parent ".$optionClass."'>";
-            $content .= "<td class='text-left'><span>".$v['status'].'</span></td>';            
-            $content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$v['Guid_status'].'">'.$v['Guid_patient'].'</a></td>';
-            if ( !empty($checkChildren) ) {
-                $content .= get_status_child_rows( $db, $v['Guid_status'],"&nbsp;" );
-            }            
-            $content .= "</tr>";            
-        }
-    }
-    
-    return $content;
-}
-
-function get_status_child_rows__($db, $parent = 0,  $level = '') {
-    
-    $q ='SELECT statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date` 
-        FROM `tbl_mdl_status` statuses
-        LEFT JOIN `tbl_mdl_status_log` statuslogs
-        ON statuses.`Guid_status`= statuslogs.`Guid_status`
-        WHERE `visibility`="1" 
-        AND statuslogs.`Guid_status_log`<>""
-        AND parent_id="'.$parent.'"     
-        ORDER BY statuslogs.`Date` DESC, statuslogs.`order_by` DESC';
-    $statuses = $db->query($q);
-    
-    $content = "";
-    if ( !empty($statuses) ) {
-        $prefix = 0;
-        foreach ( $statuses as $status ) { 
-            $qChild = 'SELECT statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date` 
-                        FROM `tbl_mdl_status` statuses
-                        LEFT JOIN `tbl_mdl_status_log` statuslogs
-                        ON statuses.`Guid_status`= statuslogs.`Guid_status`
-                        WHERE `visibility`="1" 
-                        AND statuslogs.`Guid_status_log`<>""
-                        AND parent_id="'.$status['Guid_status'].'"           
-                        ORDER BY statuslogs.`Date` DESC, statuslogs.`order_by`  DESC';
-            $checkCildren = $db->query($qChild);
-            $optionClass = '';  
-            
-            
-            if ( !empty($checkCildren) ) { 
-                $optionClass = 'parent has_sub';   
-            }  
-            $content .= "<tr id='".$status['Guid_status']."' data-parent-id='".$parent."' class='sub ".$optionClass."'>";
-            $content .= "<td class='text-left'><span>".$level . " " .$status['status'].'</span></td>';
-            $content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].'">hhhh</a></td>';
-            if ( !empty($checkCildren) ) {
-                $prefix .= '&nbsp;';
-                $content .= get_status_child_rows( $db, $status['Guid_status'], $level . "&nbsp;" );
-            }
-            $content .= "</tr>";
-            
         }
     }
    
@@ -2145,4 +2070,21 @@ function getStatusRevenueTotals($db, $Guid_status, $searchData=array()){
     $revenueTotalsData['total'] = $total;
     
     return $revenueTotalsData;    
+}
+
+/**
+ * Top Nav Links
+ * @param type $role
+ * @return string
+ */
+function topNavLinks($role=FALSE){
+    $content = '<a href="'.SITE_URL.'/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>';
+    if($role=='Physician'){
+        $content .= '<a href="'.SITE_URL.'/accounts.php" class="button homeIcon"></a>';
+    }else{
+       $content .= '<a href="'.SITE_URL.'/dashboard2.php" class="button homeIcon"></a>'; 
+    }    
+    $content .= '<a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit smaller_button"><strong>View Questionnaire</strong></a>';
+
+    return $content;
 }

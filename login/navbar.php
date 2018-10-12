@@ -36,6 +36,9 @@
                         <?php } ?>
                         <li><a href="<?php echo SITE_URL; ?>/eventschedule.php">Event Schedule</a></li>
                     <?php } ?>
+                    <?php if($role == 'Physician') { ?>
+                        <li><a href="<?php echo SITE_URL; ?>/accounts.php">Account</a></li>
+                    <?php } ?>
                     <?php if($role=='Admin'){ ?>
                         <li><a href="<?php echo SITE_URL; ?>/access-roles.php">Access Roles</a></li>
                         <li><a href="<?php echo SITE_URL; ?>/user-management.php">User Management</a></li>

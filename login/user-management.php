@@ -581,7 +581,7 @@ require_once ('navbar.php');
                                 <option value="">Account</option>
                                 <?php foreach ($accounts as $k=>$v) { ?>
                                 <?php $selected = (isset($accountID) && $accountID==$v['account'])?" selected":""; ?>
-                                <option <?php echo $selected; ?> value="<?php echo $v['account']; ?>"><?php echo $v['account']."-".ucfirst(strtolower($v['name'])); ?></option>                                
+                                <option <?php echo $selected; ?> value="<?php echo $v['account']; ?>"><?php echo $v['account']."-". ucwords(strtolower($v['name'])); ?></option>                                
                                 <?php }?>
                             </select>
                             <p class="f_status">

@@ -329,16 +329,22 @@ require_once ('navbar.php');
 				</div>
 				<?php } ?>
 				<?php if(isFieldVisibleByRole($isColorView, $roleID)) {?>
-				<div class="form-group">
+				<div class="form-group"> 
 				    <div class="row">
-					<div id="color-block" class="col-md-12 padd-0">
+					<div id="color-block" class="padd-0">
 					    <div class="openColorBox">
 						Select Color
 						<i class="fas fa-chevron-down pull-right" ></i>
 					    </div>
 					    <div class="colorBox closed">
 						<?php
-						    $colorsArr = array('f99d1b','16a44a','3869b3', 'd4c038', 'c13f95', '3ec5cd', '9dbd1d','FF8170','9490FF','f599ff','d8d8d8','FFDAB1','9cffb1','D9BB93','C2E7F2','ea7898' );
+						    $colorsArr = array('f99d1b','16a44a','3869b3', 'd4c038', 
+                                                        'c13f95', '3ec5cd', '9dbd1d','FF8170','9490FF',
+                                                        'f599ff','d8d8d8','FFDAB1','9cffb1','D9BB93',
+                                                        'C2E7F2','ea7898', 'B194B2', 'E6DAC2','F2F4E9','BEE9E0',
+                                                        'abb7c8', 'dadadb', 'b2ca85', 'c2c4b6', 'faf884', 'b2cefe', 
+                                                        'baed91', 'fea3aa','89ffc0','CBFCAD','B0C3D1','FCF1C4','FCF3DF',
+                                                        'D1DCDE','59A797', 'b5fff0','FBF2B7');
 						    $getSelectedColors = $db->query("SELECT color FROM tblsalesrep WHERE color<>'' ");
 						    $disableColors = array();
 						    foreach ($getSelectedColors as $k=>$v){
@@ -352,11 +358,19 @@ require_once ('navbar.php');
 						?>
 						    <div class="item">
 							<input <?php echo $selected; ?> id="<?php echo $v; ?>" type="radio" name="color" value="#<?php echo $v; ?>" />
-							<label  class="<?php echo $selected; ?>" style="background:#<?php echo $v; ?>;" for="<?php echo $v; ?>"></label>
+							<label data-color="#<?php echo $v; ?>"  class="<?php echo $selected; ?>" style="background:#<?php echo $v; ?>;" for="<?php echo $v; ?>"></label>
 						    </div>
 						    <?php } }?>
 					    </div>
 					</div>
+                                        <div id='selected-color-box'>
+                                            <?php if($color!='') { ?>
+                                                <span class="active" style="background: <?php echo $color;?>"></span>
+                                            <?php } else { ?>
+                                                <span></span>
+                                            <?php } ?>
+                                        </div>
+                                       
 				    </div>
 				</div>
 				<?php } ?>
@@ -488,6 +502,9 @@ require_once ('navbar.php');
 				<th class="">Completed</th>
 				<th class="">Qualified</th>
 				<th class="">Submitted</th>
+                                <?php if( isFieldVisibleByRole($isActionEdit, $roleID) || isFieldVisibleByRole($isActionDelete, $roleID)) {?>
+                                    <th class="noFilter actions text-center">Actions</th>
+                                <?php } ?>                                
 			    </tr>
 			</thead>
 			<tbody>
@@ -499,55 +516,7 @@ require_once ('navbar.php');
 				<tr>
 				    <?php if(isFieldVisibleByRole($isFNameView, $roleID) || isFieldVisibleByRole($isLNameView, $roleID)) {?>
 				    <td class="clickable">
-					<a class="details"><?php echo $v['first_name']." ".$v['last_name']; ?></a>
-					 <div class="moreInfo">
-					    <div class="content">
-						<span class="close">X</span>
-
-						<?php if(isFieldVisibleByRole($isPhotoView, $roleID)) {?>
-						    <p class="">
-							<?php $photo = ($v['photo_filename'] != "") ? "/images/users/".$v['photo_filename'] : "/assets/images/default.png";  ?>
-							<img width="40" src="<?php echo SITE_URL.$photo; ?>" />
-						    </p>
-						<?php } ?>
-						<?php if(isFieldVisibleByRole($isAddressView, $roleID)) {?>
-						    <?php if($v['address']!=""){ ?>
-							<p><label>Address: </label><?php echo $v['address']; ?></p>
-						    <?php } ?>
-						<?php } ?>
-						<?php if(isFieldVisibleByRole($isRegionView, $roleID)) {?>
-						    <?php if($v['region']!=""){ ?>
-							<p><label>Region: </label><?php echo $v['region']; ?></p>
-						    <?php } ?>
-						<?php } ?>
-						<?php if(isFieldVisibleByRole($isZipView, $roleID)) {?>
-						    <?php if($v['zip']!=""){ ?>
-							<p><label>Zip: </label><?php echo $v['zip']; ?></p>
-						    <?php } ?>
-						<?php } ?>
-						<?php if(isFieldVisibleByRole($isPhoneView, $roleID)) {?>
-						    <?php if($v['phone_number']!=""){ ?>
-							<p><label>Phone: </label><span class="phone_us"><?php echo $v['phone_number']; ?></span></p>
-						    <?php } ?>
-						<?php } ?>
-
-						<?php if( isFieldVisibleByRole($isActionEdit, $roleID) || isFieldVisibleByRole($isActionDelete, $roleID)) {?>
-						    <div class="text-right pT-15 pB-10">
-							<?php if( isFieldVisibleByRole($isActionEdit, $roleID) ) {?>
-							<a href="<?php echo SITE_URL; ?>/salesreps.php?action=edit&id=<?php echo $v['Guid_salesrep']; ?>">
-							    <span class="fas fa-pencil-alt"></span>
-							</a>
-							<?php } ?>
-							<?php if(isFieldVisibleByRole($isActionDelete, $roleID)) {?>
-							<a onclick="javascript:confirmationDeleteSalesReps($(this));return false;" href="<?php echo SITE_URL; ?>/salesreps.php?delete=<?php echo $v['Guid_salesrep'] ?>&id=<?php echo $v['Guid_salesrep']; ?>&user=<?php echo $v['Guid_user']; ?>">
-							    <span class="far fa-trash-alt"></span>
-							</a>
-							<?php } ?>
-						    </div>
-						<?php } ?>
-					    </div>
-					 </div>
-
+					<a href="<?php echo SITE_URL; ?>/salesreps.php?action=edit&id=<?php echo $v['Guid_salesrep']; ?>"><?php echo $v['first_name']." ".$v['last_name']; ?></a>
 				    </td>
 				    <?php } ?>
 				    <?php if(isFieldVisibleByRole($isEmailView, $roleID)) {?>
@@ -566,7 +535,22 @@ require_once ('navbar.php');
 				    <td><?php echo getSalesrepStatusCount($db, $v['Guid_salesrep'], '36'); //36->Questionnaire Completed ?></td>
 				    <td><?php echo getSalesrepStatusCount($db, $v['Guid_salesrep'], '29'); //29->Questionnaire Completed->Qualified ?></td>
 				    <td><?php echo getSalesrepStatusCount($db, $v['Guid_salesrep'], '1' ); //28->Submitted (Specimen Collected) ?></td>
-				</tr>
+				
+                                    <?php if( isFieldVisibleByRole($isActionEdit, $roleID) || isFieldVisibleByRole($isActionDelete, $roleID)) {?>
+                                        <td class="text-center">
+                                            <?php if( isFieldVisibleByRole($isActionEdit, $roleID) ) {?>
+                                            <a href="<?php echo SITE_URL; ?>/salesreps.php?action=edit&id=<?php echo $v['Guid_salesrep']; ?>">
+                                                <span class="fas fa-pencil-alt"></span>
+                                            </a>
+                                            <?php } ?>
+                                            <?php if(isFieldVisibleByRole($isActionDelete, $roleID)) {?>
+                                            <a onclick="javascript:confirmationDeleteSalesReps($(this));return false;" href="<?php echo SITE_URL; ?>/salesreps.php?delete=<?php echo $v['Guid_salesrep'] ?>&id=<?php echo $v['Guid_salesrep']; ?>&user=<?php echo $v['Guid_user']; ?>">
+                                                <span class="far fa-trash-alt"></span>
+                                            </a>
+                                            <?php } ?>
+                                        </td>
+                                    <?php } ?>
+                                </tr>
 			    <?php
 				$i++;
 			    }
