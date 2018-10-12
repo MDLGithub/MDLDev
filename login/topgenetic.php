@@ -22,7 +22,15 @@ $query = "SELECT sp.Guid_salesrep, CONCAT(sp.first_name, ' ', sp.last_name) as s
                         . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
                         . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
                         . "WHERE tblsrep.Guid_salesrep = sp.Guid_salesrep "
-                        . "AND tblqfss.qualified IN ('Yes','No','Unknown') AND YEARWEEK(tblqf.Date_created)=YEARWEEK(:datecreated3) ) as completedCnt "
+                        . "AND tblqfss.qualified IN ('Yes','No','Unknown') AND YEARWEEK(tblqf.Date_created)=YEARWEEK(:datecreated3) ) as completedCnt, "
+
+                . "(SELECT count(*) FROM tbl_ss_qualify tblqfss "
+                        . "LEFT JOIN tblqualify tblqf ON tblqfss.Guid_qualify = tblqf.Guid_qualify "
+                        . "INNER JOIN tblaccount tblacc ON tblqf.account_number = tblacc.account "
+                        . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
+                        . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
+                        . "WHERE tblsrep.Guid_salesrep = sp.Guid_salesrep "
+                        . "AND tblqfss.qualified IN ('Yes','No','Unknown') AND YEARWEEK(tblqf.Date_created)=YEARWEEK(:datecreated3) ) as submittedCnt "
             . "FROM tblsalesrep sp "
             . "GROUP BY sp.Guid_salesrep  ORDER BY registeredCnt DESC LIMIT 5";
 
@@ -33,6 +41,7 @@ foreach($result as $row){
     $registered[] = (int)$row['registeredCnt'];
     $qualified[] = (int)$row['qualifiedCnt'];
     $completed[] = (int)$row['completedCnt'];
+    $submitted[] = (int)$row['submittedCnt'];
     $salereps[] = $row['salerepname'];
 }
 $data = array( 'series' => array ( [
@@ -40,13 +49,17 @@ $data = array( 'series' => array ( [
                                 'data'=> $registered,
                                 'color'=> "#bce273"
                            ],[
+                                'name'=> "Completed",
+                                'data'=> $completed,
+                                'color'=> "#263805"
+                            ],[
                                 'name'=> "Qualified",
                                 'data'=> $qualified,
                                 'color'=> "#5b870a"
                             ],[
-                                'name'=> "Completed",
-                                'data'=> $completed,
-                                'color'=> "#263805"
+                                'name'=> 'Submitted',
+                                'data'=> $submitted,
+                                'color'=> "#919191"
                             ]
                            ),
                 'categories' => $salereps 

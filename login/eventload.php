@@ -5,7 +5,7 @@ require_once ('functions_event.php');
 $salesRepId = isset($_REQUEST['salerepId'])? $_REQUEST['salerepId'] : 0;
 $accountId = isset($_REQUEST['accountId'])? $_REQUEST['accountId'] : 0;
 
-$result = getEventSchedule($db,$salesRepId,$accountId);
+$result = getEventSchedule($db,$salesRepId,$accountId,0);
 
 foreach($result as $row)
 {
