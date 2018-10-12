@@ -803,10 +803,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         
                     <div class="row actionButtons pB-30">
                         <div class="col-md-12">
-                            <?php if($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager' ){ ?>
+                            
+                            <?php if( $qualifyResult['source']=='HealthCare Fair' && ($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager') ){ ?>
                             <span class="pull-left markTest">                               
                                 <input id="test-kit" <?php echo $qualifyResult['test_kit']=='1'?' checked': ''; ?>  type="checkbox" name="test_kit" value="1" /> 
-                                <label for="test-kit">Test kit has been given to the patient.</label>
+                                <label for="test-kit">Test kit has been given to the patient</label>
                             </span><br/>
                             <?php } ?>
                             <?php if($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager' ){ ?>

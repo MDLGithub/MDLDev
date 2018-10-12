@@ -110,7 +110,8 @@ body{
 .hidden{
     display: none!important;
 }
-.color-red{
+.color-red,
+.far.fa-trash-alt{
     color: #f00;
 }
 
@@ -465,10 +466,16 @@ th.zip input{
     width: 100%;
     display: inline-block;
 }
-.selectAccountBlock #selectAccount{
+.selectAccountBlock #selectAccount,
+.thisPAccount{
     width: 80%;
     float: left;
     margin-bottom: 10px;
+}
+.thisPAccount{
+    padding: 5px 10px;
+    border: 1px solid #d3d3d3;
+    border-radius: 3px;
 }
 .selectAccountBlock a#edit-selected-account{
     font-size: 22px;
@@ -1628,6 +1635,23 @@ td.tdAccount:hover .account_name{
 .select_device_dropdown{
     padding-left:0px !important;
 }
+#color-block{
+    width: 85%;
+    float: left;
+}
+#selected-color-box{
+    width: 15%;
+    float: left;
+    text-align: center;
+}
+#selected-color-box > span{
+    width: 65%;
+    height: 35px;
+    display: inline-block;
+}
+#selected-color-box > span.active{
+    border: 2px solid #000;    
+}
 .colorBox{
     display: inline-block;
     width: 100%;
@@ -1640,7 +1664,7 @@ td.tdAccount:hover .account_name{
 }
 .colorBox {
     padding: 10px;
-    background: #f2f2f2;
+    background: #fff;
     border: 2px solid #bac5c5;
     border-radius: 7px;
     display: none;
@@ -1773,7 +1797,7 @@ td.clickable .moreInfo .close{
     border: 1px solid #d3d3d3;
     border-radius: 5px;
     text-align: center;
-    font-size: 14px;
+    margin-bottom: 15px;
 }
 .status_chart span{
     border-right: 1px solid #999;
@@ -1811,4 +1835,17 @@ a.button.cancel.half{
     width: 100%;
     height: 2.3em;
     max-width: 100%;
+}
+.statusTable{
+    margin-top: 40px;
+}
+.statusTable .actions{
+    height: auto!important;
+}
+.statusTable #bulkPrint,
+.statusTable .btn-home{
+    font-size: 13px;
+    float: left;
+    margin-bottom: 0;
+    margin-top: 10px;
 }
