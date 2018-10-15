@@ -39,7 +39,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     }
     
     $sqlQualify = "SELECT q.Guid_qualify,q.Guid_user,q.insurance,
-                    q.other_insurance,q.Date_created as qDate,q.provider_id, q.source, 
+                    q.other_insurance,q.account_number,q.Date_created as qDate,q.provider_id, q.source, 
                     CONCAT(prov.first_name,' ',prov.last_name) provider,
                     p.*, u.email, u.marked_test ";
     
@@ -91,55 +91,13 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
             }
         }
         if($isValid){
-            $userData = array();
-            if(isset($_POST['email']) && $_POST['email']!=''){
-                $userData['email'] = $_POST['email'];
-            }
-            $userData['Guid_role'] = '3';
-            if(!empty($userData)){
-                $userData['Date_modified'] = date('Y-m-d H:i:s');
-                $whereUser = array('Guid_user'=>$_GET['patient']);
-                //check if user exists
-                $isUserExists=$db->row("SELECT * FROM tbluser WHERE Guid_user=:Guid_user", $whereUser);            
-                if($isUserExists){//update user                
-                    $updateUser = updateTable($db, 'tbluser', $userData, $whereUser);                    
-                } else { //insert user
-                    $userData['user_type'] = 'patient';
-                    $userData['Date_created'] = date('Y-m-d H:i:s');
-                    $userData['Guid_role']='3';
-                    $inserUser = insertIntoTable($db, 'tbluser', $userData);
-                }            
-            }
             
-            if(isset($_POST['dob']) && $_POST['dob']!=""){
-                $dob= date('Y-m-d h:i:s', strtotime($_POST['dob']));
-                updateTable($db, 'tblpatient', array('dob'=>$dob), array('Guid_user'=>$_GET['patient']));
-            }
-            
+            //total_deductible
             if(isset($_POST['total_deductible']) && $_POST['total_deductible']!=""){                
                 updateTable($db, 'tblpatient', array('total_deductible'=> $_POST['total_deductible']), array('Guid_user'=>$_GET['patient']));
             }
             
-            if(isset($_POST['source']) && $_POST['source']!=""){  
-                $Guid_qualify = $_POST['Guid_qualify'];
-                $dateCreated = $_POST['qDate'];
-                $source = $_POST['source'];
-                if(isset($_POST['incomplate'])){  
-                    $updateQualify = " UPDATE `tblqualify` SET `source`=:source WHERE `Date_created`=:Date_created AND Guid_qualify=:Guid_qualify";                    
-                }else{
-                    $updateQualify = " UPDATE `tbl_ss_qualify` SET `source`=:source WHERE `Date_created`=:Date_created AND Guid_qualify=:Guid_qualify";
-                }
-                $db->query($updateQualify, array('source'=>$source ,'Guid_qualify'=>$Guid_qualify, 'Date_created'=>$dateCreated));
-                
-            }
-            
-             //update patient table for reason and cpecimen collected values
-            $wherePatient = array('Guid_user'=>$_GET['patient']);
-            $patientData = array();
-            $userID = $_GET['patient'];
-            if(!empty($patientData)){
-                $updatePatient = updateTable($db, 'tblpatient', $patientData, $wherePatient);
-            }
+            //test kit
             if(isset($_POST['test_kit'])){  
                 updateTable($db,'tblpatient', array('test_kit'=>'1'), array('Guid_user'=>$userID));
             } else {
@@ -151,8 +109,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 updateTable($db,'tbluser', array('marked_test'=>'1'), array('Guid_user'=>$userID));
             } else {
                 updateTable($db,'tbluser', array('marked_test'=>'0'), array('Guid_user'=>$userID));
-            }
-            
+            }           
 
             //Update MDL# info
             if(isset($_POST['mdl_number'])){
@@ -173,9 +130,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 }
             }
             
-            
-            
-           //add revenue data if exists
+            //add revenue data if exists
             if(isset($_POST['revenueAdd']) && !empty($_POST['revenueAdd'])){                
                 $revData = $_POST['revenueAdd'];                
                 $size = count($revData['date_paid']);
@@ -269,13 +224,13 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 
 
 <?php 
-    if(isset($_GET['account'])&&$_GET['account']!=""){
+    if(isset($qualifyResult['account_number'])&&$qualifyResult['account_number']!=""){
         $accountQ = "SELECT a.Guid_account, a.account, a.name AS account_name, "
                     . "sr.Guid_salesrep, sr.first_name AS salesrep_fname, sr.last_name AS salesrep_lname, CONCAT(sr.first_name, ' ', sr.last_name) AS salesrep_name "
                     . "FROM tblaccount a "
                     . "LEFT JOIN tblaccountrep ar ON a.Guid_account=ar.Guid_account "
                     . "LEFT JOIN tblsalesrep sr ON ar.Guid_salesrep = sr.Guid_salesrep "
-                    . "WHERE a.account = '" . $_GET['account'] . "'";
+                    . "WHERE a.account = '" . $qualifyResult['account_number'] . "'";
         $accountInfo = $db->row($accountQ);        
     } else {
         $accountInfo = FALSE;
@@ -323,7 +278,38 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         <input type="hidden" name="qDate" value="<?php echo $qualifyResult['qDate']; ?>"/>
                         <input type="hidden" name="Guid_qualify" value="<?php echo $qualifyResult['Guid_qualify']; ?>"/>
                         <div class="row">
-                            <div class="col-md-6 pInfo">
+                            <div class="col-md-5 pInfo">
+                                <p><label>Date of Birth: </label><?php echo ($qualifyResult['dob']!="")?date("n/j/Y", strtotime($qualifyResult['dob'])):""; ?></p>
+                                <p><label>Email: </label><?php echo $qualifyResult['email']; ?></p>
+                                <p class="capitalize"><label>Insurance: </label><?php echo $qualifyResult['insurance'];
+                                            if($qualifyResult['other_insurance']!="" && $qualifyResult['other_insurance']!="Other"){
+                                                echo " (".$qualifyResult['other_insurance'].")";
+                                            }
+                                    ?>                                  
+                                </p>
+                                
+                                <p><label>Account: </label><?php echo $qualifyResult['account_number'];
+                                        if($accountInfo['account_name']!=""){
+                                            echo " - ". ucwords(strtolower($accountInfo['account_name']));
+                                        }
+                                    ?>
+                                </p>
+                                <p><label>Genetic Consultant: </label><?php echo $accountInfo['salesrep_name']; ?></p>
+                               
+                                <p><label>Health Care Providers: </label><?php echo $qualifyResult['provider']; ?>
+                                <p>
+                                    <label>Location: </label>
+                                    <?php echo $qualifyResult['source']; ?> 
+                                </p>
+                            </div>
+                            <?php if($role=="Admin"){ ?>
+                            <div class="col-md-1 padd-0">
+                                <a title="Edit Patient Info" href="<?php echo $patientInfoUrl."&edit_patient_info=1";?>">
+                                    <span class="fas fa-pencil-alt fs-20" aria-hidden="true"></span>
+                                </a>
+                            </div>
+                            <?php } ?>
+                            <!--<div class="col-md-6 pInfo">
                                 <p><label>Date of Birth: </label><input type="text" name="dob" class="datepicker" value="<?php echo ($qualifyResult['dob']!="")?date("n/j/Y", strtotime($qualifyResult['dob'])):""; ?>" autocomplete="off" /></p>
                                 <p><label>Email: </label><input type="email" name="email" value="<?php echo $qualifyResult['email']; ?>" autocomplete="off"/> </p>
                                 <p class="capitalize"><label>Insurance: </label><?php echo $qualifyResult['insurance'];
@@ -355,7 +341,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                         <?php } ?>
                                     </select>   
                                 </p>
-                            </div>
+                            </div> -->
                             <div class="col-md-6 pB-30">                    
                                 <div class="row">
                                     <div id="message" class="error-text">
@@ -836,6 +822,146 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 
 
 <?php
+    if(isset($_POST['save_patient_info'])){ 
+        extract($_POST);
+        $userData = array();
+        if(isset($_POST['email']) && $_POST['email']!=''){
+            $userData['email'] = $_POST['email'];
+        }
+        
+        $userData['Guid_role'] = '3';
+        if(!empty($userData)){
+            $userData['Date_modified'] = date('Y-m-d H:i:s');
+            $whereUser = array('Guid_user'=>$_GET['patient']);
+            //check if user exists
+            $isUserExists=$db->row("SELECT * FROM tbluser WHERE Guid_user=:Guid_user", $whereUser);            
+            if($isUserExists){//update user                
+                $updateUser = updateTable($db, 'tbluser', $userData, $whereUser);                    
+            } else { //insert user
+                $userData['user_type'] = 'patient';
+                $userData['Date_created'] = date('Y-m-d H:i:s');
+                $userData['Guid_role']='3';
+                $inserUser = insertIntoTable($db, 'tbluser', $userData);
+            }            
+        }
+
+        if(isset($_POST['dob']) && $_POST['dob']!=""){
+            $dob= date('Y-m-d h:i:s', strtotime($_POST['dob']));
+            updateTable($db, 'tblpatient', array('dob'=>$dob), array('Guid_user'=>$_GET['patient']));
+        }
+
+         
+        
+        $dateCreated = $_POST['qDate'];
+
+        if(isset($_POST['incomplate'])){  
+            $updateQualify = " UPDATE `tblqualify` "
+                    . "SET `source`=:source,account_number=:account_number, "
+                    . "insurance=:insurance, other_insurance=:other_insurance,"
+                    . "provider_id=:provider_id "
+                    . "WHERE `Date_created`=:Date_created AND Guid_qualify=:Guid_qualify";                    
+        }else{
+            $updateQualify = " UPDATE `tbl_ss_qualify` "
+                    . "SET `source`=:source,account_number=:account_number, "
+                    . "insurance=:insurance, other_insurance=:other_insurance,"
+                    . "provider_id=:provider_id "
+                    . "WHERE `Date_created`=:Date_created AND Guid_qualify=:Guid_qualify";
+        }
+        $db->query( $updateQualify, array(
+                                        'source'=>$source ,
+                                        'account_number'=>$account_number,
+                                        'insurance'=>$insurance,
+                                        'other_insurance'=>$other_insurance,
+                                        'provider_id'=>$provider_id,
+                                        'Guid_qualify'=>$Guid_qualify, 
+                                        'Date_created'=>$dateCreated
+                                    ));
+        
+        
+        Leave($patientInfoUrl.'&u');
+        
+    }
+?>
+<?php if($role=='Admin' && (isset($_GET['edit_patient_info'])) && $_GET['edit_patient_info']=="1" ){ ?>
+<div id="manage-status-modal" class="modalBlock ">
+    <div class="contentBlock patientInfo">
+        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a> 
+        <h5 class="title">
+            Update Patient Info
+        </h5>
+        <div class="content">
+            <form class="paientInfo" action="" method="POST">
+               
+               <input type="hidden" name="qDate" value="<?php echo $qualifyResult['qDate']; ?>"/>
+               <input type="hidden" name="Guid_qualify" value="<?php echo $qualifyResult['Guid_qualify']; ?>"/>
+
+                <p>
+                    <label>Date of Birth: </label>
+                    <input type="text" name="dob" class="datepicker" value="<?php echo ($qualifyResult['dob']!="")?date("n/j/Y", strtotime($qualifyResult['dob'])):""; ?>" autocomplete="off" />
+                </p>
+                <p><label>Email: </label>
+                    <input type="email" name="email" value="<?php echo $qualifyResult['email']; ?>" autocomplete="off"/> </p>
+                <p class="capitalize"><label>Insurance: </label>
+                    <input type="text" name="insurance" value="<?php echo $qualifyResult['insurance']; ?>" autocomplete="off" />
+                </p>
+                <p class="capitalize"><label>Other Insurance: </label>
+                    <input type="text" name="other_insurance" value="<?php echo $qualifyResult['other_insurance']; ?>" autocomplete="off" />
+                </p>
+               
+                <p>
+                    <label>Account: </label>
+                    <select class="patientAccount" name="account_number">
+                        <option value="">Select Account</option>
+                        <?php 
+                        $accounts = $db->selectAll('tblaccount', ' ORDER BY `account` ASC');
+                        foreach ($accounts as $k=>$v){ 
+                        $selected = $qualifyResult['account_number']==$v['account'] ? ' selected' : '';
+                        ?>
+                        <option <?php echo $selected; ?> value="<?php echo $v['account']; ?>" ><?php echo $v['account'] .'-'. ucwords(strtolower($v['name'])); ?></option>
+                        <?php } ?>
+                    </select>  
+                </p>
+                
+                <p>
+                    <label>Health Care Provider: </label>
+                    <select id="pInfoAccountProviders" name="provider_id">
+                        <option value="">Select Provider</option>
+                        <?php 
+                        $tblproviders = $db->query('SELECT * FROM tblprovider WHERE account_id='.$qualifyResult['account_number']);
+                        foreach ($tblproviders as $k=>$v){ 
+                        $selected = $qualifyResult['provider_id']==$v['Guid_provider'] ? ' selected' : '';
+                        ?>
+                        <option <?php echo $selected; ?> value="<?php echo $v['Guid_provider']; ?>" ><?php echo $v['first_name'].' '.$v['last_name']; ?></option>
+                        <?php } ?>
+                    </select> 
+                </p>
+                
+                <p>
+                    <label>Location: </label>
+                    <select name="source">
+                        <option value="">Select Location</option>
+                        <?php 
+                        $sources = $db->selectAll('tblsource', ' ORDER BY `description` ASC');
+                        foreach ($sources as $k=>$v){ 
+                        $selected = $qualifyResult['source']==$v['description'] ? ' selected' : '';
+                        ?>
+                        <option <?php echo $selected; ?> value="<?php echo $v['description']; ?>" ><?php echo $v['description']; ?></option>
+                        <?php } ?>
+                    </select>   
+                </p>
+                <div class="text-right pT-10">
+                    <button class="button btn-inline" name="save_patient_info" type="submit">Save</button>
+                    <a href="<?php echo $patientInfoUrl; ?>" class="btn-inline btn-cancel">Cancel</a>                   
+                </div>                
+            </form> 
+        </div>
+    </div>
+</div>
+<?php } ?>
+
+    
+    
+<?php
     if(isset($_POST['manage_revenue'])){ 
         $date_paid = ($_POST['date_paid'] != "")?date('Y-m-d h:i:s', strtotime($_POST['date_paid'])):"";
         $revenueData=array(
@@ -1020,13 +1146,12 @@ if(isset($_POST['edit_statuses'])){
         $statusVisibility = $_POST['status']['visibility'];
         $access_roles = $_POST['status']['roles'];
         $count = count($statusIDS);
-        foreach ($statusIDS as $k => $statusID) {
-            
+        foreach ($statusIDS as $k => $statusID) {            
             $whereEditStatus = array('Guid_status'=>$statusID);
             $editStatusData = array(
                 'status' => $statusNames[$k],
                 'visibility' => $statusVisibility[$k],
-                'access_roles' => '',
+                'access_roles' => $access_roles,
                 'order_by' => $statusOrder[$k]
             );
             if(isset($access_roles[$statusID])){                

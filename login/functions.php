@@ -1599,7 +1599,7 @@ function get_option_of_nested_status($db, $parent = 0,  $level = '', $checkboxes
 
 function get_nested_ststus_editable_rows($db, $parent = 0, $level = '') {
     $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
-    $roles= $db->query('SELECT * FROM `tblrole` WHERE `role`<>"Admin" ');
+    $roles= $db->query('SELECT * FROM `tblrole` WHERE `role`<>"Admin" AND `role`<>"Patient" AND `role`<>"MDL Patient"');
     
     $content = "";
     if ( $statuses ) {
@@ -1633,13 +1633,14 @@ function get_nested_ststus_editable_rows($db, $parent = 0, $level = '') {
                 $content .= "<p><span class='toggleThisRoles pull-right far fa-eye-slash'></span></p>";
                 $content .= "<div class='rolesBlock hidden'>";   //.hidden             
                 foreach ($roles as $k => $v) {
-                    $checked = "";
-                    
+                    $checked = "";                    
                     if($status['access_roles'] && $status['access_roles']!=""){
                         $accessRoles = unserialize($status['access_roles']); 
-                        if(array_key_exists($v['Guid_role'], $accessRoles)){
-                            $checked = " checked";
-                        }                        
+                        if($accessRoles){
+                            if(array_key_exists($v['Guid_role'], $accessRoles)){
+                                $checked = " checked";
+                            }       
+                        }
                     }                    
                     $content .= "<p><input name=status[roles][".$status['Guid_status']."][".$v["Guid_role"]."] type='checkbox' ".$checked." />".$v['role']."</p>";
                 }
@@ -2087,4 +2088,37 @@ function topNavLinks($role=FALSE){
     $content .= '<a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit smaller_button"><strong>View Questionnaire</strong></a>';
 
     return $content;
+}
+
+/**
+ * salutation function for logged in Physicians
+ * Good morning, Dr (if the title is MD in db) [last name]!
+ * After 12:00 PM -> "Good afternoon"
+ * After 5:00 PM -> "Good evening"
+ * @param type $role
+ * @param type $userID
+ * @return string
+ */
+function salutation($db, $role, $userID){
+    $salutation = '';
+    //date_default_timezone_set('Asia/Calcutta');    
+    if($role=='Physician'){  
+        $physician = $db->row("SELECT title, first_name FROM `tblprovider` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
+        if($physician['title']=='MD' || $physician['title']==''){
+            $title = "Dr ".$physician['first_name'].'!';
+        }else{
+            $title = $physician['first_name'].'!';
+        }
+        // 24-hour format of an hour without leading zeros (0 through 23)
+        $Hour = date('G');
+        if ( $Hour >= 5 && $Hour <= 11 ) {
+            $salutation = "Good morning, ".$title;
+        } else if ( $Hour >= 12 && $Hour <= 18 ) {
+            $salutation = "Good afternoon, ".$title;
+        } else if ( $Hour >= 19 || $Hour <= 4 ) {
+            $salutation = "Good evening, ".$title;
+        }        
+    }
+    
+    return $salutation;
 }

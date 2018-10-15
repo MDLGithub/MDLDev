@@ -270,7 +270,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                 <li><a href="<?php echo SITE_URL; ?>">Home</a></li>
                 <li><a href="<?php echo SITE_URL; ?>/account-config.php">Accounts</a></li>
                 <li class="active">
-                    Edit Account	
+                    Account Information	
                 </li>
             </ol>
             </h4>
@@ -309,10 +309,11 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                     <div class="selectAccountBlock row ">
                         
                         <div class="col-md-6 padd-0">
-                            <label >Select Account</label><br/>
+                            
                             <?php if($role=='Physician') { ?>
                                 <span class="thisPAccount"><?php echo $thisProvider['account']." - ".ucwords(strtolower($thisProvider['name'])); ?></span>
                             <?php } else { ?>
+                            <label >Select Account</label><br/>
                             <select class="form-control" id="selectAccount">
                                 <?php 
                                 $accountInfo = "";
@@ -324,10 +325,11 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                                 <option <?php echo $selected; ?> data-guid="<?php echo $v['Guid_account']; ?>" value="<?php echo $v['account']; ?>"><?php echo $v['account']." - ".ucwords(strtolower($v['name'])); ?></option>
                                 <?php  } ?>
                             </select>
-                            <?php }  ?>
+                            
                             <a href="<?php echo SITE_URL;?>/account-config.php?action=edit&id=<?php echo $accountActive['Guid_account']; ?>" id="edit-selected-account" class="add-new-account">
                                 <span class="fas fa-pencil-alt" aria-hidden="true"></span>
                             </a>
+                            <?php }  ?>
                         </div>
                         <div class="col-md-6 padd-0 pT-20">
                             
@@ -425,168 +427,15 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                             </tbody>
                         </table>
                     </div>
-                    <?php if(isset($_GET['status_table'])){ ?>
-                    <div class="statusTable">
-                        <?php $parent = isset($_GET['parent'])?$_GET['parent']:""; ?>
-                        <h2>Status: <?php echo getStatusName($db, $_GET['status_id'], $parent); ?></h2>
-                        <form id="patient_information" action="" method="post" class="<?php echo $role."_table";?>">
-                
-                            <div class="actions">
-                                <button class="btn-styled btn-home" id="bulkPrint"><i class="fas fa-print"></i> Print Selected</button>
-                            </div>
-                            
-                            <div class="">
-                                <table id="dataTableHome" class="pseudo_t table">
-                                    <thead class="">
-                                       <tr>
-                                            <th class="text-center no-bg">
-                                                <label class="switch">
-                                                    <input id="selectAllPrintOptions" type="checkbox">
-                                                    <span class="slider round">
-                                                        <span id="switchLabel">Select All</span>
-                                                    </span>
-                                                </label>
-                                            </th>
-                                            <th>Medical Necessity</th>
-                                            <?php foreach ($labels as $k=>$v){ ?>                                
-                                            <?php 
-                                                $isVisibleForStatus = isFieldVisibleForStatus($db, $k, $_GET['status_id']);
-                                                $isVisibleForRole = isFieldVisibleForRole($db, $k, $roleID);
-                                                if($isVisibleForStatus&&$isVisibleForRole){
-                                                    echo '<th>';
-                                                    if(isset($optionVal[$k]['label'])){
-                                                        echo $optionVal[$k]['label']; 
-                                                    } else {
-                                                        echo $v;
-                                                    } 
-                                                    echo '</th>';
-                                                }
-                                                ?>
-                                            <?php } ?>
-                                       </tr>
-                                    </thead>
-                                <tbody> 
-                                    <?php foreach ($initData as $k=>$v){ ?>
-                                    <?php 
-                                        $Guid_user = $v['Guid_user'];
-                                        $revenue = getRevenueStat($db, $v['Guid_user']);
-                                        $patientInfoUrl = SITE_URL.'/patient-info.php?patient='.$v['Guid_user']; 
-                                        if($v['account_number'] && $v['account_number']!=''){
-                                            $patientInfoUrl .= '&account='.$v['account_number'];
-                                        }
-                                        $incomplateStr = "";
-                                        $incomplateQ = "SELECT q.Guid_qualify,q.Guid_user, q.Date_created, '1' AS incomplete FROM tblqualify q  
-                                                        WHERE NOT EXISTS(SELECT qs.Guid_qualify FROM tbl_ss_qualify qs WHERE q.Guid_qualify=qs.Guid_qualify) 
-                                                        AND q.Guid_user=$Guid_user";
-                                        $questionaryR = $db->row($incomplateQ);
-                                        if($questionaryR){
-                                            $incomplateStr = "&incomplete=1";
-                                        } else {
-                                            $complatedQ = "SELECT q.Guid_qualify, q.Guid_user, q.qualified, q.Date_created  FROM tbl_ss_qualify q   
-                                                        WHERE q.`Date_created` = (SELECT MAX(Date_created) FROM tbl_ss_qualify AS m2 WHERE q.Guid_qualify = m2.Guid_qualify)
-                                                        AND q.Guid_user=$Guid_user";
-                                            $questionaryR = $db->row($complatedQ);
-                                        }
-                                        
-                                        
-                                    ?>
-                                    <tr class="t_row"> 
-                                        
-                                        <td class="printSelectBlock text-center sorting_1">
-                                            <?php if(!isset($questionaryR['incomplete'])){ ?>
-                                                <input name="markedRow[user][<?php echo $Guid_user; ?>]" type="checkbox" class="print1 report1" data-prinatble="1" data-selected_questionnaire="<?php echo $questionaryR['Guid_qualify']; ?>" data-selected_date="<?php echo $questionaryR['Date_created']; ?>">
-                                            <?php } ?>
-                                        </td>
-                                        <td>
-                                            <?php 
-                                            if(isset($questionaryR['incomplete'])){
-                                                echo '<span class="mn no">Incomplite</span>';
-                                            } else {
-                                                echo '<span class="mn '.strtolower($questionaryR['qualified']).'">'.$questionaryR['qualified'].'</span>';
-                                            }
-                                            
-                                            ?>
-                                        </td>
-                                        <?php if(isFieldVisibleForStatus($db, 'mdl_number', $_GET['status_id']) && isFieldVisibleForRole($db, 'mdl_number', $roleID)){ ?>
-                                        <td><?php echo $v['mdl_number'];?></td> 
-                                        <?php } ?>
-
-                                        <?php if(isFieldVisibleForStatus($db, 'first_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'first_name', $roleID)){ ?>
-                                        <td><a href="<?php echo $patientInfoUrl.$incomplateStr; ?>"><?php echo ucfirst(strtolower($v['firstname']));?></a></td>                              
-                                        <?php } ?>
-
-                                        <?php if(isFieldVisibleForStatus($db, 'last_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'last_name', $roleID)){ ?>
-                                        <td><a href="<?php echo $patientInfoUrl.$incomplateStr; ?>"><?php echo ucfirst(strtolower($v['lastname'])); ?></a></td>                              
-                                        <?php } ?>
-
-                                        <?php if(isFieldVisibleForStatus($db, 'account', $_GET['status_id']) && isFieldVisibleForRole($db, 'account', $roleID)){ ?>
-                                        <td><?php echo $v['account_number'];?></td>                              
-                                        <?php } ?>
-
-                                        <?php if(isFieldVisibleForStatus($db, 'account_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'account_name', $roleID)){ ?>
-                                        <td><?php echo ucwords(strtolower($v['account_name'])); ?></td>                              
-                                        <?php } ?>
-
-                                        <?php if(isFieldVisibleForStatus($db, 'salesrep', $_GET['status_id']) && isFieldVisibleForRole($db, 'salesrep', $roleID)){ ?>
-                                        <td><?php echo $v['salesrep'];?></td>                              
-                                        <?php } ?>
-
-                                        <?php if(isFieldVisibleForStatus($db, 'date', $_GET['status_id']) && isFieldVisibleForRole($db, 'date', $roleID)){ ?>
-                                        <td><?php echo date("n/j/Y", strtotime($v['Date'])); ?></td>                              
-                                        <?php } ?>
-
-                                        <?php if(isFieldVisibleForStatus($db, 'date_accessioned', $_GET['status_id']) && isFieldVisibleForRole($db, 'date_accessioned', $roleID)){ ?>
-                                        <td>???</td>   
-                                        <?php } ?>
-
-                                        <?php if(isFieldVisibleForStatus($db, 'date_reported', $_GET['status_id']) && isFieldVisibleForRole($db, 'date_reported', $roleID)){ ?>
-                                        <td><?php echo date("n/j/Y", strtotime($v['Date_created'])); ?></td>                              
-                                        <?php } ?>
-
-                                        <?php if(isFieldVisibleForStatus($db, 'insurance_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'insurance_paid', $roleID)){ ?>
-                                        <td><?php echo "$".formatMoney($revenue['insurance_paid']); ?></td>  
-                                        <?php } ?>
-
-                                        <?php if(isFieldVisibleForStatus($db, 'patient_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'patient_paid', $roleID)){ ?>
-                                        <td><?php echo "$".formatMoney($revenue['patient_paid']); ?></td>
-                                        <?php } ?>
-
-                                        <?php if(isFieldVisibleForStatus($db, 'total_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'total_paid', $roleID)){ ?>
-                                        <td><?php echo "$".formatMoney($revenue['total']); ?></td> 
-                                        <?php } ?>
-
-                                        <?php if(isFieldVisibleForStatus($db, 'insurance_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'insurance_name', $roleID)){ ?>
-                                        <td><?php echo $revenue['insurance_name']; ?></td> 
-                                        <?php } ?>
-
-                                        <?php if(isFieldVisibleForStatus($db, 'test_ordered', $_GET['status_id']) && isFieldVisibleForRole($db, 'test_ordered', $roleID)){ ?>
-                                        <td>??</td> 
-                                        <?php } ?>
-
-                                        <?php if(isFieldVisibleForStatus($db, 'location', $_GET['status_id']) && isFieldVisibleForRole($db, 'location', $roleID)){ ?>
-                                        <td><?php echo $v['location']; ?></td> 
-                                        <?php } ?>
-                                    </tr>
-                                    <?php } ?>
-                                    
-                                    
-                                </tbody>
-                                
-                                </table>
-                            </div>
-                            
-                            
-                        </form>
-                    </div>
-                    <?php } ?>
+                  
                 </div>
-                    <div class="col-md-4 pL-50">
-                    <div id="officeLogo">
+                <div class="col-md-4 pL-50">
+                    <div id="accountLogo">
                         <?php $logo = $logo ? "/../images/practice/".$logo : "/assets/images/default.png"; ?>
-                        <img class="salesrepLogo" src="<?php echo SITE_URL.$logo; ?>" />
+                        <img class="" src="<?php echo SITE_URL.$logo; ?>" />
                     </div>
                     <div class="addressInfoBlock">
-                        <label >Account Address</label>
+                        <!-- <label >Account Address</label>-->
                         <div id="officeAddress">
                             <div>
                                 <?php 
@@ -623,9 +472,11 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                         
                         <div id="salesrepInfo1">
                             <?php 
-                            if($salesrepAddress){
-                                echo $salesrepRegion."<br/>".$salesrepAddress.", <br/>".$salesrepCity.", ".$salesrepState." ".$salesrepZip."<br/>"; 
-                            }  
+                            if($role!="Physician") {
+                                if($salesrepAddress){
+                                    echo $salesrepRegion."<br/>".$salesrepAddress.", <br/>".$salesrepCity.", ".$salesrepState." ".$salesrepZip."<br/>"; 
+                                } 
+                            }
                             ?>
                             <?php if($salesrepEmail) { ?>
                                 <div><i class="fas fa-envelope"></i> <a href="mailto:<?php echo $salesrepEmail; ?>"><?php echo $salesrepEmail; ?></a></div>
@@ -636,7 +487,167 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                         </div>
                     </div>
                 </div>
-                </div> <!-- /.row -->        
+                </div> <!-- /.row -->  
+                
+                <div class="row">
+                    <div class="col-md-12">
+                          <?php if(isset($_GET['status_table'])){ ?>
+                                <div class="statusTable">
+                                    <?php $parent = isset($_GET['parent'])?$_GET['parent']:""; ?>
+                                    <h2>Status: <?php echo getStatusName($db, $_GET['status_id'], $parent); ?></h2>
+                                    <form id="patient_information" action="" method="post" class="<?php echo $role."_table";?>">
+
+                                        <div class="actions">
+                                            <button class="btn-styled btn-home" id="bulkPrint"><i class="fas fa-print"></i> Print Selected</button>
+                                        </div>
+
+                                        <div class="">
+                                            <table id="dataTableFixed" class="pseudo_t table">
+                                                <thead class="">
+                                                   <tr>
+                                                        <th class="text-center no-bg">
+                                                            <label class="switch">
+                                                                <input id="selectAllPrintOptions" type="checkbox">
+                                                                <span class="slider round">
+                                                                    <span id="switchLabel">Select All</span>
+                                                                </span>
+                                                            </label>
+                                                        </th>
+                                                        <th>Medical Necessity</th>
+                                                        <?php foreach ($labels as $k=>$v){ ?>                                
+                                                        <?php 
+                                                            $isVisibleForStatus = isFieldVisibleForStatus($db, $k, $_GET['status_id']);
+                                                            $isVisibleForRole = isFieldVisibleForRole($db, $k, $roleID);
+                                                            if($isVisibleForStatus&&$isVisibleForRole){
+                                                                echo '<th>';
+                                                                if(isset($optionVal[$k]['label'])){
+                                                                    echo $optionVal[$k]['label']; 
+                                                                } else {
+                                                                    echo $v;
+                                                                } 
+                                                                echo '</th>';
+                                                            }
+                                                            ?>
+                                                        <?php } ?>
+                                                   </tr>
+                                                </thead>
+                                                <tbody> 
+                                                    <?php foreach ($initData as $k=>$v){ ?>
+                                                    <?php 
+                                                        $Guid_user = $v['Guid_user'];
+                                                        $revenue = getRevenueStat($db, $v['Guid_user']);
+                                                        $patientInfoUrl = SITE_URL.'/patient-info.php?patient='.$v['Guid_user']; 
+                                                        if($v['account_number'] && $v['account_number']!=''){
+                                                            $patientInfoUrl .= '&account='.$v['account_number'];
+                                                        }
+                                                        $incomplateStr = "";
+                                                        $incomplateQ = "SELECT q.Guid_qualify,q.Guid_user, q.Date_created, '1' AS incomplete FROM tblqualify q  
+                                                                        WHERE NOT EXISTS(SELECT qs.Guid_qualify FROM tbl_ss_qualify qs WHERE q.Guid_qualify=qs.Guid_qualify) 
+                                                                        AND q.Guid_user=$Guid_user";
+                                                        $questionaryR = $db->row($incomplateQ);
+                                                        if($questionaryR){
+                                                            $incomplateStr = "&incomplete=1";
+                                                        } else {
+                                                            $complatedQ = "SELECT q.Guid_qualify, q.Guid_user, q.qualified, q.Date_created  FROM tbl_ss_qualify q   
+                                                                        WHERE q.`Date_created` = (SELECT MAX(Date_created) FROM tbl_ss_qualify AS m2 WHERE q.Guid_qualify = m2.Guid_qualify)
+                                                                        AND q.Guid_user=$Guid_user";
+                                                            $questionaryR = $db->row($complatedQ);
+                                                        }
+
+
+                                                    ?>
+                                                    <tr class="t_row"> 
+
+                                                        <td class="printSelectBlock text-center sorting_1">
+                                                            <?php if(!isset($questionaryR['incomplete'])){ ?>
+                                                                <input name="markedRow[user][<?php echo $Guid_user; ?>]" type="checkbox" class="print1 report1" data-prinatble="1" data-selected_questionnaire="<?php echo $questionaryR['Guid_qualify']; ?>" data-selected_date="<?php echo $questionaryR['Date_created']; ?>">
+                                                            <?php } ?>
+                                                        </td>
+                                                        <td>
+                                                            <?php 
+                                                            if(isset($questionaryR['incomplete'])){
+                                                                echo '<span class="mn no">Incomplete</span>';
+                                                            } else {
+                                                                echo '<span class="mn '.strtolower($questionaryR['qualified']).'">'.$questionaryR['qualified'].'</span>';
+                                                            }
+
+                                                            ?>
+                                                        </td>
+                                                        <?php if(isFieldVisibleForStatus($db, 'mdl_number', $_GET['status_id']) && isFieldVisibleForRole($db, 'mdl_number', $roleID)){ ?>
+                                                        <td><?php echo $v['mdl_number'];?></td> 
+                                                        <?php } ?>
+
+                                                        <?php if(isFieldVisibleForStatus($db, 'first_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'first_name', $roleID)){ ?>
+                                                        <td><a href="<?php echo $patientInfoUrl.$incomplateStr; ?>"><?php echo ucfirst(strtolower($v['firstname']));?></a></td>                              
+                                                        <?php } ?>
+
+                                                        <?php if(isFieldVisibleForStatus($db, 'last_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'last_name', $roleID)){ ?>
+                                                        <td><a href="<?php echo $patientInfoUrl.$incomplateStr; ?>"><?php echo ucfirst(strtolower($v['lastname'])); ?></a></td>                              
+                                                        <?php } ?>
+
+                                                        <?php if(isFieldVisibleForStatus($db, 'account', $_GET['status_id']) && isFieldVisibleForRole($db, 'account', $roleID)){ ?>
+                                                        <td><?php echo $v['account_number'];?></td>                              
+                                                        <?php } ?>
+
+                                                        <?php if(isFieldVisibleForStatus($db, 'account_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'account_name', $roleID)){ ?>
+                                                        <td><?php echo ucwords(strtolower($v['account_name'])); ?></td>                              
+                                                        <?php } ?>
+
+                                                        <?php if(isFieldVisibleForStatus($db, 'salesrep', $_GET['status_id']) && isFieldVisibleForRole($db, 'salesrep', $roleID)){ ?>
+                                                        <td><?php echo $v['salesrep'];?></td>                              
+                                                        <?php } ?>
+
+                                                        <?php if(isFieldVisibleForStatus($db, 'date', $_GET['status_id']) && isFieldVisibleForRole($db, 'date', $roleID)){ ?>
+                                                        <td><?php echo date("n/j/Y", strtotime($v['Date'])); ?></td>                              
+                                                        <?php } ?>
+
+                                                        <?php if(isFieldVisibleForStatus($db, 'date_accessioned', $_GET['status_id']) && isFieldVisibleForRole($db, 'date_accessioned', $roleID)){ ?>
+                                                        <td>???</td>   
+                                                        <?php } ?>
+
+                                                        <?php if(isFieldVisibleForStatus($db, 'date_reported', $_GET['status_id']) && isFieldVisibleForRole($db, 'date_reported', $roleID)){ ?>
+                                                        <td><?php echo date("n/j/Y", strtotime($v['Date_created'])); ?></td>                              
+                                                        <?php } ?>
+
+                                                        <?php if(isFieldVisibleForStatus($db, 'insurance_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'insurance_paid', $roleID)){ ?>
+                                                        <td><?php echo "$".formatMoney($revenue['insurance_paid']); ?></td>  
+                                                        <?php } ?>
+
+                                                        <?php if(isFieldVisibleForStatus($db, 'patient_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'patient_paid', $roleID)){ ?>
+                                                        <td><?php echo "$".formatMoney($revenue['patient_paid']); ?></td>
+                                                        <?php } ?>
+
+                                                        <?php if(isFieldVisibleForStatus($db, 'total_paid', $_GET['status_id']) && isFieldVisibleForRole($db, 'total_paid', $roleID)){ ?>
+                                                        <td><?php echo "$".formatMoney($revenue['total']); ?></td> 
+                                                        <?php } ?>
+
+                                                        <?php if(isFieldVisibleForStatus($db, 'insurance_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'insurance_name', $roleID)){ ?>
+                                                        <td><?php echo $revenue['insurance_name']; ?></td> 
+                                                        <?php } ?>
+
+                                                        <?php if(isFieldVisibleForStatus($db, 'test_ordered', $_GET['status_id']) && isFieldVisibleForRole($db, 'test_ordered', $roleID)){ ?>
+                                                        <td>??</td> 
+                                                        <?php } ?>
+
+                                                        <?php if(isFieldVisibleForStatus($db, 'location', $_GET['status_id']) && isFieldVisibleForRole($db, 'location', $roleID)){ ?>
+                                                        <td><?php echo $v['location']; ?></td> 
+                                                        <?php } ?>
+                                                    </tr>
+                                                    <?php } ?>
+
+
+                                                </tbody>
+
+                                            </table>
+                                        </div>
+
+
+                                    </form>
+                                </div>
+                                <?php } ?>
+                    </div>
+                </div>
+                
             </div>
         </div><!-- /. mainContent-->
     </div> <!-- /. full box visible-->       
@@ -762,8 +773,8 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
 
 
 <script type="text/javascript">
-    if ($('#dataTableHome').length ) { 
-        var table = $('#dataTableHome').DataTable({
+    if ($('#dataTableFixed').length ) { 
+        var table = $('#dataTableFixed').DataTable({
                         dom: '<"top"i>rt<"bottom"flp><"wider-bottom"><"clear">',
                         orderCellsTop: true,
                         fixedHeader: true,

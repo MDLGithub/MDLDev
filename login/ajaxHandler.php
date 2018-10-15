@@ -60,6 +60,20 @@ if(isset($_POST['unlock_this_user'])){
 if (isset($_POST['exportUsers'])) {
     exportUsers($db);
 }
+if (isset($_POST['get_patient_info_providers'])) {
+    get_providers_dropdown_options($db,$_POST['account_id']);
+}
+
+function get_providers_dropdown_options($db,$accountID){
+    $option = '<option value="">Select Provider</option>';
+    $tblproviders = $db->query('SELECT * FROM tblprovider WHERE account_id='.$accountID);
+    foreach ($tblproviders as $k=>$v){ 
+        $option .= '<option value="'. $v['Guid_provider'].'" >'.$v['first_name'].' '.$v['last_name'].'</option>';
+    }
+    
+    echo json_encode(array('options'=>$option));                        
+}
+
 function  unlock_user($db, $email){
     deleteByField($db, 'tbluser_login_attempts', 'email',  $_POST['email']);
     echo json_encode(array('delete'=>TRUE));
