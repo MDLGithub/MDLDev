@@ -779,10 +779,10 @@ textarea.form-control {
 #app_data > form#patient_information.Physician_table{
     height: 86%;
 }
-#patient_information #dataTableHome_wrapper {
+#patient_information #dataTableFixed_wrapper {
     position: relative;
 }
-#patient_information #dataTableHome_wrapper > .top{
+#patient_information #dataTableFixed_wrapper > .top{
     position: absolute;
     top: -40px;
     right: 0;
