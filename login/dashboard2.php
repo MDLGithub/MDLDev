@@ -134,6 +134,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     
     
     select#sidebar_select { border: 1px solid #ccc; border-radius: 20px; width: 100%; padding: 5px 8px;   margin-bottom: 8px;}
+    .modalaccounttype.hide { display: none; }
     
 </style>
 <script>
@@ -265,10 +266,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var modal = document.getElementById('myModal');
                 //var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD HH:mm:ss");
                 var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
-                var thisdate = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
-                if (moment <= thisdate) {
+                var modaldate = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
+                console.log("Moment: "+ moment +", Date: "+modaldate);
+                if ( modaldate >= moment ) {
                     $('#updateEvent').find('input, #eventupdate, select').prop("disabled", false);
                     $('#eventupdate').prop("disabled", true);
+                    $('input[name="modaleventtype"]').change(function(e){
+                        $("#eventupdate").prop("disabled", false);
+                    });
                 } else {
                     $('#updateEvent').find('input, #eventupdate, select').prop("disabled", true);
                 }
@@ -821,6 +826,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
         // Whenever the user clicks on the "update" button
         $('#eventupdate').bind(clickEventType, function () {
+
             var current_time = get_date();
             var commentid = "";
             if($(this).hasClass("edited")){
@@ -857,6 +863,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var salesrepId = $('#modalsalerepid').val() ? $('#modalsalerepid').val() : 0;
                 var action ="" , comments = "";
                 var radioValue = $("input[name='modaleventtype']:checked").val();
+
                 if(radioValue == 2 ){
                     comments = $("#modalhealthcareComment").val();
                     action = 'healthEventupdate'
@@ -909,6 +916,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         $('#calendar').fullCalendar('refetchEvents');
                         popup_comment(modalid);
                         $('#modalcomment').val('');
+                        $("#eventupdate").prop('disabled',true);
                         $("#modalhealthcareComment").val('')
                     }
                 })

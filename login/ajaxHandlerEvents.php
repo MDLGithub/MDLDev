@@ -67,6 +67,18 @@ if(isset($_POST['modalhealthcareid']) && isset($_POST['action']) && $_POST['acti
      $where = array('Guid_healthcare' => $_POST['modalhealthcareid']);
     
      updateTable($db,'tblhealthcare',$healthCare,$where);
+    $startdate = $_POST['modalstart'];
+    $enddate = $_POST['modalend'];
+    $updateArr = array(
+                'title'  => $_POST['modaltitle'],
+                'start_event' => $startdate,
+                'end_event' => $enddate,
+                'salesrepid' => $_POST['modalsalesrepId'],
+                'accountid' => $_POST['modalaccountId'],  
+               );
+    $where = array('id' => $_POST['modalid']);
+    
+    updateTable($db,'tblevents',$updateArr,$where);
      if($_POST['modalcomments'] != ""):
          if($_POST['commentid'] && $_POST['commentid'] !=""){
             $updateArrComments = array(
@@ -92,6 +104,7 @@ if(isset($_POST['modalhealthcareid']) && isset($_POST['action']) && $_POST['acti
 
 if(isset($_POST["modalid"]) && isset($_POST['action']) && $_POST['action'] == "eventupdate")
 {
+
     $startdate = $_POST['modalstart'];
     $enddate = $_POST['modalend'];
     $updateArr = array(
@@ -104,28 +117,29 @@ if(isset($_POST["modalid"]) && isset($_POST['action']) && $_POST['action'] == "e
     $where = array('id' => $_POST['modalid']);
     
     updateTable($db,'tblevents',$updateArr,$where);
-
+    
     /* ------- Update Comment ------- */
-
-    if($_POST['commentid'] && $_POST['commentid'] != ""){
-        $updateArrComments = array(
-                            'comments' => $_POST['modalcomments'],
-                            'eventid' => $_POST['modalid'],
-                            'user_id' => $_POST['userid'],
-                            'updated_date' => $_POST['updated_date'],
-                        );
-        $where = array('id' => $_POST['commentid']);
-        updateTable($db, 'tblcomments', $updateArrComments, $where );
-    }else{
-        $addArrComments = array(
-                            'comments' => $_POST['modalcomments'],
-                            'eventid' => $_POST['modalid'],
-                            'user_id' => $_POST['userid'],
-                            'created_date' => $_POST['updated_date'],
-                            'updated_date' => $_POST['updated_date'],
-                        );
-        insertIntoTable($db, 'tblcomments', $addArrComments);
-    }  
+    if($_POST['modalcomments'] != ""):
+        if($_POST['commentid'] && $_POST['commentid'] != ""){
+            $updateArrComments = array(
+                                'comments' => $_POST['modalcomments'],
+                                'eventid' => $_POST['modalid'],
+                                'user_id' => $_POST['userid'],
+                                'updated_date' => $_POST['updated_date'],
+                            );
+            $where = array('id' => $_POST['commentid']);
+            updateTable($db, 'tblcomments', $updateArrComments, $where );
+        }else{
+            $addArrComments = array(
+                                'comments' => $_POST['modalcomments'],
+                                'eventid' => $_POST['modalid'],
+                                'user_id' => $_POST['userid'],
+                                'created_date' => $_POST['updated_date'],
+                                'updated_date' => $_POST['updated_date'],
+                            );
+            insertIntoTable($db, 'tblcomments', $addArrComments);
+        }
+    endif;  
 }
 
 /* --------------------- Get Comment ------------------------- */
@@ -302,14 +316,10 @@ if(isset($_POST['action']) && $_POST['action'] == "getAccountSetup"){
     echo json_encode($data);
 }
 
-/**/
-
-
-/*function getAvgAccountCount($db, $account, $Guid_status ){     
-    $q = "SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l "
-        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
-        . "WHERE l.Guid_status =:Guid_status AND l.account=:account AND u.marked_test='0'"; 
-    
-    $result = $db->row($q, array('account'=>$account,'Guid_status'=>$Guid_status));    
-    return $result['count'];
-}*/
+if(isset($_POST['action']) && $_POST['action'] == "getLogo")
+{
+    $id = $_POST['account_id']; 
+    $query = "SELECT logo FROM tblaccount WHERE Guid_account =:id ";
+    $result = $db->query($query, array("id"=>$id));
+    echo json_encode($result);
+}
