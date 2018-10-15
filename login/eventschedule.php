@@ -585,8 +585,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     borderColor = "border: 2px solid " + event.color + " !important";
                 }
                 
-                var modifiedName = sentenceCase(name);
-                
+                var modifiedName = sentenceCase((name == "") ? "Health Care Fair" : name);
+
                 var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable" style="' + borderColor + '">' +
                         '<div class="fc-content evtcontent">' +
                         '<div class="fc-title evttitle"><a id="acc-'+event.accountid+'"  href="accounts.php?account_id="'+event.accountid+'">' + modifiedName + '</a></div>' +
@@ -791,10 +791,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var radioValue = $("input[name='modaleventtype']:checked").val();
                 if(radioValue == 2 ){
                     comments = $("#modalhealthcareComment").val();
-                    action = 'healthEventupdate'
+                    action = 'healthEventupdate';
                 }else{
                     comments = $("#modalcomment").val();
-                    action = 'eventupdate'
+                    action = 'eventupdate';
                 }
 
                 var full_name = $('#modalfull_name_id').val() ? $('#modalfull_name_id').val() : '';
@@ -1634,7 +1634,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                     </div>
                                     <div class='col-md-6 col-sm-6 modalaccounttype'> 
                                         <div class="form-group">
-                                            <label for="modalcomment">Add Comments: </label>
+                                            <label for="modalcomment" style="font-size: 15px;">Add Comments: </label>
                                             <textarea class="form-control" name="modalcomment" rows="10" id="modalcomment" placeholder="Comments" required></textarea>
                                         </div> 
                                     </div>  
@@ -1648,7 +1648,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                     <div class='col-md-4'>
                                         
                                         <div class="form-group">
-                                            <label for="modalhealthcareComment" style="font-size: 15px; font-weight: 500;">Add Comments: </label>
+                                            <label for="modalhealthcareComment" style="font-size: 15px;">Add Comments: </label>
                                             <textarea class="form-control" rows="12" id="modalhealthcareComment" placeholder="Comments"></textarea>
                                         </div>
                                     </div>    

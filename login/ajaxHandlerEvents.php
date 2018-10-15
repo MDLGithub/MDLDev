@@ -67,26 +67,27 @@ if(isset($_POST['modalhealthcareid']) && isset($_POST['action']) && $_POST['acti
      $where = array('Guid_healthcare' => $_POST['modalhealthcareid']);
     
      updateTable($db,'tblhealthcare',$healthCare,$where);
-
-     if($_POST['commentid'] && $_POST['commentid'] !=""){
-        $updateArrComments = array(
-                            'comments' => $_POST['modalcomments'],
-                            'eventid' => $_POST['modalid'],
-                            'user_id' => $_POST['userid'],
-                            'updated_date' => $_POST['updated_date'],
-                        );
-        $where = array('id' => $_POST['commentid']);
-        updateTable($db, 'tblcomments', $updateArrComments, $where );
-    }else{
-        $addArrComments = array(
-                            'comments' => $_POST['modalcomments'],
-                            'eventid' => $_POST['modalid'],
-                            'user_id' => $_POST['userid'],
-                            'created_date' => $_POST['updated_date'],
-                            'updated_date' => $_POST['updated_date'],
-                        );
-        insertIntoTable($db, 'tblcomments', $addArrComments);
-    }
+     if($_POST['modalcomments'] != ""):
+         if($_POST['commentid'] && $_POST['commentid'] !=""){
+            $updateArrComments = array(
+                                'comments' => $_POST['modalcomments'],
+                                'eventid' => $_POST['modalid'],
+                                'user_id' => $_POST['userid'],
+                                'updated_date' => $_POST['updated_date'],
+                            );
+            $where = array('id' => $_POST['commentid']);
+            updateTable($db, 'tblcomments', $updateArrComments, $where );
+        }else{
+            $addArrComments = array(
+                                'comments' => $_POST['modalcomments'],
+                                'eventid' => $_POST['modalid'],
+                                'user_id' => $_POST['userid'],
+                                'created_date' => $_POST['updated_date'],
+                                'updated_date' => $_POST['updated_date'],
+                            );
+            insertIntoTable($db, 'tblcomments', $addArrComments);
+        }
+    endif;
 }
 
 if(isset($_POST["modalid"]) && isset($_POST['action']) && $_POST['action'] == "eventupdate")
@@ -190,7 +191,11 @@ if( isset($_POST['action']) && $_POST['action'] == 'piechart' ){
                             . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
                             . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
                             . "WHERE tblacc.Guid_account = acc.Guid_account "
-                            . "AND tblqfss.qualified IN ('Yes','No','Unknown')) as completedCnt "
+                            . "AND tblqfss.qualified IN ('Yes','No','Unknown')) as completedCnt, "
+                    . "(SELECT count(*) FROM tblpatient tblpat "
+                            //."LEFT JOIN tblevents tblevt ON tblevt.title = 'BRCA DAY' "
+                            . "WHERE tblpat.specimen_collected = 'Yes' "
+                            . "AND YEARWEEK(tblpat.Date_created) = YEARWEEK(:datecreated) ) as submittedCnt "
                 . "FROM tblaccount acc "
                 . "GROUP BY acc.Guid_account  ORDER BY registeredCnt DESC LIMIT 5";
 
