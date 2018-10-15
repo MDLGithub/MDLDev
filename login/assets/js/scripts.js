@@ -290,19 +290,19 @@ $(document).ready(function () {
     /**
      *  Salesrep page open color Box 
      */
-    $('#color-block').delegate( ".openColorBox", "click", function() {
+    $('.color-block').delegate( ".openColorBox", "click", function() {
         if($(this).parent().find('.colorBox').hasClass('closed')){
             $(this).parent().find('.colorBox').removeClass('closed').show();
         }else{
             $(this).parent().find('.colorBox').addClass('closed').hide();
         }        
     });
-    $('#color-block .colorBox label').on( "click", function() {
-        $('#color-block .colorBox label').removeClass('checked');
+    $('.color-block .colorBox label').on( "click", function() {
+        $(this).parent().parent().find('label').removeClass('checked');
         $(this).addClass('checked');
         var thisColor = $(this).attr('data-color');
-        $("#selected-color-box span").removeClass('active');
-        $("#selected-color-box span").css("background-color", thisColor).addClass('active');
+        $(this).parent().parent().parent().parent().find(".selected-color-box span").removeClass('active');
+        $(this).parent().parent().parent().parent().find(".selected-color-box span").css("background-color", thisColor).addClass('active');
     });
     
     /**
@@ -820,26 +820,29 @@ $(document).ready(function () {
     });
  
  
-    $('#accounts #selectAccount__').on('change', function() {
+    $('.patientInfo .patientAccount').on('change', function() {
         var accountId =  this.value;
-        $.ajax( 'ajaxHandler.php', {
+        console.log(accountId);
+        var ajaxUrl = baseUrl+'/ajaxHandler.php';
+        $.ajax( ajaxUrl, {
             type: 'POST',
             data: {
-               get_account_full_info: '1',
+               get_patient_info_providers: '1',
                account_id: accountId
             },
             success: function(response) {
                 var result = JSON.parse(response);
                 console.log(result);
-                var accountData = result['accountInfo'];
-                var providers = result['providers']
-                updateAccountFullInfo(accountData['0'], providers);
+                if(result['options']){
+                    $('select#pInfoAccountProviders').html(result['options']);
+                }
             },
             error: function() {
                 console.log('0');
             }
         });
     });
+    
     function updateAccountFullInfo(accountData, providers){
         
         var dataEditUrl = $("#edit-selected-account").attr("data-edit-url");
