@@ -77,6 +77,11 @@ if( isset($_POST['manage_salesrep'])){
     } else {
 	 $data['color'] = '';
     }
+    if(isset($_POST['color_matrix'])){
+	$data['color_matrix'] = $_POST['color_matrix'];
+    } else {
+	 $data['color_matrix'] = '';
+    }
     if($_FILES["photo_filename"]["name"] != ""){
 	$fileName = $_FILES["photo_filename"]["name"];
 	$data['photo_filename'] = $fileName;
@@ -207,6 +212,7 @@ require_once ('navbar.php');
 		    $state='';
 		    $zip='';
 		    $color = '';
+		    $color_matrix = '';
 		}
 	    ?>
 
@@ -331,20 +337,17 @@ require_once ('navbar.php');
 				<?php if(isFieldVisibleByRole($isColorView, $roleID)) {?>
 				<div class="form-group"> 
 				    <div class="row">
-					<div id="color-block" class="padd-0">
+					<div class="color-block padd-0">
 					    <div class="openColorBox">
-						Select Color
+						Select Event Color
 						<i class="fas fa-chevron-down pull-right" ></i>
 					    </div>
 					    <div class="colorBox closed">
 						<?php
 						    $colorsArr = array('f99d1b','16a44a','3869b3', 'd4c038', 
                                                         'c13f95', '3ec5cd', '9dbd1d','FF8170','9490FF',
-                                                        'f599ff','d8d8d8','FFDAB1','9cffb1','D9BB93',
-                                                        'C2E7F2','ea7898', 'B194B2', 'E6DAC2','F2F4E9','BEE9E0',
-                                                        'abb7c8', 'dadadb', 'b2ca85', 'c2c4b6', 'faf884', 'b2cefe', 
-                                                        'baed91', 'fea3aa','89ffc0','CBFCAD','B0C3D1','FCF1C4','FCF3DF',
-                                                        'D1DCDE','59A797', 'b5fff0','FBF2B7');
+                                                        'f599ff','e44af5','a9a9a9','9c6e3b','1cbd3e',
+                                                        '1cbdbd', 'e91e63','00bcd4','f44336', '3a8a65');
 						    $getSelectedColors = $db->query("SELECT color FROM tblsalesrep WHERE color<>'' ");
 						    $disableColors = array();
 						    foreach ($getSelectedColors as $k=>$v){
@@ -363,14 +366,56 @@ require_once ('navbar.php');
 						    <?php } }?>
 					    </div>
 					</div>
-                                        <div id='selected-color-box'>
+                                        <div class='selected-color-box'>
                                             <?php if($color!='') { ?>
                                                 <span class="active" style="background: <?php echo $color;?>"></span>
                                             <?php } else { ?>
                                                 <span></span>
                                             <?php } ?>
-                                        </div>
-                                       
+                                        </div>                                       
+				    </div>
+				</div>
+				<?php } ?>
+				<?php if(isFieldVisibleByRole($isColorView, $roleID)) {?>
+				<div class="form-group"> 
+				    <div class="row">
+					<div class="color-block padd-0">
+					    <div class="openColorBox">
+						Select Matrix Color
+						<i class="fas fa-chevron-down pull-right" ></i>
+					    </div>
+					    <div class="colorBox closed">
+						<?php
+						    $colorsArr = array(
+                                                        'C2E7F2','ea7898', 'B194B2', 'E6DAC2','F2F4E9','BEE9E0',
+                                                        'abb7c8', 'dadadb', 'b2ca85', 'c2c4b6', 'faf884', 'b2cefe', 
+                                                        'baed91', 'fea3aa','89ffc0','CBFCAD','B0C3D1','FCF1C4','FCF3DF',
+                                                        'D1DCDE','59A797', 'b5fff0','FBF2B7', 'ffd2d2');
+						    $getSelectedMatrixColors = $db->query("SELECT color_matrix FROM tblsalesrep WHERE color<>'' ");
+						    $disableMatrixColors = array();
+						    foreach ($getSelectedMatrixColors as $k=>$v){
+							$disableMatrixColors[] = $v['color_matrix'];
+						    }
+						    $disabled = '';
+
+						    foreach ($colorsArr as $k=>$v){
+							$selected = ($color_matrix=='#'.$v)?' checked':'';
+							if(($color_matrix=='#'.$v) || !in_array('#'.$v, $disableMatrixColors)){
+						?>
+						    <div class="item">
+							<input <?php echo $selected; ?> id="<?php echo $v; ?>" type="radio" name="color_matrix" value="#<?php echo $v; ?>" />
+							<label data-color="#<?php echo $v; ?>"  class="<?php echo $selected; ?>" style="background:#<?php echo $v; ?>;" for="<?php echo $v; ?>"></label>
+						    </div>
+						    <?php } }?>
+					    </div>
+					</div>
+                                        <div class="selected-color-box">
+                                            <?php if($color_matrix!='') { ?>
+                                                <span class="active" style="background: <?php echo $color_matrix;?>"></span>
+                                            <?php } else { ?>
+                                                <span></span>
+                                            <?php } ?>
+                                        </div>                                       
 				    </div>
 				</div>
 				<?php } ?>

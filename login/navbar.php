@@ -14,8 +14,11 @@
                 <a class="module">BRCAcare<sup>®</sup> Portal</a>
             </li>
         </ul>
+        
     </section>
-
+    <div class="salutation">
+        <?php echo salutation($db, $role, $userID); ?>
+    </div>
     <div id="app_user">
             <button type="button" id="mdl" class="toggle" data-on="#user_window"></button>
             <div id="user_window">
@@ -24,8 +27,12 @@
                     <span><?php echo getUserName($db, $_SESSION['user']['id']); ?></span>
                 </div>
 
-                <ul>                   
-                    <li><a href="<?php echo SITE_URL; ?>/dashboard2.php">Home</a></li>
+                <ul>   
+                    <?php if($role == 'Physician') { ?>
+                        <li><a href="<?php echo SITE_URL; ?>/accounts.php">Account</a></li>
+                    <?php } else { ?>
+                        <li><a href="<?php echo SITE_URL; ?>/dashboard2.php">Home</a></li>
+                    <?php } ?>                    
                     <li><a href="<?php echo SITE_URL; ?>">Patients</a></li>
                     <?php if($role !== 'Physician' && $role != 'Patient') { ?>
                         <li><a href="<?php echo SITE_URL; ?>/url-configuration.php">URL</a></li>
@@ -35,10 +42,7 @@
                             <li><a href="<?php echo SITE_URL; ?>/salesreps.php">Genetic Consultants</a></li>
                         <?php } ?>
                         <li><a href="<?php echo SITE_URL; ?>/eventschedule.php">Event Schedule</a></li>
-                    <?php } ?>
-                    <?php if($role == 'Physician') { ?>
-                        <li><a href="<?php echo SITE_URL; ?>/accounts.php">Account</a></li>
-                    <?php } ?>
+                    <?php } ?>                    
                     <?php if($role=='Admin'){ ?>
                         <li><a href="<?php echo SITE_URL; ?>/access-roles.php">Access Roles</a></li>
                         <li><a href="<?php echo SITE_URL; ?>/user-management.php">User Management</a></li>

@@ -57,14 +57,14 @@ foreach ($userTables as $k=>$v){
     
     if(isset($_POST['search'])){
         if(isset($_POST['first_name']) && $_POST['first_name']!=""){
-            if($k=='patient'){
+            if($k=='patient' || $k=='mdlpatient'){
                 $selectQ .= " AND uInfo.firstname LIKE '%".escape($_POST['first_name'])."%'";
             }else{
                 $selectQ .= " AND uInfo.first_name LIKE '".escape($_POST['first_name'])."%'";
             }
         }
         if(isset($_POST['last_name']) && $_POST['last_name']!=""){
-            if($k=='patient'){
+            if($k=='patient' || $k=='mdlpatient'){
                 $selectQ .= " AND uInfo.lastname LIKE '%".escape($_POST['last_name'])."%'";
             }else{
                 $selectQ .= " AND uInfo.last_name LIKE '%".escape($_POST['last_name'])."%'";

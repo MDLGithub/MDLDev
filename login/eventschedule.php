@@ -234,6 +234,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         height: 50px;
     }
     .fc-salesrep a{color:#000; pointer-events:visible;}
+    .modalaccounttype.hide { display: none; }
 
     @media only screen 
     and (min-device-width : 768px) 
@@ -308,7 +309,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             }
         });
 
-        $("input[name='modaleventtype']").click(function () {
+        /*$("input[name='modaleventtype']").click(function () {
             var modalevtType = $(this).val();
             if (modalevtType == 2) {
                 $("div.modalaccounttype").addClass('hide').removeClass('show');//  hide();
@@ -316,6 +317,17 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             } else {
                 $("div.modalaccounttype").addClass('show').removeClass('hide'); //show();
                 $("div.modalhealthcare").addClass('hide').removeClass('show'); //hide();
+            }
+        });*/
+
+        $("input[name='modaleventtype']").click(function () {
+            var modalevtType = $(this).val();
+            if (modalevtType == 2) {
+                $("div.modalaccounttype").hide();
+                $("div.modalhealthcare").show();
+            } else {
+                $("div.modalaccounttype").show();
+                $("div.modalhealthcare").hide();
             }
         });
         
@@ -416,6 +428,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 if (moment <= thisdate) {
                     $('#updateEvent').find('input, #eventupdate, select').prop("disabled", false);
                     $('#eventupdate').prop("disabled", true);
+                    $('input[name="modaleventtype"]').change(function(e){
+                        $("#eventupdate").prop("disabled", false);
+                    });
                 } else {
                     $('#updateEvent').find('input, #eventupdate, select').prop("disabled", true);
                 }
@@ -525,8 +540,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var account = "";
                 var name = "";
                 var salesrep = "";
-                if (event.logo)
-                    logo = '<div class="fc-logo">' + event.logo + '</div>';
+                
+               
+
+                /*if (event.logo)
+                    logo = '<div class="fc-logo">' + logo + '</div>';*/
                 if (event.account)
                     account = event.account + ' - ';
 
@@ -562,10 +580,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     if(event.comments != null) 
                           cmts += event.comments;
                     cmts += '</div></div>'
-                    if(event.logo != null)
-                        cmts += '<div class="fc-logo"><img src = "../login/images/practice/' + event.logo + '" onError="imgError(this);"/></div>';
-                    else
-                        cmts += '<div class="fc-logo"><img src = "../login/images/logo-placeholder.png" onError="imgError(this);"/></div>';
+                    
+                    cmts += '<div class="fc-logo" id="fc-logo-'+state_count+'"></div>';
+                    
                     state_count = state_count+1;
                 }
 
@@ -585,8 +602,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     borderColor = "border: 2px solid " + event.color + " !important";
                 }
                 
-                var modifiedName = sentenceCase(name);
-                
+                var modifiedName = sentenceCase((name == "") ? "Health Care Fair" : name);
+
                 var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable" style="' + borderColor + '">' +
                         '<div class="fc-content evtcontent">' +
                         '<div class="fc-title evttitle"><a id="acc-'+event.accountid+'"  href="accounts.php?account_id="'+event.accountid+'">' + modifiedName + '</a></div>' +
@@ -660,6 +677,21 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         element.css('color', '#000');
                     }
                 }
+                $.ajax({
+                    url: 'ajaxHandlerEvents.php',
+                    type: 'POST',
+                    data: { account_id: event.accountid, action: 'getLogo'},
+                    success:function(res){
+                        var res = JSON.parse(res);
+                        if(res.length > 0){
+                            logo = res[0];
+                            element[0].childNodes[2].innerHTML = '<img src = "images/practice/'+logo.logo+'" />';
+                        }
+                        else{   
+                            element[0].childNodes[2].innerHTML = '<img src = "images/logo-placeholder.png" />';    
+                        }
+                    }
+                });
                 
             },
             eventAfterAllRender: function (event, element, view) {
@@ -791,10 +823,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var radioValue = $("input[name='modaleventtype']:checked").val();
                 if(radioValue == 2 ){
                     comments = $("#modalhealthcareComment").val();
-                    action = 'healthEventupdate'
+                    action = 'healthEventupdate';
                 }else{
                     comments = $("#modalcomment").val();
-                    action = 'eventupdate'
+                    action = 'eventupdate';
                 }
 
                 var full_name = $('#modalfull_name_id').val() ? $('#modalfull_name_id').val() : '';
@@ -836,6 +868,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         $('#calendar').fullCalendar('refetchEvents');
                         popup_comment(modalid);
                         $('#modalcomment').val('');
+                        $("#eventupdate").prop('disabled',true);
                         $("#modalhealthcareComment").val('')
                     }
                 })
@@ -1180,8 +1213,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var commentstext = "";
                 if(result.length != 0){
                     for( count = 0; count < result.length; count++){
-                        var comment_date = result[count]['updated_date'].replace(/-/g, '/');
-                        comment_date = moment(new Date(comment_date)).format('DD MMM YYYY');
+                        /*var comment_date = result[count]['updated_date'].replace(/-/g, '/');
+                        comment_date = moment(new Date(comment_date)).format('DD MMM YYYY');*/
+                        var comment_date = moment(new Date(result[count]['created_date'])).format('DD MMM YYYY, h:mm a');
                         commentstext += "<div class='commentlogss' id='"+result[count]['id']+"'><p>";
                         if(result[count]['repfname'] != null){
                             commentstext += "<strong>"+ result[count]['repfname'] + " " + result[count]['replname'] + " (" + comment_date + ") </strong>";
@@ -1634,7 +1668,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                     </div>
                                     <div class='col-md-6 col-sm-6 modalaccounttype'> 
                                         <div class="form-group">
-                                            <label for="modalcomment">Add Comments: </label>
+                                            <label for="modalcomment" style="font-size: 15px;">Add Comments: </label>
                                             <textarea class="form-control" name="modalcomment" rows="10" id="modalcomment" placeholder="Comments" required></textarea>
                                         </div> 
                                     </div>  
@@ -1648,7 +1682,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                     <div class='col-md-4'>
                                         
                                         <div class="form-group">
-                                            <label for="modalhealthcareComment" style="font-size: 15px; font-weight: 500;">Add Comments: </label>
+                                            <label for="modalhealthcareComment" style="font-size: 15px;">Add Comments: </label>
                                             <textarea class="form-control" rows="12" id="modalhealthcareComment" placeholder="Comments"></textarea>
                                         </div>
                                     </div>    
