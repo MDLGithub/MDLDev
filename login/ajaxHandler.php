@@ -731,6 +731,9 @@ function exportUsers($db) {
     $testsSql = "SELECT q.Date_created AS date, CONCAT(srep.first_name, ' ', srep.last_name) as 'sales', mdl.mdl_number as 'mdl',
     (SELECT MAX(sp.Date) FROM tbl_mdl_status_log sp WHERE sp.account = a.account AND sp.Guid_patient = p.Guid_patient AND sp.Guid_status = 2) as 'accessioned', 
     (SELECT MAX(trr.Date) FROM tbl_mdl_status_log trr WHERE trr.account = a.account AND trr.Guid_patient = p.Guid_patient AND trr.Guid_status = 22) as 'reported', 
+    (SELECT tp.status FROM tbl_mdl_status_log tplog
+     LEFT JOIN tbl_mdl_status tp ON tplog.Guid_status = tp.Guid_status
+     WHERE tplog.account = a.account AND tplog.Guid_patient = p.Guid_patient AND tplog.Guid_status IN (69, 70, 71, 72, 73, 77) ORDER BY tplog.Date_created DESC LIMIT 1) as 'test_paid',
     (SELECT aps.status FROM tbl_mdl_status_log ap 
      LEFT JOIN tbl_mdl_status aps ON ap.Guid_status = aps.Guid_status
      WHERE ap.account = a.account AND ap.Guid_patient = p.Guid_patient AND ap.Guid_status IN (78, 79, 80, 81, 82) ORDER BY ap.Date_created DESC LIMIT 1) as 'test_ordered', 
@@ -743,7 +746,7 @@ function exportUsers($db) {
     q.qualified as 'med_necessity',
     q.source as 'event',
     q.Guid_user as 'user_id',
-    srep.color as 'sales_color',
+    srep.color_matrix as 'sales_color',
     q.Date_created
     
     FROM tbl_ss_qualify q 
@@ -762,7 +765,7 @@ function exportUsers($db) {
     AND a.Guid_account = ar.Guid_account AND ar.Guid_salesrep = ". ($_POST['consultant'] == '' ? "srep.Guid_salesrep" : ":consultant") ." 
      ". ($_POST['from'] == '' ? " " : "AND q.Date_created >=:from") ." 
      ". ($_POST['to'] == '' ? " " : "AND q.Date_created <=:to") ." 
-    AND mdl.mdl_number IS NOT NULL
+    AND mdl.mdl_number IS NOT NULL AND mdl.mdl_number != '' AND mdl.mdl_number != 0
     
     AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%test%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Smith%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Doe%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%Jane Doe%'
     
@@ -801,7 +804,10 @@ function exportUsers($db) {
       )
     );
 
-    $objPHPExcel->getActiveSheet()->getStyle('A' . $rowCount . ':M' . $rowCount)->applyFromArray($headerStyleArray);
+    $objPHPExcel->getActiveSheet()->getDefaultColumnDimension()
+        ->setWidth(20);
+
+    $objPHPExcel->getActiveSheet()->getStyle('A' . $rowCount . ':N' . $rowCount)->applyFromArray($headerStyleArray);
     $objPHPExcel->getActiveSheet()->SetCellValue('A' . $rowCount, 'Accessioned');
     $objPHPExcel->getActiveSheet()->SetCellValue('B' . $rowCount, 'MDL #');
     $objPHPExcel->getActiveSheet()->SetCellValue('C' . $rowCount, 'Test Ordered');
@@ -812,10 +818,12 @@ function exportUsers($db) {
     $objPHPExcel->getActiveSheet()->SetCellValue('H' . $rowCount, 'Event');
     $objPHPExcel->getActiveSheet()->SetCellValue('I' . $rowCount, 'Insurance App/Dec');
     $objPHPExcel->getActiveSheet()->SetCellValue('J' . $rowCount, 'Reported');
-    $objPHPExcel->getActiveSheet()->SetCellValue('K' . $rowCount, 'Last Paid');
-    $objPHPExcel->getActiveSheet()->SetCellValue('L' . $rowCount, 'Payer(s)');
-    $objPHPExcel->getActiveSheet()->SetCellValue('M' . $rowCount, 'Total Paid');
+    $objPHPExcel->getActiveSheet()->SetCellValue('K' . $rowCount, 'Test Paid');
+    $objPHPExcel->getActiveSheet()->SetCellValue('L' . $rowCount, 'Last Paid');
+    $objPHPExcel->getActiveSheet()->SetCellValue('M' . $rowCount, 'Payer(s)');
+    $objPHPExcel->getActiveSheet()->SetCellValue('N' . $rowCount, 'Total Paid');
 
+    $totalSum = 0;
     if (!empty($tests)) {
       foreach ($tests as $data) {
 	$revenueQuery = 'SELECT r.*, p.name AS payor, cpt.code '
@@ -839,7 +847,8 @@ function exportUsers($db) {
 	}
 
 	$payersNames = implode(', ', $revPayers);
-	$total = '$ '.number_format($revSum, 2);
+	$total = number_format($revSum, 2);
+	$totalSum += $total;
 
 	$rowCount++;
 
@@ -847,13 +856,13 @@ function exportUsers($db) {
 	    $objPHPExcel->getActiveSheet()->getStyle('A'.$rowCount.':M'.$rowCount)->getFill()->applyFromArray(array(
 		'type' => PHPExcel_Style_Fill::FILL_SOLID,
 		'startcolor' => array(
-		     'rgb' => substr($data['sales_color'], 1)
+		     'rgb' => (!empty($data['sales_color'])) ? substr($data['sales_color'], 1) : '#ffffff'
 		)
 	    ));
 	}
 
 	$account_name = strtolower($data['account_name']);
-	$account_name = ucfirst($account_name);
+	$account_name = ucwords($account_name);
 
 	$objPHPExcel->getActiveSheet()->SetCellValue('A' . $rowCount, formatDate($data['accessioned']));
 	$objPHPExcel->getActiveSheet()->SetCellValue('B' . $rowCount, $data['mdl']);
@@ -865,9 +874,10 @@ function exportUsers($db) {
 	$objPHPExcel->getActiveSheet()->SetCellValue('H' . $rowCount, $data['event']);
 	$objPHPExcel->getActiveSheet()->SetCellValue('I' . $rowCount, $data['insurance_app']);
 	$objPHPExcel->getActiveSheet()->SetCellValue('J' . $rowCount, formatDate($data['reported']));
-	$objPHPExcel->getActiveSheet()->SetCellValue('K' . $rowCount, formatDate($data['last_paid']));
-	$objPHPExcel->getActiveSheet()->SetCellValue('L' . $rowCount, $payersNames);
-	$objPHPExcel->getActiveSheet()->SetCellValue('M' . $rowCount, $total);
+	$objPHPExcel->getActiveSheet()->SetCellValue('K' . $rowCount, $data['test_paid']);
+	$objPHPExcel->getActiveSheet()->SetCellValue('L' . $rowCount, formatDate($data['last_paid']));
+	$objPHPExcel->getActiveSheet()->SetCellValue('M' . $rowCount, $payersNames);
+	$objPHPExcel->getActiveSheet()->SetCellValue('N' . $rowCount, $total);
       }
     }
 
@@ -878,7 +888,10 @@ function exportUsers($db) {
 	  )
 	));
 
-    $objPHPExcel->getActiveSheet()->getStyle('A3:M' . $rowCount)->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$rowCount, 'Total');
+    $objPHPExcel->getActiveSheet()->mergeCells('A' . $rowCount . ':M' . $rowCount);
+    $objPHPExcel->getActiveSheet()->SetCellValue('N' . $rowCount, '$'.$totalSum);
+    $objPHPExcel->getActiveSheet()->getStyle('A3:N' . $rowCount)->applyFromArray($styleArray);
 
     $filename = date('his', time()).'_geneveda_matrix.xlsx';
     $directory = SITE_ROOT . '/uploads/';
