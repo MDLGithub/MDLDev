@@ -255,8 +255,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 //if (date._d.getDate() === today.getDate()) {
                 //if(moment.format("DD-MM-YYYY") === today ){
                 if (date.format('DD-MM-YYYY') === today2) {
-//                    cell.css("background", "linear-gradient(135deg, #aab9d4 25%, #ffffff 25%, #ffffff 50%, #aab9d4 50%, #aab9d4 75%, #ffffff 75%, #ffffff 100%)");
-//                    cell.css("background-size", "14.14px 14.14px");
+                   cell.css("background", "linear-gradient(135deg, #cfe0e8 15%, #ffffff 25%, #ffffff 50%, #cfe0e8 15%, #cfe0e8 75%, #ffffff 75%, #ffffff 100%)");
+                    cell.css("background-size", "6.14px 6.14px");
                 }
             },
             eventClick: function (event)
@@ -416,8 +416,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         '</div>';
 
                 if (event.evtCnt) {
-                    $("#summary").addClass("details_button").removeClass("summary_button");
-                    $("#detail").addClass("summary_button").removeClass("details_button");
+                    $("#summary").removeClass("details_button").addClass("summary_button");
+                    $("#detail").removeClass("summary_button").addClass("details_button");
                     var content = '<div class="fc-content evtcontent summarybrca days-' + eventDate + '" style="padding: 0 20px; font-size: 15px; line-height: 16px;">';
                     content += '<div class="numberCircleContainer"><span class="numberCircle">' + event.evtCnt + '</span></div>';
                     content += '<div>Registered <span style="float:right">' + event.registeredCnt + '</span></div>';
@@ -427,8 +427,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     content += '</div>';
                     return $(content);
                 } else {
-                    $("#detail").addClass("details_button").removeClass("summary_button");
-                    $("#summary").addClass("summary_button").removeClass("details_button");
+                    $("#detail").removeClass("details_button").addClass("summary_button");
+                    $("#summary").removeClass("summary_button").addClass("details_button");
                     if (parsedEventTime < parsedNow) {
                         var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable days-' + eventDate + '"  style="' + borderColor + '">' +
                                 '<div class="fc-content evtcontent summarybrca">' +
