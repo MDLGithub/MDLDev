@@ -235,6 +235,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     }
     .fc-salesrep a{color:#000; pointer-events:visible;}
     .modalaccounttype.hide { display: none; }
+    .flask > img { margin-left: 3px; }
 
     @media only screen 
     and (min-device-width : 768px) 
@@ -411,10 +412,32 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             selectHelper: true,
             editable: false,
             eventOverlap: false,
-            dayRender: function (date, cell) {
+            /*dayRender: function (date, cell) {
                 var today = new Date();
                 if (date._d.getDate() === today.getDate()) {
                     // cell.css("background-color", "red");
+                }
+            },*/
+            dayRender: function (date, cell) {
+                var today = new Date();
+                var dd = today.getDate();
+                var mm = today.getMonth() + 1; //January is 0!
+
+                var yyyy = today.getFullYear();
+                if (dd < 10) {
+                    dd = '0' + dd;
+                }
+                if (mm < 10) {
+                    mm = '0' + mm;
+                }
+                var today2 = dd + '-' + mm + '-' + yyyy;
+                //var moment = $('#calendar').fullCalendar('getDate');
+                //alert(date.format('DD-MM-YYYY'))
+                //if (date._d.getDate() === today.getDate()) {
+                //if(moment.format("DD-MM-YYYY") === today ){
+                if (date.format('DD-MM-YYYY') === today2) {
+                    cell.css("background", "linear-gradient(135deg, #cfe0e8 10%, #ffffff 30%, #ffffff 55%, #cfe0e8 15%, #cfe0e8 75%, #ffffff 75%, #ffffff 100%)");
+                    cell.css("background-size", "6.14px 6.14px");
                 }
             },
             eventClick: function (event, jsEvent, view)
@@ -613,8 +636,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         '</div>';
 
                 if (event.evtCnt) {
-                    $("#summary").css("background","linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");
-                    $("#detail").css("background","#90bcf7");
+                    $("#summary").css("background","#90bcf7");
+                    $("#detail").css("background","linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");
+                    
                     var content = '<div class="fc-content evtcontent days-' + eventDate + '" style="padding: 0 20px;">';
                     content += '<div class="numberCircleContainer"><span class="numberCircle">' + event.evtCnt + '</span></></div>';
                     content += '<div><img src="assets/eventschedule/icons/silhouette_icon.png" width="13" style="margin-right:5px;">Registered <span style="float:right">' + event.registeredCnt + '</span></div>';
@@ -624,8 +648,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     content += '</div>';
                     return $(content);
                 } else {
-                    $("#summary").css("background","#90bcf7");
-                    $("#detail").css("background","linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");
+                    $("#summary").css("background","linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");
+                    $("#detail").css("background","#90bcf7");
                     if (parsedEventTime < parsedNow) {
                         var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable days-' + eventDate + '"  style="' + borderColor + '">' +
                                 '<div class="fc-content evtcontent">'+                                
@@ -1574,8 +1598,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <button type="button" name="Detail" id="detail" class="info-button" style="float:left; margin-right: 20px;">Detail</button>
-                                        <button type="button" name="Summary" id="summary" class="info-button" style="background: #90bcf7;">Summary</button>
+                                        <button type="button" name="Detail" id="detail" class="info-button" style="float:left; margin-right: 20px; background: #90bcf7;">Detail</button>
+                                        <button type="button" name="Summary" id="summary" class="info-button" style="">Summary</button>
                                     </div>
                                 </div>
                             </div>
