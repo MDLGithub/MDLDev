@@ -769,7 +769,7 @@ function exportUsers($db) {
     
     AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%test%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Smith%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Doe%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%Jane Doe%'
     
-    GROUP BY q.Guid_qualify ORDER BY date DESC";
+    GROUP BY q.Guid_qualify ORDER BY sales ASC, account ASC, date ASC";
 
     $params = [];
     if ($_POST['account']) {
@@ -795,17 +795,20 @@ function exportUsers($db) {
 
     $rowCount = 3;
     $headerStyleArray = array(
-      'fill' => array(
-	'type' => PHPExcel_Style_Fill::FILL_SOLID,
-	'color' => array('rgb' => 'EFF0F1')
-      ),
-      'font' => array(
-	'bold' => true
-      )
+        'fill' => array(
+            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+            'color' => array('rgb' => '000000')
+        ),
+        'font' => array(
+            'bold' => true,
+            'color' => array('rgb' => 'ffffff')
+        ),
+        'alignment' => array(
+            'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+        )
     );
 
-    $objPHPExcel->getActiveSheet()->getDefaultColumnDimension()
-        ->setWidth(20);
+    $objPHPExcel->getActiveSheet()->getDefaultColumnDimension()->setWidth(20);
 
     $objPHPExcel->getActiveSheet()->getStyle('A' . $rowCount . ':N' . $rowCount)->applyFromArray($headerStyleArray);
     $objPHPExcel->getActiveSheet()->SetCellValue('A' . $rowCount, 'Accessioned');
@@ -823,61 +826,64 @@ function exportUsers($db) {
     $objPHPExcel->getActiveSheet()->SetCellValue('M' . $rowCount, 'Payer(s)');
     $objPHPExcel->getActiveSheet()->SetCellValue('N' . $rowCount, 'Total Paid');
 
+    $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(35);
+
     $totalSum = 0;
     if (!empty($tests)) {
       foreach ($tests as $data) {
-	$revenueQuery = 'SELECT r.*, p.name AS payor, cpt.code '
-		    . 'FROM tbl_revenue r '
-		    . 'LEFT JOIN tbl_mdl_payors p ON r.Guid_payor=p.Guid_payor '
-		    . 'LEFT JOIN tbl_mdl_cpt_code cpt ON r.Guid_cpt=cpt.Guid_cpt '
-		    . 'WHERE Guid_user=:Guid_user AND p.name != \'Patient\'';
-	$revenues = $db->query($revenueQuery, array('Guid_user'=>$data['user_id']));
+        $revenueQuery = 'SELECT r.*, p.name AS payor, cpt.code '
+                . 'FROM tbl_revenue r '
+                . 'LEFT JOIN tbl_mdl_payors p ON r.Guid_payor=p.Guid_payor '
+                . 'LEFT JOIN tbl_mdl_cpt_code cpt ON r.Guid_cpt=cpt.Guid_cpt '
+                . 'WHERE Guid_user=:Guid_user AND p.name != \'Patient\'';
+        $revenues = $db->query($revenueQuery, array('Guid_user'=>$data['user_id']));
 
-	$revSum = 0;
-	$revPayers = [];
-	if (!empty($revenues)) {
-	    foreach ($revenues as $k=>$v) {
-		if (!in_array($v['payor'], $revPayers)) {
-		    $revPayers[] = $v['payor'];
-		}
-		if($v['amount']!=""){
-		    $revSum += $v['amount'];
-		}
-	    }
-	}
+        $revSum = 0;
+        $revPayers = [];
+        if (!empty($revenues)) {
+            foreach ($revenues as $k=>$v) {
+                if (!in_array($v['payor'], $revPayers)) {
+                    $revPayers[] = $v['payor'];
+                }
+                if($v['amount']!=""){
+                    $revSum += $v['amount'];
+                }
+            }
+        }
 
-	$payersNames = implode(', ', $revPayers);
-	$total = number_format($revSum, 2);
-	$totalSum += $total;
+        $payersNames = implode(', ', $revPayers);
+        // $total = number_format($revSum, 2);
+        $totalSum += $revSum;
 
-	$rowCount++;
+        $rowCount++;
 
-	if (isset($data['sales_color'])) {
-	    $objPHPExcel->getActiveSheet()->getStyle('A'.$rowCount.':M'.$rowCount)->getFill()->applyFromArray(array(
-		'type' => PHPExcel_Style_Fill::FILL_SOLID,
-		'startcolor' => array(
-		     'rgb' => (!empty($data['sales_color'])) ? substr($data['sales_color'], 1) : '#ffffff'
-		)
-	    ));
-	}
+        if (isset($data['sales_color'])) {
+            $objPHPExcel->getActiveSheet()->getStyle('A'.$rowCount.':N'.$rowCount)->getFill()->applyFromArray(array(
+            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+            'startcolor' => array(
+                'rgb' => (!empty($data['sales_color'])) ? substr($data['sales_color'], 1) : '#ffffff'
+            )
+            ));
+        }
 
-	$account_name = strtolower($data['account_name']);
-	$account_name = ucwords($account_name);
+        $account_name = strtolower($data['account_name']);
+        $account_name = ucwords($account_name);
 
-	$objPHPExcel->getActiveSheet()->SetCellValue('A' . $rowCount, formatDate($data['accessioned']));
-	$objPHPExcel->getActiveSheet()->SetCellValue('B' . $rowCount, $data['mdl']);
-	$objPHPExcel->getActiveSheet()->SetCellValue('C' . $rowCount, $data['test_ordered']);
-	$objPHPExcel->getActiveSheet()->SetCellValue('D' . $rowCount, $data['sales']);
-	$objPHPExcel->getActiveSheet()->SetCellValue('E' . $rowCount, $data['account']);
-	$objPHPExcel->getActiveSheet()->SetCellValue('F' . $rowCount, $account_name);
-	$objPHPExcel->getActiveSheet()->SetCellValue('G' . $rowCount, substr($data['med_necessity'], 0, 1));
-	$objPHPExcel->getActiveSheet()->SetCellValue('H' . $rowCount, $data['event']);
-	$objPHPExcel->getActiveSheet()->SetCellValue('I' . $rowCount, $data['insurance_app']);
-	$objPHPExcel->getActiveSheet()->SetCellValue('J' . $rowCount, formatDate($data['reported']));
-	$objPHPExcel->getActiveSheet()->SetCellValue('K' . $rowCount, $data['test_paid']);
-	$objPHPExcel->getActiveSheet()->SetCellValue('L' . $rowCount, formatDate($data['last_paid']));
-	$objPHPExcel->getActiveSheet()->SetCellValue('M' . $rowCount, $payersNames);
-	$objPHPExcel->getActiveSheet()->SetCellValue('N' . $rowCount, $total);
+        $objPHPExcel->getActiveSheet()->SetCellValue('A' . $rowCount, formatDate($data['accessioned']));
+        $objPHPExcel->getActiveSheet()->SetCellValue('B' . $rowCount, $data['mdl']);
+        $objPHPExcel->getActiveSheet()->SetCellValue('C' . $rowCount, $data['test_ordered']);
+        $objPHPExcel->getActiveSheet()->SetCellValue('D' . $rowCount, $data['sales']);
+        $objPHPExcel->getActiveSheet()->SetCellValue('E' . $rowCount, $data['account']);
+        $objPHPExcel->getActiveSheet()->SetCellValue('F' . $rowCount, $account_name);
+        $objPHPExcel->getActiveSheet()->SetCellValue('G' . $rowCount, substr($data['med_necessity'], 0, 1));
+        $objPHPExcel->getActiveSheet()->SetCellValue('H' . $rowCount, $data['event']);
+        $objPHPExcel->getActiveSheet()->SetCellValue('I' . $rowCount, $data['insurance_app']);
+        $objPHPExcel->getActiveSheet()->SetCellValue('J' . $rowCount, formatDate($data['reported']));
+        $objPHPExcel->getActiveSheet()->SetCellValue('K' . $rowCount, $data['test_paid']);
+        $objPHPExcel->getActiveSheet()->SetCellValue('L' . $rowCount, formatDate($data['last_paid']));
+        $objPHPExcel->getActiveSheet()->SetCellValue('M' . $rowCount, $payersNames);
+        $objPHPExcel->getActiveSheet()->SetCellValue('N' . $rowCount, $revSum);
+        $objPHPExcel->getActiveSheet()->getStyle('N' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
       }
     }
 
@@ -891,6 +897,7 @@ function exportUsers($db) {
     $objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$rowCount, 'Total');
     $objPHPExcel->getActiveSheet()->mergeCells('A' . $rowCount . ':M' . $rowCount);
     $objPHPExcel->getActiveSheet()->SetCellValue('N' . $rowCount, '$'.$totalSum);
+    $objPHPExcel->getActiveSheet()->getStyle('A' . $rowCount . ':N' . $rowCount)->applyFromArray($headerStyleArray);
     $objPHPExcel->getActiveSheet()->getStyle('A3:N' . $rowCount)->applyFromArray($styleArray);
 
     $filename = date('his', time()).'_geneveda_matrix.xlsx';

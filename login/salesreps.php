@@ -516,9 +516,10 @@ require_once ('navbar.php');
 			<span class="fas fa-plus-circle"></span> Add
 		    </a>
 		    <?php if ($roleID == 1) { ?>
-			<a class="add-new-device export_matrix" id="export">
-			    <span class="fas fa-arrow-up"></span> Export Geneveda Matrix
-			</a>
+				<a class="export_matrix" id="export">
+					<img src="./images/icon_forms.png" />
+					<p>Geneveda Matrix</p>
+				</a>
 		    <?php } ?>
 		</div>
 		<?php } ?>

@@ -1395,3 +1395,19 @@ and (orientation : portrait){
 .hidden {
     display: none;
 }
+
+.export_matrix {
+    text-align: center;
+    width: 100px;
+}
+
+.export_matrix img {
+    height: 30px;
+    margin-left: 30%;
+    display: block;
+}
+
+.export_matrix p {
+    font-size: 12px;
+    position: absolute;
+}
