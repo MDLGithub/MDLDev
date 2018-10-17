@@ -286,6 +286,9 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
             <div id="accounts">
                 <div class="row">
                     <div class="col-md-8">
+                        <div id = "physician-header">
+                            <h2>Physician's Dashboard</h2>
+                        </div>
                         <div class="status_chart">
                         <div class="row">
                             <div class="col-md-12">
@@ -314,7 +317,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                     </div>
                     <div class="selectAccountBlock row ">
                         
-                        <div class="col-md-6 padd-0">
+                        <!--<div class="col-md-6 padd-0">
                             
                             <?php if($role=='Physician') { ?>
                                 <span class="thisPAccount"><?php echo $thisProvider['account']." - ".ucwords(strtolower($thisProvider['name'])); ?></span>
@@ -341,9 +344,44 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                             <a class="followup" id="followup" href="#ex1">
                                 Follow Up
                             </a>
-                        </div>
+                        </div>-->
                     </div>
                     
+                    <div class = "address-container">
+
+                    <div id="accountLogo">
+                        <?php $logo = $logo ? "/../images/practice/".$logo : "/assets/images/default.png"; ?>
+                        <img class="" src="<?php echo SITE_URL.$logo; ?>" />
+                    </div>
+                    <div class="addressInfoBlock">
+                        <!-- <label >Account Address</label>-->
+                        <div id="officeAddress">
+                            <div>
+                                <?php 
+                                if($address){
+                                    echo $address."<br/>";
+                                    if($city !=""){ echo $city.", "; }
+                                    if($state !=""){ echo $state." "; }
+                                    if($zip !="" ){ echo $zip ."<br/>"; } 
+                                }
+                                ?>
+                            </div>
+                            
+                            <div class = "addressContact">
+                            <?php if($phone_number) { ?>
+                                <div><i class="fas fa-phone"></i> <a class="phone_us" href="tel:<?php echo $phone_number; ?>"><?php echo $phone_number; ?></a></div>
+                            <?php } ?>
+                            <?php if($fax) { ?>
+                                <div><i class="fas fa-fax"></i> <a class="phone_us" href="tel:<?php echo $fax; ?>"><?php echo $fax; ?></a></div>
+                            <?php } ?>
+                            <?php if($website) { ?>
+                                <div><i class="fas fa-globe"></i> <a target="_blank" href="<?php echo $website; ?>"><?php echo $website; ?></a></div>                   
+                            <?php } ?>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+
                     <div class="providersTable">
                         <?php if($role!='Physician'){ ?>                        
                         <h4 id="physiciansListLabel" class="accounts">
@@ -425,14 +463,14 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                     </div>
                   
                 </div>
-                <div class="col-md-4 pL-50">
-                    <div id="accountLogo">
+                <div class="col-md-4">
+                    <!--<div id="accountLogo">
                         <?php $logo = $logo ? "/../images/practice/".$logo : "/assets/images/default.png"; ?>
                         <img class="" src="<?php echo SITE_URL.$logo; ?>" />
                     </div>
-                    <div class="addressInfoBlock">
+                    <div class="addressInfoBlock">-->
                         <!-- <label >Account Address</label>-->
-                        <div id="officeAddress">
+                        <!--<div id="officeAddress">
                             <div>
                                 <?php 
                                 if($address){
@@ -453,10 +491,11 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                                 <div><i class="fas fa-globe"></i> <a target="_blank" href="<?php echo $website; ?>"><?php echo $website; ?></a></div>                   
                             <?php } ?>
                         </div>
-                    </div>
-                    <div class="salesrepInfoBlock pT-20">
-                        <label >Genetic Consultant</label>
-                        <div class="imageBox">
+                    </div>-->
+                    <div class="salesrepInfoBlock">
+                      <div id = "physician-gc" class="col-md-12">
+                        <label class = "col-md-12 col-sm-4">Genetic Consultant</label>
+                        <div class="imageBox col-md-6 col-sm-4">
                             <div class="pic">
                                 <?php $salesrepPhoto = (isset($salesrepPhoto)&&$salesrepPhoto!="") ? "/images/users/".$salesrepPhoto : "/assets/images/default.png"?>
                                 <img width="50" class="salesrepProfilePic" src="<?php echo SITE_URL.$salesrepPhoto; ?>" />
@@ -481,6 +520,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                                 <div><i class="fas fa-phone"></i> <a class="phone_us" href="tel:<?php echo $salesrepPhone; ?>"><?php echo $salesrepPhone; ?></a></div>
                             <?php } ?>
                         </div>
+                    </div>
                     </div>
                 </div>
                 </div> <!-- /.row -->  
