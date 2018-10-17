@@ -74,10 +74,10 @@ body{
     padding-left: 50px !important;
 }
 .pB-10{
-    padding-bottom: 10px!important; 
+   padding-bottom: 10px!important; 
 }
 .pL-30{
-    padding-left: 30px!important; 
+       padding-left: 30px!important; 
 }
 .pR-30{
     padding-right: 30px !important;
@@ -111,8 +111,7 @@ body{
     display: none!important;
 }
 .color-red,
-.far.fa-trash-alt,
-.fas.fa-trash{
+.far.fa-trash-alt{
     color: #f00;
 }
 
@@ -126,22 +125,22 @@ body{
 }
 
 #dataTable ::-webkit-input-placeholder { /* Chrome/Opera/Safari */
-    color: #000!important;
-    font-weight: bold!important;
-    font-style: normal!important;
+  color: #000!important;
+  font-weight: bold!important;
+  font-style: normal!important;
 
 }
 #dataTable ::-moz-placeholder { /* Firefox 19+ */
-    color: #000!important;
-    font-weight: bold;
+  color: #000!important;
+  font-weight: bold;
 }
 #dataTable :-ms-input-placeholder { /* IE 10+ */
-    color:#000!important;
-    font-weight: bold;
+  color:#000!important;
+  font-weight: bold;
 }
 #dataTable :-moz-placeholder { /* Firefox 18- */
-    color:#000!important;
-    font-weight: bold;
+  color:#000!important;
+  font-weight: bold;
 }
 a, a:hover{
     text-decoration: none;
@@ -154,7 +153,7 @@ h1,h2,h3,h4,h5,h6{
     font-size: 12px;
 }
 main.full-width{
-    padding: 7.6em 1.2em 1.2em 1.2em;
+   padding: 7.6em 1.2em 1.2em 1.2em;
 }
 
 #user_window > ul{
@@ -177,7 +176,7 @@ main.full-width{
 #physiciansList > p{
     margin-bottom: 10px;
 }
-.loginBG { 
+ .loginBG { 
     background: url(../images/banner_default.jpg) no-repeat center center fixed; 
     -webkit-background-size: cover;
     -moz-background-size: cover;
@@ -285,7 +284,7 @@ table.prev_settings{
 }
 table.prev_settings thead > tr > th,
 .providersTable thead > tr > th{
-    font-weight: bold;  
+  font-weight: bold;  
 }
 #dataTable{
     font-size: 14px;
@@ -333,8 +332,8 @@ table.prev_settings thead > tr > th,
     cursor: pointer;
 }
 #add-account-provider-box{
-
-
+   
+    
 }
 
 select {
@@ -508,21 +507,6 @@ th.zip input{
     border: 1px solid #eee;
     box-shadow: 3px 2px 10px #0000008a;
 }
-
-@media screen and (max-width: 1024px) {
-    .modalBlock .contentBlock{
-        width: 50%;
-        left: 35%;
-        top: 15%;
-        position: relative;
-        background: #fff;
-        padding: 30px;
-        border-radius: 5px;
-        border: 1px solid #eee;
-        box-shadow: 3px 2px 10px #0000008a;
-    }
-}
-
 .modalBlock .close{
     display: block;
     position: absolute;
@@ -537,10 +521,10 @@ th.zip input{
 }
 /* The switch - the box around the slider */
 .switch {
-    position: relative;
-    display: inline-block;
-    width: 60px;
-    height: 34px;
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
 }
 
 /* Hide default HTML checkbox */
@@ -548,50 +532,50 @@ th.zip input{
 
 /* The slider */
 .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #999;
-    -webkit-transition: .4s;
-    transition: .4s;
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #999;
+  -webkit-transition: .4s;
+  transition: .4s;
 }
 
 .slider:before {
-    position: absolute;
-    content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    -webkit-transition: .4s;
-    transition: .4s;
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
 }
 
 input:checked + .slider {
-    background-color: #2196F3;
+  background-color: #2196F3;
 }
 
 input:focus + .slider {
-    box-shadow: 0 0 1px #2196F3;
+  box-shadow: 0 0 1px #2196F3;
 }
 
 input:checked + .slider:before {
-    -webkit-transform: translateX(26px);
-    -ms-transform: translateX(26px);
-    transform: translateX(26px);
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
 }
 
 /* Rounded sliders */
 .slider.round {
-    border-radius: 34px;
+  border-radius: 34px;
 }
 
 .slider.round:before {
-    border-radius: 50%;
+  border-radius: 50%;
 }
 .btn-home{
     font-size: 17px;
@@ -620,6 +604,7 @@ input:checked + .slider:before {
 
 /****** Gabby Johnson *********/
 .add-new-device,
+.followup,
 .add-new-button{
     margin-bottom: 15px;
     font-size: 17px;
@@ -641,24 +626,37 @@ input:checked + .slider:before {
     text-align: center;
 }
 .add-new-device{
-    width: 100px;
+     width: 100px;
+}
+.followup{ float: right; width: 170px; position: relative;}
+.followup:before {
+    background-image: url(../images/icon_forms.png);
+    width: 21px;
+    height: 21px;
+    content: "";
+    top: 9px;
+    left: 15px;
+    background-size: 18px;
+    position: absolute;
+    background-position: right;
+    background-repeat: no-repeat;
 }
 .add-new-device.export_matrix{
-    width: 250px;
+     width: 250px;
 }
 /* The switch - the box around the slider */
 .no-bg{
     background: none !important;
 }
 .dataTables_length select{
-    border: 1px solid;
+        border: 1px solid;
 }
 .switch {
-    position: relative;
-    display: inline-block;
-    margin-top: 10px;
-    width: 45px;
-    height: 20px;
+  position: relative;
+  display: inline-block;
+  margin-top: 10px;
+  width: 45px;
+  height: 20px;
 }
 .switch #switchLabel{
     position: absolute;
@@ -668,7 +666,7 @@ input:checked + .slider:before {
 }
 /* The slider */
 .slider {
-    position: absolute;
+  position: absolute;
     cursor: pointer;
     top: 10px;
     left: 0;
@@ -680,7 +678,7 @@ input:checked + .slider:before {
     transition: .4s;
 }
 .slider:before {
-    position: absolute;
+  position: absolute;
     content: "";
     top: 2.5px;
     height: 15px;
@@ -691,9 +689,9 @@ input:checked + .slider:before {
     transition: .4s;
 }
 input:checked + .slider:before {
-    -webkit-transform: translateX(22px);
-    -ms-transform: translateX(22px);
-    transform: translateX(22px);
+  -webkit-transform: translateX(22px);
+  -ms-transform: translateX(22px);
+  transform: translateX(22px);
 }
 #bulkPrint{
     font-size: 17px;
@@ -794,18 +792,6 @@ textarea.form-control {
 #app_data > form#patient_information.Physician_table{
     height: 86%;
 }
-#patient_information #dataTableFixed_wrapper {
-    position: relative;
-}
-#patient_information #dataTableFixed_wrapper > .top{
-    position: absolute;
-    top: -40px;
-    right: 0;
-}
-#accountLogo img{
-    max-width: 100%;
-    max-height: 70px;
-}
 .error#message{
     font-weight: bold;
     color: #f00;
@@ -859,10 +845,10 @@ thead th{
 
 #dataTableHome_wrapper,
 #tableHeaderFixed_wrapper{
-    display:flex;
-    flex-direction:column;
-    flex-grow:2;
-    z-index:1;
+	display:flex;
+	flex-direction:column;
+	flex-grow:2;
+	z-index:1;
 }
 #dataTableHome,
 #tableHeaderFixed{
@@ -871,10 +857,10 @@ thead th{
 
 #dataTableHome thead,
 #tableHeaderFixed thead{
-    position: -webkit-sticky;
-    position: -moz-sticky;
-    position: -ms-sticky;
-    position: -o-sticky;
+	position: -webkit-sticky;
+	position: -moz-sticky;
+	position: -ms-sticky;
+	position: -o-sticky;
     position:sticky;
     transition:width 0.6s 0.2s;
     top:0;
@@ -894,7 +880,7 @@ thead th{
 
 #dataTableHome thead th,    
 #tableHeaderFixed thead th{    
-    width:inherit;
+	width:inherit;
 
 }
 
@@ -917,7 +903,7 @@ thead th{
 
 #tableHeaderFixed th,
 #tableHeaderFixed td{
-    width: 11.11% !important;
+  width: 11.11% !important;
 }
 #tableHeaderFixed th {
     box-sizing: border-box;
@@ -946,44 +932,41 @@ table.dataTable thead .sorting {
 }
 
 #home form{
-    height:100%;
-    width:100%;
+	height:100%;
+	width:100%;
 }
 
 #home .actions{
-    height:50px;
-    display: inline-block;
-    width: 100%;
+	height:50px;
 }
 
 #home .formContent{
-    display:flex;
-    /*flex-direction:column;*/
-    height:calc(100% - 50px);
+	display:flex;
+	/*flex-direction:column;*/
+	height:calc(100% - 50px);
 }
 
 
 .wider-bar{
-    width:76%;
+	width:76%;
 }
 
 .bottom{
-    border-top:1.5px solid #b1bdc8;;
+	border-top:1.5px solid #b1bdc8;;
 }
 
 #dataTableHome_length,
 #tableHeaderFixed_length{
-    padding-top: 0.5em;
+	padding-top: 0.5em;
 }
 
 #tableHeaderFixed_filter{
     display: none;
 }
 .col-md-3 .pT-20 #image{
-    margin-top:10px;
-    margin-left:-20px;
+	margin-top:10px;
+	margin-left:-20px;
 }
-
 
 .accountLogo{
     max-width: 100%;
@@ -1058,20 +1041,20 @@ and (orientation : landscape) {
     }
 
     #dataTableHome thead{
-        top:220px;
+    	top:220px;
         position: absolute;
-        display: table-row;
-        width: 97%;
-        top: 33px;
+	    display: table-row;
+	    width: 97%;
+	    top: 33px;
     }
 
-    #dataTableHome tbody{
-        margin-top:70px;
+	#dataTableHome tbody{
+    	margin-top:70px;
     }
 
     #dataTableHome tbody td {
-        overflow: hidden;
-    }
+	    overflow: hidden;
+	}
 
     .home_scroller{
         overflow-y:hidden;
@@ -1080,7 +1063,7 @@ and (orientation : landscape) {
     }
 
     .dataTables_wrapper .dataTables_info{
-        padding:0;
+    	padding:0;
     }
 
     .dataTableFilterInput{
@@ -1088,8 +1071,8 @@ and (orientation : landscape) {
     }
 
     .wider-bar{
-        width: 98% !important;
-        display:table !important;
+    	width: 98% !important;
+    	display:table !important;
     }
 
     .pseudo_t{
@@ -1098,7 +1081,7 @@ and (orientation : landscape) {
 
 
     #app_data .url_config_box input[type='radio'], input[type='radio']:checked{
-
+  
         height:18px;
     }
 
@@ -1112,79 +1095,79 @@ and (min-device-height : 768px)
 and (max-device-height: 1024px) 
 and (orientation : portrait) {
 
-    #home .formContent{
-        /*margin-right:-300px;*/
+	#home .formContent{
+    	/*margin-right:-300px;*/
     }
 
-    #dataTableHome_info{
+	#dataTableHome_info{
         padding-top:0;
         margin-top: 0px;
     }
 
-    #dataTableHome_wrapper{
-        width: fit-content;
-    }
+	#dataTableHome_wrapper{
+		width: fit-content;
+	}
 
-    #dataTableHome thead{
-        top:25px;
-        position:absolute;
+	#dataTableHome thead{
+    	top:25px;
+    	position:absolute;
         display:table-row;
         width:165%;
     }
 
 
-    #dataTableHome tbody{
-        overflow-x: scroll;
-        width:165%;
-        margin-top: 60px;
-    }
+	#dataTableHome tbody{
+		overflow-x: scroll;
+		width:165%;
+		margin-top: 60px;
+	}
 
-    #dataTableHome tbody td{
-        overflow:hidden;
-    }
+	#dataTableHome tbody td{
+		overflow:hidden;
+	}
 
-    #palette_top a{
-        transition:padding 0.6s 0.2s;
-    }
+	#palette_top a{
+		transition:padding 0.6s 0.2s;
+	}
 
-    .shorter_palette_top{
-        padding-right:6.25em !important;
-    }
+	.shorter_palette_top{
+		padding-right:6.25em !important;
+	}
 
-    .smaller_button{
-        text-indent: -40px;
-        padding-left: 35px !important;
-        padding-right: 10px !important;
-    }
+	.smaller_button{
+		text-indent: -40px;
+	    padding-left: 35px !important;
+	    padding-right: 10px !important;
+	}
 
-    .smaller_button strong{
-        overflow: hidden;
-    }
+	.smaller_button strong{
+		overflow: hidden;
+	}
 
 
     .wider-bar{
-        width:calc(103% - 18px) !important;
-        display:table !important;
+    	width:calc(103% - 18px) !important;
+    	display:table !important;
     }
 
     .wider-tbody{
-        width:100% !important;
+    	width:100% !important;
     }
 
     .wider-bottom{
-        width:auto !important;
+    	width:auto !important;
     }
 
     .form-remove{
-        margin-right:0;
+    	margin-right:0;
     }
 
     .bottom{
-        width:165%;
+    	width:165%;
     }
 
     #app_data .url_config_box input[type='radio'], input[type='radio']:checked{
-
+  
         height:18px;
     }
 
@@ -1194,19 +1177,19 @@ and (orientation : portrait) {
 
 /* iPad Pro Landscape */
 @media only screen 
-and (min-device-width: 1366px) 
-and (max-device-width: 1366px) 
-and (orientation: landscape) 
-and (-webkit-min-device-pixel-ratio: 2) {
+  and (min-device-width: 1366px) 
+  and (max-device-width: 1366px) 
+  and (orientation: landscape) 
+  and (-webkit-min-device-pixel-ratio: 2) {
 
-    #dataTableHome thead{
+  	#dataTableHome thead{
         top:210px;
         position:fixed;
         width:70%;
     }
 
     #dataTableHome tbody{
-        margin-top: 60px;
+    	margin-top: 60px;
     }
 
     #dataTableHome_info{
@@ -1215,15 +1198,15 @@ and (-webkit-min-device-pixel-ratio: 2) {
     }
 
     .pseudo_t{
-        margin-top:-6px;
+       margin-top:-6px;
     }
 
     .wider-bar{
-        width: 93% !important;
+    	width: 93% !important;
     }
 
     #app_data .url_config_box input[type='radio'], input[type='radio']:checked{
-
+  
         height:30px;
     }
 
@@ -1235,12 +1218,12 @@ and (-webkit-min-device-pixel-ratio: 2) {
 
 /* iPad Pro Portrait */
 @media only screen 
-and (min-device-width: 1023px) 
-and (max-device-width: 1025px) 
-and (min-device-height: 1365px) 
-and (max-device-height: 1367px) 
-and (orientation: portrait) 
-and (-webkit-min-device-pixel-ratio: 2) {
+  and (min-device-width: 1023px) 
+  and (max-device-width: 1025px) 
+  and (min-device-height: 1365px) 
+  and (max-device-height: 1367px) 
+  and (orientation: portrait) 
+  and (-webkit-min-device-pixel-ratio: 2) {
 
     #dataTableHome thead{
         top:210px;
@@ -1255,8 +1238,8 @@ and (-webkit-min-device-pixel-ratio: 2) {
     }
 
     #dataTableHome tbody td {
-        overflow: hidden;
-    }
+	    overflow: hidden;
+	}
 
     #dataTableHome_info{
         padding-top:0;
@@ -1264,17 +1247,17 @@ and (-webkit-min-device-pixel-ratio: 2) {
     }
 
     .wider-bar{
-        width: 93%!important;
+    	width: 93%!important;
     }
 
     #app_data .url_config_box  div.col-md-7 .col-md-6:nth-child(1){
-        padding-right: 0px;
-        padding-left: 22px;
+            padding-right: 0px;
+            padding-left: 22px;
     }
 
 
     #app_data .url_config_box input[type='radio'], input[type='radio']:checked{
-
+  
         height:18px;
     }
 
@@ -1497,7 +1480,7 @@ button[name="search"] > strong{
     border-color: #1c487b transparent transparent transparent;
 }
 .stats-table tr.show{
-    display: table-row;
+     display: table-row;
 }
 #specimenRadioBox #specimen{
     position: relative;
@@ -1511,7 +1494,7 @@ button[name="search"] > strong{
     right: 0;
     bottom: 0;
     z-index: 100;
-
+    
 }
 #specimenRadioBox .specimenCollected{
     display: none;
@@ -1613,21 +1596,7 @@ table.valignTop td{
     max-width: 450px;
     margin: 0 auto;
 }
-.modalBlock .contentBlock.patientInfo{
-    width: 40%;
-    left: 30%;
-}
-.modalBlock .patientInfo label{
-    min-width: 200px;
-}
-.modalBlock .patientInfo input[type='text'],
-.modalBlock .patientInfo input[type='email'],
-.modalBlock .patientInfo select{
-    width: 430px;
-    border: 1px solid #5d7ea7;
-    padding: 3px 10px;
-    margin-bottom: 5px;
-}
+
 table.dataTable.display tbody tr:hover>.sorting_1, 
 table.dataTable.order-column tbody tr>.sorting_1, 
 table.dataTable.order-column tbody tr>.sorting_2, 
@@ -1661,18 +1630,18 @@ td.tdAccount .account_name {
     z-index: 1000;
     padding: 3px 10px;
     display: none;
-
+    
 }
 td.tdAccount .account_name:after{
-    content: " ";
-    position: absolute;
-    left: 15px;
-    top: -6px;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 0 10px 8px 10px;
-    border-color: transparent transparent #dee3e8 transparent;
+  content: " ";
+  position: absolute;
+  left: 15px;
+  top: -6px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 10px 8px 10px;
+  border-color: transparent transparent #dee3e8 transparent;
 }
 td.tdAccount:hover .account_name{
     display: block;
@@ -1680,21 +1649,21 @@ td.tdAccount:hover .account_name{
 .select_device_dropdown{
     padding-left:0px !important;
 }
-.color-block{
+#color-block{
     width: 85%;
     float: left;
 }
-.selected-color-box{
+#selected-color-box{
     width: 15%;
     float: left;
     text-align: center;
 }
-.selected-color-box > span{
+#selected-color-box > span{
     width: 65%;
     height: 35px;
     display: inline-block;
 }
-.selected-color-box > span.active{
+#selected-color-box > span.active{
     border: 2px solid #000;    
 }
 .colorBox{
@@ -1727,9 +1696,9 @@ td.tdAccount:hover .account_name{
     border: 2px solid #000;
 }
 .colorBox .item{
-    display: inline-block;
-    padding: 0;
-    border: 0;
+  display: inline-block;
+  padding: 0;
+  border: 0;
 }
 .fa-user-lock{
     color: #f00;
@@ -1782,7 +1751,7 @@ tr.marked_test{
     background: #ffc747ba!important;
 }
 table.dataTable th{
-    box-sizing: border-box!important;
+        box-sizing: border-box!important;
 }
 td.clickable{
     position: relative;
@@ -1851,7 +1820,7 @@ td.clickable .moreInfo .close{
     line-height: 1;
 }
 .status_chart span:last-child{
-    border-right: none;
+     border-right: none;
 }
 a.button.cancel.half{
     display: inline-table;
@@ -1893,10 +1862,4 @@ a.button.cancel.half{
     float: left;
     margin-bottom: 0;
     margin-top: 10px;
-}
-.salutation{
-    position: absolute;
-    top: 20px;
-    right: 170px;
-    font-weight: bold;
 }

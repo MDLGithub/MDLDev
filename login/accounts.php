@@ -253,7 +253,13 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
 }
 
 ?>
+
+
 <?php require_once 'navbar.php'; ?> 
+
+<!-- jQuery Modal -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
 
 <main class="full-width">
     <?php if($dataViewAccess) { ?>
@@ -332,7 +338,9 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                             <?php }  ?>
                         </div>
                         <div class="col-md-6 padd-0 pT-20">
-                            
+                            <a class="followup" id="followup" href="#ex1">
+                                Follow Up
+                            </a>
                         </div>
                     </div>
                     
@@ -648,7 +656,35 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                     </div>
                 </div>
                 
+
+
             </div>
+
+            <div id="setDate" class="modal" style="position: absolute; top: 5%; left: 35%;">
+                <a id="modal_close" href="#" rel="modal:close">x</a>
+                <div class="f2">
+                    <label class="" for="account"><span>Start Date</span></label>
+                    <div class="group">
+                        <input type="date" name="start_date" id="start_date">
+                    </div>
+                </div>
+                <div class="f2">
+                    <label class="" for="account"><span>End Date</span></label>
+                    <div class="group">
+                        <input type="date" name="end_date" id="end_date">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <button id="print" name="submit_account" type="submit" class="btn-inline">Print</button>
+                </div>
+                <div class="col-md-6">
+                    <button id="today_date" value="<?php echo date('Y-m-d'); ?>" name="submit_account" type="submit" class="btn-inline">Today</button>
+                </div>
+                <input type="hidden" name="account" value="<?php echo $accountActive['account']; ?>">
+                <input type="hidden" name="guid_account" value="<?php echo $accountActive['Guid_account'] ?>">
+            </div>
+
+            
         </div><!-- /. mainContent-->
     </div> <!-- /. full box visible-->       
     <?php } else { ?>
@@ -656,6 +692,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
             <h4> Sorry, You Don't have Access to this page content. </h4>
         </div>
     <?php } ?>
+
 </main>
 
 
@@ -766,11 +803,28 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
             </div>
         </form>
           
-    </div>    
+    </div> 
 </div>
 
 <?php require_once('scripts.php');?>
 
+<style type="text/css">
+    #setDate input{    
+        border-radius: .438em;
+        border-right-width: 2px;
+        width: 100%;
+    }
+    #setDate .group{ padding-left: 0; }
+    #setDate #modal_close{
+        font-size: 21px;
+        position: absolute;
+        right: -5px;
+        top: -6px;
+        background: #e0e0e0;
+        color: #fff;
+        padding: 2px 6px;
+    }
+</style>
 
 <script type="text/javascript">
     if ($('#dataTableFixed').length ) { 
@@ -790,5 +844,8 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                         ]      
                     });  
     }
+
+
     </script>
+    <script type="text/javascript" src="assets/js/custom-script.js"></script>
 <?php require_once('footer.php');?>

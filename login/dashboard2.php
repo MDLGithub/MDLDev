@@ -255,8 +255,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 //if (date._d.getDate() === today.getDate()) {
                 //if(moment.format("DD-MM-YYYY") === today ){
                 if (date.format('DD-MM-YYYY') === today2) {
-                   cell.css("background", "linear-gradient(135deg, #cfe0e8 15%, #ffffff 25%, #ffffff 50%, #cfe0e8 15%, #cfe0e8 75%, #ffffff 75%, #ffffff 100%)");
-                    cell.css("background-size", "6.14px 6.14px");
+                   //cell.css("background", "linear-gradient(135deg, #cfe0e8 15%, #ffffff 25%, #ffffff 50%, #cfe0e8 15%, #cfe0e8 75%, #ffffff 75%, #ffffff 100%)");active_background.png
+                    cell.css("background-image", "url('assets/images/active_background.png')");
+                    cell.css("background-size", "100%");
                 }
             },
             eventClick: function (event)
