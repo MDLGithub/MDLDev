@@ -181,6 +181,7 @@ main.full-width{
 #physician-gc{
     background-image: -webkit-linear-gradient( 120deg, rgb(255,255,255) 17%, rgb(230,240,251) 100%);
     box-shadow: 0px 4px 4px 0px rgba(78, 112, 150, 0.26);
+    height: 100%;
 }
 
 #physician-header{
@@ -1313,6 +1314,7 @@ and (-webkit-min-device-pixel-ratio: 2) {
 
 #accounts .address-container{
     display:flex;
+    margin-bottom:20px;
 }
 
 #accounts .addressInfoBlock{
