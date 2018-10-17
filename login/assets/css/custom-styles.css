@@ -111,7 +111,8 @@ body{
     display: none!important;
 }
 .color-red,
-.far.fa-trash-alt{
+.far.fa-trash-alt,
+.fas.fa-trash{
     color: #f00;
 }
 
@@ -507,6 +508,21 @@ th.zip input{
     border: 1px solid #eee;
     box-shadow: 3px 2px 10px #0000008a;
 }
+
+@media screen and (max-width: 1024px) {
+    .modalBlock .contentBlock{
+        width: 50%;
+        left: 35%;
+        top: 15%;
+        position: relative;
+        background: #fff;
+        padding: 30px;
+        border-radius: 5px;
+        border: 1px solid #eee;
+        box-shadow: 3px 2px 10px #0000008a;
+    }
+}
+
 .modalBlock .close{
     display: block;
     position: absolute;
@@ -604,7 +620,6 @@ input:checked + .slider:before {
 
 /****** Gabby Johnson *********/
 .add-new-device,
-.followup,
 .add-new-button{
     margin-bottom: 15px;
     font-size: 17px;
@@ -792,6 +807,18 @@ textarea.form-control {
 #app_data > form#patient_information.Physician_table{
     height: 86%;
 }
+#patient_information #dataTableFixed_wrapper {
+    position: relative;
+}
+#patient_information #dataTableFixed_wrapper > .top{
+    position: absolute;
+    top: -40px;
+    right: 0;
+}
+#accountLogo img{
+    max-width: 100%;
+    max-height: 70px;
+}
 .error#message{
     font-weight: bold;
     color: #f00;
@@ -932,23 +959,25 @@ table.dataTable thead .sorting {
 }
 
 #home form{
-	height:100%;
-	width:100%;
+    height:100%;
+    width:100%;
 }
 
 #home .actions{
-	height:50px;
+    height:50px;
+    display: inline-block;
+    width: 100%;
 }
 
 #home .formContent{
-	display:flex;
-	/*flex-direction:column;*/
-	height:calc(100% - 50px);
+    display:flex;
+    /*flex-direction:column;*/
+    height:calc(100% - 50px);
 }
 
 
 .wider-bar{
-	width:76%;
+    width:76%;
 }
 
 .bottom{
@@ -1596,7 +1625,21 @@ table.valignTop td{
     max-width: 450px;
     margin: 0 auto;
 }
-
+.modalBlock .contentBlock.patientInfo{
+    width: 40%;
+    left: 30%;
+}
+.modalBlock .patientInfo label{
+    min-width: 200px;
+}
+.modalBlock .patientInfo input[type='text'],
+.modalBlock .patientInfo input[type='email'],
+.modalBlock .patientInfo select{
+    width: 430px;
+    border: 1px solid #5d7ea7;
+    padding: 3px 10px;
+    margin-bottom: 5px;
+}
 table.dataTable.display tbody tr:hover>.sorting_1, 
 table.dataTable.order-column tbody tr>.sorting_1, 
 table.dataTable.order-column tbody tr>.sorting_2, 
@@ -1630,18 +1673,18 @@ td.tdAccount .account_name {
     z-index: 1000;
     padding: 3px 10px;
     display: none;
-    
+
 }
 td.tdAccount .account_name:after{
-  content: " ";
-  position: absolute;
-  left: 15px;
-  top: -6px;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 0 10px 8px 10px;
-  border-color: transparent transparent #dee3e8 transparent;
+    content: " ";
+    position: absolute;
+    left: 15px;
+    top: -6px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 10px 8px 10px;
+    border-color: transparent transparent #dee3e8 transparent;
 }
 td.tdAccount:hover .account_name{
     display: block;
@@ -1649,21 +1692,21 @@ td.tdAccount:hover .account_name{
 .select_device_dropdown{
     padding-left:0px !important;
 }
-#color-block{
+.color-block{
     width: 85%;
     float: left;
 }
-#selected-color-box{
+.selected-color-box{
     width: 15%;
     float: left;
     text-align: center;
 }
-#selected-color-box > span{
+.selected-color-box > span{
     width: 65%;
     height: 35px;
     display: inline-block;
 }
-#selected-color-box > span.active{
+.selected-color-box > span.active{
     border: 2px solid #000;    
 }
 .colorBox{
@@ -1862,4 +1905,18 @@ a.button.cancel.half{
     float: left;
     margin-bottom: 0;
     margin-top: 10px;
+}
+.salutation{
+    position: absolute;
+    top: 20px;
+    right: 170px;
+    font-weight: bold;
+}
+.statusTable{
+    position: relative;
+}
+.statusTable > h2 {
+    position: absolute;
+    top: 18px;
+    left: 190px;
 }

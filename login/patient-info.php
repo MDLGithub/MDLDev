@@ -298,50 +298,18 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                
                                 <p><label>Health Care Providers: </label><?php echo $qualifyResult['provider']; ?>
                                 <p>
-                                    <label>Location: </label>
+                                    <label>Event: </label>
                                     <?php echo $qualifyResult['source']; ?> 
                                 </p>
                             </div>
-                            <?php if($role=="Admin"){ ?>
+                           
                             <div class="col-md-1 padd-0">
                                 <a title="Edit Patient Info" href="<?php echo $patientInfoUrl."&edit_patient_info=1";?>">
                                     <span class="fas fa-pencil-alt fs-20" aria-hidden="true"></span>
                                 </a>
                             </div>
-                            <?php } ?>
-                            <!--<div class="col-md-6 pInfo">
-                                <p><label>Date of Birth: </label><input type="text" name="dob" class="datepicker" value="<?php echo ($qualifyResult['dob']!="")?date("n/j/Y", strtotime($qualifyResult['dob'])):""; ?>" autocomplete="off" /></p>
-                                <p><label>Email: </label><input type="email" name="email" value="<?php echo $qualifyResult['email']; ?>" autocomplete="off"/> </p>
-                                <p class="capitalize"><label>Insurance: </label><?php echo $qualifyResult['insurance'];
-                                                                                        if($qualifyResult['other_insurance']!="" && $qualifyResult['other_insurance']!="Other"){
-                                                                                            echo " (".$qualifyResult['other_insurance'].")";
-                                                                                        }
-                                                                                ?>                                  
-                                </p>
-                                <?php if($accountInfo) { ?>
-                                <p><label>Account: </label><?php echo $accountInfo['account'];
-                                                                if($accountInfo['account_name']!=""){
-                                                                    echo " - ". ucwords(strtolower($accountInfo['account_name']));
-                                                                }
-                                                            ?>
-                                </p>
-                                <p><label>Genetic Consultant: </label><?php echo $accountInfo['salesrep_name']; ?></p>
-                                <?php } ?>
-                                <p><label>Health Care Providers: </label><?php echo $qualifyResult['provider']; ?>
-                                <p>
-                                    <label>Location: </label>
-                                    <select name="source">
-                                        <option value="">Select Location</option>
-                                        <?php 
-                                        $sources = $db->selectAll('tblsource', ' ORDER BY `description` ASC');
-                                        foreach ($sources as $k=>$v){ 
-                                        $selected = $qualifyResult['source']==$v['description'] ? ' selected' : '';
-                                        ?>
-                                        <option <?php echo $selected; ?> value="<?php echo $v['description']; ?>" ><?php echo $v['description']; ?></option>
-                                        <?php } ?>
-                                    </select>   
-                                </p>
-                            </div> -->
+                            
+                            
                             <div class="col-md-6 pB-30">                    
                                 <div class="row">
                                     <div id="message" class="error-text">
@@ -801,9 +769,10 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input id="mark-as-test" <?php echo $qualifyResult['marked_test']=='1'?' checked': ''; ?>  type="checkbox" name="mark_as_test" value="1" /> 
                                 <label for="mark-as-test">Mark As Test</label>
                             </span>
-                            <?php } ?>
                             
                             <button id="save-patient-info" name="save" type="submit" class="button btn-inline pull-right">Save</button>
+                            <?php } ?>                           
+                            
                         </div>
                     </div>
                         
@@ -878,11 +847,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                     ));
         
         
-        Leave($patientInfoUrl.'&u');
+       Leave($patientInfoUrl.'&u');
         
     }
 ?>
-<?php if($role=='Admin' && (isset($_GET['edit_patient_info'])) && $_GET['edit_patient_info']=="1" ){ ?>
+<?php if( (isset($_GET['edit_patient_info'])) && $_GET['edit_patient_info']=="1" ){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock patientInfo">
         <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a> 
@@ -907,7 +876,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 <p class="capitalize"><label>Other Insurance: </label>
                     <input type="text" name="other_insurance" value="<?php echo $qualifyResult['other_insurance']; ?>" autocomplete="off" />
                 </p>
-               
+                <?php if($role!='Physician'){  ?>
                 <p>
                     <label>Account: </label>
                     <select class="patientAccount" name="account_number">
@@ -921,7 +890,9 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         <?php } ?>
                     </select>  
                 </p>
-                
+                <?php } else { ?>
+                    <input type="hidden" name="account_number" value="<?php echo $qualifyResult['account_number']; ?>" />
+                <?php } ?>
                 <p>
                     <label>Health Care Provider: </label>
                     <select id="pInfoAccountProviders" name="provider_id">
@@ -936,8 +907,10 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     </select> 
                 </p>
                 
+                
+                <?php if($role!='Physician'){  ?>
                 <p>
-                    <label>Location: </label>
+                    <label>Event: </label>
                     <select name="source">
                         <option value="">Select Location</option>
                         <?php 
@@ -949,6 +922,10 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         <?php } ?>
                     </select>   
                 </p>
+                <?php } else { ?>
+                    <input type="hidden" name="source" value="<?php echo $qualifyResult['source']; ?>" />
+                <?php }  ?>
+                    
                 <div class="text-right pT-10">
                     <button class="button btn-inline" name="save_patient_info" type="submit">Save</button>
                     <a href="<?php echo $patientInfoUrl; ?>" class="btn-inline btn-cancel">Cancel</a>                   

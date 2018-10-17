@@ -487,7 +487,7 @@ require_once ('navbar.php');
                                 <th class="">Qualified</th>           
                                 <th class="">Submitted</th>
                                 <?php if( isFieldVisibleByRole($isActionEdit, $roleID) || isFieldVisibleByRole($isActionDelete, $roleID)) {?>
-                                    <th class="noFilter actions text-center">Actions</th>
+                                    <th class="noFilter text-center">Actions</th>
                                 <?php } ?>
                             
                             </tr>

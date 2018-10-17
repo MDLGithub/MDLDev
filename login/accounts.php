@@ -65,7 +65,7 @@ if( isset($_POST['manage_provider'])){
         'first_name' => $first_name,
         'last_name' => $last_name,
         'provider_id'=>$provider_id,
-        'provider_id'=>$Guid_account
+        'Guid_account'=>$Guid_account
     );
     
     if($_POST['email']!=""){
@@ -344,14 +344,15 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                         </div>
                     </div>
                     
-                    <div class="providersTable">                        
+                    <div class="providersTable">
+                        <?php if($role!='Physician'){ ?>                        
                         <h4 id="physiciansListLabel" class="accounts">
                             Physicians       
                             <a href="<?php echo SITE_URL;?>/accounts.php?account_id=<?php echo $thisAccountID;?>&provider_guid=add" class="pull-right" id="add-account-provider">
                                 <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
                             </a>
                         </h4>
-                
+                        <?php } ?>
                         <table class="table providersTable">
                             <thead>
                                 <tr>                        
@@ -362,6 +363,9 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                                     <th class="">Completed</th>           
                                     <th class="">Qualified</th>           
                                     <th class="">Submitted</th>
+                                    <?php if($role!='Physician'){ ?>
+                                    <th class="text-center">Actions</th>
+                                    <?php } ?>
                                 </tr>
                             </thead>
                             <tbody>
@@ -377,34 +381,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                                 <tr>                            
                                     <td><?php echo $v['provider_id']; ?></td>
                                     <td><?php echo $v['title']; ?></td>
-                                    <td class="clickable">                                        
-                                        <?php if($role=='Physician'){ ?>
-                                            <?php echo $v['first_name']." ". $v['last_name']; ?>
-                                        <?php } else { ?>
-                                        <a class="details"><?php echo $v['first_name']." ". $v['last_name']; ?></a>
-                                        <div class="moreInfo">
-                                            <div class="content">
-                                                <span class="close">X</span>
-                                                
-                                                <p>
-                                                    <?php $photoImg = ($v['photo_filename']=="")? "/assets/images/default.png" : "/images/users/".$v['photo_filename'];   ?>
-                                                    <img width="40" src="<?php echo SITE_URL.$photoImg; ?>" />
-                                                </p>
-                                                
-                                                <div class="text-right pT-15 pB-10">
-                                                    <!--<a class="edit-provider" data-provider-guid="<?php echo $v['Guid_provider']; ?>">-->
-                                                    <a href="<?php echo SITE_URL."/accounts.php?account_id=$Guid_account&provider_guid=$providerGuid"; ?>">
-                                                        <span class="fas fa-pencil-alt" aria-hidden="true"></span>
-                                                    </a>
-                                                    <a class="color-red" onclick="javascript:confirmationDeleteProvider($(this));return false;" href="?delete=<?php echo $providerGuid ?>&provider-id=<?php echo $v['provider_id']; ?>&account-id=<?php echo $Guid_account; ?>&user-id=<?php echo $v['Guid_user']; ?>">
-                                                        <span class="far fa-trash-alt" aria-hidden="true"></span> 
-                                                    </a>
-                                                </div>
-                                                
-                                            </div>
-                                        </div>
-                                        <?php } ?>
-                                    </td>                                    
+                                    <td><?php echo $v['first_name']." ". $v['last_name']; ?></td>                                    
                                     <td>
                                         <?php 
                                             $incomplete = getProviderStatusCount($db, 'Incomplete', $v['Guid_provider'] );
@@ -416,6 +393,17 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                                     <td><?php echo getProviderStatusCount($db, 'Completed', $v['Guid_provider'] ); ?></td>
                                     <td><?php echo getProviderStatusCount($db, 'Yes', $v['Guid_provider'] ); ?></td>
                                     <td><?php echo getProviderSubmitedCount($db, $v['Guid_provider'] ); ?></td>
+                                    <?php if($role!='Physician'){ ?>
+                                    <td class="text-center">
+                                        <!--<a class="edit-provider" data-provider-guid="<?php echo $v['Guid_provider']; ?>">-->
+                                        <a href="<?php echo SITE_URL."/accounts.php?account_id=$Guid_account&provider_guid=$providerGuid"; ?>">
+                                            <span class="fas fa-pencil-alt" aria-hidden="true"></span>
+                                        </a>
+                                        <a class="color-red" onclick="javascript:confirmationDeleteProvider($(this));return false;" href="?delete=<?php echo $providerGuid ?>&provider-id=<?php echo $v['provider_id']; ?>&account-id=<?php echo $Guid_account; ?>&user-id=<?php echo $v['Guid_user']; ?>">
+                                            <span class="far fa-trash-alt" aria-hidden="true"></span> 
+                                        </a>
+                                    </td>
+                                    <?php } ?>
                                 </tr>
                                 <?php } ?>
                             <?php } ?>
@@ -561,14 +549,13 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                                                                         AND q.Guid_user=$Guid_user";
                                                             $questionaryR = $db->row($complatedQ);
                                                         }
-
-
                                                     ?>
                                                     <tr class="t_row"> 
-
                                                         <td class="printSelectBlock text-center sorting_1">
                                                             <?php if(!isset($questionaryR['incomplete'])){ ?>
                                                                 <input name="markedRow[user][<?php echo $Guid_user; ?>]" type="checkbox" class="print1 report1" data-prinatble="1" data-selected_questionnaire="<?php echo $questionaryR['Guid_qualify']; ?>" data-selected_date="<?php echo $questionaryR['Date_created']; ?>">
+                                                            <?php }  else { ?>
+                                                                <input name="markedRow[user][<?php echo $Guid_user; ?>]" type="checkbox" class="print1 report1" data-prinatble="2" data-selected_questionnaire="<?php echo $questionaryR['Guid_qualify']; ?>" data-selected_date="<?php echo $questionaryR['date']; ?>" />
                                                             <?php } ?>
                                                         </td>
                                                         <td>
@@ -844,8 +831,6 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                         ]      
                     });  
     }
-
-
     </script>
     <script type="text/javascript" src="assets/js/custom-script.js"></script>
 <?php require_once('footer.php');?>

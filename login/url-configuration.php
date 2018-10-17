@@ -72,7 +72,7 @@ if (isset($_POST['generate_url_config']) && $_POST['generate_url_config']=='1'){
         if( $an=='' || $an=='0'){
             $isValid = FALSE;
             $generateUrlLink = "";
-            $accountMessage .= "<div class='error-text'>Account Number is required for this Location.</div>";
+            $accountMessage .= "<div class='error-text'>Account Number is required for this Event.</div>";
         }
     }
     
@@ -170,7 +170,7 @@ $accountProviders = '';
                         <th>#</th>
                         <th>Logo</th>
                         <th>Account</th>
-                        <th>Location</th>
+                        <th>Event</th>
                         <th>Login</th>
                         <th>Action</th>
                     </tr>

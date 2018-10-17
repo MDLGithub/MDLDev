@@ -2104,11 +2104,11 @@ function topNavLinks($role=FALSE){
  */
 function salutation($db, $role, $userID){
     $salutation = '';
-    //date_default_timezone_set('Asia/Calcutta');    
+    date_default_timezone_set (date_default_timezone_get());   
     if($role=='Physician'){  
         $physician = $db->row("SELECT title, first_name FROM `tblprovider` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
         if($physician['title']=='MD' || $physician['title']==''){
-            $title = "Dr ".$physician['first_name'].'!';
+            $title = "Dr. ".$physician['first_name'].'!';
         }else{
             $title = $physician['first_name'].'!';
         }
