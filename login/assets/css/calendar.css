@@ -590,7 +590,7 @@ Author:Gabriela Johnson;
 
       margin: 10px 0;
 
-      text-align: right;
+      text-align: center;
 
 }
 
@@ -1386,6 +1386,9 @@ Author:Gabriela Johnson;
 
 }
 
+#piechart svg > g > path, #chart svg > g > path {
+    fill-opacity: 0;
+}
 
 
 g g g text{
