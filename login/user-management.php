@@ -350,7 +350,7 @@ require_once ('navbar.php');
                                     </a> 
                                     <?php if($user['marked_test']=='1' && $user['Guid_role']!='6'){?>
                                     <a id="test-user" class="deleteUser" title="Remove User and History" data-user-id="<?php echo $user['Guid_user']; ?>" >
-                                        <span class="fas fa-trash" aria-hidden="true"></span> 
+                                        <span class="far fa-trash-alt" aria-hidden="true"></span> 
                                     </a>
                                     <?php } ?>
                                     <?php if($user['Guid_role']=='6'){?>

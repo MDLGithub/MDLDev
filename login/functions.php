@@ -2104,7 +2104,7 @@ function topNavLinks($role=FALSE){
  */
 function salutation($db, $role, $userID){
     $salutation = '';
-    date_default_timezone_set (date_default_timezone_get());   
+    date_default_timezone_set('America/New_York');   
     if($role=='Physician'){  
         $physician = $db->row("SELECT title, first_name FROM `tblprovider` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
         if($physician['title']=='MD' || $physician['title']==''){

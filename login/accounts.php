@@ -286,9 +286,11 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
             <div id="accounts">
                 <div class="row">
                     <div class="col-md-8">
+                        <?php if($role=='Physician') { ?>
                         <div id = "physician-header">
                             <h2>Physician's Dashboard</h2>
                         </div>
+                        <?php } ?>
                         <div class="status_chart">
                         <div class="row">
                             <div class="col-md-12">
@@ -315,13 +317,11 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                             </div>
                         </div>
                     </div>
+                    <?php if($role!='Physician') { ?>
                     <div class="selectAccountBlock row ">
                         
-                        <!--<div class="col-md-6 padd-0">
+                        <div class="col-md-6 padd-0">
                             
-                            <?php if($role=='Physician') { ?>
-                                <span class="thisPAccount"><?php echo $thisProvider['account']." - ".ucwords(strtolower($thisProvider['name'])); ?></span>
-                            <?php } else { ?>
                             <label >Select Account</label><br/>
                             <select class="form-control" id="selectAccount">
                                 <?php 
@@ -338,14 +338,15 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                             <a href="<?php echo SITE_URL;?>/account-config.php?action=edit&id=<?php echo $accountActive['Guid_account']; ?>" id="edit-selected-account" class="add-new-account">
                                 <span class="fas fa-pencil-alt" aria-hidden="true"></span>
                             </a>
-                            <?php }  ?>
+                            
                         </div>
                         <div class="col-md-6 padd-0 pT-20">
-                            <a class="followup" id="followup" href="#ex1">
+                            <a class="followup btn-styled btn-home" id="followup" href="#ex1">
                                 Follow Up
                             </a>
-                        </div>-->
+                        </div>
                     </div>
+                    <?php }  ?>
                     
                     <div class = "address-container">
 

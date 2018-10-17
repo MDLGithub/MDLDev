@@ -14,7 +14,7 @@ class Log {
 
     public function __construct() {
         global $root;
-        date_default_timezone_set('Europe/Amsterdam');
+        date_default_timezone_set('America/New_York');
         $this->path = $root . $this->path;
     }
 

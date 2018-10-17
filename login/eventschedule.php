@@ -709,10 +709,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         var res = JSON.parse(res);
                         if(res.length > 0){
                             logo = res[0];
-                            element[0].childNodes[2].innerHTML = '<img src = "images/practice/'+logo.logo+'" />';
+                            if(element[0].childNodes[2]){
+                                element[0].childNodes[2].innerHTML = '<img src = "images/practice/'+logo.logo+'" />';
+                            }
                         }
                         else{   
-                            element[0].childNodes[2].innerHTML = '<img src = "images/logo-placeholder.png" />';    
+                            if(element[0].childNodes[2]){
+                                element[0].childNodes[2].innerHTML = '<img src = "images/logo-placeholder.png" />';    
+                            }
                         }
                     }
                 });

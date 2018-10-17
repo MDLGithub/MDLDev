@@ -191,6 +191,7 @@ main.full-width{
     border-radius: 20px;
     text-align:center;
     color:white;
+    line-height: 2;
 }
 
 .loginBG { 
@@ -495,8 +496,7 @@ th.zip input{
 }
 .thisPAccount{
     padding: 5px 10px;
-    border: 1px solid #d3d3d3;
-    border-radius: 3px;
+    font-weight: bold;
 }
 .selectAccountBlock a#edit-selected-account{
     font-size: 22px;
@@ -647,6 +647,19 @@ input:checked + .slider:before {
 }
 .add-new-device{
     width: 100px;
+}
+.followup{ float: right; width: 170px; position: relative;}
+.followup:before {
+    background-image: url(../images/icon_forms.png);
+    width: 21px;
+    height: 21px;
+    content: "";
+    top: 9px;
+    left: 15px;
+    background-size: 18px;
+    position: absolute;
+    background-position: right;
+    background-repeat: no-repeat;
 }
 .add-new-device.export_matrix{
     width: 250px;
@@ -1314,7 +1327,7 @@ and (-webkit-min-device-pixel-ratio: 2) {
 
 #accounts .address-container{
     display:flex;
-    margin-bottom:20px;
+    margin-bottom: 15px;
 }
 
 #accounts .addressInfoBlock{
@@ -1961,4 +1974,12 @@ a.button.cancel.half{
     top: 20px;
     right: 170px;
     font-weight: bold;
+}
+.statusTable{
+    position: relative;
+}
+.statusTable > h2 {
+    position: absolute;
+    top: 18px;
+    left: 190px;
 }
