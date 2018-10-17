@@ -437,7 +437,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 //if(moment.format("DD-MM-YYYY") === today ){
                 if (date.format('DD-MM-YYYY') === today2) {
                     cell.css("background-image", "url('assets/images/active_background.png')");
-                    cell.css("background-size", "100%");
+                    cell.css("background-size", "100% 100%");
                 }
             },
             eventClick: function (event, jsEvent, view)
@@ -709,14 +709,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         var res = JSON.parse(res);
                         if(res.length > 0){
                             logo = res[0];
-                            if(element[0].childNodes[2]){
-                                element[0].childNodes[2].innerHTML = '<img src = "images/practice/'+logo.logo+'" />';
-                            }
+                            element[0].childNodes[2].innerHTML = '<img src = "images/practice/'+logo.logo+'" />';
                         }
                         else{   
-                            if(element[0].childNodes[2]){
-                                element[0].childNodes[2].innerHTML = '<img src = "images/logo-placeholder.png" />';    
-                            }
+                            element[0].childNodes[2].innerHTML = '<img src = "images/logo-placeholder.png" />';    
                         }
                     }
                 });
