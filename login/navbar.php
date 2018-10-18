@@ -29,7 +29,7 @@
 
                 <ul>   
                     <?php if($role == 'Physician') { ?>
-                        <li><a href="<?php echo SITE_URL; ?>/accounts.php">Account</a></li>
+                        <li><a href="<?php echo SITE_URL; ?>/accounts.php">Home</a></li>
                     <?php } else { ?>
                         <li><a href="<?php echo SITE_URL; ?>/dashboard2.php">Home</a></li>
                     <?php } ?>                    

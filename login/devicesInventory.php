@@ -380,48 +380,10 @@ require_once ('navbar.php');
                             ?>
                             <tr>                                
                                 <?php if(isFieldVisibleByRole($isSalesRepView, $roleID)) {?>
-                                    <td class="clickable">
-                                        <a class="details"><?php echo $v['first_name']." ".$v['last_name']; ?></a>
-                                        
-                                        <div class="moreInfo">
-                                            <div class="content">
-                                                <span class="close">X</span> 
-                                                
-                                                <?php if(isFieldVisibleByRole($isInserviceDateView, $roleID)) {?>
-                                                    <p>
-                                                        <label>In-Service Date: </label>
-                                                        <?php echo (!preg_match("/0{4}/" , $v['inservice_date'])) ? date('n/j/Y', strtotime($v['inservice_date'])) : ""; ?>
-                                                    </p>
-                                                <?php } ?>
-                                                <?php if(isFieldVisibleByRole($isOutserviceDateView, $roleID)) {?>
-                                                    <p>
-                                                        <label>Out-Of-Service Date: </label>
-                                                        <?php echo (!preg_match("/0{4}/" , $v['outservice_date'])) ? date('n/j/Y', strtotime($v['outservice_date'])) : ""; ?>
-                                                    </p>
-                                                <?php } ?>
-                                                <?php if(isFieldVisibleByRole($isCommentView, $roleID)) {?>
-                                                    <p><label>Comment: </label><?php echo substr($v['comment'], 0, 50); ?></p>
-                                                <?php } ?>
-                                                    
-                                                <?php if( isFieldVisibleByRole($isActionEdit, $roleID) || isFieldVisibleByRole($isActionDelete, $roleID)) {?>
-                                                    <div class="text-right pT-15 pB-10">
-                                                         <?php if( isFieldVisibleByRole($isActionEdit, $roleID) ) {?>
-                                                        <a href="<?php echo SITE_URL; ?>/devicesInventory.php?action=edit&id=<?php echo $v['id']; ?>">
-                                                            <span class="fas fa-pencil-alt" aria-hidden="true"></span>
-                                                        </a>&nbsp;&nbsp;
-                                                        <?php } ?>
-                                                        <?php if(isFieldVisibleByRole($isActionDelete, $roleID)) {?>
-                                                        <a onclick="javascript:confirmationDeleteDevice($(this));return false;" href="<?php echo SITE_URL; ?>/devicesInventory.php?delete=<?php echo $v['id'] ?>&id=<?php echo $v['serial_number']; ?>">
-                                                            <span class="far fa-trash-alt" aria-hidden="true"></span> 
-                                                        </a>
-                                                        <?php } ?>
-                                                    </div>
-                                                <?php } ?> 
-                                                
-                                            </div>
-                                        </div>
-                                        
-                                    
+                                    <td>
+                                        <a href="<?php echo SITE_URL; ?>/devicesInventory.php?action=edit&id=<?php echo $v['id']; ?>">
+                                        <?php echo $v['first_name']." ".$v['last_name']; ?>
+                                        </a>
                                     </td>
                                 <?php } ?>
                                 <?php if(isFieldVisibleByRole($isDeviceNameView, $roleID)) {?>
@@ -435,6 +397,7 @@ require_once ('navbar.php');
                                 <td><?php echo getDeviceStatusCount($db, $v['Guid_salesrep'], '36'); //36->Questionnaire Completed ?></td>
                                 <td><?php echo getDeviceStatusCount($db, $v['Guid_salesrep'], '29'); //29->Questionnaire Completed->Qualified ?></td>
                                 <td><?php echo getDeviceStatusCount($db, $v['Guid_salesrep'], '1' ); //28->Submitted (Specimen Collected) ?></td>
+                                
                             </tr>
                         <?php
                             $i++;

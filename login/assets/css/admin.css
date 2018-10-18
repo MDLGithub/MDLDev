@@ -606,6 +606,10 @@ main {
     color: #1c487b;
 }
 
+.button.export {
+    margin-right: 9%;
+}
+
 .button.export::before {
     content: "";
     background: url(../images/arrow-up.png) no-repeat center;
@@ -613,6 +617,12 @@ main {
 
 .button.export > strong {
     color: #1c487b;
+}
+
+.button.custom {
+    max-width: 45%;
+    width: 100%;
+    display: inline-block;
 }
 
 .button.half {

@@ -768,10 +768,13 @@ function getSalesrepAccounts($db, $Guid_user){
  * @param type $Guid_status
  * @return type
  */
-function getAccountStatusCount($db, $account, $Guid_status ){     
+function getAccountStatusCount($db, $account, $Guid_status, $eventDate=NULL ){     
     $q = "SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l "
         . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
-        . "WHERE l.Guid_status =:Guid_status AND l.account=:account AND u.marked_test='0'"; 
+        . "WHERE l.Guid_status =:Guid_status AND l.account=:account AND u.marked_test='0' "; 
+    if($eventDate){
+        $q .=  "AND DATE(l.Date)='".$eventDate."'";
+    }
     
     $result = $db->row($q, array('account'=>$account,'Guid_status'=>$Guid_status));    
     return $result['count'];
@@ -2101,11 +2104,11 @@ function topNavLinks($role=FALSE){
  */
 function salutation($db, $role, $userID){
     $salutation = '';
-    //date_default_timezone_set('Asia/Calcutta');    
+    date_default_timezone_set('America/New_York');   
     if($role=='Physician'){  
         $physician = $db->row("SELECT title, first_name FROM `tblprovider` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
         if($physician['title']=='MD' || $physician['title']==''){
-            $title = "Dr ".$physician['first_name'].'!';
+            $title = "Dr. ".$physician['first_name'].'!';
         }else{
             $title = $physician['first_name'].'!';
         }
@@ -2121,4 +2124,82 @@ function salutation($db, $role, $userID){
     }
     
     return $salutation;
+}
+
+function get_status_state($db, $parent = 0, $searchData=array(), $linkArr=array(), $today) {
+    $statuses = array('28' => 'Registered Paient', '36' => 'Completed Questionnaire', '16' => 'Insufficient Informatin' , '29' => 'Medically Qualified' );
+    $filterUrlStr = "";
+    $content = '';    
+    foreach ($statuses as $key => $status) {
+        $stats1 = get_stats_info($db, $key, FALSE, $searchData);
+        $stats2 = get_stats_info_today($db, $key, FALSE, $searchData, $today);
+        $content .= "<tr class='parent'>";
+        $content .= "<td class='text-left'><span>".$status."</span></td>";            
+        $content .= '<td><a>'.$stats2['count'].'</a></td>';
+        $content .= '<td><a>'.$stats1['count'].'</a></td>';
+        $content .= "</tr>";    
+    }    
+    return $content;
+}
+
+
+function get_stats_info_today($db, $statusID, $hasChildren=FALSE, $searchData=array(), $today){
+    
+    //exclude test users
+    $markedTestUserIds = getMarkedTestUserIDs($db);
+    $testUserIds = getTestUserIDs($db);
+    $filterUrlStr = "";
+    //$testUserIds = '';
+    $q = "SELECT statuses.*, statuslogs.*,
+            mdlnum.mdl_number as mdl_number
+            FROM `tbl_mdl_status` statuses
+            LEFT JOIN `tbl_mdl_status_log` statuslogs ON statuses.`Guid_status`= statuslogs.`Guid_status`
+            LEFT JOIN `tbl_mdl_number` mdlnum ON statuslogs.Guid_user=mdlnum.Guid_user ";
+    
+    $q .=  "WHERE  statuslogs.`currentstatus`='Y' AND DATE(statuslogs.`Date`) =:today ";
+    
+    if(!empty($searchData)){ 
+        if (isset($searchData['from_date']) && $searchData['from_date']!="" && isset($searchData['to_date']) && $searchData['to_date']!="") {
+            if ($searchData['from_date'] == $searchData['to_date']) {
+                $q .= " AND statuslogs.Date LIKE '%" . date("Y-m-d", strtotime($searchData['from_date'])) . "%'";
+            } else {
+                $q .= " AND statuslogs.Date BETWEEN '" . date("Y-m-d", strtotime($searchData['from_date'])) . "' AND '" . date("Y-m-d", strtotime($searchData['to_date'])) . "'";
+            }
+            $filterUrlStr .= "&from=".date("Y-m-d", strtotime($searchData['from_date']));
+            $filterUrlStr .= "&to=".date("Y-m-d", strtotime($searchData['to_date']));
+        }
+        if(isset($searchData['mdl_number']) && $searchData['mdl_number']!=""){
+            $q .= " AND mdl_number='".$searchData['mdl_number']."' ";
+            $filterUrlStr .= "&mdnum=".$searchData['mdl_number'];
+        }
+        if(isset($searchData['Guid_salesrep']) && $searchData['Guid_salesrep']!=""){
+            $q .= " AND statuslogs.Guid_salesrep='".$searchData['Guid_salesrep']."' ";
+            $filterUrlStr .= "&salesrep=".$searchData['Guid_salesrep'];
+        }
+        if(isset($searchData['Guid_account']) && $searchData['Guid_account']!=""){
+            $q .= " AND statuslogs.Guid_account='".$searchData['Guid_account']."' ";
+            $filterUrlStr .= "&account=".$searchData['Guid_account'];
+        }
+    }
+  
+    $q .=  " AND statuslogs.`Guid_status_log`<>'' 
+            AND statuslogs.Guid_status=$statusID ";
+    if($markedTestUserIds!=""){
+    $q .=  " AND statuslogs.Guid_user NOT IN(".$markedTestUserIds.") "; 
+    }
+    if($testUserIds!=""){
+    $q .=  " AND statuslogs.Guid_user NOT IN(".$testUserIds.") ";   
+    }
+    $q .=  " AND statuslogs.Guid_patient<>'0' 
+            ORDER BY statuslogs.`Date` DESC, statuses.`order_by` DESC";
+    
+    $stats = $db->query($q, array('today'=>$today));
+    $result['count'] = 0;
+    if(!empty($stats)){
+        $result['count'] = count($stats);
+        $result['filterUrlStr'] = $filterUrlStr;
+        $result['info'] = $stats;
+    }  
+    
+    return $result;
 }

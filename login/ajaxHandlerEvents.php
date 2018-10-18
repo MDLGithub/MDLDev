@@ -171,10 +171,10 @@ if(isset($_POST['commentid']) && isset($_POST['action']) && $_POST['action'] == 
 
 if(isset($_POST['account']) && isset($_POST['action']) && $_POST['action'] == "getStates"){
 
-    $reg = getAccountStatusCount($db, $_POST['account'], $_POST['regitered']);
-    $qua = getAccountStatusCount($db, $_POST['account'], $_POST['qualified']);
-    $com = getAccountStatusCount($db, $_POST['account'], $_POST['completed']);
-    $sub = getAccountStatusCount($db, $_POST['account'], $_POST['submitted']);
+    $reg = getAccountStatusCount($db, $_POST['account'], $_POST['regitered'], '2018-10-03');
+    $qua = getAccountStatusCount($db, $_POST['account'], $_POST['qualified'], '2018-10-03');
+    $com = getAccountStatusCount($db, $_POST['account'], $_POST['completed'], '2018-10-03');
+    $sub = getAccountStatusCount($db, $_POST['account'], $_POST['submitted'], '2018-10-03');
     $result = array("reg"=>$reg, "qua"=>$qua, "com"=>$com, "sub"=>$sub);
     echo json_encode($result);
 }

@@ -1,66 +1,50 @@
-<!DOCTYPE html>
+<?php
+ob_start();
+require_once('config.php');
+require_once('settings.php');
+require_once('functions.php');
+
+?>
+
 <html>
 <head>
 	<link rel="stylesheet" type="text/css" href="assets/css/forms.css">
 	<link rel="stylesheet" type="text/css" href="assets/css/custom-styles1.css">
 	<script type="text/javascript">
 
-/*--This JavaScript method for Print command--*/
+	    function PrintDoc() {
 
-    function PrintDoc() {
+	        var toPrint = document.getElementById('printarea');
 
-        var toPrint = document.getElementById('printarea');
+	        var popupWin = window.open('', '_blank', 'width=900,height=900,location=no,left=200px');
 
-        var popupWin = window.open('', '_blank', 'width=350,height=150,location=no,left=200px');
+	        popupWin.document.open();
 
-        popupWin.document.open();
+	        popupWin.document.write('<html><title>::Preview::</title><link rel="stylesheet" type="text/css" href="assets/css/print.css" /></head><body onload="window.print()">')
 
-        popupWin.document.write('<html><title>::Preview::</title><link rel="stylesheet" type="text/css" href="print.css" /></head><body onload="window.print()">')
+	        popupWin.document.write(toPrint.innerHTML);
 
-        popupWin.document.write(toPrint.innerHTML);
+	        popupWin.document.write('</html>');
 
-        popupWin.document.write('</html>');
+	        popupWin.document.close();
 
-        popupWin.document.close();
-
-    }
-
-/*--This JavaScript method for Print Preview command--*/
-
-    function PrintPreview() {
-
-        var toPrint = document.getElementById('printarea');
-
-        var popupWin = window.open('', '_blank', 'width=350,height=150,location=no,left=200px');
-
-        popupWin.document.open();
-
-        popupWin.document.write('<html><title>::Print Preview::</title><link rel="stylesheet" type="text/css" href="Print.css" media="screen"/></head><body">')
-
-        popupWin.document.write(toPrint.innerHTML);
-
-        popupWin.document.write('</html>');
-
-        popupWin.document.close();
-
-    }
-
-</script>
-	
+	    }
+	</script>
 </head>
 <body>
+
 	<input type="button" value="Print" class="btn" onclick="PrintDoc()"/>
 	 
 	<section class="form follow-up geneveda" id="printarea">
 	    <header class="header">
-			<div class="col one">
+			 <div class="col one">
 				<figure class="account_logo"><img src="https://www.mdlab.com/dev/images/practice/22230-LEXINGTON%20OBGYN%20ASSOCIATES.png" alt="Lexington"></figure>
 
 				<p>Thank you for selecting Geneveda to provide Hereditary Breast and Ovarian Cancer (HBOC) Screening for your patients. This report was prepared on <strong>September 24, 2018</strong>.</p>
-			</div>
+			</div> 
 		
 			<div class="col two">
-				<figure class="lab"><img src="https://www.mdlab.com/dev/images/logo_geneveda.png" alt="Geneveda"></figure>
+				 <figure class="lab"><img src="https://www.mdlab.com/dev/images/logo_geneveda.png" alt="Geneveda"></figure> 
 				
 				<table class="stat_table c2 c3">
 				    <thead>
@@ -72,38 +56,46 @@
 					</thead>
 					
 					<tbody>
-					    <tr>
-						    <td>Registered Patients</td>
-							<td>11</td>
-							<td>24</td>
-						</tr>
-						<tr>
-						    <td>Completed Questionnaire</td>
-							<td>9</td>
-							<td>20</td>
-						</tr>
-						<tr>
-						    <td>Insufficient Information</td>
-							<td>2</td>
-							<td>5</td>
-						</tr>
-						<tr>
-						    <td>Medically Qualified</td>
-							<td>4</td>
-							<td>12</td>
-						</tr>
+						<?php 
+							if(isset($_POST['today'])){
+								$account = $_POST['account'];
+								$guid_account = $_POST['guid_account'];
+								$today = $_POST['today'];
+
+							    echo get_status_state($db, '0', array('Guid_account'=>$guid_account), array('account_id'=>$guid_account,'status_table'=>'1'), $today);
+							}
+						?>
+
 					</tbody>
 				</table>
 			</div>
 		</header>
 		
 		<div class="main">
-			<p>Based upon the cited clinical policy testing guidelines, testing is <strong class="labColor">recommended</strong> for the following patients:</p>
+			<p> <strong class="labColor">Follow-up is needed - </strong>Patients met medical neccessity and submitted specimens:</p>
+
+			<?php 
+				/*$statuses = array('28' => 'Registered Paient', '36' => 'Completed Questionnaire', '16' => 'Insufficient Informatin' , '29' => 'Medically Qualified' );
+			    $filterUrlStr = "";
+			    $content = '';    
+			    foreach ($statuses as $key => $status) {
+			        $stats1 = get_stats_info($db, $key, FALSE, $searchData);
+			        $stats2 = get_stats_info_today($db, $key, FALSE, $searchData, $today);
+			        $content .= "<tr class='parent'>";
+			        $content .= "<td class='text-left'><span>".$status."</span></td>";            
+			        $content .= '<td><a>'.$stats2['count'].'</a></td>';
+			        $content .= '<td><a>'.$stats1['count'].'</a></td>';
+			        $content .= "</tr>";    
+			    } */   
+			    //return $content;
+			    $specimen = get_stats_info_today($db, 1, FALSE, array('Guid_account'=>$guid_account), $today);
+			    
+			?>
 			
 			<table id="testing_recommended" class="ftable c4 c5 c6 lC5">
 			    <thead>
 					<tr>
-						<th><img class="pBG" src="images/swatch_gen_purple.png" alt="">First Name</th>
+						<th>First Name</th>
 						<th>Last Name</th>
 						<th>DOB</th>
 						<th>Guideline Applied</th>
@@ -112,56 +104,60 @@
 					</tr>
 				</thead>
 			    <tbody>
-				    <tr>
-						<td>John</td>
-						<td>Doe</td>
-						<td>1/1/1980</td>
-						<td>Aetna</td>
-						<td>BRCA</td>
-						<td></td>
-					</tr>
-					<tr>
-						<td>John</td>
-						<td>Doe</td>
-						<td>1/1/1980</td>
-						<td>Aetna</td>
-						<td>BRCA</td>
-						<td></td>
-					</tr>
+			    	<?php 
+			    		if(!empty($specimen['info'])):
+					    	foreach ($specimen['info'] as $key => $value) {
+					    		$sql = "SELECT `firstname`,`lastname`,`dob` FROM `tblpatient` WHERE `Guid_patient`=:patient_id";
+					    		$test = $db->query($sql, array('patient_id' => $value['Guid_patient']));
+					    		
+						    	echo "<tr>";
+						    	echo "<td>".$test[0]['firstname']."</td>";
+						    	echo "<td>".$test[0]['lastname']."</td>";
+						    	echo "<td>".$test[0]['dob']."</td>";
+						    	echo "<td></td>";
+						    	echo "<td></td>";
+						    	echo "<td></td>";
+						    	echo "</tr>";
+						    }
+						endif;
+				    ?>
 				</tbody>
 			</table>
 			
 			<p><strong>Insufficient information</strong> was available to determine if the following patients met clinical policy testing guidelines:</p>
-			
+			<?php $unknown = get_stats_info_today($db, 31, FALSE, array('Guid_account'=>$guid_account), $today); ?>
 			<table class="ftable sf4">
 			    <thead>
 					<tr>
-						<th><img class="pBG" src="images/swatch_gen_grey.png" alt="">First Name</th>
+						<th>First Name</th>
 						<th>Last Name</th>
 						<th>DOB</th>
 						<th>Information Needed</th>
 					</tr>
 				</thead>
 			    <tbody>
-				    <tr>
-						<td>John</td>
-						<td>Doe</td>
-						<td>1/1/1980</td>
-						<td>Genetic Mutation</td>
-					</tr>
-					<tr>
-						<td>John</td>
-						<td>Doe</td>
-						<td>1/1/1980</td>
-						<td>Do you have at least one first- or second-degree close blood relative in your family with breast cancer at age 45 years or younger?</td>
-					</tr>
+				    <?php 
+			    		if(!empty($unknown['info'])):
+					    	foreach ($unknown['info'] as $key => $value) {
+					    		$sql = "SELECT `firstname`,`lastname`,`dob` FROM `tblpatient` WHERE `Guid_patient`=:patient_id";
+					    		$test = $db->query($sql, array('patient_id' => $value['Guid_patient']));
+					    		
+						    	echo "<tr>";
+						    	echo "<td>".$test[0]['firstname']."</td>";
+						    	echo "<td>".$test[0]['lastname']."</td>";
+						    	echo "<td>".$test[0]['dob']."</td>";
+						    	echo "<td></td>";
+						    	echo "</tr>";
+						    }
+						endif;
+				    ?>
 				</tbody>
 			</table>
 			
 			<div id="not_recommended" class="columns two">
 				<div class="col">
 				    <p>The following patients were also screened and based upon the information provided, screening for BRCA, HBOC, and/or Lynch Syndrome is <strong>not</strong> recommended:</p>
-				
+					<?php $notqual = get_stats_info_today($db, 30, FALSE, array('Guid_account'=>$guid_account), $today); ?>
 					<table class="sTable">
 						<thead>
 							<tr>
@@ -171,18 +167,27 @@
 							</tr>
 						</thead>
 						<tbody>
-						    <tr>
-							    <td>Jane</td>
-								<td>Smith</td>
-								<td>3/3/1985</td>
-							</tr>
+						    <?php 
+					    		if(!empty($notqual['info'])):
+							    	foreach ($notqual['info'] as $key => $value) {
+							    		$sql = "SELECT `firstname`,`lastname`,`dob` FROM `tblpatient` WHERE `Guid_patient`=:patient_id";
+							    		$test = $db->query($sql, array('patient_id' => $value['Guid_patient']));
+							    		
+								    	echo "<tr>";
+								    	echo "<td>".$test[0]['firstname']."</td>";
+								    	echo "<td>".$test[0]['lastname']."</td>";
+								    	echo "<td>".$test[0]['dob']."</td>";
+								    	echo "</tr>";
+								    }
+								endif;
+						    ?>
 						</tbody>
 					</table>
 				</div>
 				
 				<div id="not_completed" class="col">
 				    <p>The following patients initiated, but did not complete the questionnaire:</p>
-				
+					<?php $incomplete = get_stats_info_today($db, 16, FALSE, array('Guid_account'=>$guid_account), $today); ?>
 					<table class="sTable">
 						<thead>
 							<tr>
@@ -192,11 +197,20 @@
 							</tr>
 						</thead>
 						<tbody>
-						    <tr>
-							    <td>Irma</td>
-								<td>Redulus</td>
-								<td>9/18/1965</td>
-							</tr>
+						    <?php 
+					    		if(!empty($incomplete['info'])):
+							    	foreach ($incomplete['info'] as $key => $value) {
+							    		$sql = "SELECT `firstname`,`lastname`,`dob` FROM `tblpatient` WHERE `Guid_patient`=:patient_id";
+							    		$test = $db->query($sql, array('patient_id' => $value['Guid_patient']));
+							    		
+								    	echo "<tr>";
+								    	echo "<td>".$test[0]['firstname']."</td>";
+								    	echo "<td>".$test[0]['lastname']."</td>";
+								    	echo "<td>".$test[0]['dob']."</td>";
+								    	echo "</tr>";
+								    }
+								endif;
+						    ?>
 						</tbody>
 					</table>
 				</div>
@@ -235,9 +249,3 @@
 	</section>
 </body>
 </html>
-
-
-
-
-	
-	

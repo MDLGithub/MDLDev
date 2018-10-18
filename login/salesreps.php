@@ -717,8 +717,8 @@ require_once ('navbar.php');
 		    </div>
 		
 
-		<button value="1" name="search" class="button export half"><strong>Export</strong></button>
-		<button id="clear_filters" name="clear" class="button cancel half"><strong>Clear</strong></button>
+		<button value="1" name="search" class="button export custom"><strong>Export</strong></button>
+		<button id="clear_filters" name="clear" class="button cancel custom"><strong>Clear</strong></button>
 	    </form>
 	</div>
     </div>

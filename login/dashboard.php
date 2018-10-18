@@ -323,25 +323,7 @@ $whereIncomplete  = "";
 if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
    
     $where = "";  $whereTest = "";  $whereIncomplete  = "";   
-    //Marked as test
-    if (isset($_POST['mark_test']) && strlen($_POST['mark_test'])) {
-        $whereTest = (strlen($where)) ? " AND " : " WHERE ";
-        $whereTest .= " u.marked_test = '1'";
-    } else {
-        $whereTest = (strlen($where)) ? " AND " : " WHERE ";
-        $whereTest .= " u.marked_test = '0'";
-    }
     
-    //From date - To Date range
-    if (strlen($_POST['from_date']) && strlen($_POST['to_date'])) {
-        if ($_POST['from_date'] == $_POST['to_date']) {
-            $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
-            $where .= " q.Date_created LIKE '%" . date("Y-m-d", strtotime($_POST['from_date'])) . "%'";
-        } else {
-            $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
-            $where .= " q.Date_created BETWEEN '" . date("Y-m-d", strtotime($_POST['from_date'])) . "' AND '" . date("Y-m-d", strtotime($_POST['to_date'])) . "'";
-        }
-    }  
     //Medical Necessity
     if (isset($_POST['meets_mn']) && strlen($_POST['meets_mn'])) {
         $whereTest = "";
@@ -362,6 +344,27 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
             $where .= " q.qualified = '" . $_POST['meets_mn'] . "'";
         }
     }
+    
+    //Marked as test
+    if (isset($_POST['mark_test']) && strlen($_POST['mark_test'])) {
+        $whereTest = (strlen($where)) ? " AND " : " WHERE ";
+        $whereTest .= " u.marked_test = '1'";
+    } else {
+        $whereTest = (strlen($where)) ? " AND " : " WHERE ";
+        $whereTest .= " u.marked_test = '0'";
+    }
+    
+    //From date - To Date range
+    if (strlen($_POST['from_date']) && strlen($_POST['to_date'])) {
+        if ($_POST['from_date'] == $_POST['to_date']) {
+            $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
+            $where .= " q.Date_created LIKE '%" . date("Y-m-d", strtotime($_POST['from_date'])) . "%'";
+        } else {
+            $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
+            $where .= " q.Date_created BETWEEN '" . date("Y-m-d", strtotime($_POST['from_date'])) . "' AND '" . date("Y-m-d", strtotime($_POST['to_date'])) . "'";
+        }
+    }  
+    
     //First Name
     if (isset($_POST['first_name']) && strlen(trim($_POST['first_name']))) {
         $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
@@ -437,7 +440,6 @@ $sqlTbl .= $where;
   
 //$sqlTbl .= " GROUP BY p.Guid_user";
 $sqlTbl .= " ORDER BY date DESC";
-//var_dump($sqlTbl);
 
 $qualify_requests = $db->query($sqlTbl);
 

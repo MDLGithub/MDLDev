@@ -303,6 +303,7 @@ $(document).ready(function () {
         var thisColor = $(this).attr('data-color');
         $(this).parent().parent().parent().parent().find(".selected-color-box span").removeClass('active');
         $(this).parent().parent().parent().parent().find(".selected-color-box span").css("background-color", thisColor).addClass('active');
+        $(this).parent().parent().addClass('closed').hide();
     });
     
     /**
