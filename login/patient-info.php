@@ -288,11 +288,16 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                     ?>                                  
                                 </p>
                                 
-                                <p><label>Account: </label><?php echo $qualifyResult['account_number'];
+                                <p><label>Account: </label>
+                                    <a href="<?php echo SITE_URL.'/accounts.php?account_id='.$accountInfo['Guid_account']; ?>">
+                                        <?php echo $qualifyResult['account_number']; ?>
+                                    </a>
+                                    <?php
                                         if($accountInfo['account_name']!=""){
                                             echo " - ". ucwords(strtolower($accountInfo['account_name']));
                                         }
                                     ?>
+                                    
                                 </p>
                                 <p><label>Genetic Consultant: </label><?php echo $accountInfo['salesrep_name']; ?></p>
                                
@@ -878,11 +883,31 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 </p>
                 <?php if($role!='Physician'){  ?>
                 <p>
-                    <label>Account: </label>
+                    <label>Account: </label>                    
+                    <?php 
+                    if (($role == "Sales Rep") || ((isset($_POST['salesrep']) && strlen($_POST['salesrep']) && (!isset($_POST['clear']))))) {
+                        $query = "SELECT 
+                        tblaccount.*                   
+                        FROM tblsalesrep 
+                        LEFT JOIN `tblaccountrep` ON  tblsalesrep.Guid_salesrep = tblaccountrep.Guid_salesrep
+                        LEFT JOIN `tblaccount` ON tblaccountrep.Guid_account = tblaccount.Guid_account                    
+                        WHERE tblsalesrep.Guid_user=";
+
+                        if (isset($_POST['salesrep']) && strlen($_POST['salesrep'])) {
+                            $query .= $_POST['salesrep'];
+                        } else {
+                            $query .= $_SESSION['user']['id'];
+                        }
+                    } else {
+                        $query = "SELECT * FROM tblaccount";
+                    }
+                    $query .= " ORDER BY account";
+                    $accounts = $db->query($query);                   
+                    ?>
                     <select class="patientAccount" name="account_number">
                         <option value="">Select Account</option>
                         <?php 
-                        $accounts = $db->selectAll('tblaccount', ' ORDER BY `account` ASC');
+                        
                         foreach ($accounts as $k=>$v){ 
                         $selected = $qualifyResult['account_number']==$v['account'] ? ' selected' : '';
                         ?>
@@ -898,7 +923,10 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     <select id="pInfoAccountProviders" name="provider_id">
                         <option value="">Select Provider</option>
                         <?php 
-                        $tblproviders = $db->query('SELECT * FROM tblprovider WHERE account_id='.$qualifyResult['account_number']);
+                        //$tblproviders = $db->query('SELECT * FROM tblprovider WHERE account_id='.$qualifyResult['account_number']);
+                        $tblproviders = $db->query('SELECT pr.* FROM tblprovider pr '                                
+                                                . 'LEFT JOIN tbluser u ON u.`Guid_user`=pr.`Guid_user`'
+                                                . ' WHERE account_id='.$qualifyResult['account_number'].' AND u.status="1" ');
                         foreach ($tblproviders as $k=>$v){ 
                         $selected = $qualifyResult['provider_id']==$v['Guid_provider'] ? ' selected' : '';
                         ?>

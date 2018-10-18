@@ -2093,39 +2093,6 @@ function topNavLinks($role=FALSE){
     return $content;
 }
 
-/**
- * salutation function for logged in Physicians
- * Good morning, Dr (if the title is MD in db) [last name]!
- * After 12:00 PM -> "Good afternoon"
- * After 5:00 PM -> "Good evening"
- * @param type $role
- * @param type $userID
- * @return string
- */
-function salutation($db, $role, $userID){
-    $salutation = '';
-    date_default_timezone_set('America/New_York');   
-    if($role=='Physician'){  
-        $physician = $db->row("SELECT title, first_name FROM `tblprovider` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
-        if($physician['title']=='MD' || $physician['title']==''){
-            $title = "Dr. ".$physician['first_name'].'!';
-        }else{
-            $title = $physician['first_name'].'!';
-        }
-        // 24-hour format of an hour without leading zeros (0 through 23)
-        $Hour = date('G');
-        if ( $Hour >= 5 && $Hour <= 11 ) {
-            $salutation = "Good morning, ".$title;
-        } else if ( $Hour >= 12 && $Hour <= 18 ) {
-            $salutation = "Good afternoon, ".$title;
-        } else if ( $Hour >= 19 || $Hour <= 4 ) {
-            $salutation = "Good evening, ".$title;
-        }        
-    }
-    
-    return $salutation;
-}
-
 function get_status_state($db, $parent = 0, $searchData=array(), $linkArr=array(), $today) {
     $statuses = array('28' => 'Registered Paient', '36' => 'Completed Questionnaire', '16' => 'Insufficient Informatin' , '29' => 'Medically Qualified' );
     $filterUrlStr = "";

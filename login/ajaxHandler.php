@@ -18,7 +18,7 @@ if(isset($_POST['get_account_provider']) && $_POST['get_account_provider']=='1')
     get_provider_by_guid($db, $_POST['provider_guid']);
 }
 if(isset($_POST['status_dropdown']) && $_POST['status_dropdown']=='1'){
-    __status_dropdown($db, $_POST['parent_id']);
+    get_this_status_dropdown($db, $_POST['parent_id']);
 }
 if(isset($_POST['save_specimen_into_logs'])){
     save_specimen_into_logs($db, $_POST['date'], $_POST['Guid_user'], $_POST['account']);
@@ -63,22 +63,71 @@ if (isset($_POST['exportUsers'])) {
 if (isset($_POST['get_patient_info_providers'])) {
     get_providers_dropdown_options($db,$_POST['account_id']);
 }
-
-function get_providers_dropdown_options($db,$accountID){
-    $option = '<option value="">Select Provider</option>';
-    $tblproviders = $db->query('SELECT * FROM tblprovider WHERE account_id='.$accountID);
-    foreach ($tblproviders as $k=>$v){ 
-        $option .= '<option value="'. $v['Guid_provider'].'" >'.$v['first_name'].' '.$v['last_name'].'</option>';
-    }
-    
-    echo json_encode(array('options'=>$option));                        
+if (isset($_POST['get_salutation_message'])) {
+    salutationMessage($db,$_POST['userRole'], $_POST['userId'], $_POST['userTimeZone']);
 }
 
+/**
+ * salutation function for logged in Physicians
+ * Good morning, Dr (if the title is MD in db) [last name]!
+ * After 12:00 PM -> "Good afternoon"
+ * After 5:00 PM -> "Good evening"
+ * @param type $role
+ * @param type $userID
+ * @return json
+ */
+function salutationMessage($db, $role, $userID, $timezone){
+    $salutation = '';
+    date_default_timezone_set($timezone);   
+    if($role=='Physician'){  
+        $physician = $db->row("SELECT title, first_name FROM `tblprovider` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
+        if($physician['title']=='MD' || $physician['title']==''){
+            $title = "Dr. ".$physician['first_name'].'!';
+        }else{
+            $title = $physician['first_name'].'!';
+        }
+        // 24-hour format of an hour without leading zeros (0 through 23)
+        $Hour = date('G');
+        if ( $Hour >= 5 && $Hour <= 11 ) {
+            $salutation = "Good morning, ".$title;
+        } else if ( $Hour >= 12 && $Hour <= 18 ) {
+            $salutation = "Good afternoon, ".$title;
+        } else if ( $Hour >= 19 || $Hour <= 4 ) {
+            $salutation = "Good evening, ".$title;
+        }        
+    }
+    echo json_encode(array('salutation'=>$salutation));
+}
+/**
+ * Get provider <select> dropdown options by given account id
+ * @param type $db
+ * @param type $accountID
+ */
+function get_providers_dropdown_options($db,$accountID){
+    $option = '<option value="">Select Provider</option>';
+    $tblproviders = $db->query('SELECT pr.* FROM tblprovider pr '                                
+                                . 'LEFT JOIN tbluser u ON u.`Guid_user`=pr.`Guid_user`'
+                                . ' WHERE account_id='.$accountID.' AND u.status="1" ');
+    foreach ($tblproviders as $k=>$v){ 
+        $option .= '<option value="'. $v['Guid_provider'].'" >'.$v['first_name'].' '.$v['last_name'].'</option>';
+    }    
+    echo json_encode(array('options'=>$option, 'providers'=>$tblproviders));                        
+}
+/**
+ * Unlock users by email
+ * Used in user management screen, click to unlock user button
+ * @param type $db
+ * @param type $email
+ */
 function  unlock_user($db, $email){
     deleteByField($db, 'tbluser_login_attempts', 'email',  $_POST['email']);
     echo json_encode(array('delete'=>TRUE));
 }
-
+/**
+ * Get log for locked users
+ * @param type $db
+ * @param type $email
+ */
 function get_loced_user_log($db, $email){
     $userLoginLog = $db->query('SELECT ip, time FROM tbluser_login_attempts WHERE email=:email ORDER BY `time` DESC', array('email'=>$email));
     $content = "";
@@ -89,7 +138,6 @@ function get_loced_user_log($db, $email){
     }
     echo json_encode(array('content'=>$content));
 }
-
 /**
  * Delete User
  * @param type $db
@@ -97,7 +145,6 @@ function get_loced_user_log($db, $email){
  * @param type $Guid_user
  */
 function delete_user($db, $type, $Guid_user){
-
     //tbl_ss_qualify
     $SSQualify = $db->row("SELECT Guid_qualify FROM `tbl_ss_qualify` WHERE Guid_user=:Guid_user ORDER BY Date_created DESC LIMIT 1", array('Guid_user'=>$Guid_user));
     $clinupSSQualifyTables = array(
@@ -117,7 +164,6 @@ function delete_user($db, $type, $Guid_user){
 	    }
 	}
     }
-
     //tblqualify
     $Qualify = $db->row("SELECT Guid_qualify FROM `tblqualify` WHERE Guid_user=:Guid_user ORDER BY Date_created DESC LIMIT 1", array('Guid_user'=>$Guid_user));
     $clinupQualifyTables = array(
@@ -137,7 +183,6 @@ function delete_user($db, $type, $Guid_user){
 	    }
 	}
     }
-
     //both users 'test-user' and 'mdl-user' are in patients table,
     //but have different role ids in user table (Guid_role)
     // Delete the history of given user
@@ -161,7 +206,6 @@ function delete_user($db, $type, $Guid_user){
 	    $arrMsg[] = "Error deleting #".$Guid_user." user from ".$thisTable." table. ";
 	}
     }
-
     //If user is test user
     if($type=='test-user'){ //Delete user data
 	$userTables = array(
@@ -177,13 +221,14 @@ function delete_user($db, $type, $Guid_user){
 	    }
 	}
     }
-
     echo json_encode(array('message'=>$arrMsg, '$Qualify'=>$Qualify, '$SSQualify'=>$SSQualify));
     exit();
 }
-
+/**
+ * Delete Mark As Test type users
+ * @param type $db
+ */
 function delete_marked_test_users($db){
-
     //tbl_ss_qualify
     $SSQualifyQuery = "SELECT Guid_qualify, Guid_user FROM `tbl_ss_qualify` "
 	    . "WHERE Guid_user IN(SELECT Guid_user FROM `tbluser` WHERE marked_test='1')";
@@ -207,7 +252,6 @@ function delete_marked_test_users($db){
 	    }
 	}
     }
-
     //tblqualify
     $qualifyQuery = "SELECT Guid_qualify, Guid_user FROM `tblqualify` "
 	    . "WHERE Guid_user IN(SELECT Guid_user FROM  `tbluser` WHERE marked_test='1')";
@@ -233,7 +277,6 @@ function delete_marked_test_users($db){
 	    }
 	}
     }
-
     // Delete Marked Test Users
     $arrMsg = array();
     $cleanupTables = array(
@@ -257,20 +300,14 @@ function delete_marked_test_users($db){
 	    $arrMsg[] = "Error Marked Test users deleting from ".$thisTable." table. ";
 	}
     }
-
-
     //Delete patient
     $deletePatient = $db->query("DELETE FROM tblpatient WHERE Guid_user "
 		. "IN(SELECT Guid_user FROM  `tbluser` WHERE marked_test='1' AND Guid_role<>'6')");
-
     //delete from users table
     $deleteUsers = $db->query("DELETE FROM `tbluser` WHERE marked_test='1' and Guid_role<>6");
-
-
     echo json_encode(array('message'=>$arrMsg));
     exit();
 }
-
 /**
  * save save_specimen_into_logs
  * @param type $db
@@ -280,7 +317,6 @@ function delete_marked_test_users($db){
  * @param type $status
  */
 function save_specimen_not_collected_into_logs($db, $date, $Guid_user, $account, $status){
-
     if($account && $account!=""){
 	$accountQ = "SELECT a.Guid_account, a.account, a.name AS account_name, "
 		    . "sr.Guid_salesrep, sr.first_name AS salesrep_fname, sr.last_name AS salesrep_lname, CONCAT(sr.first_name, ' ', sr.last_name) AS salesrep_name "
@@ -299,21 +335,17 @@ function save_specimen_not_collected_into_logs($db, $date, $Guid_user, $account,
     }
     $statusLogData['Guid_user'] = $Guid_user;
     $statusLogData['Guid_status'] = '1';
-
     $patient = $db->row("SELECT * FROM tblpatient WHERE Guid_user=:Guid_user", array('Guid_user'=>$Guid_user));
     $statusLogData['Guid_patient'] = $patient['Guid_patient'];
-
     $statusLogData['Recorded_by'] = $_SESSION['user']['id'];
     $statusLogData['Date'] = ($date!="")?date('Y-m-d h:i:s',strtotime($date)):"";
     $statusLogData['Date_created'] = date('Y-m-d h:i:s');
-
     if($status!='37'){
 	$statuses[] = '37';
 	$statuses[] = $status;
     }else{
 	$statuses[] = '37';
     }
-
     $Guid_patient = $patient['Guid_patient'];
     $q  =   "SELECT *
 	    FROM `tbl_mdl_status` statuses
@@ -324,26 +356,26 @@ function save_specimen_not_collected_into_logs($db, $date, $Guid_user, $account,
 	    AND statuslogs.Guid_patient=$Guid_patient
 	    ORDER BY statuslogs.`Date` DESC, statuses.order_by DESC LIMIT 1";
     $result = $db->row($q);
-
     $thisLog = $db->row("SELECT * FROM tbl_mdl_status_log WHERE Guid_status=:Guid_status AND Guid_patient=:Guid_patient", array('Guid_status'=>'37', 'Guid_patient'=>$Guid_patient));
     if(!empty($thisLog)){
 	$LogGroup = $thisLog['Log_group'];
 	//delete old log
 	deleteByField($db, 'tbl_mdl_status_log', 'Log_group', $LogGroup);
     }
-
     //insert log
     $saveStats = saveStatusLog($db, $statuses, $statusLogData);
     updateTable($db, 'tblpatient', array('specimen_collected'=>'No'), array('Guid_patient'=>$patient['Guid_patient']));
-
-
     $statID = updateCurrentStatusID($db, $Guid_patient, FALSE);
-
     echo json_encode(array('log_data'=>$statusLogData, 'updateCurrentStatusID'=>$statID, 'q'=>$q, 'result'=>$result));
     exit();
 }
-
-//save save_specimen_into_logs
+/**
+ * Save specimen collected into status log
+ * @param type $db
+ * @param type $date
+ * @param type $Guid_user
+ * @param type $account
+ */
 function save_specimen_into_logs($db, $date, $Guid_user, $account){
     if($account && $account!=""){
 	$accountQ = "SELECT a.Guid_account, a.account, a.name AS account_name, "
@@ -373,20 +405,18 @@ function save_specimen_into_logs($db, $date, $Guid_user, $account){
 
     //get log group if exists
     $logRow = $db->row("SELECT * FROM tbl_mdl_status_log WHERE Guid_user=:Guid_user", array('Guid_user'=>$Guid_user));
-
     $insert = insertIntoTable($db, 'tbl_mdl_status_log', $statusLogData);
     if($insert['insertID']){
 	updateTable($db, 'tbl_mdl_status_log', array('Log_group'=>$insert['insertID']), array('Guid_status_log'=>$insert['insertID']));
 	updateTable($db, 'tblpatient', array('specimen_collected'=>'Yes'), array('Guid_patient'=>$patient['Guid_patient']));
 	updateCurrentStatusID($db, $patient['Guid_patient']);
     }
-
     echo json_encode(array('log_data'=>$statusLogData));
     exit();
 }
 
 //get status dropdown
-function __status_dropdown($db, $parent) {
+function get_this_status_dropdown($db, $parent) {
     $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
     $content = "";
     $hasSub = "";
@@ -665,8 +695,6 @@ function get_account_and_salesrep($db, $accountGuid=NULL, $getRow=NULL){
 
 
 }
-
-
 
 function load_url_config($db, $id){
 

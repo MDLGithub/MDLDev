@@ -198,15 +198,8 @@ require_once ('navbar.php');
                     <div class="row">
                         <div class="col-md-2"></div>
                         <div class="col-md-8">
-                            <div class="row pB-30">
-                                <div class="col-md-6">
-                                    <button name="save_device_inv" type="submit" class="btn-inline">Save</button>
-                                    <button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>                   
-                                    <!--<a href="<?php echo SITE_URL."/devicesInventory.php";?>" class="btn-inline btn-cancel">Cancel</a>-->                                   
-                                </div>
-                                
-                                <div class="col-md-6 ">
-                                    <?php if(isset($_GET['action']) && $_GET['action']=='edit') { ?>
+                            <div class="row">
+                                <div class="col-md-12">
                                     <div class="status_chart">
                                         <div class="row">
                                             <div class="col-md-12">
@@ -233,10 +226,15 @@ require_once ('navbar.php');
                                             </div>
                                         </div>
                                     </div>
-                                    <?php } ?>
                                 </div>
-                                
-                                <div class="col-md-12 text-center">
+                            </div>
+                            <div class="row pB-30">
+                                <div class="col-md-6">
+                                    <button name="save_device_inv" type="submit" class="btn-inline">Save</button>
+                                    <button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>                   
+                                    <!--<a href="<?php echo SITE_URL."/devicesInventory.php";?>" class="btn-inline btn-cancel">Cancel</a>-->                                   
+                                </div>                                
+                                <div class="col-md-6 text-center">
                                     <span class="error" id="message"></span>
                                 </div>
                             </div>
