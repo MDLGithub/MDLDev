@@ -16,9 +16,13 @@ $roleInfo = getRole($db, $userID);
 $role = $roleInfo['role'];
 $roleID = $roleInfo['Guid_role'];
 
+$accessRole = getAccessRoleByKey('mdlStats');
+var_dump($accessRole);
+
 if($role!="Admin"){
-    Leave(SITE_URL."/no-permission.php");
+    //Leave(SITE_URL."/no-permission.php");
 }
+
 $users = getUsersAndRoles($db);
 
 //exclude test users from mdl stats
@@ -188,7 +192,7 @@ require_once ('navbar.php');
                                 <?php } ?>
                                 
                                 <?php if(isFieldVisibleForStatus($db, 'account', $_GET['status_id']) && isFieldVisibleForRole($db, 'account', $roleID)){ ?>
-                                <td><?php echo $v['account_number'];?></td>                              
+                                <td><a href="<?php echo SITE_URL.'/accounts.php?account_id='.$v['Guid_account']; ?>"><?php echo $v['account_number'];?></a></td>                              
                                 <?php } ?>
                                 
                                 <?php if(isFieldVisibleForStatus($db, 'account_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'account_name', $roleID)){ ?>

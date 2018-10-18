@@ -355,11 +355,20 @@ $('#matrix_parameters').submit(function(event) {
     event.preventDefault();
 });
 
-$('#matrix_parameters #clear_filters').click(function() {
-    $('.export_filters #from_date').val('');
-    $('.export_filters #to_date').val('');
-    $('.export_filters #salesrep').val('');
-    $('.export_filters #account').val('');
+function clearFilters() {
+	$('.export_filters #from_date').val('');
+	$('.export_filters #from_date').parents('.f2').removeClass('show-label');
+	$('.export_filters #to_date').val('');
+	$('.export_filters #to_date').parents('.f2').removeClass('show-label');
+	$('.export_filters #salesrep').val('');
+	$('.export_filters #salesrep').addClass('no-selection').parents('.f2').removeClass('show-label');
+	$('.export_filters #account').val('');
+	$('.export_filters #account').addClass('no-selection').parents('.f2').removeClass('show-label');
+}
+
+$('#matrix_parameters #clear_filters').click(function(e) {
+	e.preventDefault();
+    clearFilters();
 });
 
 $('#matrix_parameters #date_type').on('change', function() {
@@ -390,5 +399,6 @@ $('#matrix_parameters #date_type').on('change', function() {
   })
 
   $('.modalBlock#geneveda-export-modal .close').on('click', function() {
-    $('.modalBlock#geneveda-export-modal').addClass('hidden');
-  })
+	$('.modalBlock#geneveda-export-modal').addClass('hidden');
+	clearFilters();
+  });

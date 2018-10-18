@@ -19,6 +19,7 @@ $roles=  array(
 $tables = array(
     'home' => array(
         'tableName' => 'Home',
+        'tableTitle' => 'Table Fields',
         'tableActions' => array('add', 'edit', 'delete'),
         'from_date'=>'From Date',
         'to_date'=>'To Date',
@@ -33,6 +34,7 @@ $tables = array(
     ),
     'account' => array(
         'tableName' => 'Account',
+        'tableTitle' => 'Table Fields',
         'tableActions' => array('add', 'edit', 'delete'),
         'account' => 'Account',
         'name' => 'Name',
@@ -48,6 +50,7 @@ $tables = array(
     ),
     'devices' => array(
         'tableName' => 'Devices',
+        'tableTitle' => 'Table Fields',
         'tableActions' => array('add', 'edit', 'delete'),
         'serial_number'=>'Serial',
         'Guid_salesrep'=>'Genetic Consultant',
@@ -58,6 +61,7 @@ $tables = array(
     ),
     'salesreps' => array(
         'tableName' => 'Genetic Consultants',
+        'tableTitle' => 'Table Fields',
         'tableActions' => array('add', 'edit', 'delete'),
         'first_name' => 'First Name',
         'last_name' => 'Last Name',
@@ -71,6 +75,11 @@ $tables = array(
         'zip' => 'Zip',
         'color' => 'Color',
         'phone_number' => 'Phone'
+    ),        
+    'mdlStats' => array(
+        'tableName' => 'MDL Stats Page',
+        'tableTitle' => '',
+        'tableActions' => array('view')        
     ),        
 );
 $userID = $_SESSION['user']["id"];
@@ -145,6 +154,7 @@ require_once ('navbar.php');
             <p><a href="<?php echo SITE_URL; ?>/access-roles.php?config=tables&tableid=account"><i class="fas fa-arrow-circle-right"></i> Accounts</a></p>
             <p><a href="<?php echo SITE_URL; ?>/access-roles.php?config=tables&tableid=devices"><i class="fas fa-arrow-circle-right"></i> Devices</a></p>
             <p><a href="<?php echo SITE_URL; ?>/access-roles.php?config=tables&tableid=salesreps"><i class="fas fa-arrow-circle-right"></i> Genetic Consultants</a></p>
+            <p><a href="<?php echo SITE_URL; ?>/access-roles.php?config=tables&tableid=mdlStats"><i class="fas fa-arrow-circle-right"></i> MDL Stats</a></p>
         </div>  
         <?php } ?>   
         <!-- ./Config Tables -->
@@ -158,8 +168,11 @@ require_once ('navbar.php');
                             $thisTable = $tables[$tableID];                            
                             $tableName = $thisTable['tableName'];
                             $tableActions = $thisTable['tableActions'];
+                            $tableActions = $thisTable['tableActions'];
+                            $tableTitle = $thisTable['tableTitle'];
                             unset($thisTable['tableName']);
                             unset($thisTable['tableActions']);
+                            unset($thisTable['tableTitle']);
                         ?>
                         <div class="actions">
                             <button name="submit_config_tables" type="submit" class="btn-inline">Save</button>
@@ -168,7 +181,10 @@ require_once ('navbar.php');
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th><?php echo $tableName; ?> Table Fields</th>                    
+                                    <th>
+                                        <?php echo $tableName; ?> 
+                                        <?php echo $tableTitle; ?>
+                                    </th>                    
                                     <?php foreach ($roles as $k=>$v){ ?>
                                     <th class='text-center '><?php echo $v['role']; ?></th>
                                     <?php } ?>

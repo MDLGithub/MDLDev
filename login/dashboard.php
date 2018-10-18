@@ -294,9 +294,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 <?php
 
 //updating mark as test users
-if(isset($_POST['mark_as_test'])){
-    $markedUsers =$_POST['markedRow']['user'];
-    if($markedUsers){
+if(isset($_POST['mark_as_test'])){    
+    if( isset($_POST['markedRow']['user']) ){
+        $markedUsers =$_POST['markedRow']['user'];
         foreach ($markedUsers as $userID=>$v){
             updateTable($db,'tbluser', array('marked_test'=>'1'), array('Guid_user'=>$userID));
         }
@@ -440,7 +440,6 @@ $sqlTbl .= $where;
   
 //$sqlTbl .= " GROUP BY p.Guid_user";
 $sqlTbl .= " ORDER BY date DESC";
-
 $qualify_requests = $db->query($sqlTbl);
 
 $num_estimates = $qualify_requests;
@@ -463,40 +462,43 @@ $num_estimates = $qualify_requests;
                     if($role=='Physician'){
                       $salesRep = getProviderSalesRep($db, $_SESSION['user']['id']);
                     ?>
-                <div class="col-md-6 pull-right">
+                    <div class="col-md-6 pull-right">
                     <?php 
                         $img = ($salesRep['photo_filename']!="")? $salesRep['photo_filename']: ""; 
                         $image = ($img!="") ? SITE_URL.'/images/users/'.$img : "assets/images/default.png";
                         $address = "";
                     ?>
-                    <div class="row" id="salesrepInfo1">
-                        <div class="col-md-2 text-center">
-                            <img width="40" src="<?php echo $image; ?>" />
-                        </div>
-                        <div class="col-md-5">
-                            <p>
-                                <?php if($salesRep['title']) { echo " ".$salesRep['title']; } ?>
-                            </p>
-                            <p>
-                                <?php if($salesRep['first_name']) { echo $salesRep['first_name']; } ?>
-                                <?php if($salesRep['last_name']) { echo " ".$salesRep['last_name']; } ?>
-                            </p>                            
-                        </div>
-                        <div  class="col-md-5">
-                            <p>
-                            <?php if($salesRep['email']) { ?>
-                                <i class="fas fa-envelope"></i>
-                                <a href="mailto:<?php echo $salesRep['email'];?>"><?php echo $salesRep['email'];?></a>
+                        
+                        
+                    <div class="salesrepInfoBlock">
+                        <div id="physician-gc" class="col-md-12">
+                            <label class="col-md-12 col-sm-4"><?php if($salesRep['title']) { echo " ".$salesRep['title']; } ?></label>
+                            <div class="imageBox col-md-6 col-sm-4">
+                                <div class="pic">
+                                    <img width="50" class="salesrepProfilePic" src="<?php echo $image; ?>">
+                                </div>
+                                <div class="name text-center">
+                                    <?php if($salesRep['first_name']) { echo $salesRep['first_name']; } ?>
+                                    <?php if($salesRep['last_name']) { echo " ".$salesRep['last_name']; } ?>                           
+                                </div>
+                            </div>
+
+                            <div id="salesrepInfo1">
+                                <div>
+                                <?php if($salesRep['email']) { ?>
+                                    <i class="fas fa-envelope"></i>
+                                    <a href="mailto:<?php echo $salesRep['email'];?>"><?php echo $salesRep['email'];?></a>
                                 <?php }?>
-                            </p>
-                            <p>
-                                <?php if($salesRep['phone_number']) { ?>
-                                <i class="fas fa-phone"></i>
-                                <a class="phone_us" href="tel:<?php echo $salesRep['phone_number']; ?>">><?php echo $salesRep['phone_number']; ?></a>
-                                <?php } ?>
-                            </p>
+                                </div>
+                                <div>
+                                    <?php if($salesRep['phone_number']) { ?>
+                                    <i class="fas fa-phone"></i>
+                                    <a class="phone_us" href="tel:<?php echo $salesRep['phone_number']; ?>">><?php echo $salesRep['phone_number']; ?></a>
+                                    <?php } ?>
+                                </div>
+                            </div>
                         </div>
-                    </div>                    
+                    </div>                                          
                 </div>
                 <?php } ?>
             </div>

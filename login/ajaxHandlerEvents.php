@@ -171,14 +171,22 @@ if(isset($_POST['commentid']) && isset($_POST['action']) && $_POST['action'] == 
 
 if(isset($_POST['account']) && isset($_POST['action']) && $_POST['action'] == "getStates"){
 
-    $reg = getAccountStatusCount($db, $_POST['account'], $_POST['regitered'], '2018-10-03');
-    $qua = getAccountStatusCount($db, $_POST['account'], $_POST['qualified'], '2018-10-03');
-    $com = getAccountStatusCount($db, $_POST['account'], $_POST['completed'], '2018-10-03');
-    $sub = getAccountStatusCount($db, $_POST['account'], $_POST['submitted'], '2018-10-03');
+    $reg = getAccountStatusCount($db, $_POST['account'], $_POST['regitered'],$_POST['selectedDate']);
+    $qua = getAccountStatusCount($db, $_POST['account'], $_POST['qualified'],$_POST['selectedDate']);
+    $com = getAccountStatusCount($db, $_POST['account'], $_POST['completed'],$_POST['selectedDate']);
+    $sub = getAccountStatusCount($db, $_POST['account'], $_POST['submitted'],$_POST['selectedDate']);
     $result = array("reg"=>$reg, "qua"=>$qua, "com"=>$com, "sub"=>$sub);
     echo json_encode($result);
 }
 
+if( isset($_POST['action']) && $_POST['action'] == "getStatTotal" ){
+    $reg = getAccStatDateRange($db, $_POST['regitered'], $_POST['start'], $_POST['end']);
+    /*$qua = getAccStatDateRange($db, $_POST['account'], $_POST['qualified'], $_POST['start'], $_POST['end']);
+    $com = getAccStatDateRange($db, $_POST['account'], $_POST['completed'], $_POST['start'], $_POST['end']);
+    $sub = getAccStatDateRange($db, $_POST['account'], $_POST['submitted'], $_POST['start'], $_POST['end']);*/
+    $result = array("reg"=>$reg/*, "qua"=>$qua, "com"=>$com, "sub"=>$sub*/);
+    echo json_encode($result);
+}
 
 /* --------------------- Render Piechart Data ------------------------- */
 

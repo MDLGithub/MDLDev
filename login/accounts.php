@@ -44,10 +44,6 @@ $accountInfo = getAccountAndSalesrep($db, $thisAccountID);
 $accountActive = $accountInfo['0'];
 extract($accountActive);
 
-
-
-
-
 if (isset($_GET['delete']) && $_GET['delete'] != '') {
    //deleteRowByField($db, 'tblprovider', array('Guid_provider'=>$_GET['delete'])); 
     if(isset($_GET['user-id'])&&$_GET['user-id']!=""){
@@ -288,35 +284,47 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                     <div class="col-md-8">
                         <?php if($role=='Physician') { ?>
                         <div id = "physician-header">
-                            <h2>Physician's Dashboard</h2>
+                            <h2><?php echo $accountActive['account']." - ". strtoupper($accountActive['name']); ?></h2>
                         </div>
                         <?php } ?>
                         <div class="status_chart">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <span class="registred">
-                                    Registered
-                                    <img src="assets/eventschedule/icons/silhouette_icon.png">
-                                    <?php echo getAccountStatusCount($db, $accountActive['account'], '28' ); //28->Registered ?>
-                                </span>
-                                <span class="completed">
-                                    Completed
-                                    <img src="assets/eventschedule/icons/checkmark_icon.png">
-                                    <?php echo getAccountStatusCount($db, $accountActive['account'], '36'); //36->Questionnaire Completed ?>
-                                </span>
-                                <span class="qualified">
-                                    Qualified
-                                    <img src="assets/eventschedule/icons/dna_icon.png">
-                                    <?php echo getAccountStatusCount($db, $accountActive['account'], '29'); //29->Questionnaire Completed->Qualified ?>
-                                </span>
-                                <span class="submitted">
-                                    Submitted
-                                    <img src="assets/eventschedule/icons/flask_icon.png">
-                                    <?php echo getAccountStatusCount($db, $accountActive['account'], '1' ); //28->Submitted (Specimen Collected) ?>
-                                </span>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <span class="registred">
+                                        Registered
+                                        <img src="assets/eventschedule/icons/silhouette_icon.png">
+                                        <?php 
+                                            $Registered = getAccountStatusCount($db, $accountActive['account'], '28' ); //28->Registered 
+                                            echo ($Registered>0)?$Registered:'-';
+                                        ?>
+                                    </span>
+                                    <span class="completed">
+                                        Completed
+                                        <img src="assets/eventschedule/icons/checkmark_icon.png">
+                                        <?php 
+                                            $Completed = getAccountStatusCount($db, $accountActive['account'], '36'); //36->Questionnaire Completed 
+                                            echo ($Completed>0)?$Completed:'-';
+                                        ?>
+                                    </span>
+                                    <span class="qualified">
+                                        Qualified
+                                        <img src="assets/eventschedule/icons/dna_icon.png">
+                                        <?php 
+                                            $Qualified = getAccountStatusCount($db, $accountActive['account'], '29'); //29->Questionnaire Completed->Qualified 
+                                            echo ($Qualified>0)?$Qualified:'-';
+                                        ?>
+                                    </span>
+                                    <span class="submitted">
+                                        Submitted
+                                        <img src="assets/eventschedule/icons/flask_icon.png">
+                                        <?php 
+                                            $Submitted = getAccountStatusCount($db, $accountActive['account'], '1' ); //28->Submitted (Specimen Collected) 
+                                            echo ($Submitted>0)?$Submitted:'-';
+                                        ?>
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    </div>
                     <?php if($role!='Physician') { ?>
                     <div class="selectAccountBlock row ">
                         
@@ -426,12 +434,21 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                                             $incomplete = getProviderStatusCount($db, 'Incomplete', $v['Guid_provider'] );
                                             $completed = getProviderStatusCount($db, 'Completed', $v['Guid_provider'] );
                                             $registred = $incomplete+$completed;
-                                            echo $registred; 
+                                            echo ($registred>0)? $registred : '-'; 
                                         ?>
                                     </td>
-                                    <td><?php echo getProviderStatusCount($db, 'Completed', $v['Guid_provider'] ); ?></td>
-                                    <td><?php echo getProviderStatusCount($db, 'Yes', $v['Guid_provider'] ); ?></td>
-                                    <td><?php echo getProviderSubmitedCount($db, $v['Guid_provider'] ); ?></td>
+                                    <td><?php 
+                                        $completed = getProviderStatusCount($db, 'Completed', $v['Guid_provider'] );
+                                        echo ($completed>0)? $completed : '-'; ?>
+                                    </td>
+                                    <td><?php 
+                                        $qualified = getProviderStatusCount($db, 'Yes', $v['Guid_provider'] );
+                                        echo ($qualified>0)? $qualified : '-'; ?>
+                                    </td>
+                                    <td><?php 
+                                        $submitted = getProviderSubmitedCount($db, $v['Guid_provider'] );
+                                        echo ($submitted>0)? $submitted : '-'; ?>
+                                    </td>
                                     <?php if($role!='Physician'){ ?>
                                     <td class="text-center">
                                         <!--<a class="edit-provider" data-provider-guid="<?php echo $v['Guid_provider']; ?>">-->
@@ -465,38 +482,10 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                   
                 </div>
                 <div class="col-md-4">
-                    <!--<div id="accountLogo">
-                        <?php $logo = $logo ? "/../images/practice/".$logo : "/assets/images/default.png"; ?>
-                        <img class="" src="<?php echo SITE_URL.$logo; ?>" />
-                    </div>
-                    <div class="addressInfoBlock">-->
-                        <!-- <label >Account Address</label>-->
-                        <!--<div id="officeAddress">
-                            <div>
-                                <?php 
-                                if($address){
-                                    echo $address."<br/>";
-                                    if($city !=""){ echo $city.", "; }
-                                    if($state !=""){ echo $state." "; }
-                                    if($zip !="" ){ echo $zip ."<br/>"; } 
-                                }
-                                ?>
-                            </div>
-                            <?php if($phone_number) { ?>
-                                <div><i class="fas fa-phone"></i> <a class="phone_us" href="tel:<?php echo $phone_number; ?>"><?php echo $phone_number; ?></a></div>
-                            <?php } ?>
-                            <?php if($fax) { ?>
-                                <div><i class="fas fa-fax"></i> <a class="phone_us" href="tel:<?php echo $fax; ?>"><?php echo $fax; ?></a></div>
-                            <?php } ?>
-                            <?php if($website) { ?>
-                                <div><i class="fas fa-globe"></i> <a target="_blank" href="<?php echo $website; ?>"><?php echo $website; ?></a></div>                   
-                            <?php } ?>
-                        </div>
-                    </div>-->
                     <div class="salesrepInfoBlock">
-                      <div id = "physician-gc" class="col-md-12">
-                        <label class = "col-md-12 col-sm-4">Genetic Consultant</label>
-                        <div class="imageBox col-md-6 col-sm-4">
+                      <div id = "physician-gc" class="row">
+                        <label class = "col-md-12 col-sm-4"><?php echo $salesrepTitle; ?></label>
+                        <div class="imageBox col-lg-6 col-md-12 col-sm-4">
                             <div class="pic">
                                 <?php $salesrepPhoto = (isset($salesrepPhoto)&&$salesrepPhoto!="") ? "/images/users/".$salesrepPhoto : "/assets/images/default.png"?>
                                 <img width="50" class="salesrepProfilePic" src="<?php echo SITE_URL.$salesrepPhoto; ?>" />
@@ -506,7 +495,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                             </div>
                         </div>
                         
-                        <div id="salesrepInfo1">
+                        <div id="salesrepInfo1" class = "col-lg-6 col-md-12 col-sm-4">
                             <?php 
                             if($role!="Physician") {
                                 if($salesrepAddress){
@@ -622,7 +611,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                                                         <?php } ?>
 
                                                         <?php if(isFieldVisibleForStatus($db, 'account', $_GET['status_id']) && isFieldVisibleForRole($db, 'account', $roleID)){ ?>
-                                                        <td><?php echo $v['account_number'];?></td>                              
+                                                        <td><a href="<?php echo SITE_URL.'/accounts.php?account_id='.$v['Guid_account']; ?>"><?php echo $v['account_number'];?></a></td>                              
                                                         <?php } ?>
 
                                                         <?php if(isFieldVisibleForStatus($db, 'account_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'account_name', $roleID)){ ?>

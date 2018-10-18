@@ -219,42 +219,55 @@ require_once ('navbar.php');
 	    <div class="row">
 		<div class="col-md-8 col-md-offset-2">
 		    <form method="POST" enctype="multipart/form-data">
-			<div class="row pB-30">
-			    <div class="col-md-6">
-				<button name="manage_salesrep" type="submit" class="btn-inline">Save</button>
-				<button type="button" class="btn-inline btn-cancel" onclick="goBack()">Cancel</button>
-			    </div>
-			    <div class="col-md-6 ">
-				<?php if(isset($_GET['action']) && $_GET['action']=='edit') { ?>
+                        <div class="row">
+                            <div class="col-md-12 ">
 				<div class="status_chart">
 				    <div class="row">
 					<div class="col-md-12">
 					    <span class="registred">
 						Registered
 						<img src="assets/eventschedule/icons/silhouette_icon.png">
-						<?php echo getSalesrepStatusCount($db, $Guid_salesrep, '28' ); //28->Registered ?>
+						<?php 
+                                                    $Registered = getSalesrepStatusCount($db, $Guid_salesrep, '28' ); //28->Registered 
+                                                    echo ($Registered>0)?$Registered:'-';
+                                                ?>
 					    </span>
 					    <span class="completed">
 						Completed
 						<img src="assets/eventschedule/icons/checkmark_icon.png">
-						<?php echo getSalesrepStatusCount($db, $Guid_salesrep, '36'); //36->Questionnaire Completed ?>
+						<?php 
+                                                    $Completed = getSalesrepStatusCount($db, $Guid_salesrep, '36'); //36->Questionnaire Completed 
+                                                    echo ($Completed>0)?$Completed:'-';
+                                                ?>
 					    </span>
 					    <span class="qualified">
 						Qualified
 						<img src="assets/eventschedule/icons/dna_icon.png">
-						<?php echo getSalesrepStatusCount($db, $Guid_salesrep, '29'); //29->Questionnaire Completed->Qualified ?>
+						<?php 
+                                                    $Qualified = getSalesrepStatusCount($db, $Guid_salesrep, '29'); //29->Questionnaire Completed->Qualified 
+                                                    echo ($Qualified>0)?$Qualified:'-';
+                                                ?>
 					    </span>
 					    <span class="submitted">
 						Submitted
 						<img src="assets/eventschedule/icons/flask_icon.png">
-						<?php echo getSalesrepStatusCount($db, $Guid_salesrep, '1' ); //28->Submitted (Specimen Collected) ?>
+						<?php 
+                                                    $Submitted = getSalesrepStatusCount($db, $Guid_salesrep, '1' ); //28->Submitted (Specimen Collected) 
+                                                    echo ($Submitted>0)?$Submitted:'-';
+                                                ?>
 					    </span>
 					</div>
 				    </div>
 				</div>
-				<?php } ?>
 			    </div>
-			    <div class="col-md-12 text-center">
+                        </div>
+                        
+			<div class="row pB-30">
+			    <div class="col-md-6">
+				<button name="manage_salesrep" type="submit" class="btn-inline">Save</button>
+				<button type="button" class="btn-inline btn-cancel" onclick="goBack()">Cancel</button>
+			    </div>			    
+			    <div class="col-md-6 text-center">
 				<span class="error" id="message"></span>
 			    </div>
 			</div>
@@ -516,9 +529,10 @@ require_once ('navbar.php');
 			<span class="fas fa-plus-circle"></span> Add
 		    </a>
 		    <?php if ($roleID == 1) { ?>
-			<a class="add-new-device export_matrix" id="export">
-			    <span class="fas fa-arrow-up"></span> Export Geneveda Matrix
-			</a>
+				<a class="export_matrix" id="export">
+					<img src="./images/icon_forms.png" />
+					<p>Geneveda Matrix</p>
+				</a>
 		    <?php } ?>
 		</div>
 		<?php } ?>
@@ -576,10 +590,30 @@ require_once ('navbar.php');
 				    <?php if(isFieldVisibleByRole($isStateView, $roleID)) {?>
 					<td><?php echo $v['state']; ?></td>
 				    <?php } ?>
-				    <td><?php echo getSalesrepStatusCount($db, $v['Guid_salesrep'], '28' ); //28->Registered ?></td>
-				    <td><?php echo getSalesrepStatusCount($db, $v['Guid_salesrep'], '36'); //36->Questionnaire Completed ?></td>
-				    <td><?php echo getSalesrepStatusCount($db, $v['Guid_salesrep'], '29'); //29->Questionnaire Completed->Qualified ?></td>
-				    <td><?php echo getSalesrepStatusCount($db, $v['Guid_salesrep'], '1' ); //28->Submitted (Specimen Collected) ?></td>
+				    <td>
+                                        <?php 
+                                        $Registered = getSalesrepStatusCount($db, $v['Guid_salesrep'], '28' ); //28->Registered 
+                                        echo ($Registered>0)?$Registered:'-';
+                                        ?>
+                                    </td>
+				    <td>
+                                        <?php 
+                                        $Completed = getSalesrepStatusCount($db, $v['Guid_salesrep'], '36'); //36->Questionnaire Completed 
+                                        echo ($Completed>0)?$Completed:'-';
+                                        ?>
+                                    </td>
+				    <td>
+                                        <?php 
+                                        $Qualified = getSalesrepStatusCount($db, $v['Guid_salesrep'], '29'); //29->Questionnaire Completed->Qualified 
+                                        echo ($Qualified>0)?$Qualified:'-';
+                                        ?>
+                                    </td>
+				    <td>
+                                        <?php 
+                                        $Submitted = getSalesrepStatusCount($db, $v['Guid_salesrep'], '1' ); //28->Submitted (Specimen Collected) 
+                                        echo ($Submitted>0)?$Submitted:'-';
+                                        ?>
+                                    </td>
 				
                                     <?php if( isFieldVisibleByRole($isActionEdit, $roleID) || isFieldVisibleByRole($isActionDelete, $roleID)) {?>
                                         <td class="text-center">

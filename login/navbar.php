@@ -16,9 +16,8 @@
         </ul>
         
     </section>
-    <div class="salutation">
-        <?php echo salutation($db, $role, $userID); ?>
-    </div>
+    <div class="salutation" id="salutation" data-user-id="<?php echo $userID; ?>" data-role="<?php echo $role; ?>"></div>
+    
     <div id="app_user">
             <button type="button" id="mdl" class="toggle" data-on="#user_window"></button>
             <div id="user_window">
@@ -46,6 +45,8 @@
                     <?php if($role=='Admin'){ ?>
                         <li><a href="<?php echo SITE_URL; ?>/access-roles.php">Access Roles</a></li>
                         <li><a href="<?php echo SITE_URL; ?>/user-management.php">User Management</a></li>
+                    <?php } ?>
+                    <?php if($role != 'Patient') { ?>    
                         <li><a href="<?php echo SITE_URL; ?>/mdl-stats.php">MDL Stats</a></li>
                     <?php } ?>
                 </ul>                

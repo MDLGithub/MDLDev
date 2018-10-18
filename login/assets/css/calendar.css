@@ -310,7 +310,7 @@ Author:Gabriela Johnson;
 
   /*margin-top:25px;*/
 
-
+  max-width: 170px;
 
 }
 
@@ -358,13 +358,11 @@ Author:Gabriela Johnson;
 
   box-shadow: none !important;
 
-  width: 45%;
+  width: 49%;
 
   padding:0;
 
 }
-
-
 
 .summary_button{
 

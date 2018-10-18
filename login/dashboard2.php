@@ -172,6 +172,23 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         var cursource = 'eventload.php';
         $('.salesrep_list li a').click(function () {
             var salesrep = $(this).attr('data-value');
+            var salesrepName = $(this).text();
+
+            var salesrepName = $(this).text();
+                salesrepName = salesrepName.split(" ");
+            var salesrepNameArray = new Array();
+            for(var i =0; i < salesrepName.length; i++){
+                salesrepNameArray.push(salesrepName[i]);
+                if(i == 0){
+                    salesrepNameArray.push('<i class="fas fa-angle-down info_block_arrow" style="float:right;"></i>');
+                }
+                if(i != salesrepName.length-1){
+                    salesrepNameArray.push("<br>");
+                }
+            }
+            salesrepName = salesrepNameArray.toString().replace(/\,/g," ");
+
+            //salesrepName = salesrepName.split(" ").join("<br>");
             var reqdashboard = 1;
             var allcursource = 'eventload.php';
             if (salesrep != 0) {
@@ -185,6 +202,13 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 $('#calendar').fullCalendar('addEventSource', cursource);
             }
             $('#calendar').fullCalendar('refetchEvents');
+            $('.info_block_arrow').removeClass('info_block_arrow_show');
+            $(".salesrep_dropdown").addClass("dropdown_hide");
+            if(salesrep != 0){
+                $(".info_block h1").removeClass('hide').html(salesrepName)
+            }else{
+                $(".info_block h1").removeClass('hide').html('All<i class="fas fa-angle-down info_block_arrow" style="float:right;"></i><br>Genetic<br>Consultants');
+            }
         });
 
         // when summary button is clicked
@@ -431,31 +455,18 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     $("#detail").removeClass("details_button").addClass("summary_button");
                     $("#summary").removeClass("summary_button").addClass("details_button");
                     if (parsedEventTime < parsedNow) {
-                        var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable days-' + eventDate + '"  style="' + borderColor + '">' +
-                                '<div class="fc-content evtcontent summarybrca">' +
-                                '<div class="' + icon + '"></div>' +
-                                '<div class="fc-title evttitle"><a href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>' + salesrep + cmts;
-
-                        content += "<div id='state2_count"+ state_count1 +"'>";
-
-                        var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1};
-                        $.ajax({
-                            url: "ajaxHandlerEvents.php",
-                            type: "POST",
-                            data: eventData,
-                            success: function (res)
-                            {
-                                var result = JSON.parse(res);
-                                var html = '<div class="show-stats"><span class="silhouette"><span>' + result.reg + '</span> <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> <span>'+ result.qua + '</span> <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna"><span>'+ result.com + '</span> <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask"><span>'+ result.sub +'</span> <img src="assets/eventschedule/icons/flask_icon.png"></span></div>';
-                                $('#state2_count'+count1).html(html);
-                                count1 += 1;
                         
-                            }
-                        });
-
-                                /*'<div class="show-stats"><span class="silhouette">' + event.registeredCnt + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ event.qualifiedCnt + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ event.completedCnt + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">0 <img src="assets/eventschedule/icons/flask_icon.png"></span></div>';*/
-                    content += '</div></div></div>';
-                    state_count1 += 1;
+                    var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable days-' + eventDate + '"  style="' + borderColor + '">' +
+                                '<div class="fc-content evtcontent">'+                                
+                                '<div class="fc-title evttitle"><a id="acc-'+event.accountid+'"  href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>' + salesrep + cmts;
+                            content += "<div id='state2_count'>"
+                            /*if(view.name != 'basicDay'){
+                                content += '<div class="states-rep"></div>'
+                            }*/
+                            content += '</div><div class="' + icon + '"></div>';   
+                            content += '</div> </div>';
+                            state_count1 += 1;
+                    
 
                         return $(content);
                     } else {
@@ -482,6 +493,21 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         element.css('color', '#000');
                     }
                 }
+
+                 var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1, selectedDate: $.fullCalendar.formatDate(event.start, "Y-M-DD")};                
+                    $.ajax({
+                        url: "ajaxHandlerEvents.php",
+                        type: "POST",
+                        data: eventData,
+                        success: function (res)
+                        {
+                            var res = JSON.parse(res);
+                            var html = '<div class="show-stats"><span class="silhouette"><span>' + res.reg + '</span> <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"><span> '+ res.qua + '</span> <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna"><span>'+ res.com + '</span> <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask"><span>'+ res.sub +'</span> <img src="assets/eventschedule/icons/flask_icon.png"></span></div>';
+                            if(view.name != 'basicDay'){
+                                element[0].childNodes[0].childNodes[2].innerHTML = html;
+                            }
+                        }
+                    });
 
             },
             eventAfterAllRender: function (event, element, view) {
@@ -1314,7 +1340,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                 </div>
                             </div>
                         <div class="col-lg-7 col-md-5 top-buttons">
-                        <button type="button" name="Detail" id="detail" class="info-button details_button">Detail</button>
+                        <button type="button" name="Detail" id="detail" class="info-button details_button">Details</button>
                         <button type="button" name="Summary" id="summary" class="info-button summary_button">Summary</button>
                         <a href="eventschedule.php" class="button submit"><strong>Full Calendar</strong></a>   
                         </div>    
