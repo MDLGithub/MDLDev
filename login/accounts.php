@@ -483,9 +483,9 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                 </div>
                 <div class="col-md-4">
                     <div class="salesrepInfoBlock">
-                      <div id = "physician-gc" class="col-md-12">
+                      <div id = "physician-gc" class="row">
                         <label class = "col-md-12 col-sm-4"><?php echo $salesrepTitle; ?></label>
-                        <div class="imageBox col-md-6 col-sm-4">
+                        <div class="imageBox col-lg-6 col-md-12 col-sm-4">
                             <div class="pic">
                                 <?php $salesrepPhoto = (isset($salesrepPhoto)&&$salesrepPhoto!="") ? "/images/users/".$salesrepPhoto : "/assets/images/default.png"?>
                                 <img width="50" class="salesrepProfilePic" src="<?php echo SITE_URL.$salesrepPhoto; ?>" />
@@ -495,7 +495,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                             </div>
                         </div>
                         
-                        <div id="salesrepInfo1">
+                        <div id="salesrepInfo1" class = "col-lg-6 col-md-12 col-sm-4">
                             <?php 
                             if($role!="Physician") {
                                 if($salesrepAddress){
