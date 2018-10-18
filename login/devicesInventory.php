@@ -206,22 +206,34 @@ require_once ('navbar.php');
                                                 <span class="registred">                                                    
                                                     Registered 
                                                     <img src="assets/eventschedule/icons/silhouette_icon.png">
-                                                    <?php echo getDeviceStatusCount($db, $Guid_salesrep, '28' ); //28->Registered ?>
+                                                    <?php 
+                                                        $Registered = getDeviceStatusCount($db, $Guid_salesrep, '28' ); //28->Registered 
+                                                        echo ($Registered>0)?Registered:'-';
+                                                    ?>
                                                 </span>
                                                 <span class="completed">
                                                     Completed
                                                     <img src="assets/eventschedule/icons/checkmark_icon.png">
-                                                    <?php echo getDeviceStatusCount($db, $Guid_salesrep, '36'); //36->Questionnaire Completed ?>
+                                                    <?php 
+                                                    $Completed = getDeviceStatusCount($db, $Guid_salesrep, '36'); //36->Questionnaire Completed 
+                                                    echo ($Completed>0)?$Completed:'-';
+                                                    ?>
                                                 </span>
                                                 <span class="qualified">                                                    
                                                     Qualified
                                                     <img src="assets/eventschedule/icons/dna_icon.png">
-                                                    <?php echo getDeviceStatusCount($db, $Guid_salesrep, '29'); //29->Questionnaire Completed->Qualified ?>
+                                                    <?php 
+                                                    $Qualified = getDeviceStatusCount($db, $Guid_salesrep, '29'); //29->Questionnaire Completed->Qualified 
+                                                    echo ($Qualified>0)?$Qualified:'-';
+                                                    ?>
                                                 </span>
                                                 <span class="submitted">                                                    
                                                     Submitted
                                                     <img src="assets/eventschedule/icons/flask_icon.png">
-                                                    <?php echo getDeviceStatusCount($db, $Guid_salesrep, '1' ); //28->Submitted (Specimen Collected) ?>
+                                                    <?php 
+                                                    $Submitted = getDeviceStatusCount($db, $Guid_salesrep, '1' ); //28->Submitted (Specimen Collected) 
+                                                    echo ($Submitted>0)?$Submitted:'';
+                                                    ?>
                                                 </span>
                                             </div>
                                         </div>

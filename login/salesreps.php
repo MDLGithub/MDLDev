@@ -590,10 +590,30 @@ require_once ('navbar.php');
 				    <?php if(isFieldVisibleByRole($isStateView, $roleID)) {?>
 					<td><?php echo $v['state']; ?></td>
 				    <?php } ?>
-				    <td><?php echo getSalesrepStatusCount($db, $v['Guid_salesrep'], '28' ); //28->Registered ?></td>
-				    <td><?php echo getSalesrepStatusCount($db, $v['Guid_salesrep'], '36'); //36->Questionnaire Completed ?></td>
-				    <td><?php echo getSalesrepStatusCount($db, $v['Guid_salesrep'], '29'); //29->Questionnaire Completed->Qualified ?></td>
-				    <td><?php echo getSalesrepStatusCount($db, $v['Guid_salesrep'], '1' ); //28->Submitted (Specimen Collected) ?></td>
+				    <td>
+                                        <?php 
+                                        $Registered = getSalesrepStatusCount($db, $v['Guid_salesrep'], '28' ); //28->Registered 
+                                        echo ($Registered>0)?$Registered:'-';
+                                        ?>
+                                    </td>
+				    <td>
+                                        <?php 
+                                        $Completed = getSalesrepStatusCount($db, $v['Guid_salesrep'], '36'); //36->Questionnaire Completed 
+                                        echo ($Completed>0)?$Completed:'-';
+                                        ?>
+                                    </td>
+				    <td>
+                                        <?php 
+                                        $Qualified = getSalesrepStatusCount($db, $v['Guid_salesrep'], '29'); //29->Questionnaire Completed->Qualified 
+                                        echo ($Qualified>0)?$Qualified:'-';
+                                        ?>
+                                    </td>
+				    <td>
+                                        <?php 
+                                        $Submitted = getSalesrepStatusCount($db, $v['Guid_salesrep'], '1' ); //28->Submitted (Specimen Collected) 
+                                        echo ($Submitted>0)?$Submitted:'-';
+                                        ?>
+                                    </td>
 				
                                     <?php if( isFieldVisibleByRole($isActionEdit, $roleID) || isFieldVisibleByRole($isActionDelete, $roleID)) {?>
                                         <td class="text-center">
