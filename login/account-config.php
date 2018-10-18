@@ -530,10 +530,30 @@ require_once ('navbar.php');
                                 <?php if(isFieldVisibleByRole($isSalesrepView, $roleID)) {?>
                                     <td><?php echo $v['salesrepFName']." ".$v['salesrepLName']?></td>          
                                 <?php } ?>    
-                                <td><?php echo getAccountStatusCount($db, $v['account'], '28' ); //28->Registered ?></td>
-                                <td><?php echo getAccountStatusCount($db, $v['account'], '36'); //36->Questionnaire Completed ?></td>
-                                <td><?php echo getAccountStatusCount($db, $v['account'], '29'); //29->Questionnaire Completed->Qualified ?></td>
-                                <td><?php echo getAccountStatusCount($db, $v['account'], '1' ); //28->Submitted (Specimen Collected) ?></td>
+                                <td>
+                                    <?php 
+                                    $Registered = getAccountStatusCount($db, $v['account'], '28' ); //28->Registered 
+                                    echo ($Registered>0)?$Registered:'-';
+                                    ?>
+                                </td>
+                                <td>
+                                    <?php 
+                                    $Completed = getAccountStatusCount($db, $v['account'], '36'); //36->Questionnaire Completed 
+                                    echo ($Completed>0)?$Completed:'-';
+                                    ?>
+                                </td>
+                                <td>
+                                    <?php 
+                                    $Qualified = getAccountStatusCount($db, $v['account'], '29'); //29->Questionnaire Completed->Qualified 
+                                    echo ($Qualified>0)?$Qualified:'-';
+                                    ?>
+                                </td>
+                                <td>
+                                    <?php 
+                                    $Submitted = getAccountStatusCount($db, $v['account'], '1' ); //28->Submitted (Specimen Collected) 
+                                    echo ($Submitted>0)?$Submitted:'-';
+                                    ?>
+                                </td>
                                 <?php if( isFieldVisibleByRole($isActionEdit, $roleID) || isFieldVisibleByRole($isActionDelete, $roleID)) {?>
                                     <td class="text-center">
                                         <?php if(isFieldVisibleByRole($isActionEdit, $roleID)) {?>
