@@ -236,6 +236,36 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .fc-salesrep a{color:#000; pointer-events:visible;}
     .modalaccounttype.hide { display: none; }
     .flask > img { margin-left: 3px; }
+    #summary.info-button, #detail.info-button {
+        box-shadow: none;
+    }
+    #calendar th {
+        height: 5%;
+        /*border: 2px solid grey;*/
+        text-align: right;
+        color: white;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    #calendar th.fc-past {
+        color: #a3b5be;
+        background: white;
+        box-shadow: none;
+    }
+    #calendar th.fc-today {
+        background: #1c487b;
+        box-shadow: none;
+        color: #fff;
+    }
+    #calendar th.fc-future {
+        background: rgb(163, 181, 190);
+        color: white;
+        box-shadow: none;
+    }
+    #calendar thead.fc-head {
+        box-shadow: none !important;
+    }
+
 
     @media only screen 
     and (min-device-width : 768px) 
@@ -376,8 +406,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $('#calendar').fullCalendar('refetchEvents');
             $('#calendar').fullCalendar('addEventSource', summarycursource);
             $('#calendar').fullCalendar('refetchEvents');
-            $("#detail").css("background", "#90bcf7");
-            $("#summary").css("background", "linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");
+            $("#detail").css("background", "#90bcf7").css("color","#000").css("box-shadow", "inset 0 0 30px rgba(255,255,255,.8), 0 1px 6px rgba(0,0,0,.31)");
+            $("#summary").css("background", "#1c487b").css("color","#fff").css("box-shadow", "none");
         });
 
         // when detail button is clicked
@@ -388,12 +418,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $('#calendar').fullCalendar('refetchEvents');
             $('#calendar').fullCalendar('addEventSource', detailcursource);
             $('#calendar').fullCalendar('refetchEvents');
-            $("#summary").css("background", "#90bcf7");
-            $("#detail").css("background", "linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");
+            $("#summary").css("background", "#90bcf7").css("color","#000").css("box-shadow", "inset 0 0 30px rgba(255,255,255,.8), 0 1px 6px rgba(0,0,0,.31)");
+            $("#detail").css("background", "#1c487b").css("color","#fff").css("box-shadow", "none");
+            /*$("#detail").css("background", "linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");*/
         });
 
-        var state_count = 0, count = 0, state_count1 =0, count1 = 0;
-
+        var state_count = 0, count = 0, state_count1 = 0, count1 = 0;
+        var startRange = "", endRange = "";
+//        var regCnt = 0, quaCnt = 0, comCnt = 0, subCnt = 0;
         var calendar = $('#calendar').fullCalendar({
             header: {
                 left: 'prev,next today',
@@ -412,12 +444,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             selectHelper: true,
             editable: false,
             eventOverlap: false,
-            /*dayRender: function (date, cell) {
-                var today = new Date();
-                if (date._d.getDate() === today.getDate()) {
-                    // cell.css("background-color", "red");
-                }
-            },*/
             dayRender: function (date, cell) {
                 var today = new Date();
                 var dd = today.getDate();
@@ -555,6 +581,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var currentDate = today.getDate();
                                 
                 var eventDate = $.fullCalendar.formatDate(event.start, "DD");
+
                 var parsedNow =  new Date(today).getUnixTime();
                 var parsedEventTime = new Date(event.start).getUnixTime();
                 
@@ -580,24 +607,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                    
                     cmts = '<div class="fc-number"><span>Account Number: </span>' + event.account + '</div>';
                     
-                    cmts += '<div class = "day_stats" id="state-count'+ state_count +'" >';
-                    var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1};
-                    $.ajax({
-                        url: "ajaxHandlerEvents.php",
-                        type: "POST",
-                        data: eventData,
-                        success: function (res)
-                        {
-                            var result = JSON.parse(res);
-                            
-                            console.log(result.reg);
-                            html = '<p class="show-stats"><span class="silhouette">' + result.reg + ' <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"> '+ result.qua + ' <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna">'+ result.com + ' <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask">'+result.sub+'<img src="assets/eventschedule/icons/flask_icon.png"></span></p>' +
-                                '';
-                            $('#state-count'+count).html(html);
-                            count += 1;
-                        }
-                    });
-                    
+                    cmts += '<div class = "day_stats" id="state-count-dayview" >';
+
                     cmts += '</div></div>'
                     cmts += '<div class="fc-comments"><h1>Comments</h1><div class = "day-comments">';
                     if(event.comments != null) 
@@ -636,9 +647,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         '</div>';
 
                 if (event.evtCnt) {
-                    $("#summary").css("background","#90bcf7");
-                    $("#detail").css("background","linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");
-                    
+                    /*$("#summary").css("background","#90bcf7");
+                    $("#detail").css("background","linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");*/
+                    console.log(event);
                     var content = '<div class="fc-content evtcontent days-' + eventDate + '" style="padding: 0 20px;">';
                     content += '<div class="numberCircleContainer"><span class="numberCircle">' + event.evtCnt + '</span></></div>';
                     content += '<div><img src="assets/eventschedule/icons/silhouette_icon.png" width="13" style="margin-right:5px;">Registered <span style="float:right">' + event.registeredCnt + '</span></div>';
@@ -648,30 +659,16 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     content += '</div>';
                     return $(content);
                 } else {
-                    $("#summary").css("background","linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");
-                    $("#detail").css("background","#90bcf7");
+                    /*$("#summary").css("background","linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");
+                    $("#detail").css("background","#90bcf7");*/
                     if (parsedEventTime < parsedNow) {
                         var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable days-' + eventDate + '"  style="' + borderColor + '">' +
                                 '<div class="fc-content evtcontent">'+                                
                                 '<div class="fc-title evttitle"><a id="acc-'+event.accountid+'"  href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>' + salesrep + cmts;
-                            content += "<div id='state2_count"+ state_count1 +"'>"
-                                if(view.name != 'basicDay'){
-                                    
-                                    var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1};
-                                    $.ajax({
-                                        url: "ajaxHandlerEvents.php",
-                                        type: "POST",
-                                        data: eventData,
-                                        success: function (res)
-                                        {
-                                            var result = JSON.parse(res);
-                                            var html = '<div class="show-stats"><span class="silhouette"><span>' + result.reg + '</span> <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"><span> '+ result.qua + '</span> <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna"><span>'+ result.com + '</span> <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask"><span>'+ result.sub +'</span> <img src="assets/eventschedule/icons/flask_icon.png"></span></div>';
-                                            $('#state2_count'+count1).html(html);
-                                            count1 += 1;
-                                    
-                                        }
-                                    });
-                                }
+                            content += "<div id='state2_count'>"
+                            /*if(view.name != 'basicDay'){
+                                content += '<div class="states-rep"></div>'
+                            }*/
                             content += '</div><div class="' + icon + '"></div>';   
                             content += '</div> </div>';
                             state_count1 += 1;
@@ -685,6 +682,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
             },
             eventAfterRender: function (event, element, view) {
+                /*alert(event.accountid);*/
                 if (!event.evtCnt) {
                     if ((event.salesrep == null || event.account == null) && event.title == 'BRCA Day') {
                         //element.css('background-color', '#FF6347');
@@ -706,25 +704,47 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     type: 'POST',
                     data: { account_id: event.accountid, action: 'getLogo'},
                     success:function(res){
-                        var res = JSON.parse(res);
-                        if(res.length > 0){
-                            logo = res[0];
-                            if(element[0].childNodes[2]){
+                        if(isEmpty(res)) {
+                            var res = JSON.parse(res);
+                            if(res.length > 0){
+                                logo = res[0];
                                 element[0].childNodes[2].innerHTML = '<img src = "images/practice/'+logo.logo+'" />';
                             }
-                        }
-                        else{   
-                            if(element[0].childNodes[2]){
+                            else{   
                                 element[0].childNodes[2].innerHTML = '<img src = "images/logo-placeholder.png" />';    
                             }
                         }
                     }
                 });
+
                 
-            },
-            eventAfterAllRender: function (event, element, view) {
-                $("td.fc-event-container").each(function() {
+                var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1, selectedDate: $.fullCalendar.formatDate(event.start, "Y-M-DD")};                
+                $.ajax({
+                    url: "ajaxHandlerEvents.php",
+                    type: "POST",
+                    data: eventData,
+                    success: function (res)
+                    {
+                        var res = JSON.parse(res);
+                        
+                        var html = '<div class="show-stats"><span class="silhouette"><span>' + res.reg + '</span> <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"><span> '+ res.qua + '</span> <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna"><span>'+ res.com + '</span> <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask"><span>'+ res.sub +'</span> <img src="assets/eventschedule/icons/flask_icon.png"></span></div>';
+                        if(view.name != 'basicDay'){
+                            element[0].childNodes[0].childNodes[2].innerHTML = html;
+                        }else if(view.name == 'basicDay'){
+                            element[0].childNodes[0].childNodes[3].innerHTML = html;
+                        }
+                        /*$('.regCnt').html('Registered <img src="assets/eventschedule/icons/silhouette_icon.png"> ' + regCnt);
+                        $('.comCnt').html('Completed <img src="assets/eventschedule/icons/checkmark_icon.png"> ' + comCnt);
+                        $('.quaCnt').html('Qualified <img src="assets/eventschedule/icons/dna_icon.png"> ' + quaCnt);
+                        $('.subCnt').html('Submitted <img src="assets/eventschedule/icons/flask_icon.png"> ' + subCnt);*/
+                    }
                 });
+
+                startRange = moment(view.start._d).format('Y-M-DD');
+                endRange = moment(view.end._d).format('Y-M-DD');
+            },
+            eventAfterAllRender: function(view) {
+
             },
             
         });
@@ -1209,6 +1229,17 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         }
     });
 
+    var totalParams = { action: 'getStatTotal', regitered:28, start: startRange, end: endRange };
+    console.log(totalParams);
+    $.ajax({
+        url: 'ajaxHandlerEvents.php',
+        type: 'POST',
+        data: totalParams,
+        success: function(res){
+            console.log(res);
+        }
+    });
+
     function sentenceCase(str) {
         if ((str === null) || (str === ''))
             return false;
@@ -1264,6 +1295,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 }
             }
         });
+    }
+
+    function isEmpty(obj) {
+        for(var key in obj) {
+            if(obj.hasOwnProperty(key))
+                return false;
+        }
+        return true;
     }
 
     $(document).delegate('.del','click',function(){
@@ -1569,6 +1608,17 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                     <div id="stats-summary">
 
                                     </div>
+                                    <div class="status_chart">
+                                        <div class="row">
+                                            <div class="col-md-12">
+
+                                                <span class="regCnt">Registered <img src="assets/eventschedule/icons/silhouette_icon.png"> 0 </span>
+                                                <span class="comCnt">Completed <img src="assets/eventschedule/icons/checkmark_icon.png"> 0 </span>
+                                                <span class="quaCnt">Qualified <img src="assets/eventschedule/icons/dna_icon.png"> 0 </span>
+                                                <span class="subCnt">Submitted <img src="assets/eventschedule/icons/flask_icon.png"> 0 </span>
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     <div class="col-md-1"><label>Filter by:</label></div>
                                     <div class='col-md-2'>
@@ -1602,8 +1652,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <button type="button" name="Detail" id="detail" class="info-button" style="float:left; margin-right: 20px; background: #90bcf7;">Detail</button>
-                                        <button type="button" name="Summary" id="summary" class="info-button" style="">Summary</button>
+                                        <button type="button" name="Detail" id="detail" class="info-button" style="float:left; margin-right: 20px; background: #1c487b; color: #fff;">Detail</button>
+                                        <button type="button" name="Summary" id="summary" class="info-button" style="background: #90bcf7;box-shadow: inset 0 0 30px rgba(255,255,255,.8), 0 1px 6px rgba(0,0,0,.31)">Summary</button>
                                     </div>
                                 </div>
                             </div>

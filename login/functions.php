@@ -773,12 +773,14 @@ function getAccountStatusCount($db, $account, $Guid_status, $eventDate=NULL ){
         . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
         . "WHERE l.Guid_status =:Guid_status AND l.account=:account AND u.marked_test='0' "; 
     if($eventDate){
-        $q .=  "AND DATE(l.Date)='".$eventDate."'";
+        $q .=  "AND DATE(l.Date)=:eventdate";
     }
     
-    $result = $db->row($q, array('account'=>$account,'Guid_status'=>$Guid_status));    
+    $result = $db->row($q, array('account'=>$account,'Guid_status'=>$Guid_status, 'eventdate'=>$eventDate));    
     return $result['count'];
 }
+
+
 /**
  * Get Slasrep Status count By Guid salesrep
  * @param type $db
@@ -2092,6 +2094,7 @@ function topNavLinks($role=FALSE){
 
     return $content;
 }
+
 
 function get_status_state($db, $parent = 0, $searchData=array(), $linkArr=array(), $today) {
     $statuses = array('28' => 'Registered Paient', '36' => 'Completed Questionnaire', '16' => 'Insufficient Informatin' , '29' => 'Medically Qualified' );

@@ -190,4 +190,16 @@ function getTopCompleted($db,$userId,$date){
  
 }
 
+function getAccStatDateRange($db, $Guid_status, $eventStart=NULL, $eventEnd=NULL){     
+    $q = "SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l "
+        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
+        . "WHERE l.Guid_status =:Guid_status AND u.marked_test='0' "; 
+    if($eventStart && $eventEnd){
+        $q .=  "AND DATE(l.Date) >=:startdate AND DATE(l.Date) <:enddate ";
+    }
+    
+    $result = $db->row($q, array('Guid_status'=>$Guid_status,'startdate'=>$eventStart,'enddate'=>$eventEnd));    
+    return $result['count'];
+}
+
 ?>
