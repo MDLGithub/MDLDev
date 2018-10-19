@@ -77,25 +77,42 @@ if (isset($_POST['get_salutation_message'])) {
  * @return json
  */
 function salutationMessage($db, $role, $userID, $timezone){
-    $salutation = '';
-    date_default_timezone_set($timezone);   
-    if($role=='Physician'){  
-        $physician = $db->row("SELECT title, first_name FROM `tblprovider` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
+    date_default_timezone_set($timezone); 
+    $salutation = ''; 
+    $title ='';      
+    if($role=='Admin'){
+        $admin = $db->row("SELECT last_name FROM `tbladmins` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
+        $title = $admin['last_name'];
+    }elseif($role=='Physician'){  
+        $physician = $db->row("SELECT title, last_name FROM `tblprovider` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
         if($physician['title']=='MD' || $physician['title']==''){
-            $title = "Dr. ".$physician['first_name'].'!';
+            $title = "Dr. ".$physician['last_name'].'!';
         }else{
-            $title = $physician['first_name'].'!';
-        }
-        // 24-hour format of an hour without leading zeros (0 through 23)
-        $Hour = date('G');
-        if ( $Hour >= 5 && $Hour <= 11 ) {
+            $title = $physician['last_name'].'!';
+        }               
+    } elseif($role=='Sales Rep' || $role=='Sales Manager'){  
+        $salesrep = $db->row("SELECT last_name FROM `tblsalesrep` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
+        $title = $salesrep['last_name'].'!';                     
+    } elseif($role=='Patient' || $role=='MDL Patient'){ 
+        $salesrep = $db->row("SELECT lastname FROM `tblpatient` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
+        $title = $salesrep['lastname'].'!';
+    }    
+    // 24-hour format of an hour without leading zeros (0 through 23)
+    $Hour = date('G');
+    if ( $Hour >= 5 && $Hour <= 11 ) {
+        if($title!=""){
             $salutation = "Good morning, ".$title;
-        } else if ( $Hour >= 12 && $Hour <= 18 ) {
+        }
+    } else if ( $Hour >= 12 && $Hour <= 18 ) {
+        if($title!=""){
             $salutation = "Good afternoon, ".$title;
-        } else if ( $Hour >= 19 || $Hour <= 4 ) {
+        }
+    } else if ( $Hour >= 19 || $Hour <= 4 ) {
+        if($title!=""){
             $salutation = "Good evening, ".$title;
-        }        
-    }
+        }
+    } 
+    
     echo json_encode(array('salutation'=>$salutation));
 }
 /**

@@ -1340,6 +1340,9 @@ and (-webkit-min-device-pixel-ratio: 2) {
     display:flex;
     justify-content:space-around;
 }
+#officeAddress.urlPage{
+    display:block;
+}
 
 #officeAddress div:nth-child(1){
     display:inline-block;

@@ -437,7 +437,7 @@ $accountProviders = '';
                             <h5 id="officeAddressLabel" class="addressTitle">
                                 <?php  echo $accountInfo; ?>
                             </h5>
-                            <div id="officeAddress">  
+                          <div id="officeAddress" class="urlPage">  
                                 <?php  echo $addressInfo; ?>
                             </div>                          
                       </div>
