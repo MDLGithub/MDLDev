@@ -924,6 +924,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         <option value="">Select Provider</option>
                         <?php 
                         //$tblproviders = $db->query('SELECT * FROM tblprovider WHERE account_id='.$qualifyResult['account_number']);
+                        if(isset($qualifyResult['account_number'])&&$qualifyResult['account_number']!=""){
                         $tblproviders = $db->query('SELECT pr.* FROM tblprovider pr '                                
                                                 . 'LEFT JOIN tbluser u ON u.`Guid_user`=pr.`Guid_user`'
                                                 . ' WHERE account_id='.$qualifyResult['account_number'].' AND u.status="1" ');
@@ -931,7 +932,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         $selected = $qualifyResult['provider_id']==$v['Guid_provider'] ? ' selected' : '';
                         ?>
                         <option <?php echo $selected; ?> value="<?php echo $v['Guid_provider']; ?>" ><?php echo $v['first_name'].' '.$v['last_name']; ?></option>
-                        <?php } ?>
+                        <?php }} ?>
                     </select> 
                 </p>
                 
