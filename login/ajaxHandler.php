@@ -814,7 +814,7 @@ function exportUsers($db) {
     
     AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%test%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Smith%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Doe%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%Jane Doe%'
     
-    GROUP BY q.Guid_qualify ORDER BY sales ASC, account ASC, date ASC";
+    GROUP BY q.Guid_qualify ORDER BY sales ASC, account ASC, accessioned ASC";
 
     $params = [];
     if ($_POST['account']) {
@@ -842,7 +842,7 @@ function exportUsers($db) {
     $headerStyleArray = array(
         'fill' => array(
             'type' => PHPExcel_Style_Fill::FILL_SOLID,
-            'color' => array('rgb' => '000000')
+            'color' => array('rgb' => '989898')
         ),
         'font' => array(
             'bold' => true,
@@ -871,7 +871,7 @@ function exportUsers($db) {
     $objPHPExcel->getActiveSheet()->SetCellValue('M' . $rowCount, 'Payer(s)');
     $objPHPExcel->getActiveSheet()->SetCellValue('N' . $rowCount, 'Total Paid');
 
-    $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(35);
+    $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(60);
 
     $totalSum = 0;
     if (!empty($tests)) {
@@ -897,7 +897,6 @@ function exportUsers($db) {
         }
 
         $payersNames = implode(', ', $revPayers);
-        // $total = number_format($revSum, 2);
         $totalSum += $revSum;
 
         $rowCount++;
@@ -932,6 +931,20 @@ function exportUsers($db) {
       }
     }
 
+    $footerStyleArray = array(
+        'fill' => array(
+            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+            'color' => array('rgb' => '989898')
+        ),
+        'font' => array(
+            'bold' => true,
+            'color' => array('rgb' => 'ffffff')
+        ),
+        'alignment' => array(
+            'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_RIGHT,
+        )
+    );
+
     $styleArray = array(
 	'borders' => array(
 	  'allborders' => array(
@@ -939,10 +952,13 @@ function exportUsers($db) {
 	  )
 	));
 
-    $objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$rowCount, 'Total');
+    $objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$rowCount, 'Total:');
     $objPHPExcel->getActiveSheet()->mergeCells('A' . $rowCount . ':M' . $rowCount);
-    $objPHPExcel->getActiveSheet()->SetCellValue('N' . $rowCount, '$'.$totalSum);
-    $objPHPExcel->getActiveSheet()->getStyle('A' . $rowCount . ':N' . $rowCount)->applyFromArray($headerStyleArray);
+
+    $objPHPExcel->getActiveSheet()->SetCellValue('N' . $rowCount, $totalSum);
+    $objPHPExcel->getActiveSheet()->getStyle('N' . $rowCount)->getNumberFormat()->setFormatCode('"$" #,##0.00');
+
+    $objPHPExcel->getActiveSheet()->getStyle('A' . $rowCount . ':N' . $rowCount)->applyFromArray($footerStyleArray);
     $objPHPExcel->getActiveSheet()->getStyle('A3:N' . $rowCount)->applyFromArray($styleArray);
 
     $filename = date('his', time()).'_geneveda_matrix.xlsx';
