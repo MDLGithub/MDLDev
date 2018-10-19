@@ -77,25 +77,42 @@ if (isset($_POST['get_salutation_message'])) {
  * @return json
  */
 function salutationMessage($db, $role, $userID, $timezone){
-    $salutation = '';
-    date_default_timezone_set($timezone);   
-    if($role=='Physician'){  
-        $physician = $db->row("SELECT title, first_name FROM `tblprovider` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
+    date_default_timezone_set($timezone); 
+    $salutation = ''; 
+    $title ='';      
+    if($role=='Admin'){
+        $admin = $db->row("SELECT last_name FROM `tbladmins` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
+        $title = $admin['last_name'];
+    }elseif($role=='Physician'){  
+        $physician = $db->row("SELECT title, last_name FROM `tblprovider` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
         if($physician['title']=='MD' || $physician['title']==''){
-            $title = "Dr. ".$physician['first_name'].'!';
+            $title = "Dr. ".$physician['last_name'].'!';
         }else{
-            $title = $physician['first_name'].'!';
-        }
-        // 24-hour format of an hour without leading zeros (0 through 23)
-        $Hour = date('G');
-        if ( $Hour >= 5 && $Hour <= 11 ) {
+            $title = $physician['last_name'].'!';
+        }               
+    } elseif($role=='Sales Rep' || $role=='Sales Manager'){  
+        $salesrep = $db->row("SELECT last_name FROM `tblsalesrep` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
+        $title = $salesrep['last_name'].'!';                     
+    } elseif($role=='Patient' || $role=='MDL Patient'){ 
+        $salesrep = $db->row("SELECT lastname FROM `tblpatient` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
+        $title = $salesrep['lastname'].'!';
+    }    
+    // 24-hour format of an hour without leading zeros (0 through 23)
+    $Hour = date('G');
+    if ( $Hour >= 5 && $Hour <= 11 ) {
+        if($title!=""){
             $salutation = "Good morning, ".$title;
-        } else if ( $Hour >= 12 && $Hour <= 18 ) {
+        }
+    } else if ( $Hour >= 12 && $Hour <= 18 ) {
+        if($title!=""){
             $salutation = "Good afternoon, ".$title;
-        } else if ( $Hour >= 19 || $Hour <= 4 ) {
+        }
+    } else if ( $Hour >= 19 || $Hour <= 4 ) {
+        if($title!=""){
             $salutation = "Good evening, ".$title;
-        }        
-    }
+        }
+    } 
+    
     echo json_encode(array('salutation'=>$salutation));
 }
 /**
@@ -797,7 +814,7 @@ function exportUsers($db) {
     
     AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%test%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Smith%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Doe%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%Jane Doe%'
     
-    GROUP BY q.Guid_qualify ORDER BY sales ASC, account ASC, date ASC";
+    GROUP BY q.Guid_qualify ORDER BY sales ASC, account ASC, accessioned ASC";
 
     $params = [];
     if ($_POST['account']) {
@@ -825,7 +842,7 @@ function exportUsers($db) {
     $headerStyleArray = array(
         'fill' => array(
             'type' => PHPExcel_Style_Fill::FILL_SOLID,
-            'color' => array('rgb' => '000000')
+            'color' => array('rgb' => '989898')
         ),
         'font' => array(
             'bold' => true,
@@ -854,7 +871,7 @@ function exportUsers($db) {
     $objPHPExcel->getActiveSheet()->SetCellValue('M' . $rowCount, 'Payer(s)');
     $objPHPExcel->getActiveSheet()->SetCellValue('N' . $rowCount, 'Total Paid');
 
-    $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(35);
+    $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(60);
 
     $totalSum = 0;
     if (!empty($tests)) {
@@ -880,7 +897,6 @@ function exportUsers($db) {
         }
 
         $payersNames = implode(', ', $revPayers);
-        // $total = number_format($revSum, 2);
         $totalSum += $revSum;
 
         $rowCount++;
@@ -915,6 +931,20 @@ function exportUsers($db) {
       }
     }
 
+    $footerStyleArray = array(
+        'fill' => array(
+            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+            'color' => array('rgb' => '989898')
+        ),
+        'font' => array(
+            'bold' => true,
+            'color' => array('rgb' => 'ffffff')
+        ),
+        'alignment' => array(
+            'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_RIGHT,
+        )
+    );
+
     $styleArray = array(
 	'borders' => array(
 	  'allborders' => array(
@@ -922,10 +952,13 @@ function exportUsers($db) {
 	  )
 	));
 
-    $objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$rowCount, 'Total');
+    $objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$rowCount, 'Total:');
     $objPHPExcel->getActiveSheet()->mergeCells('A' . $rowCount . ':M' . $rowCount);
-    $objPHPExcel->getActiveSheet()->SetCellValue('N' . $rowCount, '$'.$totalSum);
-    $objPHPExcel->getActiveSheet()->getStyle('A' . $rowCount . ':N' . $rowCount)->applyFromArray($headerStyleArray);
+
+    $objPHPExcel->getActiveSheet()->SetCellValue('N' . $rowCount, $totalSum);
+    $objPHPExcel->getActiveSheet()->getStyle('N' . $rowCount)->getNumberFormat()->setFormatCode('"$" #,##0.00');
+
+    $objPHPExcel->getActiveSheet()->getStyle('A' . $rowCount . ':N' . $rowCount)->applyFromArray($footerStyleArray);
     $objPHPExcel->getActiveSheet()->getStyle('A3:N' . $rowCount)->applyFromArray($styleArray);
 
     $filename = date('his', time()).'_geneveda_matrix.xlsx';
