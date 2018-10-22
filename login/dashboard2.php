@@ -157,6 +157,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         background-size: 15px;
         top: 5px;
     }
+    .activeButton{ background: #1c487b !important; color: #fff !important; width: 45%; padding: 0; box-shadow: none !important; float: left;}
 </style>
 <script>
     
@@ -166,6 +167,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
     $(document).ready(function () {
         createChart();
+        top_stats();
         $(".f2").width('95%');
         $("input[name='eventtype']").click(function () {
             var evtType = $(this).val();
@@ -241,8 +243,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $('#calendar').fullCalendar('refetchEvents');
             $('#calendar').fullCalendar('addEventSource', summarycursource);
             $('#calendar').fullCalendar('refetchEvents');
-            $("#summary").addClass("details_button").removeClass("summary_button");
-            $("#detail").addClass("summary_button").removeClass("details_button");
+            $("#detail").removeClass('activeButton')
+            $("#summary").addClass('activeButton')
+            //$("#summary").addClass("details_button").removeClass("summary_button");
+            //$("#detail").addClass("summary_button").removeClass("details_button");
         });
 
         // when detail button is clicked
@@ -253,8 +257,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $('#calendar').fullCalendar('refetchEvents');
             $('#calendar').fullCalendar('addEventSource', detailcursource);
             $('#calendar').fullCalendar('refetchEvents');
-            $("#detail").addClass("details_button").removeClass("summary_button");
-            $("#summary").addClass("summary_button").removeClass("details_button");
+            $("#summary").removeClass('activeButton')
+            $("#detail").addClass('activeButton')
+            //$("#detail").addClass("details_button").removeClass("summary_button");
+            //$("#summary").addClass("summary_button").removeClass("details_button");
         });
         var state_count1 = 0, count1 = 0;
         var calendar = $('#calendar').fullCalendar({
@@ -464,8 +470,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         '</div>';
 
                 if (event.evtCnt) {
-                    $("#summary").removeClass("details_button").addClass("summary_button");
-                    $("#detail").removeClass("summary_button").addClass("details_button");
+                    //$("#summary").removeClass("details_button").addClass("summary_button");
+                    //$("#detail").removeClass("summary_button").addClass("details_button");
+                    console.log(event);
                     var content = '<div class="fc-content evtcontent summarybrca days-' + eventDate + '" style="padding: 0 20px; font-size: 15px; line-height: 16px;">';
                     content += '<div class="numberCircleContainer"><span class="numberCircle">' + event.evtCnt + '</span></div>';
                     content += '<div>Registered <span style="float:right">' + event.registeredCnt + '</span></div>';
@@ -475,8 +482,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     content += '</div>';
                     return $(content);
                 } else {
-                    $("#detail").removeClass("details_button").addClass("summary_button");
-                    $("#summary").removeClass("summary_button").addClass("details_button");
+                    //$("#detail").removeClass("details_button").addClass("summary_button");
+                    //$("#summary").removeClass("summary_button").addClass("details_button");
                     if (parsedEventTime < parsedNow) {
                         
                     var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable days-' + eventDate + '"  style="' + borderColor + '">' +
@@ -517,7 +524,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     }
                 }
 
-                 var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1, selectedDate: $.fullCalendar.formatDate(event.start, "Y-M-DD")};                
+                 var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1, selectedDate: $.fullCalendar.formatDate(event.start, "Y-M-DD")};
+                 console.log(event);         
                     $.ajax({
                         url: "ajaxHandlerEvents.php",
                         type: "POST",
@@ -525,6 +533,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         success: function (res)
                         {
                             var res = JSON.parse(res);
+                            //console.log(res); 
                             var html = '<div class="show-stats"><span class="silhouette"><span>' + res.reg + '</span> <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"><span> '+ res.qua + '</span> <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna"><span>'+ res.com + '</span> <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask"><span>'+ res.sub +'</span> <img src="assets/eventschedule/icons/flask_icon.png"></span></div>';
                             if(view.name != 'basicDay'){
                                 element[0].childNodes[0].childNodes[2].innerHTML = html;
@@ -1398,8 +1407,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                 </div>
                             </div>
                         <div class="col-lg-7 col-md-5 top-buttons">
-                        <button type="button" name="Detail" id="detail" class="info-button details_button">Details</button>
-                        <button type="button" name="Summary" id="summary" class="info-button summary_button">Summary</button>
+                        <button type="button" name="Detail" id="detail" class="info-button activeButton" style="width: 48%; padding: 2px;">Details</button>
+                        <button type="button" name="Summary" id="summary" class="info-button" style="width: 48%; padding: 2px;">Summary</button>
                         <a href="eventschedule.php" class="button submit"><strong>Full Calendar</strong></a>   
                         </div>    
                     </div>
@@ -1729,7 +1738,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
 </script>
 <script>
         function createChart() {
-            /*$("#chart").kendoChart({
+            $("#chart").kendoChart({
                 title: {
                     text: "Top Genetic Consultants"
                 },
@@ -1760,7 +1769,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     width: 600,
                     height: 230
                 },
-            });*/
+            });
             
             $("#piechart").kendoChart({
                 title: {
@@ -1869,7 +1878,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                         $("#mesubcnt").text(subCnt).addClass(subCntimg).removeClass('decrease');
                     });
                 }, 500);
-                setTimeout(function(){
+                /*setTimeout(function(){
                     $("#chart").kendoChart({
                         title: {
                             text: "Top Genetic Consultants"
@@ -1902,9 +1911,18 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                             height: 230
                         },
                     });
-                },1000);
+                },1000);*/
             }
         }
+        function labelTemplate (e) { 
+            var text = e.value;
+            var first = "";
+            if ((screen.width<=950))
+                first = text.slice(0, text.indexOf(" "));
+            else
+                first = e.value.split(" ").join("\n");
+            return first;
+        };
     </script>
 <?php require_once 'scripts.php'; ?>
 <?php require_once 'footer.php'; ?>

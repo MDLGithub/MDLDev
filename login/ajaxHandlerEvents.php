@@ -184,17 +184,41 @@ if(isset($_POST['account']) && isset($_POST['action']) && $_POST['action'] == "g
 
 if( isset($_POST['action']) && $_POST['action'] == 'barChart' ){
     $datecreated = isset($_POST['startdate'])? $_POST['startdate'] : 0;
-    
-    $query = "SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l "
-        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
-        . "WHERE l.Guid_status =:Guid_status AND l.account=:account AND u.marked_test='0' "; 
 
-    
+    $query = "SELECT sp.Guid_salesrep, CONCAT(sp.first_name, ' ', sp.last_name) as salerepname, "
+                . "(SELECT  count(*) FROM tblqualify tblqf "
+                            . "INNER JOIN tblaccount tblacc ON tblqf.account_number = tblacc.account "
+                            . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
+                            . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
+                            . "WHERE tblsrep.Guid_salesrep = sp.Guid_salesrep AND YEARWEEK(tblqf.Date_created)=YEARWEEK(:datecreated1) ) as registeredCnt, "
+                    . "(SELECT count(*) FROM tbl_ss_qualify tblqfss "
+                            . "LEFT JOIN tblqualify tblqf ON tblqfss.Guid_qualify = tblqf.Guid_qualify "
+                            . "INNER JOIN tblaccount tblacc ON tblqf.account_number = tblacc.account "
+                            . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
+                            . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
+                            . "WHERE tblsrep.Guid_salesrep = sp.Guid_salesrep "
+                            . "AND tblqfss.qualified = 'Yes' AND YEARWEEK(tblqf.Date_created)=YEARWEEK(:datecreated2) ) as qualifiedCnt, "
+                    . "(SELECT count(*) FROM tbl_ss_qualify tblqfss "
+                            . "LEFT JOIN tblqualify tblqf ON tblqfss.Guid_qualify = tblqf.Guid_qualify "
+                            . "INNER JOIN tblaccount tblacc ON tblqf.account_number = tblacc.account "
+                            . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
+                            . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
+                            . "WHERE tblsrep.Guid_salesrep = sp.Guid_salesrep "
+                            . "AND tblqfss.qualified IN ('Yes','No','Unknown') AND YEARWEEK(tblqf.Date_created)=YEARWEEK(:datecreated3) ) as completedCnt, "
 
+                    . "(SELECT count(*) FROM tbl_ss_qualify tblqfss "
+                            . "LEFT JOIN tblqualify tblqf ON tblqfss.Guid_qualify = tblqf.Guid_qualify "
+                            . "INNER JOIN tblaccount tblacc ON tblqf.account_number = tblacc.account "
+                            . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
+                            . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
+                            . "WHERE tblsrep.Guid_salesrep = sp.Guid_salesrep "
+                            . "AND tblqfss.qualified IN ('Yes','No','Unknown') AND YEARWEEK(tblqf.Date_created)=YEARWEEK(:datecreated3) ) as submittedCnt "
+                . "FROM tblsalesrep sp "
+                . "GROUP BY sp.Guid_salesrep  ORDER BY registeredCnt DESC LIMIT 5";
 
-    $result = $db->query($query,array("datecreated1"=>$datecreated));
+    $result = $db->query($query,array("datecreated1"=>$datecreated,"datecreated2"=>$datecreated,"datecreated3"=>$datecreated));
 
-    /*foreach($result as $row){
+    foreach($result as $row){
         
         $registered[] = (int)$row['registeredCnt'];
         $qualified[] = (int)$row['qualifiedCnt'];
@@ -221,8 +245,8 @@ if( isset($_POST['action']) && $_POST['action'] == 'barChart' ){
                                 ]
                                ),
                     'categories' => $salereps 
-        );*/
-    echo json_encode($result);
+        );
+    echo json_encode($data);
 }
 /* --------------------- Render Piechart Data ------------------------- */
 
