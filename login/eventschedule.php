@@ -47,7 +47,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 <link rel="stylesheet" href="assets/eventschedule/css/bootstrap-datetimepicker.min.css">
 <script src="assets/eventschedule/js/jquery.min.js"></script>
 <script src="assets/eventschedule/js/jquery-ui.min.js"></script>
-
+<!-- <script src="assets/eventschedule/js/moment.min.js"></script> -->
 <script src="assets/eventschedule/js/fullcalendar.min.js"></script>
 <script src="assets/eventschedule/js/bootstrap-datetimepicker.min.js"></script>
 
@@ -268,7 +268,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         box-shadow: none !important;
     }
     .forcehidden{ display: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; }
-
+    tr:first-child > td > .fc-day-grid-event{ min-height: 50px; }
+    .fc-basicWeek-view tbody .fc-today, .fc-basicDay-view tbody .fc-today{
+        background: repeating-linear-gradient(135deg, #c1d4ea 13px, #fff 9px, #c1d4ea 17px, #fff 18px) !important;
+    }
 
     @media only screen 
     and (min-device-width : 768px) 
@@ -448,6 +451,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             selectHelper: true,
             editable: false,
             eventOverlap: false,
+            contentHeight: 'auto',
             dayRender: function (date, cell) {
                 var today = new Date();
                 var dd = today.getDate();
@@ -642,14 +646,20 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
                 var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable" style="' + borderColor + '">' +
                         '<div class="fc-content evtcontent">' +
-                        '<div class="fc-title evttitle"><a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id="'+event.accountid+'">' + modifiedName + '</a></div>' +
-                        salesrep + cmts +
+                        '<div class="fc-title evttitle">';
+
+                        if(event.accountid == 0 || event.accountid == "")
+                            content += '<p class="acc-click" id="acc-'+event.accountid+'" >' + modifiedName + '</p></div>';
+                        else{
+                            content += '<a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id="'+event.accountid+'">' + modifiedName + '</a></div>';
+                        }
+                        content += salesrep + cmts +
                         '<div class="' + icon + '"></div>' +
                         '</div>' +
                         '</div>';
 
                 if (event.evtCnt) {
-                    console.log(event);
+                    //console.log(event);
                     var content = '<div class="fc-content evtcontent days-' + eventDate + '" style="padding: 0 20px;">';
                     content += '<div class="numberCircleContainer"><span class="numberCircle">' + event.evtCnt + '</span></></div>';
                     content += '<div><img src="assets/eventschedule/icons/silhouette_icon.png" width="13" style="margin-right:5px;">Registered <span style="float:right">' + event.registeredCnt + '</span></div>';
@@ -716,7 +726,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 });
 
                 
-                var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1, selectedDate: $.fullCalendar.formatDate(event.start, "Y-M-DD")};                
+                var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1, selectedDate: $.fullCalendar.formatDate(event.start, "Y-M-DD")};     
+                var today = new Date();
+                var parsedNow =  new Date(today).getUnixTime();
+                var parsedEventTime = new Date(event.start).getUnixTime();           
                 $.ajax({
                     url: "ajaxHandlerEvents.php",
                     type: "POST",
@@ -724,19 +737,20 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     success: function (res)
                     {
                         var res = JSON.parse(res);
-                        console.log(res);
+                        //console.log(res);
                         var regHTML = res.reg;
                         var comHTML = res.com;
                         var subHTML = res.sub;
                         var quaHTML = res.qua;
                         
-                        if(view.name != 'basicDay'){
+                        if(view.name != 'basicDay' && parsedEventTime < parsedNow){
+                            //console.log(element[0].childNodes);
                             element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[0].childNodes[0].innerHTML = regHTML;
                             element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[2].childNodes[0].innerHTML = comHTML;
                             element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].childNodes[0].innerHTML = quaHTML;
                             element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[6].childNodes[0].innerHTML = subHTML;
-                        }else if(view.name == 'basicDay'){
-                            console.log(element[0].childNodes[0].childNodes[3].childNodes[0].childNodes[2].childNodes);
+                        }else if(view.name == 'basicDay' && parsedEventTime < parsedNow){
+                            //console.log(element[0].childNodes[0].childNodes[3].childNodes[0].childNodes[2].childNodes);
                             element[0].childNodes[0].childNodes[3].childNodes[0].childNodes[0].childNodes[0].innerHTML = regHTML;
                             element[0].childNodes[0].childNodes[3].childNodes[0].childNodes[2].childNodes[0].innerHTML = comHTML;
                             element[0].childNodes[0].childNodes[3].childNodes[0].childNodes[4].childNodes[0].innerHTML = quaHTML;
@@ -762,6 +776,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 if (errorMsg)
                     errorMsg += "\n";
                 errorMsg += "Please select Account";
+            }
+            if($("input[name='eventtype']:checked").val() == 2 && $("#full_name_id").val() == ""){
+                if (errorMsg)
+                    errorMsg += "\n";
+                errorMsg += "Please Enter Name";
             }
             if (errorMsg) {
                 alert(errorMsg);
@@ -1379,7 +1398,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
                         <div class="group">
                             <?php if ($role == 'Admin' || $role == 'Sales Manager') { ?>
-                                <select id="salesrepopt" name="salesrepopt" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrepopt'])) && (strlen($_POST['salesrepopt']))) ? "" : "no-selection"; ?>">
+                                <select id="salesrepopt" name="salesrepopt" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrepopt'])) && (strlen($_POST['salesrepopt']))) ? "" : "no-selection"; ?>" required>
                                     <option value="">Genetic Consultant</option>							
                                     <?php
                                     $salesreps = $db->query("SELECT * FROM tblsalesrep GROUP BY first_name  ORDER BY first_name, last_name");
@@ -1752,7 +1771,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                     </div>    
                                     <div class='col-md-4'>
                                         <div class="form-group"> <!-- Full Name -->
-                                            <input type="text" class="form-control" id="modalfull_name_id" name="modalfull_name" placeholder="Full Name">
+                                            <input type="text" class="form-control" id="modalfull_name_id" name="modalfull_name" placeholder="Full Name" required="required">
                                         </div>
                                         <div class="form-group"> <!-- Street 1 -->
                                             <input type="text" class="form-control" id="modalstreet1_id" name="modalstreet1" placeholder="Street address, P.O. box, company name, c/o">
@@ -1995,7 +2014,7 @@ function top_stats(){
                 qCnt = qCnt + parseInt($(this).find(".dna span").text());
                 $(".top-stats-cal").html('<span class="regCnt">Registered <img src="assets/eventschedule/icons/silhouette_icon.png"> '+rgCnt+'</span><span class="comCnt">Completed <img src="assets/eventschedule/icons/checkmark_icon.png"> '+cmCnt+'</span><span class="quaCnt">Qualified <img src="assets/eventschedule/icons/dna_icon.png"> '+qCnt+'</span><span class="subCnt">Submitted <img src="assets/eventschedule/icons/flask_icon.png"> '+subCnt+'</span>');
             });
-        }, 500);
+        }, 2500);
     }
 }
 </script>

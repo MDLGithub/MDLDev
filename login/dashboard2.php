@@ -158,6 +158,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         top: 5px;
     }
     .activeButton{ background: #1c487b !important; color: #fff !important; width: 45%; padding: 0; box-shadow: none !important; float: left;}
+    tr:first-child > td > .fc-day-grid-event{ min-height: 50px; }
 </style>
 <script>
     
@@ -465,9 +466,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         '<div class="fc-content evtcontent">' +
                         '<div class="' + icon + '"></div>' +
                         '<div class="fc-title evttitle"><a class="acc-click" href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>' +
-                        salesrep + cmts +
-                        '</div>' +
-                        '</div>';
+                        salesrep ;
+                    if (parsedEventTime < parsedNow) {
+                        content += '<div class="fc-stats"></div>';
+                    }
+                    content +='</div>' + '</div>';
 
                 if (event.evtCnt) {
                     //$("#summary").removeClass("details_button").addClass("summary_button");
@@ -488,12 +491,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         
                     var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable days-' + eventDate + '"  style="' + borderColor + '">' +
                                 '<div class="fc-content evtcontent">'+                                
-                                '<div class="fc-title evttitle"><a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>' + salesrep + cmts;
-                            content += "<div id='state2_count'>"
-                            /*if(view.name != 'basicDay'){
-                                content += '<div class="states-rep"></div>'
-                            }*/
-                            content += '</div><div class="' + icon + '"></div>';   
+                                '<div class="fc-title evttitle"><a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>' + salesrep;
+                            //content += cmts;
+                            if (parsedEventTime < parsedNow) {
+                                content += '<div class="fc-stats"></div>';
+                            }
+                            content += '<div class="' + icon + '"></div>';   
                             content += '</div> </div>';
                             state_count1 += 1;
                     
@@ -524,8 +527,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     }
                 }
 
-                 var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1, selectedDate: $.fullCalendar.formatDate(event.start, "Y-M-DD")};
-                 console.log(event);         
+                var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1, selectedDate: $.fullCalendar.formatDate(event.start, "Y-M-DD")};
+                var today = new Date();
+                var parsedNow =  new Date(today).getUnixTime();
+                var parsedEventTime = new Date(event.start).getUnixTime();        
                     $.ajax({
                         url: "ajaxHandlerEvents.php",
                         type: "POST",
@@ -535,7 +540,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             var res = JSON.parse(res);
                             //console.log(res); 
                             var html = '<div class="show-stats"><span class="silhouette"><span>' + res.reg + '</span> <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"><span> '+ res.qua + '</span> <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna"><span>'+ res.com + '</span> <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask"><span>'+ res.sub +'</span> <img src="assets/eventschedule/icons/flask_icon.png"></span></div>';
-                            if(view.name != 'basicDay'){
+                            if(view.name != 'basicDay' && parsedEventTime < parsedNow){
                                 element[0].childNodes[0].childNodes[2].innerHTML = html;
                             }
                         }
@@ -1324,6 +1329,41 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     $(document).delegate('a.acc-click', 'click', function(e){
         $("#myModal").addClass("forcehidden");
     });
+
+    $(document).delegate('.info_block_arrow', 'click', function(){
+        $(this).addClass('info_block_arrow_show');
+        $(".salesrep_dropdown").removeClass("dropdown_hide");
+        $(this).parent().addClass('hide');
+        /*var salesrep = $(this).attr('data-value');
+        var salesrepName = $(this).text();
+
+        var salesrepName = $(this).text();*/
+            //salesrepName = salesrepName.split(" ");
+        /*var salesrepNameArray = new Array();
+        for(var i =0; i < salesrepName.length; i++){
+            salesrepNameArray.push(salesrepName[i]);
+            if(i == 0){
+                salesrepNameArray.push('<i class="fas fa-angle-down info_block_arrow" style="float:right;"></i>');
+            }
+            if(i != salesrepName.length-1){
+                salesrepNameArray.push("<br>");
+            }
+        }
+        salesrepName = salesrepNameArray.toString().replace(/\,/g," ");*/
+
+        //salesrepName = salesrepName.split(" ").join("<br>");
+        
+        
+        /*$('.info_block_arrow').removeClass('info_block_arrow_show');
+        $(".salesrep_dropdown").addClass("dropdown_hide");
+        if(salesrep != 0){
+            $(".info_block h1").removeClass('hide').html(salesrepName)
+        }else{
+            $(".info_block h1").removeClass('hide').html('All<i class="fas fa-angle-down info_block_arrow" style="float:right;"></i><br>Genetic<br>Consultants');
+        }
+        top_stats();*/
+
+    })
     
 </script>
 <?php
@@ -1378,7 +1418,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 </div>
              </div>
                 <div class="row info_block_row">
-                        <div class = "info_block">
+                        <div class = "info_block" style="min-width: 340px;">
                             <h1>
                             All<i class="fas fa-angle-down info_block_arrow" style = "float:right;"></i>
                             <br>Genetic
@@ -1877,7 +1917,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                         $("#mecomcnt").text(cmCnt).addClass(cmCntimg).removeClass('decrease');
                         $("#mesubcnt").text(subCnt).addClass(subCntimg).removeClass('decrease');
                     });
-                }, 500);
+                }, 2500);
                 /*setTimeout(function(){
                     $("#chart").kendoChart({
                         title: {
@@ -1914,7 +1954,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 },1000);*/
             }
         }
-        function labelTemplate (e) { 
+        /*function labelTemplate (e) { 
             var text = e.value;
             var first = "";
             if ((screen.width<=950))
@@ -1922,7 +1962,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             else
                 first = e.value.split(" ").join("\n");
             return first;
-        };
+        };*/
     </script>
 <?php require_once 'scripts.php'; ?>
 <?php require_once 'footer.php'; ?>
