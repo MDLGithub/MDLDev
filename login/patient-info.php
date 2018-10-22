@@ -99,16 +99,16 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
             
             //test kit
             if(isset($_POST['test_kit'])){  
-                updateTable($db,'tblpatient', array('test_kit'=>'1'), array('Guid_user'=>$userID));
+                updateTable($db,'tblpatient', array('test_kit'=>'1'), array('Guid_user'=>$_GET['patient']));
             } else {
-                updateTable($db,'tblpatient', array('test_kit'=>'0'), array('Guid_user'=>$userID));
+                updateTable($db,'tblpatient', array('test_kit'=>'0'), array('Guid_user'=>$_GET['patient']));
             }
             
             //mark user as a test            
             if(isset($_POST['mark_as_test'])){  
-                updateTable($db,'tbluser', array('marked_test'=>'1'), array('Guid_user'=>$userID));
+                updateTable($db,'tbluser', array('marked_test'=>'1'), array('Guid_user'=>$_GET['patient']));
             } else {
-                updateTable($db,'tbluser', array('marked_test'=>'0'), array('Guid_user'=>$userID));
+                updateTable($db,'tbluser', array('marked_test'=>'0'), array('Guid_user'=>$_GET['patient']));
             }           
 
             //Update MDL# info
@@ -128,39 +128,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 if($mdlNumberData){                    
                    insertIntoTable($db, 'tbl_mdl_number', $mdlNumberData); 
                 }
-            }
-            
-            //add revenue data if exists
-            if(isset($_POST['revenueAdd']) && !empty($_POST['revenueAdd'])){                
-                $revData = $_POST['revenueAdd'];                
-                $size = count($revData['date_paid']);
-                for($i=0; $i<$size; $i++){
-                    $date_paid = ($revData['date_paid'][$i] != "")?date('Y-m-d h:i:s', strtotime($revData['date_paid'][$i])):"";
-                    $dataRevenue = array(
-                        'Guid_user'=>$_GET['patient'],
-                        'date_paid'=>$date_paid,
-                        'payor'=>$revData['payor'][$i],
-                        'insurance'=>$revData['insurance'][$i],
-                        'patient'=>$revData['patient'][$i]
-                    );        
-                    insertIntoTable($db, 'tbl_revenue', $dataRevenue);
-                }
-            }
-            //update 
-            if(isset($_POST['revenueEdit']) && !empty($_POST['revenueEdit'])){
-                $revenues = $_POST['revenueEdit'];
-                foreach ($revenues as $revenueKey => $revenueData){
-                    $whereRevenue = array('Guid_revenue'=>$revenueKey);
-                    $date_paid = ($revenueData['date_paid'] != "")?date('Y-m-d h:i:s', strtotime($revenueData['date_paid'])):"";
-                    $dataRevenue = array(
-                        'date_paid'=>$date_paid,
-                        'payor'=>$revenueData['payor'],
-                        'insurance'=>$revenueData['insurance'],
-                        'patient'=>$revenueData['patient']
-                    ); 
-                    $updateReveue = updateTable($db, 'tbl_revenue', $dataRevenue, $whereRevenue);            
-                }
-            }
+            }           
            
             //add deductable log 
             if(isset($_POST['deductableAdd']) && !empty($_POST['deductableAdd'])){
@@ -272,12 +240,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 <?php } ?>
                 <h2 class="text-center"><?php echo ucfirst(strtolower($qualifyResult['firstname']))." ".ucfirst(strtolower($qualifyResult['lastname']));?></h2>
                 
-                <form id="mdlInfoForm" action="" method="POST" > 
-                        <input type="hidden" name="save" value="1"/>
-                        <input type="hidden" name="account" value="<?php echo isset($_GET['account'])?$_GET['account']:(isset($mdlInfo['account'])?$mdlInfo['account']:""); ?>"/>
-                        <input type="hidden" name="qDate" value="<?php echo $qualifyResult['qDate']; ?>"/>
-                        <input type="hidden" name="Guid_qualify" value="<?php echo $qualifyResult['Guid_qualify']; ?>"/>
-                        <div class="row">
+                <div class="row">
                             <div class="col-md-5 pInfo">
                                 <p><label>Date of Birth: </label><?php echo ($qualifyResult['dob']!="")?date("n/j/Y", strtotime($qualifyResult['dob'])):""; ?></p>
                                 <p><label>Email: </label><?php echo $qualifyResult['email']; ?></p>
@@ -331,33 +294,31 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                                 <?php if($qualifyResult['specimen_collected'] !== 'Yes'){ ?>
                                                 <input id="<?php echo ($qualifyResult['specimen_collected']=='No')?"":"specimen-notcollected-cbox";?>" <?php echo ($qualifyResult['specimen_collected']=='No')?"checked":"";?> type="radio" name="specimen_collected" value="No" /> No
                                                 <?php } ?>                                               
-                                                <div class="specimenCollected yes">                                                    
-                                                    <label>Date: </label>
-                                                    <input id="redirectUrl" type="hidden" value="<?php echo $patientInfoUrl; ?>" />
-                                                    <input id="Guid_user" type="hidden" value="<?php echo $_GET['patient']; ?>" />
-                                                    <input id="account" type="hidden" value="<?php echo isset($_GET['account'])?$_GET['account']:""; ?>" />
-                                                    <input type="text" class="datepicker" value="<?php echo date('n/j/Y'); ?>">
-                                                    <button id="save-specimen-collected" class="btn btn-specimen btn-inline" type="button">OK</button>
-                                                    <button class="cancel-specimen-collected btn btn-specimen btn-inline" type="button">Cancel</button>
+                                                <div class="specimenCollected yes"> 
+                                                    <form action="" method="POST" >
+                                                        <label>Date: </label>
+                                                        <input name="Guid_user" type="hidden" value="<?php echo $_GET['patient']; ?>" />
+                                                        <input name="status[]" type="hidden" value="1"/>
+                                                        <input name="date" type="text" class="datepicker" value="<?php echo date('n/j/Y'); ?>">
+                                                        <button name="manage_status_log" value="specimenCollected" class="btn btn-specimen btn-inline" type="submit">OK</button>
+                                                        <a href="<?php echo $patientInfoUrl; ?>" class="btn btn-specimen btn-inline">Cancel</a>
+                                                    </form>
                                                 </div>
-                                                <div class="specimenCollected not">   
-                                                    <label>Date: </label>
-                                                    <input id="redirectUrl" type="hidden" value="<?php echo $patientInfoUrl; ?>" />
-                                                    <input id="Guid_user" type="hidden" value="<?php echo $_GET['patient']; ?>" />
-                                                    <input id="account" type="hidden" value="<?php echo isset($_GET['account'])?$_GET['account']:""; ?>" />
-                                                    <input type="text" class="datepicker" value="<?php echo date('n/j/Y'); ?>">
-                                                    
-                                                    <?php $notCollected= $db->row("SELECT * FROM tbl_mdl_status WHERE Guid_status=:Guid_status", array('Guid_status'=>'37')); ?>
-                                                    
-                                                    <select id="specimen-not-collected" class="selectBox" name="">
-                                                        <option value="<?php echo $notCollected['Guid_status']; ?>"><?php echo $notCollected['status']; ?></option>
-                                                        <?php echo get_option_of_nested_status($db, $notCollected['Guid_status'], "&nbsp;&nbsp;");?>
-                                                    </select>
-                                                    
-                                                    <button id="save-specimen-notcollected" class="btn btn-specimen btn-inline" type="button">OK</button>
-                                                    <button class="cancel-specimen-collected btn btn-specimen btn-inline" type="button">Cancel</button>
-                                                </div>
-                                                
+                                                <div class="specimenCollected not"> 
+                                                    <form action="" method="POST" >
+                                                        <label>Date: </label>
+                                                        <input name="Guid_user" type="hidden" value="<?php echo $_GET['patient']; ?>" />
+                                                        <input name="status[]" type="hidden" value="37" />
+                                                        <input name="date" type="text" class="datepicker" value="<?php echo date('n/j/Y'); ?>">
+                                                        <?php $notCollected= $db->row("SELECT * FROM tbl_mdl_status WHERE Guid_status=:Guid_status", array('Guid_status'=>'37')); ?>
+                                                        <select required class="selectBox" name="status[]">
+                                                            <option value=""><?php echo $notCollected['status']; ?></option>
+                                                            <?php echo get_option_of_nested_status($db, $notCollected['Guid_status'], "&nbsp;&nbsp;");?>
+                                                        </select>                                                    
+                                                        <button name="manage_status_log" value="specimenNotCollected" class="btn btn-specimen btn-inline" type="submit">OK</button>
+                                                        <a href="<?php echo $patientInfoUrl; ?>" class="btn btn-specimen btn-inline">Cancel</a>
+                                                    </form>
+                                                </div>                                                
                                             </div>
                                         </div>
                                     </div>
@@ -442,7 +403,14 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 </div>
                             </div>
                         </div>
-                    
+                 
+                <form id="mdlInfoForm" action="" method="POST" >
+                    <?php $mdlNumber = isset($_POST['mdl_number'])?$_POST['mdl_number']:$mdlInfo['mdl_number']; ?>
+                    <input type="hidden" name="save" value="1"/>
+                    <input type="hidden" name="account" value="<?php echo isset($_GET['account'])?$_GET['account']:(isset($mdlInfo['account'])?$mdlInfo['account']:""); ?>"/>
+                    <input type="hidden" name="qDate" value="<?php echo $qualifyResult['qDate']; ?>"/>
+                    <input type="hidden" name="Guid_qualify" value="<?php echo $qualifyResult['Guid_qualify']; ?>"/>
+                    <input type="hidden"  name="mdl_number" id="mdlNumber" value="<?php echo $mdlNumber; ?>" />     
                     <div class="row pT-30">
                         <div id="questionaryInfo"  class="col-md-6">
                             <h5>
@@ -1355,8 +1323,8 @@ if(isset($_POST['edit_categories'])){
             'Date_created'=>date('Y-m-d h:i:s')
         );
         
-        if(isset($_POST['Guid_status_log']) && $_POST['Guid_status_log']!=""){
-            //update log
+        if(isset($_POST['Guid_status_log']) && $_POST['Guid_status_log']!=""){//update log
+		
             $thisLog = $db->row("SELECT * FROM tbl_mdl_status_log WHERE Guid_status_log=:Guid_status_log", array('Guid_status_log'=>$_POST['Guid_status_log']));
             $statusLogData['Date_created'] = $thisLog['Date_created'];
             $LogGroup = $thisLog['Log_group'];
@@ -1366,14 +1334,22 @@ if(isset($_POST['edit_categories'])){
             //update last status id in patient table too
             updateCurrentStatusID($db, $Guid_patient);
             Leave($patientInfoUrl);
-        } else {
-            //insert log
+        } else {//insert log		
+            if($_POST['manage_status_log']=='specimenNotCollected'){
+                updateTable($db, 'tblpatient', array('specimen_collected'=>'No'), array('Guid_patient'=>$Guid_patient));
+            }
+            if($_POST['manage_status_log']=='specimenCollected'){
+                updateTable($db, 'tblpatient', array('specimen_collected'=>'Yes'), array('Guid_patient'=>$Guid_patient));
+            }
             saveStatusLog($db, $statusIDs, $statusLogData);
             updateCurrentStatusID($db, $Guid_patient);
             Leave($patientInfoUrl);
-        }   
-       
+        }  
     } 
+	
+
+	
+	
 ?>
 <?php 
     if(isset($_GET['status_log']) && $role=='Admin'){ 
