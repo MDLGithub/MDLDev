@@ -10,6 +10,7 @@ require_once('config.php');
 require_once ('functions_event.php');
 require_once ('functions.php');
 
+
 /* --------------------- Save Event ------------------------- */
 
 if(isset($_POST["action"]) && $_POST["action"] == 'eventinsert')
@@ -179,15 +180,50 @@ if(isset($_POST['account']) && isset($_POST['action']) && $_POST['action'] == "g
     echo json_encode($result);
 }
 
-if( isset($_POST['action']) && $_POST['action'] == "getStatTotal" ){
-    $reg = getAccStatDateRange($db, $_POST['regitered'], $_POST['start'], $_POST['end']);
-    /*$qua = getAccStatDateRange($db, $_POST['account'], $_POST['qualified'], $_POST['start'], $_POST['end']);
-    $com = getAccStatDateRange($db, $_POST['account'], $_POST['completed'], $_POST['start'], $_POST['end']);
-    $sub = getAccStatDateRange($db, $_POST['account'], $_POST['submitted'], $_POST['start'], $_POST['end']);*/
-    $result = array("reg"=>$reg/*, "qua"=>$qua, "com"=>$com, "sub"=>$sub*/);
+/* --------------------- Render Piechart Data ------------------------- */
+
+if( isset($_POST['action']) && $_POST['action'] == 'barChart' ){
+    $datecreated = isset($_POST['startdate'])? $_POST['startdate'] : 0;
+    
+    $query = "SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l "
+        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
+        . "WHERE l.Guid_status =:Guid_status AND l.account=:account AND u.marked_test='0' "; 
+
+    
+
+
+    $result = $db->query($query,array("datecreated1"=>$datecreated));
+
+    /*foreach($result as $row){
+        
+        $registered[] = (int)$row['registeredCnt'];
+        $qualified[] = (int)$row['qualifiedCnt'];
+        $completed[] = (int)$row['completedCnt'];
+        $submitted[] = (int)$row['submittedCnt'];
+        $salereps[] = $row['salerepname'];
+    }
+    $data = array( 'series' => array ( [
+                                    'name'=> "Registered",
+                                    'data'=> $registered,
+                                    'color'=> "#bce273"
+                               ],[
+                                    'name'=> "Completed",
+                                    'data'=> $completed,
+                                    'color'=> "#263805"
+                                ],[
+                                    'name'=> "Qualified",
+                                    'data'=> $qualified,
+                                    'color'=> "#5b870a"
+                                ],[
+                                    'name'=> 'Submitted',
+                                    'data'=> $submitted,
+                                    'color'=> "#919191"
+                                ]
+                               ),
+                    'categories' => $salereps 
+        );*/
     echo json_encode($result);
 }
-
 /* --------------------- Render Piechart Data ------------------------- */
 
 if( isset($_POST['action']) && $_POST['action'] == 'piechart' ){
