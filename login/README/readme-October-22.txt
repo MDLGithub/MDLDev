@@ -1,12 +1,5 @@
-Added images in /assets/images/ :
-
-- above_avg.png
-- below_avg.png
-- top_performer.png
-
-Updated Files:
+Updated files :
 
 - dashboard2.php
-- eventschedule.php
+- assets/js/scripts.js
 - ajaxHandlerEvents.php
-- functions.php
