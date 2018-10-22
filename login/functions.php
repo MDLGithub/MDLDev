@@ -768,15 +768,17 @@ function getSalesrepAccounts($db, $Guid_user){
  * @param type $Guid_status
  * @return type
  */
-function getAccountStatusCount($db, $account, $Guid_status, $eventDate=NULL ){     
+function getAccountStatusCount($db, $account, $Guid_status, $eventDate=NULL ){    
+    $params = array('account'=>$account,'Guid_status'=>$Guid_status);
     $q = "SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l "
         . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
         . "WHERE l.Guid_status =:Guid_status AND l.account=:account AND u.marked_test='0' "; 
     if($eventDate){
-        $q .=  "AND DATE(l.Date)='".$eventDate."'";
+        $q .=  "AND DATE(l.Date)=:eventdate";
+        $params['eventdate']=$eventDate;
     }
     
-    $result = $db->row($q, array('account'=>$account,'Guid_status'=>$Guid_status));    
+    $result = $db->row($q, $params);    
     return $result['count'];
 }
 

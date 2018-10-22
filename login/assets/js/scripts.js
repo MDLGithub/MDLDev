@@ -207,12 +207,13 @@ $(document).ready(function () {
      * used on patient info page
      */
     $('body').delegate( ".mdlnumber", "input", function() {       
-        var val = $(this).val(); 
-        if(val.length>7){
-            $(this).val(val.slice(0, 7));
+        var thisVal = $(this).val(); 
+        $('#mdlNumber').val(thisVal);
+        if(thisVal.length>7){
+            $(this).val(thisVal.slice(0, 7));
+            $('#mdlNumber').val(thisVal.slice(0, 7));
         }else{
-            console.log(val.length);
-            if(val.length==7 || val.length==0){
+            if(thisVal.length==7 || thisVal.length==0){
                 $(this).removeClass('error error-border');
                 $('#message').html("");
             } else {
@@ -948,79 +949,7 @@ $(document).ready(function () {
          $('#specimen-collected-cbox').prop('checked', false);
          $('#specimen-notcollected-cbox').prop('checked', false);
     });
-    /**
-     * Patient Info screen Specimen collected options(Yes, No) functions
-     */
-    $('#save-specimen-collected').on('click', function(){
-        var dateVal = $('#specimen .datepicker').val();
-        var redirectUrl = $('#redirectUrl').val();
-        var Guid_user = $('#Guid_user').val();
-        var account = $('#account').val();
-        $('#specimen .datepicker').removeClass('error-border');
-        if(dateVal == ""){
-            $('#specimen .datepicker').addClass('error-border');
-        } else {
-            //save spacimen collected into logs
-            var ajaxUrl = baseUrl+'/ajaxHandler.php';
-            $.ajax( ajaxUrl , {
-                type: 'POST',
-                data: {
-                   save_specimen_into_logs: '1',                   
-                   date: dateVal,
-                   Guid_user: Guid_user,
-                   account: account
-                },
-                success: function(response) {
-                    var result = JSON.parse(response);
-                    console.log(result);
-                    window.location.replace(redirectUrl);
-                },
-                error: function() {
-                    console.log('0');
-                }
-            });
-        }
-    });
-    $('#save-specimen-notcollected').on('click', function(){
-        var dateVal = $('#specimen .datepicker').val();
-        var redirectUrl = $('#redirectUrl').val();
-        var Guid_user = $('#Guid_user').val();
-        var account = $('#account').val();
-        var statusVal = $('#specimen-not-collected').val();
-      
-        $('#specimen .datepicker').removeClass('error-border');
-        $('#specimen #specimen-not-collected').removeClass('error-border');
-        if(dateVal == ""){
-            $('#specimen .datepicker').addClass('error-border');
-        } 
-        if(statusVal == "" || statusVal == "37"){ //37 is ID for speciment not collected status
-            $('#specimen #specimen-not-collected').addClass('error-border');
-        } 
         
-        if(dateVal != "" && statusVal != "" && statusVal != "37" ) {
-            //save spacimen collected into logs
-            var ajaxUrl = baseUrl+'/ajaxHandler.php';
-            $.ajax( ajaxUrl , {
-                type: 'POST',
-                data: {
-                   save_specimen_not_collected_into_logs: '1',                   
-                   date: dateVal,
-                   Guid_user: Guid_user,
-                   account: account,
-                   status: statusVal
-                },
-                success: function(response) {
-                    var result = JSON.parse(response);
-                    console.log(result);
-                    window.location.replace(redirectUrl);
-                },
-                error: function() {
-                    console.log('0');
-                }
-            });
-        }
-    });
-    
     
     $('#add-patient-deductable').on('click', function(){
         $('#total-deductible').toggleClass('hidden');
