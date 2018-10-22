@@ -778,10 +778,10 @@ function exportUsers($db) {
     (SELECT MAX(trr.Date) FROM tbl_mdl_status_log trr WHERE trr.account = a.account AND trr.Guid_patient = p.Guid_patient AND trr.Guid_status = 22) as 'reported', 
     (SELECT tp.status FROM tbl_mdl_status_log tplog
      LEFT JOIN tbl_mdl_status tp ON tplog.Guid_status = tp.Guid_status
-     WHERE tplog.account = a.account AND tplog.Guid_patient = p.Guid_patient AND tplog.Guid_status IN (69, 70, 71, 72, 73, 77) ORDER BY tplog.Date_created DESC LIMIT 1) as 'test_paid',
+     WHERE tplog.account = a.account AND tplog.Guid_patient = p.Guid_patient AND tp.parent_id = 52 ORDER BY tplog.Date_created DESC LIMIT 1) as 'test_paid',
     (SELECT aps.status FROM tbl_mdl_status_log ap 
      LEFT JOIN tbl_mdl_status aps ON ap.Guid_status = aps.Guid_status
-     WHERE ap.account = a.account AND ap.Guid_patient = p.Guid_patient AND ap.Guid_status IN (78, 79, 80, 81, 82) ORDER BY ap.Date_created DESC LIMIT 1) as 'test_ordered', 
+     WHERE ap.account = a.account AND ap.Guid_patient = p.Guid_patient AND aps.parent_id = 2 ORDER BY ap.Date_created DESC LIMIT 1) as 'test_ordered', 
     (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 53) as 'last_paid',
     (CASE WHEN (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 9) THEN 'Declined'
          WHEN (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 18) THEN 'Approved'
