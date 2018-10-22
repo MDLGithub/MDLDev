@@ -1,28 +1,30 @@
 $(document).ready(function () {
     
     /** Salutation message for Physicians */
-    var userTimeZone = moment.tz.guess();
-    var thisUserId = $('#salutation').attr('data-user-id');
-    var thisUserRole = $('#salutation').attr('data-role');    
-    var ajaxUrl = baseUrl+'/ajaxHandler.php';
-    $.ajax( ajaxUrl , {
-        type: 'POST',
-        data: {
-           get_salutation_message: '1',
-           userId: thisUserId,
-           userRole: thisUserRole,
-           userTimeZone: userTimeZone
-        },
-        success: function(response) {
-            var result = JSON.parse(response);
-            if(result['salutation']){
-                $('#salutation').html(result['salutation']);
-            }             
-        },
-        error: function() {
-            console.log('0');
-        }
-    });   
+    if($('#salutation').length != 0){
+        var userTimeZone = moment.tz.guess();
+        var thisUserId = $('#salutation').attr('data-user-id');
+        var thisUserRole = $('#salutation').attr('data-role');    
+        var ajaxUrl = baseUrl+'/ajaxHandler.php';
+        $.ajax( ajaxUrl , {
+            type: 'POST',
+            data: {
+               get_salutation_message: '1',
+               userId: thisUserId,
+               userRole: thisUserRole,
+               userTimeZone: userTimeZone
+            },
+            success: function(response) {
+                var result = JSON.parse(response);
+                if(result['salutation']){
+                    $('#salutation').html(result['salutation']);
+                }             
+            },
+            error: function() {
+                console.log('0');
+            }
+        });   
+    }
     /** Salutation message for Physicians END */
     
     var opt = {

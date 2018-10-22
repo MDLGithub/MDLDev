@@ -135,7 +135,28 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     
     select#sidebar_select { border: 1px solid #ccc; border-radius: 20px; width: 100%; padding: 5px 8px;   margin-bottom: 8px;}
     .modalaccounttype.hide { display: none; }
-    
+    .below_avg, .above_avg, .top_performer_avg {
+        position: relative;
+    }
+    .below_avg:before, .above_avg:before, .top_performer_avg:before {
+        content: "";
+        background-repeat: no-repeat;
+        left: 39px;
+        position: absolute;
+        width: 18px;
+        height: 23px;
+    }
+    .below_avg:before{
+        background-image: url(assets/images/below_avg.png);
+    }
+    .above_avg:before{
+        background-image: url(assets/images/above_avg.png);
+    }
+    .top_performer_avg:before{
+        background-image: url(assets/images/top_performer.png);
+        background-size: 15px;
+        top: 5px;
+    }
 </style>
 <script>
     
@@ -209,6 +230,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             }else{
                 $(".info_block h1").removeClass('hide').html('All<i class="fas fa-angle-down info_block_arrow" style="float:right;"></i><br>Genetic<br>Consultants');
             }
+            top_stats();
         });
 
         // when summary button is clicked
@@ -260,6 +282,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var beginOfWeek = currentDate.startOf('week');
                 $("#calendarmonth").html($.fullCalendar.formatDate(beginOfWeek,"MMMM DD"));
                 $("#calendaryear").html($.fullCalendar.formatDate(beginOfWeek,"YYYY"));
+                top_stats();
             },
             dayRender: function (date, cell) {
                 var today = new Date();
@@ -292,7 +315,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 //var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD HH:mm:ss");
                 var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
                 var modaldate = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
-                console.log("Moment: "+ moment +", Date: "+modaldate);
+                //console.log("Moment: "+ moment +", Date: "+modaldate);
                 if ( modaldate >= moment ) {
                     $('#updateEvent').find('input, #eventupdate, select').prop("disabled", false);
                     $('#eventupdate').prop("disabled", true);
@@ -435,7 +458,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable" style="' + borderColor + '">' +
                         '<div class="fc-content evtcontent">' +
                         '<div class="' + icon + '"></div>' +
-                        '<div class="fc-title evttitle"><a href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>' +
+                        '<div class="fc-title evttitle"><a class="acc-click" href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>' +
                         salesrep + cmts +
                         '</div>' +
                         '</div>';
@@ -458,7 +481,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         
                     var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable days-' + eventDate + '"  style="' + borderColor + '">' +
                                 '<div class="fc-content evtcontent">'+                                
-                                '<div class="fc-title evttitle"><a id="acc-'+event.accountid+'"  href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>' + salesrep + cmts;
+                                '<div class="fc-title evttitle"><a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>' + salesrep + cmts;
                             content += "<div id='state2_count'>"
                             /*if(view.name != 'basicDay'){
                                 content += '<div class="states-rep"></div>'
@@ -737,12 +760,16 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     }
                 });
                 
+
+                var startdate = moment(event.start._d).format('YYYY-MM-DD');
+                var enddate = moment(event.end._d).format('YYYY-MM-DD');
                 $.ajax({
                     type : 'POST',
-                    data : inputparam,
+                    data : { userid: <?php echo $userID; ?>, startdate: startdate, enddate:enddate, action: "barChart" },
                     dataType: 'json',
-                    url : 'topgenetic.php',
+                    url : 'ajaxHandlerEvents.php',
                     success : function(returndata){
+                        console.log(returndata);
                         //console.log(JSON.stringify(returndata));
                     var chart = $("#chart").data("kendoChart");
                     var catr = returndata.categories;
@@ -765,7 +792,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     dataType: 'json',
                     url : 'ajaxHandlerEvents.php',
                     success : function(returndata){
-                        console.log(returndata)
+                        //console.log(returndata)
                         //console.log(JSON.stringify(returndata))
                     var chart = $("#piechart").data("kendoChart");
                     chart.setOptions({
@@ -930,7 +957,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     updated_date : current_time,
                     action: action
                 };
-                console.log(eventData);
+                //console.log(eventData);
                 //return false;
 
                 $.ajax({
@@ -939,7 +966,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     data: eventData,
                     success: function (res)
                     {
-                        console.log(res);
+                        //console.log(res);
                         $('#calendar').fullCalendar('refetchEvents');
                         popup_comment(modalid);
                         $('#modalcomment').val('');
@@ -1210,7 +1237,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var count = 0;
                 var commentstext = "";
                 if(result.length != 0){
-                    console.log(result);
+                    //console.log(result);
                     var current_user = $("#update_commenterid").val();
                     for( count = 0; count < result.length; count++){
                         var comment_date = moment(new Date(result[count]['created_date'])).format('DD MMM YYYY, h:mm a');
@@ -1256,6 +1283,37 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         $("#modalcomment").val(text);
         $("#modalhealthcareComment").val(text);
         $("#eventupdate").addClass('edited').attr("data-commentid",id);
+    });
+
+    $(document).delegate('.rightCircleicon1','click', function(){
+        $("#updateEvent").removeClass();
+        $("#popup-accounts").hide();
+    });
+
+    $(document).delegate('.account-click', 'click', function(e){
+        e.preventDefault();
+        var acc_id = $(this).attr('id').substring(4);
+        $("#updateEvent").addClass('hide');
+        
+        $.ajax({
+            url: 'ajaxHandlerEvents.php',
+            type: 'POST',
+            data: { action: "getAccountSetup", id: acc_id },
+            success: function(res){
+                var result = JSON.parse(res);
+                console.log(result);
+                $('#selectAccount').html(result.options);
+                var siteiurl = $('#siteurl').val();
+                $('a#edit-selected-account').prop('href', siteiurl+'/account-config.php?action=edit&id='+acc_id);
+                $('a#add-account-provider').prop('href', siteiurl+'/accounts.php?account_id='+acc_id);
+            }
+        });
+        $("#popup-accounts").show();
+        return false;
+    });
+
+    $(document).delegate('a.acc-click', 'click', function(e){
+        $("#myModal").addClass("forcehidden");
     });
     
 </script>
@@ -1671,30 +1729,24 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
 </script>
 <script>
         function createChart() {
-            $("#chart").kendoChart({
+            /*$("#chart").kendoChart({
                 title: {
                     text: "Top Genetic Consultants"
                 },
                 legend: {
-                    //visible: false
                 },
                 seriesDefaults: {
                     type: "column",
                     stack: true
                 },
                 valueAxis: {
-                    //max: 500,
                     line: {
-                       //visible: false
                     },
                     minorGridLines: {
-                        //visible: true
                     }
                 },
                 categoryAxis: {
-                    //categories: [1952, 1956, 1960, 1964, 1968],
                     majorGridLines: {
-                        //visible: false
                     },
                     labels: {
                                 template: labelTemplate
@@ -1708,7 +1760,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     width: 600,
                     height: 230
                 },
-            });
+            });*/
             
             $("#piechart").kendoChart({
                 title: {
@@ -1723,15 +1775,19 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 },
                 seriesDefaults: {
                     labels: {
-                        //template: "#= kendo.format('{0:P}', percentage)#",
                         template: "#if (value > 0) {# #: value #% #}#",
-                        position: "center",
+                        position: function(e) { 
+                                if(e.percentage < 0.1)
+                                    return "outsideEnd";
+                                else
+                                  return "center";
+                              },
                         visible: true,
-                        background: "transparent"
+                        background: "transparent",
+                        distance:8
                     }
                 },
                 tooltip: {
-                    //visible: true,
                     template: "#= category # - #= kendo.format('{0:P}', percentage) #"
                 },
             });
@@ -1759,6 +1815,95 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             var year = d.getFullYear();
             var current_time = year + "-" + month + "-" + date + " " +hr + ":" + min + ":" + sec ;
             return current_time;
+        }
+
+        function top_stats(){
+            var rgCnt = cmCnt = subCnt = qCnt = 0;
+            var rgCntimg = cmCntimg = subCntimg = qCntimg = "";
+            $("#meregcnt").text("0");
+            $("#mequalcnt").text("0");
+            $("#mecomcnt").text("0")
+            $("#mesubcnt").text("0");
+            if ($('.fc-month-view').has('.fc-event').length === 0) {
+                setTimeout(function(){
+                    $(".show-stats").each(function(){
+                        rgCnt = rgCnt + parseInt($(this).find(".silhouette span").text());
+                        if( rgCnt < 5 ){
+                            rgCntimg = "below_avg";
+                        }else if( rgCnt < 10 && rgCnt >= 5 ){
+                            rgCntimg = "above_avg";
+                        }else if( rgCnt > 10 ){
+                            rgCntimg = "top_performer_avg";
+                        }
+
+                        cmCnt = cmCnt + parseInt($(this).find(".checkmark span").text());
+                        if( cmCnt < 5 ){
+                            cmCntimg = "below_avg";
+                        }else if( rgCnt < 10 && cmCnt >= 5 ){
+                            cmCntimg = "above_avg";
+                        }else if( cmCnt >= 10 ){
+                            cmCntimg = "top_performer_avg";
+                        }
+
+                        subCnt = subCnt + parseInt($(this).find(".flask span").text());
+                        if( subCnt < 5 ){
+                            subCntimg = "below_avg";
+                        }else if( rgCnt < 10 && subCnt >= 5 ){
+                            subCntimg = "above_avg";
+                        }else if( subCnt >= 10 ){
+                            subCntimg = "top_performer_avg";
+                        }
+
+                        qCnt = qCnt + parseInt($(this).find(".dna span").text());
+                        if( qCnt < 5 ){
+                            qCntimg = "below_avg";
+                        }else if( qCnt >= 5 ){
+                            qCntimg = "above_avg";
+                        }else if( qCnt >= 10 ){
+                            qCntimg = "top_performer_avg";
+                        }
+
+                        $("#meregcnt").text(rgCnt).addClass(rgCntimg).removeClass('decrease');
+                        $("#mequalcnt").text(qCnt).addClass(qCntimg).removeClass('decrease');
+                        $("#mecomcnt").text(cmCnt).addClass(cmCntimg).removeClass('decrease');
+                        $("#mesubcnt").text(subCnt).addClass(subCntimg).removeClass('decrease');
+                    });
+                }, 500);
+                setTimeout(function(){
+                    $("#chart").kendoChart({
+                        title: {
+                            text: "Top Genetic Consultants"
+                        },
+                        legend: {
+                        },
+                        seriesDefaults: {
+                            type: "column",
+                            stack: true
+                        },
+                        valueAxis: {
+                            line: {
+                            },
+                            minorGridLines: {
+                            }
+                        },
+                        categoryAxis: {
+                            majorGridLines: {
+                            },
+                            labels: {
+                                        template: labelTemplate
+                                    }
+                        },
+                        tooltip: {
+                            visible: true,
+                            template: "#= series.name #: #= value #"
+                        },
+                        chartArea: {
+                            width: 600,
+                            height: 230
+                        },
+                    });
+                },1000);
+            }
         }
     </script>
 <?php require_once 'scripts.php'; ?>
