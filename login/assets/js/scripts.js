@@ -1,7 +1,7 @@
 $(document).ready(function () {
     
     /** Salutation message for Physicians */
-    var userTimeZone = moment.tz.guess();
+    /*var userTimeZone = moment.tz.guess();
     var thisUserId = $('#salutation').attr('data-user-id');
     var thisUserRole = $('#salutation').attr('data-role');    
     var ajaxUrl = baseUrl+'/ajaxHandler.php';
@@ -22,7 +22,7 @@ $(document).ready(function () {
         error: function() {
             console.log('0');
         }
-    });   
+    }); */  
     /** Salutation message for Physicians END */
     
     var opt = {
