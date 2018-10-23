@@ -9,6 +9,6 @@ CREATE TABLE `tbl_mdl_dmdl` (
   `PatientID` int(11) DEFAULT NULL,
   `PhysicianID` int(11) DEFAULT NULL,
   `ToUpdate` enum('Y','N') DEFAULT 'Y',
-  `UpdateDatetime` datetime NOT NULL,
+  `UpdateDatetime` datetime DEFAULT NULL,
   PRIMARY KEY (`Guid_mdl_dmdl`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1

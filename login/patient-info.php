@@ -219,7 +219,6 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
            }
         }
         foreach ($data as $k=>$v){
-            $v['UpdateDatetime'] = date('Y-m-d H:i:s');
             $insert = insertIntoTable($db, 'tbl_mdl_dmdl', $v);
             if($insert['insertID']){
                 $uploadMessage = "<p>Data loaded successfully!</p>";
