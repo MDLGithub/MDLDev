@@ -2014,7 +2014,7 @@ function top_stats(){
                 qCnt = qCnt + parseInt($(this).find(".dna span").text());
                 $(".top-stats-cal").html('<span class="regCnt">Registered <img src="assets/eventschedule/icons/silhouette_icon.png"> '+rgCnt+'</span><span class="comCnt">Completed <img src="assets/eventschedule/icons/checkmark_icon.png"> '+cmCnt+'</span><span class="quaCnt">Qualified <img src="assets/eventschedule/icons/dna_icon.png"> '+qCnt+'</span><span class="subCnt">Submitted <img src="assets/eventschedule/icons/flask_icon.png"> '+subCnt+'</span>');
             });
-        }, 2500);
+        }, 3500);
     }
 }
 </script>

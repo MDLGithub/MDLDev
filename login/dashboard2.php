@@ -1921,7 +1921,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                         $("#mecomcnt").text(cmCnt).addClass(cmCntimg).removeClass('decrease');
                         $("#mesubcnt").text(subCnt).addClass(subCntimg).removeClass('decrease');
                     });
-                }, 2500);
+                }, 3500);
                 /*setTimeout(function(){
                     $("#chart").kendoChart({
                         title: {
