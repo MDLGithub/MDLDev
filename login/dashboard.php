@@ -225,11 +225,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 <?php } ?>
                 <?php if(isFieldVisibleByRole($roleIDs['location']['view'], $roleID)) {?>
                     <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['location'])) && (strlen($_POST['location']))) ? " show-label valid" : ""; ?>">
-                        <label class="dynamic" for="location"><span>Location</span></label>
+                        <label class="dynamic" for="location"><span>Event</span></label>
 
                         <div class="group">
                             <select id="location" name="location" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['location'])) && (strlen($_POST['location']))) ? "" : "no-selection"; ?>">
-                                <option value="">Location</option>							
+                                <option value="">Event</option>							
                                 <?php
                                 $locations = $db->query("SELECT description FROM tblsource ORDER BY description ASC");
 
@@ -554,7 +554,7 @@ $num_estimates = $qualify_requests;
                        <?php } ?>
                      
                        <?php if(isFieldVisibleByRole($roleIDs['location']['view'], $roleID)) {?>
-                           <th>Location</th>
+                           <th>Event</th>
                        <?php } ?>
                        <?php if(isFieldVisibleByRole($roleIDs['salesrep']['view'], $roleID)) {?>
                            <th>Genetic Consultant</th>  

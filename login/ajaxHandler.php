@@ -81,8 +81,8 @@ function salutationMessage($db, $role, $userID, $timezone){
     $salutation = ''; 
     $title ='';      
     if($role=='Admin'){
-        $admin = $db->row("SELECT last_name FROM `tbladmins` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
-        $title = $admin['last_name'];
+        $admin = $db->row("SELECT first_name FROM `tbladmins` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
+        $title = $admin['first_name'].'!';
     }elseif($role=='Physician'){  
         $physician = $db->row("SELECT title, last_name FROM `tblprovider` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
         if($physician['title']=='MD' || $physician['title']==''){
@@ -91,11 +91,11 @@ function salutationMessage($db, $role, $userID, $timezone){
             $title = $physician['last_name'].'!';
         }               
     } elseif($role=='Sales Rep' || $role=='Sales Manager'){  
-        $salesrep = $db->row("SELECT last_name FROM `tblsalesrep` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
-        $title = $salesrep['last_name'].'!';                     
+        $salesrep = $db->row("SELECT first_name FROM `tblsalesrep` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
+        $title = $salesrep['first_name'].'!';                     
     } elseif($role=='Patient' || $role=='MDL Patient'){ 
-        $salesrep = $db->row("SELECT lastname FROM `tblpatient` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
-        $title = $salesrep['lastname'].'!';
+        $salesrep = $db->row("SELECT firstname FROM `tblpatient` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
+        $title = $salesrep['firstname'].'!';
     }    
     // 24-hour format of an hour without leading zeros (0 through 23)
     $Hour = date('G');
