@@ -153,10 +153,11 @@ $isValid = TRUE;
                             </div>
                     </div>
                         <div class = "buttons">
-                        	<i class="fas fa-angle-left" id = "prev-button"></i>
+                            <div></div>
+                        	<!--<i class="fas fa-angle-left prev-button"></i>-->
                         	<!--<div class = "save">Save</div>-->
                             <div class = "page-count"><p>Page 1 of 5</p></div>
-                            <i class="fas fa-angle-right" id = "next-button"></i>
+                            <i class="fas fa-angle-right next-button"></i>
 
                         </div>
                    </div>
@@ -179,10 +180,10 @@ $isValid = TRUE;
                             </div>
                     </div>
                         <div class = "buttons">
-                        	<i class="fas fa-angle-left" id = "prev-button"></i>
+                        	<i class="fas fa-angle-left prev-button"></i>
                         	<!--<div class = "save">Save</div>-->
                             <div class = "page-count"><p>Page 1 of 5</p></div>
-                            <i class="fas fa-angle-right" id = "next-button"></i>
+                            <i class="fas fa-angle-right next-button"></i>
 
                         </div>
                    </div>
@@ -205,10 +206,10 @@ $isValid = TRUE;
                             </div>
                     </div>
                         <div class = "buttons">
-                        	<i class="fas fa-angle-left" id = "prev-button"></i>
+                        	<i class="fas fa-angle-left prev-button"></i>
                         	<!--<div class = "save">Save</div>-->
                             <div class = "page-count"><p>Page 1 of 5</p></div>
-                            <i class="fas fa-angle-right" id = "next-button"></i>
+                            <i class="fas fa-angle-right next-button"></i>
 
                         </div>
                    </div>
@@ -231,10 +232,10 @@ $isValid = TRUE;
                             </div>
                     </div>
                       <div class = "buttons">
-                        	<i class="fas fa-angle-left" id = "prev-button"></i>
+                        	<i class="fas fa-angle-left prev-button"></i>
                         	<!--<div class = "save">Save</div>-->
                             <div class = "page-count"><p>Page 1 of 5</p></div>
-                            <i class="fas fa-angle-right" id = "next-button"></i>
+                            <i class="fas fa-angle-right next-button"></i>
 
                         </div>
                    </div>
@@ -312,10 +313,11 @@ $isValid = TRUE;
                             </div>
                     </div>
                         <div class = "buttons">
-                        	<i class="fas fa-angle-left" id = "prev-button"></i>
+                        	<i class="fas fa-angle-left prev-button"></i>
                         	<!--<div class = "save">Save</div>-->
                             <div class = "page-count"><p>Page 1 of 5</p></div>
-                            <i class="fas fa-angle-right" id = "next-button"></i>
+                            <!--<i class="fas fa-angle-right next-button"></i>-->
+                            <div></div>
 
                         </div>
                    </div>
