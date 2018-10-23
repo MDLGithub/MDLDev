@@ -22,23 +22,27 @@ $(document).ready(function(){
    activeItem = $("#accordion li:first");
    $(activeItem).addClass('active');
 
-   $("#accordion #form-bar").click(function(){
+   /*$("#accordion #form-bar").click(function(){
        $(activeItem).animate({width: "50px"}, {duration:300, queue:false});
        $(this).parent().animate({width: "80%"}, {duration:300, queue:false});
        activeItem = $(this).parent();
-   });
-
-   /*$("#next-button").click(function(){
-     $(activeItem).animate({width: "50px"}, {duration:300, queue:false});
-     $(activeItem).next().animate({width: "80%"}, {duration:300, queue:false});
-     activeItem.nextUntil("li").last().next().addClass("hello");
-   });
-
-
-   $("#prev-button").click(function(){
-     $(activeItem).animate({width: "50px"}, {duration:300, queue:false});
-     $(activeItem).prev().animate({width: "80%"}, {duration:300, queue:false});
-
    });*/
+
+    $(".next-button").click(function(){
+      $(this).parent().parent().parent().animate({width: "50px"}, {duration:300, queue:false});
+      $(activeItem).next().animate({width: "75%"}, {duration:300, queue:false});
+      activeItem = $(activeItem).next();
+    });
+
+
+    $(".prev-button").click(function(){
+      /*$(activeItem).animate({width: "50px"}, {duration:300, queue:false});
+      $(activeItem).prev().animate({width: "80%"}, {duration:300, queue:false});*/
+      $(this).parent().parent().parent().animate({width: "50px"}, {duration:300, queue:false});
+      $(activeItem).prev().animate({width: "75%"}, {duration:300, queue:false});
+      activeItem = $(activeItem).prev();
+    });
+ 
+
 
 });
