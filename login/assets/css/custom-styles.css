@@ -875,11 +875,17 @@ thead th{
     padding-right: 0;
 }
 
-#dataTableHome,
+#dataTableHome:not(.without_scroll),
 #tableHeaderFixed{
     display: block;
     width:100%;
     overflow-y:scroll;
+    table-layout:fixed;
+}
+
+#dataTableHome .without_scroll{
+    display: block;
+    width:100%;
     table-layout:fixed;
 }
 
@@ -1705,6 +1711,10 @@ table.valignTop td{
 .modalBlock .contentBlock.patientInfo{
     width: 40%;
     left: 30%;
+}
+.modalBlock .contentBlock.patientForms{
+    width: 60%;
+    left: 24%;
 }
 .modalBlock .patientInfo label{
     min-width: 200px;

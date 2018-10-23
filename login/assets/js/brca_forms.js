@@ -43,26 +43,20 @@ $(document).ready(function(){
       activeItem = $(activeItem).prev();
     });
 
-        // Get the modal
-        var modal = document.getElementById('myModal');
-
-        $(".patient_forms").click(function(){
-            modal.style.display = "block";
+        $(".patient_forms").on('click', function() {
+          $('#patient_brca_forms').css('display', 'block');
         });
 
-        // Get the <span> element that closes the modal
-        var span = document.getElementsByClassName("close")[0];
-
         // When the user clicks on <span> (x), close the modal
-        span.onclick = function () {
-            modal.style.display = "none";
-        }
+        $('.close').on('click', function () {
+          $('#patient_brca_forms').css('display', 'none');
+        });
 
         // When the user clicks anywhere outside of the modal, close it
-        window.onclick = function (event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
-
+        $(document).on('click', function (event) {
+          var target = $(event.target);
+          if (target.is( "#patient_brca_forms" )) {
+            $('#patient_brca_forms').css('display', 'none');
+          }
+        });
 });

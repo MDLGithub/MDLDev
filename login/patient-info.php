@@ -229,6 +229,9 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     }
 ?>
 
+<link rel="stylesheet" href="assets/css/brca_forms.css">
+<script src="assets/js/brca_forms.js"></script>
+
 <?php require_once 'navbar.php'; ?> 
 <main class="full-width">
         <?php 
@@ -264,7 +267,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 <div class="error-text"><?php echo $message; ?></div>
                 <?php } ?>
                 <h2 class="text-center"><?php echo ucfirst(strtolower($qualifyResult['firstname']))." ".ucfirst(strtolower($qualifyResult['lastname']));?></h2>
-                <a href="<?php echo SITE_URL; ?>/patient-forms.php?user=<?php echo $Guid_user; ?>" class="patient_forms">
+                <a class="patient_forms">
 					<img src="./images/icon_forms.png" />
 					<p>Forms</p>
 				</a>
@@ -825,6 +828,371 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         <?php } ?>
     </div>
     <div id="admin_print"></div>
+    <div id="patient_brca_forms" class="modalBlock" style="display: none;">
+        <div class="contentBlock patientForms">
+        <span class = "close">
+            <i class="fas fa-times"></i>
+        </span>
+        <div class="container form-container" style="margin:auto"> 
+            <div class = "form-row">
+                <div id = "form-details">
+                    <h2>Forms</h2>
+                </div>
+                <div id = "forms">
+                    <h2>Details</h2>
+                </div>
+            <ul id="accordion">
+              <li>
+                <div id = "form-bar">
+                    <h2>Patient Demographics</h2>
+                </div>
+                <div class = "form-info-container">
+                <div class = "form-info col-md-8">
+                    <strong>Patient Demographics</strong><br/>
+                        <div class="f2 required col-md-6">
+                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                                <div class="group">
+                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <p class="f_status">
+                                        <span class="status_icons"><strong>*</strong></span>
+                                    </p>
+                                </div>
+                        </div>
+                        <div class="f2 required col-md-6">
+                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                                <div class="group">
+                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <p class="f_status">
+                                        <span class="status_icons"><strong>*</strong></span>
+                                    </p>
+                                </div>
+                        </div>
+                        <div class="f2 required col-md-6">
+                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                                <div class="group">
+                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <p class="f_status">
+                                        <span class="status_icons"><strong>*</strong></span>
+                                    </p>
+                                </div>
+                        </div>
+                        <div class="f2 required col-md-6">
+                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                                <div class="group">
+                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <p class="f_status">
+                                        <span class="status_icons"><strong>*</strong></span>
+                                    </p>
+                                </div>
+                        </div>
+                        <div class="f2 required col-md-6">
+                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                                <div class="group">
+                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <p class="f_status">
+                                        <span class="status_icons"><strong>*</strong></span>
+                                    </p>
+                                </div>
+                        </div>
+                        <div class="f2 required col-md-6">
+                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                                <div class="group">
+                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <p class="f_status">
+                                        <span class="status_icons"><strong>*</strong></span>
+                                    </p>
+                                </div>
+                        </div>
+                        <div class="f2 required col-md-6">
+                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                                <div class="group">
+                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <p class="f_status">
+                                        <span class="status_icons"><strong>*</strong></span>
+                                    </p>
+                                </div>
+                        </div>
+                        <div class="f2 required col-md-6">
+                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                                <div class="group">
+                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <p class="f_status">
+                                        <span class="status_icons"><strong>*</strong></span>
+                                    </p>
+                                </div>
+                        </div>
+                        <div class="f2 required col-md-6">
+                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                                <div class="group">
+                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <p class="f_status">
+                                        <span class="status_icons"><strong>*</strong></span>
+                                    </p>
+                                </div>
+                        </div>
+                        <div class="f2 required col-md-6">
+                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                                <div class="group">
+                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <p class="f_status">
+                                        <span class="status_icons"><strong>*</strong></span>
+                                    </p>
+                                </div>
+                        </div>
+                </div>
+                    <div class = "buttons">
+                        <div></div>
+                    	<!--<i class="fas fa-angle-left prev-button"></i>-->
+                    	<!--<div class = "save">Save</div>-->
+                        <div class = "page-count"><p>Page 1 of 5</p></div>
+                        <i class="fas fa-angle-right next-button"></i>
+                    </div>
+               </div>
+              </li>
+              <li>
+                 <div id = "form-bar">
+                     <h2>Insurance</h2>
+                 </div>
+                <div class = "form-info-container">
+                <div class = "form-info col-md-8">
+                    <strong>Insurance</strong><br/>
+                        <div class="f2 required col-md-6">
+                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                                <div class="group">
+                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <p class="f_status">
+                                        <span class="status_icons"><strong>*</strong></span>
+                                    </p>
+                                </div>
+                        </div>
+                </div>
+                    <div class = "buttons">
+                    	<i class="fas fa-angle-left prev-button"></i>
+                    	<!--<div class = "save">Save</div>-->
+                        <div class = "page-count"><p>Page 1 of 5</p></div>
+                        <i class="fas fa-angle-right next-button"></i>
+                    </div>
+               </div>
+              </li>
+              <li>
+                 <div id = "form-bar">
+                     <h2>Test</h2>
+                 </div>
+                <div class = "form-info-container">
+                <div class = "form-info col-md-8">
+                    <strong>Test</strong><br/>
+                        <div class="f2 required col-md-6">
+                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                                <div class="group">
+                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <p class="f_status">
+                                        <span class="status_icons"><strong>*</strong></span>
+                                    </p>
+                                </div>
+                        </div>
+                </div>
+                    <div class = "buttons">
+                    	<i class="fas fa-angle-left prev-button"></i>
+                    	<!--<div class = "save">Save</div>-->
+                        <div class = "page-count"><p>Page 1 of 5</p></div>
+                        <i class="fas fa-angle-right next-button"></i>
+                    </div>
+               </div>
+              </li>
+              <li>
+                 <div id = "form-bar">
+                     <h2>Genetic Counseling</h2>
+                 </div>
+                <div class = "form-info-container">
+                <div class = "form-info col-md-8">
+                    <strong>Genetic Counseling</strong><br/>
+                        <div class="f2 required col-md-6">
+                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                                <div class="group">
+                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <p class="f_status">
+                                        <span class="status_icons"><strong>*</strong></span>
+                                    </p>
+                                </div>
+                        </div>
+                </div>
+                  <div class = "buttons">
+                    	<i class="fas fa-angle-left prev-button"></i>
+                    	<!--<div class = "save">Save</div>-->
+                        <div class = "page-count"><p>Page 1 of 5</p></div>
+                        <i class="fas fa-angle-right next-button"></i>
+                    </div>
+               </div>
+            </li>
+             <li>
+                 <div id = "form-bar">
+                     <h2>Physician</h2>
+                 </div>
+                <div class = "form-info-container">
+                <div class = "form-info col-md-8">
+                    <strong>Physician</strong><br/>
+                        <div class="f2 required col-md-6">
+                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                                <div class="group">
+                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <p class="f_status">
+                                        <span class="status_icons"><strong>*</strong></span>
+                                    </p>
+                                </div>
+                        </div>
+                        <div class="f2 required col-md-6">
+                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                                <div class="group">
+                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <p class="f_status">
+                                        <span class="status_icons"><strong>*</strong></span>
+                                    </p>
+                                </div>
+                        </div>
+                        <div class="f2 required col-md-6">
+                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                                <div class="group">
+                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <p class="f_status">
+                                        <span class="status_icons"><strong>*</strong></span>
+                                    </p>
+                                </div>
+                        </div>
+                        <div class="f2 required col-md-6">
+                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                                <div class="group">
+                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <p class="f_status">
+                                        <span class="status_icons"><strong>*</strong></span>
+                                    </p>
+                                </div>
+                        </div>
+                        <div class="f2 required col-md-6">
+                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                                <div class="group">
+                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <p class="f_status">
+                                        <span class="status_icons"><strong>*</strong></span>
+                                    </p>
+                                </div>
+                        </div>
+                        <div class="f2 required col-md-6">
+                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                                <div class="group">
+                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <p class="f_status">
+                                        <span class="status_icons"><strong>*</strong></span>
+                                    </p>
+                                </div>
+                        </div>
+                        <div class="f2 required col-md-6">
+                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                                <div class="group">
+                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <p class="f_status">
+                                        <span class="status_icons"><strong>*</strong></span>
+                                    </p>
+                                </div>
+                        </div>
+                </div>
+                    <div class = "buttons">
+                    	<i class="fas fa-angle-left prev-button"></i>
+                    	<!--<div class = "save">Save</div>-->
+                        <div class = "page-count"><p>Page 1 of 5</p></div>
+                        <!--<i class="fas fa-angle-right next-button"></i>-->
+                        <div></div>
+                    </div>
+               </div>
+              </li>                
+            </ul>
+              <div id = "form-option-table">
+                <table id="dataTableHome" class="pseudo_t table without_scroll">
+                    <thead class="">
+                        <tr>
+                        <th class="text-center no-bg">
+                            <label class="switch">
+                                <input id="selectAllPrintOptions" type="checkbox">
+                                <span class="slider round">
+                                    <span id="switchLabel">Select All</span>
+                                </span>
+                            </label>
+                        </th>
+                        <th>Forms</th>
+                        </tr>
+                    </thead>
+                    <tbody> 
+                        <tr class="t_row">
+                            <td class="printSelectBlock text-center">
+                                <input name="forms[test_req_form]" type="checkbox" class="print1 report1" data-prinatble="0" />
+                            </td>
+                            <td class="left-td">
+                                <a href="http://www.mdlab.com/forms/Flyers/BRCA_Genetic_Req_IH0119_10_2018.pdf">Test Req</a>
+                            </td>
+                        </tr>
+                        <tr class="t_row">
+                            <td class="printSelectBlock text-center">
+                                <input name="forms[informed_consent]" type="checkbox" class="print1 report1" data-prinatble="0" />
+                            </td>
+                            <td class="left-td">
+                                <a href="http://www.mdlab.com/forms/Other/BRCA_test_Consent.pdf">Informed consent</a>
+                            </td>
+                        </tr>
+                        <tr class="t_row">
+                            <td class="printSelectBlock text-center">
+                                <input name="forms[prior_authorization]" type="checkbox" class="print1 report1" data-prinatble="0" />
+                            </td>
+                            <td class="left-td">
+                                <a href="">Prior Authorization</a>
+                            </td>
+                        </tr>
+                        <tr class="t_row">
+                            <td class="printSelectBlock text-center">
+                                <input name="forms[genetic_counseling]" type="checkbox" class="print1 report1" data-prinatble="0" />
+                            </td>
+                            <td class="left-td">
+                                <a href="http://mdlab.com/forms/Other/BRCA_Genetic_Counseling_Referral.pdf">Genetic Counseling Referral</a>
+                            </td>
+                        </tr>
+                        <tr class="t_row">
+                            <td class="printSelectBlock text-center">
+                                <input name="forms[cancer_genetic_counseling]" type="checkbox" class="print1 report1" data-prinatble="0" />
+                            </td>
+                            <td class="left-td">
+                                <a href="https://2n3md83q9tf13jkpbi242zaw-wpengine.netdna-ssl.com/wp-content/uploads/2018/10/Cancer-Referral-Form_9.2018.pdf">Cancer Genetic Counseling Referral</a>
+                            </td>
+                        </tr>
+                        <tr class="t_row">
+                            <td class="printSelectBlock text-center">
+                                <input name="forms[aetna_precertification]" type="checkbox" class="print1 report1" data-prinatble="0" />
+                            </td>
+                            <td class="left-td">
+                                <a href="http://www.aetna.com/pharmacy-insurance/healthcare-professional/documents/BRCA-precertification-request-form.pdf">Aetna Precertification Information Request</a>
+                            </td>
+                        </tr>
+                        <tr class="t_row">
+                            <td class="printSelectBlock text-center">
+                                <input name="forms[aim]" type="checkbox" class="print1 report1" data-prinatble="0" />
+                            </td>
+                            <td class="left-td">
+                                <a href="">AIMs Precertification</a>
+                            </td>
+                        </tr>
+                        <tr class="t_row">
+                            <td class="printSelectBlock text-center">
+                                <input name="forms[beacon]" type="checkbox" class="print1 report1" data-prinatble="0" />
+                            </td>
+                            <td class="left-td">
+                                <a href="">Beacon LBS</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+              	<div class = "buttons">
+              		<button id = "info_button" class = "button">Info</button>
+              		<button class = "print_button button">Print</button>
+              	</div>
+              </div>
+          </div>
 </main>
 
 
