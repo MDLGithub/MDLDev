@@ -239,7 +239,10 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 <div class="error-text"><?php echo $message; ?></div>
                 <?php } ?>
                 <h2 class="text-center"><?php echo ucfirst(strtolower($qualifyResult['firstname']))." ".ucfirst(strtolower($qualifyResult['lastname']));?></h2>
-                
+                <a href="<?php echo SITE_URL; ?>/patient-forms.php?user=<?php echo $Guid_user; ?>" class="patient_forms">
+					<img src="./images/icon_forms.png" />
+					<p>Forms</p>
+				</a>
                 <div class="row">
                             <div class="col-md-5 pInfo">
                                 <p><label>Date of Birth: </label><?php echo ($qualifyResult['dob']!="")?date("n/j/Y", strtotime($qualifyResult['dob'])):""; ?></p>

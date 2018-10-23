@@ -1401,9 +1401,22 @@ and (orientation : portrait){
     width: 100px;
 }
 
+.patient_forms {
+    text-align: center;
+    width: 100px;
+    float: right;
+    margin-top: -45px;
+}
+
 .export_matrix img {
     height: 30px;
     margin-left: 30%;
+    display: block;
+}
+
+.patient_forms img {
+    height: 30px;
+    margin-left: 36%;
     display: block;
 }
 

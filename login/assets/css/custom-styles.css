@@ -931,7 +931,7 @@ thead th{
     table-layout:fixed;
 }
 
-#dataTableHome tbody tr td:last-child{
+#dataTableHome tbody tr td:last-child:not(.left-td){
     text-align:center;
 }
 
@@ -1989,3 +1989,4 @@ a.button.cancel.half{
     top: 18px;
     left: 190px;
 }
+
