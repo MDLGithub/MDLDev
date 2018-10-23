@@ -491,7 +491,7 @@ th.zip input{
 }
 .selectAccountBlock #selectAccount,
 .thisPAccount{
-    width: 80%;
+    width: 75%;
     float: left;
     margin-bottom: 10px;
 }
@@ -503,7 +503,7 @@ th.zip input{
     font-size: 22px;
     margin-left: 15px;
     margin-top: 5px;
-    width: 15%;
+    width: 8%;
     float: left;
 }
 
@@ -649,8 +649,8 @@ input:checked + .slider:before {
 .add-new-device{
     width: 100px;
 }
-.followup{ float: right; width: 170px; position: relative;}
-.followup:before {
+/*.followup{ float: right; width: 170px; position: relative;}*/
+/*.followup:before {
     background-image: url(../images/icon_forms.png);
     width: 21px;
     height: 21px;
@@ -661,7 +661,13 @@ input:checked + .slider:before {
     position: absolute;
     background-position: right;
     background-repeat: no-repeat;
+}*/
+#followup img{ max-width: 20px; }
+a#followup {
+    width: 5%;
+    padding-top: 8px;
 }
+
 .add-new-device.export_matrix{
     width: 250px;
 }
@@ -1363,12 +1369,17 @@ table.dataTable thead .sorting {
 }
 #patient-info-box h2 {
     font-size: 30px;
-    margin-bottom: 25px;
+    margin: 20px 0 35px 0;
 }
 #patient-info-box h5 {
     margin-bottom: 7px;
     display: inline-block;
     width: 100%;
+}
+#patient-info-box .pInfo .bordered{
+    padding: 20px 0;
+    border: 1px solid #d6dce2;
+    box-shadow: 0px 4px 4px 0px rgba(78, 112, 150, 0.26);
 }
 #patient-info-box .pInfo label {
     min-width: 210px;
@@ -1403,6 +1414,9 @@ table.dataTable thead .sorting {
 #total-deductible{
     text-align: right;
     font-weight: normal;
+}
+#mdlInfoBox.pInfo label {
+    min-width: 70px;
 }
 .add-status-form .datepicker,
 .add-status-form .order_by{
@@ -1604,7 +1618,7 @@ button[name="search"] > strong{
 }
 #specimenRadioBox .show-modal .specimenCollected label{
     float: left;
-    margin: 0;
+    margin: 3px 0 0 0;
 }
 #specimenRadioBox .show-modal .specimenCollected .datepicker,
 #specimenRadioBox .show-modal .specimenCollected .selectBox{
@@ -1613,17 +1627,19 @@ button[name="search"] > strong{
     width: 100px;
     float: left;
     margin-left: 10px;
-    height: 23px;
+    height: 25px;
+    margin-top: 3px;
 }
 #specimenRadioBox .show-modal .specimenCollected .selectBox{
     width: 210px;
 }
-#specimenRadioBox  .show-modal button.btn-specimen.btn-inline {
+#specimenRadioBox  .show-modal .btn-specimen.btn-inline {
     min-width: auto;
     height: auto;
     margin: 0 0 0 5px;
     padding: 2px 10px;
     font-size: 15px;
+    color: #000;
 }
 .modalBlock .contentBlock.manageStatsModal, 
 .modalBlock.editStausesModal .contentBlock {
@@ -1986,4 +2002,40 @@ a.button.cancel.half{
     position: absolute;
     top: 18px;
     left: 190px;
+}
+.dmdlForm{
+    margin-top: -70px;
+}
+.dmdlForm form button.refresh{
+    display: inline-block;
+    float: left;
+    margin-left: 10px;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    border: none;
+    height: auto;
+    color: #428bcb;
+}
+.dmdlForm form button.upload{
+    display: inline-block;
+    float: left;
+    height: 35px;
+}
+.dmdlCsvUpload{
+    float: left;
+    border: 1px solid #d6dce2;
+    margin-right: 10px;
+    margin-top: 5px;
+}
+.dmdlRefresh{
+    float: left;
+    font-size: 28px;
+}
+.dmdlForm form{
+    display: inline-block;
+}
+.dmdlForm .uploadMsg{
+    color: #9bae41;
+    font-weight: bold;
 }
