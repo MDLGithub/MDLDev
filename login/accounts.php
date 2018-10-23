@@ -328,7 +328,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                     <?php if($role!='Physician') { ?>
                     <div class="selectAccountBlock row ">
                         
-                        <div class="col-md-6 padd-0">
+                        <div class="col-md-8 padd-0">
                             
                             <label >Select Account</label><br/>
                             <select class="form-control" id="selectAccount">
@@ -343,16 +343,17 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                                 <?php  } ?>
                             </select>
                             
-                            <a href="<?php echo SITE_URL;?>/account-config.php?action=edit&id=<?php echo $accountActive['Guid_account']; ?>" id="edit-selected-account" class="add-new-account">
+                            <a href="<?php echo SITE_URL;?>/account-config.php?action=edit&id=<?php echo $accountActive['Guid_account']; ?>" id="edit-selected-account" class="add-new-account" title="Edit">
                                 <span class="fas fa-pencil-alt" aria-hidden="true"></span>
+                            </a>
+                            <a class="followup" id="followup" href="#ex1" title="Follow">
+                                <img src="assets/images/icon_forms.png">
                             </a>
                             
                         </div>
-                        <div class="col-md-6 padd-0 pT-20">
-                            <a class="followup btn-styled btn-home" id="followup" href="#ex1">
-                                Follow Up
-                            </a>
-                        </div>
+                        <!-- <div class="col-md-6 padd-0 pT-20">
+                            
+                        </div> -->
                     </div>
                     <?php }  ?>
                     
@@ -682,21 +683,22 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                 <div class="f2">
                     <label class="" for="account"><span>Start Date</span></label>
                     <div class="group">
-                        <input type="date" name="start_date" id="start_date">
+                        <input type="date" name="start_date" value="<?php echo date('Y-m-d') ?>" id="start_date" >
                     </div>
                 </div>
                 <div class="f2">
                     <label class="" for="account"><span>End Date</span></label>
                     <div class="group">
-                        <input type="date" name="end_date" id="end_date">
+                        <input type="date" value="<?php echo date('Y-m-d') ?>" name="end_date" id="end_date">
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <button id="print" name="submit_account" type="submit" class="btn-inline">Print</button>
+                    <button id="today_date" value="" name="submit_account" type="button" class="btn-inline">Reset</button>
                 </div>
                 <div class="col-md-6">
-                    <button id="today_date" value="<?php echo date('Y-m-d'); ?>" name="submit_account" type="submit" class="btn-inline">Today</button>
+                    <button id="print" name="submit_account" type="submit" class="btn-inline">Continue</button>
                 </div>
+                
                 <input type="hidden" name="account" value="<?php echo $accountActive['account']; ?>">
                 <input type="hidden" name="guid_account" value="<?php echo $accountActive['Guid_account'] ?>">
             </div>

@@ -159,6 +159,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     }
     .activeButton{ background: #1c487b !important; color: #fff !important; width: 45%; padding: 0; box-shadow: none !important; float: left;}
     tr:first-child > td > .fc-day-grid-event{ min-height: 50px; }
+    #piechart svg > g > g:nth-child(4) > g text, #chart svg > g > g:nth-child(4) > g text {
+        font-weight: 800 !important;
+    }
 </style>
 <script>
     
@@ -475,7 +478,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 if (event.evtCnt) {
                     //$("#summary").removeClass("details_button").addClass("summary_button");
                     //$("#detail").removeClass("summary_button").addClass("details_button");
-                    console.log(event);
+                    //console.log(event);
                     var content = '<div class="fc-content evtcontent summarybrca days-' + eventDate + '" style="padding: 0 20px; font-size: 15px; line-height: 16px;">';
                     content += '<div class="numberCircleContainer"><span class="numberCircle">' + event.evtCnt + '</span></div>';
                     content += '<div>Registered <span style="float:right">' + event.registeredCnt + '</span></div>';
@@ -528,6 +531,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 }
 
                 var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1, selectedDate: $.fullCalendar.formatDate(event.start, "Y-M-DD")};
+                //console.log(eventData);
                 var today = new Date();
                 var parsedNow =  new Date(today).getUnixTime();
                 var parsedEventTime = new Date(event.start).getUnixTime();        
@@ -538,7 +542,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         success: function (res)
                         {
                             var res = JSON.parse(res);
-                            //console.log(res); 
+                            console.log(res); 
                             var html = '<div class="show-stats"><span class="silhouette"><span>' + res.reg + '</span> <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"><span> '+ res.qua + '</span> <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna"><span>'+ res.com + '</span> <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask"><span>'+ res.sub +'</span> <img src="assets/eventschedule/icons/flask_icon.png"></span></div>';
                             if(view.name != 'basicDay' && parsedEventTime < parsedNow){
                                 element[0].childNodes[0].childNodes[2].innerHTML = html;
@@ -776,12 +780,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 
 
                 var startdate = moment(event.start._d).format('YYYY-MM-DD');
-                var enddate = moment(event.end._d).format('YYYY-MM-DD');
+                //var enddate = moment(event.end._d).format('YYYY-MM-DD');
                 $.ajax({
                     type : 'POST',
-                    data : { userid: <?php echo $userID; ?>, startdate: startdate, enddate:enddate, action: "barChart" },
+                    data : { userid: <?php echo $userID; ?>, startdate: startdate, action: "barChart" },
                     dataType: 'json',
-                    url : 'ajaxHandlerEvents.php',
+                    url : 'topgenetic.php',
                     success : function(returndata){
                         console.log(returndata);
                         //console.log(JSON.stringify(returndata));
@@ -1315,7 +1319,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             data: { action: "getAccountSetup", id: acc_id },
             success: function(res){
                 var result = JSON.parse(res);
-                console.log(result);
+                //console.log(result);
                 $('#selectAccount').html(result.options);
                 var siteiurl = $('#siteurl').val();
                 $('a#edit-selected-account').prop('href', siteiurl+'/account-config.php?action=edit&id='+acc_id);
