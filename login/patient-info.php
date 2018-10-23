@@ -17,7 +17,7 @@ $roleInfo = getRole($db, $userID);
 $roleID = $roleInfo['Guid_role'];
 $role = $roleInfo['role'];
 $default_account = "";
-
+$uploadMessage = "";
 //check if patient (the same as Guid_user) empty 
 if(!isset($_GET['patient']) || $_GET['patient']==''){
     Leave(SITE_URL);
@@ -204,6 +204,32 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         $accountInfo = FALSE;
     }
 ?>
+
+<?php     
+    if(isset($_POST['dmdlUpload'])){        
+        $tmpName = $_FILES['dmdlCsvUpload']['tmp_name'];
+        $csvArray = array_map('str_getcsv', file($tmpName));
+        $tableFields = $csvArray[0];
+        unset($csvArray[0]);        
+        $data = array();
+        $csvArrData = array();
+        for($i=0;$i<count($tableFields); $i++){           
+           for($j=1;$j<=count($csvArray); $j++){
+               $data[$j][$tableFields[$i]] = $csvArray[$j][$i];
+           }
+        }
+        foreach ($data as $k=>$v){
+            $v['UpdateDatetime'] = date('Y-m-d H:i:s');
+            $insert = insertIntoTable($db, 'tbl_mdl_dmdl', $v);
+            if($insert['insertID']){
+                $uploadMessage = "<p>Data loaded successfully!</p>";
+            } else {
+                $uploadMessage .= "<p class='color-red'>Data loaded Error.</p>";
+            }
+        } 
+    }
+?>
+
 <?php require_once 'navbar.php'; ?> 
 <main class="full-width">
         <?php 
@@ -560,7 +586,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 ?>
                                     <tr>
                                         <td><?php echo date("n/j/Y", strtotime($v['logDate'])); ?></td> 
-                                        <td><?php echo get_status_names( $db, $v['Guid_status'], $v['Guid_user'], $v['Log_group'] ); ?></td>   
+                                        <td>
+                                            <?php echo get_status_names( $db, $v['Guid_status'], $v['Guid_user'], $v['Log_group'] ); ?>
+                                            <?php //echo get_nested_statuses( $db, $v['Guid_status'], $v['Guid_user'], $v['Log_group'] ); ?>
+                                        
+                                        </td>   
                                         <?php if($role=='Admin'){ ?>
                                         <td class="text-center">
                                             <div class="action-btns">
@@ -736,27 +766,59 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     <div class="row actionButtons pB-30">
                         <div class="col-md-12">
                             
-                            <?php if( $qualifyResult['source']=='HealthCare Fair' && ($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager') ){ ?>
-                            <span class="pull-left markTest">                               
-                                <input id="test-kit" <?php echo $qualifyResult['test_kit']=='1'?' checked': ''; ?>  type="checkbox" name="test_kit" value="1" /> 
-                                <label for="test-kit">Test kit has been given to the patient</label>
-                            </span><br/>
-                            <?php } ?>
-                            <?php if($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager' ){ ?>
-                            <span class="pull-left markTest">                               
-                                <input id="mark-as-test" <?php echo $qualifyResult['marked_test']=='1'?' checked': ''; ?>  type="checkbox" name="mark_as_test" value="1" /> 
-                                <label for="mark-as-test">Mark As Test</label>
-                            </span>
-                            
-                            <button id="save-patient-info" name="save" type="submit" class="button btn-inline pull-right">Save</button>
-                            <?php } ?>                           
-                            
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <?php if( $qualifyResult['source']=='HealthCare Fair' && ($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager') ){ ?>
+                                    <span class="pull-left markTest">                               
+                                        <input id="test-kit" <?php echo $qualifyResult['test_kit']=='1'?' checked': ''; ?>  type="checkbox" name="test_kit" value="1" /> 
+                                        <label for="test-kit">Test kit has been given to the patient</label>
+                                    </span><br/>
+                                    <?php } ?>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">                                    
+                                    <?php if($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager' ){ ?>
+                                    <span class="pull-left markTest">                               
+                                        <input id="mark-as-test" <?php echo $qualifyResult['marked_test']=='1'?' checked': ''; ?>  type="checkbox" name="mark_as_test" value="1" /> 
+                                        <label for="mark-as-test">Mark As Test</label>
+                                    </span>
+                                    <?php } ?>
+                                </div>
+                                <div class="col-md-4"></div>
+                                <div class="col-md-4">
+                                    <?php if($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager' ){ ?>
+                                        <button id="save-patient-info" name="save" type="submit" class="button btn-inline pull-right">Save</button>
+                                    <?php } ?>   
+                                </div>
+                            </div>
                         </div>
                     </div>
                         
-                </form>
+                </form>                
             </div>
-        </div>  
+        </div> 
+            
+        <div class="row">
+            <div class="col-md-4"></div>
+            <div class="col-md-4 dmdlForm">
+                <form action="" method="POST" enctype="multipart/form-data">
+                    <?php if($role=='Admin'){ ?>                                    
+                    <span class="dmdlCsvUpload">  
+                        <input type="file" name="dmdlCsvUpload" />
+                    </span> 
+                    <button class="upload" type="submit" name="dmdlUpload">Upload</button>
+                    <?php } ?>
+                    <span class="dmdlRefresh">  
+                        <button class="refresh" type="submit" name="refreshDmdl"><i class="fas fa-sync-alt"></i></button>
+                    </span>
+                </form>
+                <div class="uploadMsg">
+                <?php if($uploadMessage!=""){ echo $uploadMessage; }?>
+                </div>
+            </div>
+            <div class="col-md-4"></div>
+        </div>
           
         </div>
         <?php } else { ?>

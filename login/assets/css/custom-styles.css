@@ -1369,12 +1369,17 @@ table.dataTable thead .sorting {
 }
 #patient-info-box h2 {
     font-size: 30px;
-    margin-bottom: 25px;
+    margin: 20px 0 35px 0;
 }
 #patient-info-box h5 {
     margin-bottom: 7px;
     display: inline-block;
     width: 100%;
+}
+#patient-info-box .pInfo .bordered{
+    padding: 20px 0;
+    border: 1px solid #d6dce2;
+    box-shadow: 0px 4px 4px 0px rgba(78, 112, 150, 0.26);
 }
 #patient-info-box .pInfo label {
     min-width: 210px;
@@ -1409,6 +1414,9 @@ table.dataTable thead .sorting {
 #total-deductible{
     text-align: right;
     font-weight: normal;
+}
+#mdlInfoBox.pInfo label {
+    min-width: 70px;
 }
 .add-status-form .datepicker,
 .add-status-form .order_by{
@@ -1994,4 +2002,40 @@ a.button.cancel.half{
     position: absolute;
     top: 18px;
     left: 190px;
+}
+.dmdlForm{
+    margin-top: -70px;
+}
+.dmdlForm form button.refresh{
+    display: inline-block;
+    float: left;
+    margin-left: 10px;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    border: none;
+    height: auto;
+    color: #428bcb;
+}
+.dmdlForm form button.upload{
+    display: inline-block;
+    float: left;
+    height: 35px;
+}
+.dmdlCsvUpload{
+    float: left;
+    border: 1px solid #d6dce2;
+    margin-right: 10px;
+    margin-top: 5px;
+}
+.dmdlRefresh{
+    float: left;
+    font-size: 28px;
+}
+.dmdlForm form{
+    display: inline-block;
+}
+.dmdlForm .uploadMsg{
+    color: #9bae41;
+    font-weight: bold;
 }
