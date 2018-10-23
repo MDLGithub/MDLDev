@@ -81,8 +81,8 @@ function salutationMessage($db, $role, $userID, $timezone){
     $salutation = ''; 
     $title ='';      
     if($role=='Admin'){
-        $admin = $db->row("SELECT last_name FROM `tbladmins` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
-        $title = $admin['last_name'];
+        $admin = $db->row("SELECT first_name FROM `tbladmins` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
+        $title = $admin['first_name'].'!';
     }elseif($role=='Physician'){  
         $physician = $db->row("SELECT title, last_name FROM `tblprovider` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
         if($physician['title']=='MD' || $physician['title']==''){
@@ -91,11 +91,11 @@ function salutationMessage($db, $role, $userID, $timezone){
             $title = $physician['last_name'].'!';
         }               
     } elseif($role=='Sales Rep' || $role=='Sales Manager'){  
-        $salesrep = $db->row("SELECT last_name FROM `tblsalesrep` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
-        $title = $salesrep['last_name'].'!';                     
+        $salesrep = $db->row("SELECT first_name FROM `tblsalesrep` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
+        $title = $salesrep['first_name'].'!';                     
     } elseif($role=='Patient' || $role=='MDL Patient'){ 
-        $salesrep = $db->row("SELECT lastname FROM `tblpatient` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
-        $title = $salesrep['lastname'].'!';
+        $salesrep = $db->row("SELECT firstname FROM `tblpatient` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
+        $title = $salesrep['firstname'].'!';
     }    
     // 24-hour format of an hour without leading zeros (0 through 23)
     $Hour = date('G');
@@ -325,112 +325,7 @@ function delete_marked_test_users($db){
     echo json_encode(array('message'=>$arrMsg));
     exit();
 }
-/**
- * save save_specimen_into_logs
- * @param type $db
- * @param type $date
- * @param type $Guid_user
- * @param type $account
- * @param type $status
- */
-function save_specimen_not_collected_into_logs($db, $date, $Guid_user, $account, $status){
-    if($account && $account!=""){
-	$accountQ = "SELECT a.Guid_account, a.account, a.name AS account_name, "
-		    . "sr.Guid_salesrep, sr.first_name AS salesrep_fname, sr.last_name AS salesrep_lname, CONCAT(sr.first_name, ' ', sr.last_name) AS salesrep_name "
-		    . "FROM tblaccount a "
-		    . "LEFT JOIN tblaccountrep ar ON a.Guid_account=ar.Guid_account "
-		    . "LEFT JOIN tblsalesrep sr ON ar.Guid_salesrep = sr.Guid_salesrep "
-		    . "WHERE a.account = '" . $account . "'";
-	$accountInfo = $db->row($accountQ);
-	$statusLogData = array(
-	    'Guid_account' => $accountInfo['Guid_account'],
-	    'account' => $accountInfo['account'],
-	    'Guid_salesrep' => $accountInfo['Guid_salesrep'],
-	    'salesrep_fname' => $accountInfo['salesrep_fname'],
-	    'salesrep_lname' => $accountInfo['salesrep_lname']
-	);
-    }
-    $statusLogData['Guid_user'] = $Guid_user;
-    $statusLogData['Guid_status'] = '1';
-    $patient = $db->row("SELECT * FROM tblpatient WHERE Guid_user=:Guid_user", array('Guid_user'=>$Guid_user));
-    $statusLogData['Guid_patient'] = $patient['Guid_patient'];
-    $statusLogData['Recorded_by'] = $_SESSION['user']['id'];
-    $statusLogData['Date'] = ($date!="")?date('Y-m-d h:i:s',strtotime($date)):"";
-    $statusLogData['Date_created'] = date('Y-m-d h:i:s');
-    if($status!='37'){
-	$statuses[] = '37';
-	$statuses[] = $status;
-    }else{
-	$statuses[] = '37';
-    }
-    $Guid_patient = $patient['Guid_patient'];
-    $q  =   "SELECT *
-	    FROM `tbl_mdl_status` statuses
-	    LEFT JOIN `tbl_mdl_status_log` statuslogs
-	    ON statuses.`Guid_status`= statuslogs.`Guid_status`
-	    AND statuslogs.`Guid_status_log`<>''
-	    AND statuses.parent_id='0'
-	    AND statuslogs.Guid_patient=$Guid_patient
-	    ORDER BY statuslogs.`Date` DESC, statuses.order_by DESC LIMIT 1";
-    $result = $db->row($q);
-    $thisLog = $db->row("SELECT * FROM tbl_mdl_status_log WHERE Guid_status=:Guid_status AND Guid_patient=:Guid_patient", array('Guid_status'=>'37', 'Guid_patient'=>$Guid_patient));
-    if(!empty($thisLog)){
-	$LogGroup = $thisLog['Log_group'];
-	//delete old log
-	deleteByField($db, 'tbl_mdl_status_log', 'Log_group', $LogGroup);
-    }
-    //insert log
-    $saveStats = saveStatusLog($db, $statuses, $statusLogData);
-    updateTable($db, 'tblpatient', array('specimen_collected'=>'No'), array('Guid_patient'=>$patient['Guid_patient']));
-    $statID = updateCurrentStatusID($db, $Guid_patient, FALSE);
-    echo json_encode(array('log_data'=>$statusLogData, 'updateCurrentStatusID'=>$statID, 'q'=>$q, 'result'=>$result));
-    exit();
-}
-/**
- * Save specimen collected into status log
- * @param type $db
- * @param type $date
- * @param type $Guid_user
- * @param type $account
- */
-function save_specimen_into_logs($db, $date, $Guid_user, $account){
-    if($account && $account!=""){
-	$accountQ = "SELECT a.Guid_account, a.account, a.name AS account_name, "
-		    . "sr.Guid_salesrep, sr.first_name AS salesrep_fname, sr.last_name AS salesrep_lname, CONCAT(sr.first_name, ' ', sr.last_name) AS salesrep_name "
-		    . "FROM tblaccount a "
-		    . "LEFT JOIN tblaccountrep ar ON a.Guid_account=ar.Guid_account "
-		    . "LEFT JOIN tblsalesrep sr ON ar.Guid_salesrep = sr.Guid_salesrep "
-		    . "WHERE a.account = '" . $account . "'";
-	$accountInfo = $db->row($accountQ);
-	$statusLogData = array(
-	    'Guid_account' => $accountInfo['Guid_account'],
-	    'account' => $accountInfo['account'],
-	    'Guid_salesrep' => $accountInfo['Guid_salesrep'],
-	    'salesrep_fname' => $accountInfo['salesrep_fname'],
-	    'salesrep_lname' => $accountInfo['salesrep_lname']
-	);
-    }
-    $statusLogData['Guid_user'] = $Guid_user;
-    $statusLogData['Guid_status'] = '1';
 
-    $patient = $db->row("SELECT * FROM tblpatient WHERE Guid_user=:Guid_user", array('Guid_user'=>$Guid_user));
-    $statusLogData['Guid_patient'] = $patient['Guid_patient'];
-
-    $statusLogData['Recorded_by'] = $_SESSION['user']['id'];
-    $statusLogData['Date'] = ($date!="")?date('Y-m-d h:i:s',strtotime($date)):"";
-    $statusLogData['Date_created'] = date('Y-m-d h:i:s');
-
-    //get log group if exists
-    $logRow = $db->row("SELECT * FROM tbl_mdl_status_log WHERE Guid_user=:Guid_user", array('Guid_user'=>$Guid_user));
-    $insert = insertIntoTable($db, 'tbl_mdl_status_log', $statusLogData);
-    if($insert['insertID']){
-	updateTable($db, 'tbl_mdl_status_log', array('Log_group'=>$insert['insertID']), array('Guid_status_log'=>$insert['insertID']));
-	updateTable($db, 'tblpatient', array('specimen_collected'=>'Yes'), array('Guid_patient'=>$patient['Guid_patient']));
-	updateCurrentStatusID($db, $patient['Guid_patient']);
-    }
-    echo json_encode(array('log_data'=>$statusLogData));
-    exit();
-}
 
 //get status dropdown
 function get_this_status_dropdown($db, $parent) {
@@ -778,10 +673,10 @@ function exportUsers($db) {
     (SELECT MAX(trr.Date) FROM tbl_mdl_status_log trr WHERE trr.account = a.account AND trr.Guid_patient = p.Guid_patient AND trr.Guid_status = 22) as 'reported', 
     (SELECT tp.status FROM tbl_mdl_status_log tplog
      LEFT JOIN tbl_mdl_status tp ON tplog.Guid_status = tp.Guid_status
-     WHERE tplog.account = a.account AND tplog.Guid_patient = p.Guid_patient AND tplog.Guid_status IN (69, 70, 71, 72, 73, 77) ORDER BY tplog.Date_created DESC LIMIT 1) as 'test_paid',
+     WHERE tplog.account = a.account AND tplog.Guid_patient = p.Guid_patient AND tp.parent_id = 52 ORDER BY tplog.Date_created DESC LIMIT 1) as 'test_paid',
     (SELECT aps.status FROM tbl_mdl_status_log ap 
      LEFT JOIN tbl_mdl_status aps ON ap.Guid_status = aps.Guid_status
-     WHERE ap.account = a.account AND ap.Guid_patient = p.Guid_patient AND ap.Guid_status IN (78, 79, 80, 81, 82) ORDER BY ap.Date_created DESC LIMIT 1) as 'test_ordered', 
+     WHERE ap.account = a.account AND ap.Guid_patient = p.Guid_patient AND aps.parent_id = 2 ORDER BY ap.Date_created DESC LIMIT 1) as 'test_ordered', 
     (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 53) as 'last_paid',
     (CASE WHEN (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 9) THEN 'Declined'
          WHEN (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 18) THEN 'Approved'

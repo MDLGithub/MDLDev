@@ -10,6 +10,7 @@ require_once('config.php');
 require_once ('functions_event.php');
 require_once ('functions.php');
 
+
 /* --------------------- Save Event ------------------------- */
 
 if(isset($_POST["action"]) && $_POST["action"] == 'eventinsert')
@@ -179,15 +180,28 @@ if(isset($_POST['account']) && isset($_POST['action']) && $_POST['action'] == "g
     echo json_encode($result);
 }
 
-if( isset($_POST['action']) && $_POST['action'] == "getStatTotal" ){
-    $reg = getAccStatDateRange($db, $_POST['regitered'], $_POST['start'], $_POST['end']);
-    /*$qua = getAccStatDateRange($db, $_POST['account'], $_POST['qualified'], $_POST['start'], $_POST['end']);
-    $com = getAccStatDateRange($db, $_POST['account'], $_POST['completed'], $_POST['start'], $_POST['end']);
-    $sub = getAccStatDateRange($db, $_POST['account'], $_POST['submitted'], $_POST['start'], $_POST['end']);*/
-    $result = array("reg"=>$reg/*, "qua"=>$qua, "com"=>$com, "sub"=>$sub*/);
-    echo json_encode($result);
-}
+/* --------------------- Render Piechart Data ------------------------- */
 
+if( isset($_POST['action']) && $_POST['action'] == 'barChart' ){
+    $datecreated = isset($_POST['startdate'])? $_POST['startdate'] : 0;
+    $sqlTbl = "SELECT "
+        . "a.name as account_name, a.Guid_account,"
+        . "CONCAT (srep.first_name, ' ', srep.last_name) AS salesrep_name, srep.Guid_salesrep, "
+        . "u.email, u.marked_test,  u.Guid_role, "
+        . "q.Date_created AS date, COUNT(q.Date_created) as qCnt FROM tbl_ss_qualify q "
+        . "LEFT JOIN tblaccount a ON q.account_number = a.account "
+        . "LEFT JOIN tblaccountrep arep ON arep.Guid_account = a.Guid_account "
+        . "LEFT JOIN tblsalesrep srep ON srep.Guid_salesrep = arep.Guid_salesrep "
+        . "LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user "
+        . "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user "
+        . "WHERE u.marked_test='0' AND q.Date_created BETWEEN '2018-09-16' AND '2018-09-22' "
+        . "ORDER BY date DESC";
+
+        $qualify_requests = $db->query($sqlTbl);
+        var_dump($qualify_requests);
+    
+
+}
 /* --------------------- Render Piechart Data ------------------------- */
 
 if( isset($_POST['action']) && $_POST['action'] == 'piechart' ){
