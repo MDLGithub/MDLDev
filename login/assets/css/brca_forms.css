@@ -29,7 +29,7 @@
 #accordion .form-info-container{
   height: 100%;
   background: grey;
-  background: url("assets/images/form_grey_background.png");
+  background: url("../images/form_grey_background.png");
   box-shadow: inset 0px 0px 21px 0px rgba(74, 74, 74, 0.11);
   border-bottom-left-radius: 10px;
   position: relative;
@@ -65,7 +65,7 @@ padding-left: 50px;
 align-items:center;
 }
 
-.buttons #prev-button{
+.buttons .prev-button{
 margin-left: 20px;
 background: white;
 padding: 1px 5px;
@@ -73,7 +73,7 @@ border-radius: 50%;
 cursor:pointer;
 }
 
-.buttons #next-button{
+.buttons .next-button{
 margin-right: 20px;
 background: white;
 padding: 1px 5px;
@@ -160,7 +160,7 @@ cursor:pointer;
   width: 5%;
   min-width:50px;
   /*background: linear-gradient( 90deg, rgb(218,223,227) 15%, rgb(255,255,255) 100%);*/
-  background: url("assets/images/form_bar_background.png") no-repeat;
+  background: url("../images/form_bar_background.png") no-repeat;
   border-radius:10px 0 0 10px;
   background-size:cover;
   display: block;
@@ -192,19 +192,27 @@ cursor:pointer;
 }
 
 #form-option-table{
-margin: 0;
-padding: 0;
-width: 93%;
-height: 500px;
-overflow: hidden;
-background: url(assets/images/form_grey_background.png);
+  margin: 0;
+  padding: 0;
+  width: 93%;
+  height: 500px;
+  overflow: hidden;
+  background: url(../images/form_grey_background.png);
 }
 
 #form-option-table .buttons{
-position: relative;
-top: -30px;
-display: flex;
-justify-content: center;
+  position: relative;
+  top: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+#form-option-table td.printSelectBlock {
+    width: 30%;
+}
+
+#form-option-table thead th.no-bg{
+    width:30%;
 }
 
 #info_button{
@@ -216,8 +224,10 @@ display:inline;
 }
 
 #form-option-table table{
-width:500px;
+width:600px !important;
 margin-bottom: 40px;
+overflow:hidden;
+margin:auto;
 }
 
 #form-option-table table tbody tr{
@@ -239,7 +249,7 @@ background: linear-gradient( 0deg, rgb(226,226,226) 0%, rgb(241,241,241) 100%);
 .partially_completed::before{
 content:'';
 position:absolute;
-background:url(assets/images/icon_partially_completed.png);
+background:url(../images/icon_partially_completed.png);
 width: 40px;
 height: 40px;
 background-repeat: no-repeat;
@@ -250,7 +260,7 @@ margin-top: -5px;
 .completed::before{
 content:'';
 position:absolute;
-background:url(assets/images/icon_completed.png);
+background:url(../images/icon_completed.png);
 width: 40px;
 height: 40px;
 background-repeat: no-repeat;
@@ -262,7 +272,7 @@ margin-top: -5px;
 .not_needed::before{
 content:'';
 position:absolute;
-background:url(assets/images/icon_not_needed.png);
+background:url(../images/icon_not_needed.png);
 width: 40px;
 height: 40px;
 background-repeat: no-repeat;
