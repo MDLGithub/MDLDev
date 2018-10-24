@@ -835,10 +835,10 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         </span>
         <div class="container form-container" style="margin:auto"> 
             <div class = "form-row">
-                <div id = "form-details">
+                <div id = "forms">
                     <h2>Forms</h2>
                 </div>
-                <div id = "forms">
+                <div id = "form-details">
                     <h2>Details</h2>
                 </div>
             <ul id="accordion">
@@ -850,90 +850,90 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 <div class = "form-info col-md-8">
                     <strong>Patient Demographics</strong><br/>
                         <div class="f2 required col-md-6">
-                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                            <label class="dynamic" for="form_first_name"><span>First name</span></label>
                                 <div class="group">
-                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <input id="form_first_name" name="form_first_name" type="text" value="<?php echo $qualifyResult['firstname'] ?>" placeholder="First name" required="">
                                     <p class="f_status">
                                         <span class="status_icons"><strong>*</strong></span>
                                     </p>
                                 </div>
                         </div>
                         <div class="f2 required col-md-6">
-                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                            <label class="dynamic" for="form_last_name"><span>Last name</span></label>
                                 <div class="group">
-                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <input id="form_last_name" name="form_last_name" type="text" value="<?php echo $qualifyResult['lastname'] ?>" placeholder="Last name" required="">
                                     <p class="f_status">
                                         <span class="status_icons"><strong>*</strong></span>
                                     </p>
                                 </div>
                         </div>
                         <div class="f2 required col-md-6">
-                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                            <label class="dynamic" for="form_dob"><span>DOB</span></label>
                                 <div class="group">
-                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <input id="form_dob" name="form_dob" type="text" value="<?php echo $qualifyResult['dob'] ?>" placeholder="Date of birth" required="">
                                     <p class="f_status">
                                         <span class="status_icons"><strong>*</strong></span>
                                     </p>
                                 </div>
                         </div>
                         <div class="f2 required col-md-6">
-                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                            <label class="dynamic" for="form_addr1"><span>Address line 1</span></label>
                                 <div class="group">
-                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <input id="form_addr1" name="form_addr1" type="text" value="<?php echo $qualifyResult['address'] ?>" placeholder="Address line 1" required="">
                                     <p class="f_status">
                                         <span class="status_icons"><strong>*</strong></span>
                                     </p>
                                 </div>
                         </div>
                         <div class="f2 required col-md-6">
-                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                            <label class="dynamic" for="form_addr2"><span>Address line 2</span></label>
                                 <div class="group">
-                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <input id="form_addr2" name="form_addr2" type="text" value="" placeholder="Address line 2" required="">
                                     <p class="f_status">
                                         <span class="status_icons"><strong>*</strong></span>
                                     </p>
                                 </div>
                         </div>
                         <div class="f2 required col-md-6">
-                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                            <label class="dynamic" for="form_city"><span>City</span></label>
                                 <div class="group">
-                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <input id="form_city" name="form_city" type="text" value="<?php echo $qualifyResult['city'] ?>" placeholder="City" required="">
                                     <p class="f_status">
                                         <span class="status_icons"><strong>*</strong></span>
                                     </p>
                                 </div>
                         </div>
                         <div class="f2 required col-md-6">
-                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                            <label class="dynamic" for="form_state"><span>State</span></label>
                                 <div class="group">
-                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <input id="form_state" name="form_state" type="text" value="<?php echo $qualifyResult['state'] ?>" placeholder="State" required="">
                                     <p class="f_status">
                                         <span class="status_icons"><strong>*</strong></span>
                                     </p>
                                 </div>
                         </div>
                         <div class="f2 required col-md-6">
-                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                            <label class="dynamic" for="form_zip"><span>Zip</span></label>
                                 <div class="group">
-                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <input id="form_zip" name="form_zip" type="text" value="<?php echo $qualifyResult['zip'] ?>" placeholder="Zip" required="">
                                     <p class="f_status">
                                         <span class="status_icons"><strong>*</strong></span>
                                     </p>
                                 </div>
                         </div>
                         <div class="f2 required col-md-6">
-                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                            <label class="dynamic" for="form_phone"><span>Phone</span></label>
                                 <div class="group">
-                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <input id="form_phone" name="form_phone" type="text" value="<?php echo $qualifyResult['phone_number'] ?>" placeholder="Phone" required="">
                                     <p class="f_status">
                                         <span class="status_icons"><strong>*</strong></span>
                                     </p>
                                 </div>
                         </div>
                         <div class="f2 required col-md-6">
-                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
+                            <label class="dynamic" for="form_ethnicity"><span>Ethnicity</span></label>
                                 <div class="group">
-                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
+                                    <input id="form_ethnicity" name="form_ethnicity" type="text" value="<?php ?>" placeholder="Ethnicity" required="">
                                     <p class="f_status">
                                         <span class="status_icons"><strong>*</strong></span>
                                     </p>
@@ -1123,7 +1123,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     <tbody> 
                         <tr class="t_row">
                             <td class="printSelectBlock text-center">
-                                <input name="forms[test_req_form]" type="checkbox" class="print1 report1" data-prinatble="0" />
+                                <input name="forms" value="test_req_form" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
                                 <a href="http://www.mdlab.com/forms/Flyers/BRCA_Genetic_Req_IH0119_10_2018.pdf">Test Req</a>
@@ -1131,7 +1131,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         </tr>
                         <tr class="t_row">
                             <td class="printSelectBlock text-center">
-                                <input name="forms[informed_consent]" type="checkbox" class="print1 report1" data-prinatble="0" />
+                                <input name="forms" value="informed_consent" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
                                 <a href="http://www.mdlab.com/forms/Other/BRCA_test_Consent.pdf">Informed consent</a>
@@ -1139,7 +1139,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         </tr>
                         <tr class="t_row">
                             <td class="printSelectBlock text-center">
-                                <input name="forms[prior_authorization]" type="checkbox" class="print1 report1" data-prinatble="0" />
+                                <input name="forms" value="prior_authorization" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
                                 <a href="">Prior Authorization</a>
@@ -1147,7 +1147,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         </tr>
                         <tr class="t_row">
                             <td class="printSelectBlock text-center">
-                                <input name="forms[genetic_counseling]" type="checkbox" class="print1 report1" data-prinatble="0" />
+                                <input name="forms" value="genetic_counseling" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
                                 <a href="http://mdlab.com/forms/Other/BRCA_Genetic_Counseling_Referral.pdf">Genetic Counseling Referral</a>
@@ -1155,7 +1155,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         </tr>
                         <tr class="t_row">
                             <td class="printSelectBlock text-center">
-                                <input name="forms[cancer_genetic_counseling]" type="checkbox" class="print1 report1" data-prinatble="0" />
+                                <input name="forms" value="cancer_genetic_counseling" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
                                 <a href="https://2n3md83q9tf13jkpbi242zaw-wpengine.netdna-ssl.com/wp-content/uploads/2018/10/Cancer-Referral-Form_9.2018.pdf">Cancer Genetic Counseling Referral</a>
@@ -1163,7 +1163,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         </tr>
                         <tr class="t_row">
                             <td class="printSelectBlock text-center">
-                                <input name="forms[aetna_precertification]" type="checkbox" class="print1 report1" data-prinatble="0" />
+                                <input name="forms" value="aetna_precertification" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
                                 <a href="http://www.aetna.com/pharmacy-insurance/healthcare-professional/documents/BRCA-precertification-request-form.pdf">Aetna Precertification Information Request</a>
@@ -1171,7 +1171,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         </tr>
                         <tr class="t_row">
                             <td class="printSelectBlock text-center">
-                                <input name="forms[aim]" type="checkbox" class="print1 report1" data-prinatble="0" />
+                                <input name="forms" value="aim" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
                                 <a href="">AIMs Precertification</a>
@@ -1179,7 +1179,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         </tr>
                         <tr class="t_row">
                             <td class="printSelectBlock text-center">
-                                <input name="forms[beacon]" type="checkbox" class="print1 report1" data-prinatble="0" />
+                                <input name="forms" value="beacon" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
                                 <a href="">Beacon LBS</a>
@@ -1188,8 +1188,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     </tbody>
                 </table>
               	<div class = "buttons">
-              		<button id = "info_button" class = "button">Info</button>
-              		<button class = "print_button button">Print</button>
+              		<button id = "info_button" class = "button"><i class="fas fa-info"></i> Info</button>
+              		<button class = "print_button button"><i class="fas fa-print"></i> Print</button>
               	</div>
               </div>
           </div>

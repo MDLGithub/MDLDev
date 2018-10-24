@@ -1,8 +1,11 @@
 $(document).ready(function(){
-  firsttab = $("#accordion");
-  firsttab.hide();
-  secondtab = $("#form-option-table");
-  secondtab.show();
+  firsttab = $("#form-option-table");
+  firsttab.show();
+  secondtab = $("#accordion");
+  secondtab.hide();
+  if ($('input[name=forms]:checked').length == 0) { 
+    $("#form-details").addClass('disabled');
+  }
 
   $("#forms").click(function(){
     firsttab.show();
@@ -12,6 +15,22 @@ $(document).ready(function(){
    $("#info_button").click(function(){
     firsttab.show();
     secondtab.hide();
+  });
+
+  $('input[name=forms]').change(function() {
+    if ($('input[name=forms]:checked').length > 0) { 
+      $("#form-details").removeClass('disabled');
+    } else {
+      $("#form-details").addClass('disabled');
+    }
+  });
+
+  $('.slider').on('click', function() {
+    if ($('#switchLabel').text() == 'Select All') { 
+      $("#form-details").removeClass('disabled');
+    } else {
+      $("#form-details").addClass('disabled');
+    }
   });
 
   $("#form-details").click(function(){
