@@ -4379,7 +4379,7 @@ function save_snap_shot($not_qualified) {
 		$status_string = "Qualified";
 	}
 
-	$sql = "INSERT INTO tbl_ss_qualify (Guid_qualify, Guid_user, insurance, other_insurance, gender, ashkenazi, gene_mutation, gene_relation, gene, finish_later, account_number, provider_id, other_provider, source, company, ip, qualified, Date_created) SELECT Guid_qualify, Guid_user, insurance, other_insurance, gender, ashkenazi, gene_mutation, gene_relation, gene, finish_later, account_number, provider_id, other_provider, source, company, ip, '" . $qualified . "', '" . $unique_id . "' FROM tblqualify WHERE Guid_qualify=" . $_SESSION['id'];
+	$sql = "INSERT INTO tbl_ss_qualify (Guid_qualify, Guid_user, insurance, other_insurance, gender, ashkenazi, gene_mutation, gene_relation, gene, finish_later, account_number, provider_id, other_provider, source, company, deviceid, ip, qualified, Date_created) SELECT Guid_qualify, Guid_user, insurance, other_insurance, gender, ashkenazi, gene_mutation, gene_relation, gene, finish_later, account_number, provider_id, other_provider, source, company, deviceid, ip, '" . $qualified . "', '" . $unique_id . "' FROM tblqualify WHERE Guid_qualify=" . $_SESSION['id'];
 
 	$conn->query($sql);
 	
@@ -4435,7 +4435,7 @@ function save_snap_shot($not_qualified) {
 				$account = $result->fetch_assoc();
 			}
 
-			$sql = "INSERT INTO tbl_mdl_status_log(currentstatus, Guid_patient, Guid_status, Guid_user, Guid_account, account, Guid_salesrep, salesrep_fname, salesrep_lname, Recorded_by, Date, Date_created) VALUES ('Y'," . $patient['Guid_patient'] . ", " . $mdl_status['Guid_status']  . ", " . $qualify['Guid_user'] . ", '" . $account['Guid_account'] . "', '" . $qualify['account_number'] . "', '" . $account['Guid_salesrep'] . "', '" . $account['first_name']  . "', '" . $account['last_name']  . "', " . $qualify['Guid_user'] . ", '" . $date->format('Y-m-d H:i:s') . "', '" . $date->format('Y-m-d H:i:s') . "')";
+			$sql = "INSERT INTO tbl_mdl_status_log(currentstatus, Guid_patient, Guid_status, Guid_user, Guid_account, account, Guid_salesrep, salesrep_fname, salesrep_lname, deviceid, Recorded_by, Date, Date_created) VALUES ('Y'," . $patient['Guid_patient'] . ", " . $mdl_status['Guid_status']  . ", " . $qualify['Guid_user'] . ", '" . $account['Guid_account'] . "', '" . $qualify['account_number'] . "', '" . $account['Guid_salesrep'] . "', '" . $account['first_name']  . "', '" . $account['last_name']  . "', '" . $qualify['deviceid']  . "', " . $qualify['Guid_user'] . ", '" . $date->format('Y-m-d H:i:s') . "', '" . $date->format('Y-m-d H:i:s') . "')";
 
 			$conn->query($sql);
 			
@@ -4447,7 +4447,7 @@ function save_snap_shot($not_qualified) {
 			$conn->query($sql);
 		}
 	}
-	$sql = "INSERT INTO tbl_mdl_status_log(Guid_patient, Guid_account, account, Guid_salesrep, Guid_user, salesrep_fname, salesrep_lname, Recorded_by, Date) select Guid_patient, Guid_account, account, Guid_salesrep, Guid_user, salesrep_fname, salesrep_lname, Recorded_by, Date FROM tbl_mdl_status_log WHERE Guid_status_log = " . $logid;
+	$sql = "INSERT INTO tbl_mdl_status_log(Guid_patient, Guid_account, account, Guid_salesrep, Guid_user, salesrep_fname, salesrep_lname, deviceid, Recorded_by, Date) select Guid_patient, Guid_account, account, Guid_salesrep, Guid_user, salesrep_fname, salesrep_lname, deviceid, Recorded_by, Date FROM tbl_mdl_status_log WHERE Guid_status_log = " . $logid;
 
 	$conn->query($sql);
 	
@@ -4461,7 +4461,7 @@ function save_snap_shot($not_qualified) {
 	
 	$conn->query($sql);	
 	
-	$sql = "INSERT INTO tbl_mdl_status_log(Guid_patient, Guid_account, account, Guid_salesrep, Guid_user, salesrep_fname, salesrep_lname, Recorded_by, Date) select Guid_patient, Guid_account, account, Guid_salesrep, Guid_user, salesrep_fname, salesrep_lname, Recorded_by, Date FROM tbl_mdl_status_log WHERE Guid_status_log = " . $logid;
+	$sql = "INSERT INTO tbl_mdl_status_log(Guid_patient, Guid_account, account, Guid_salesrep, Guid_user, salesrep_fname, salesrep_lname, deviceid, Recorded_by, Date) select Guid_patient, Guid_account, account, Guid_salesrep, Guid_user, salesrep_fname, salesrep_lname, deviceid, Recorded_by, Date FROM tbl_mdl_status_log WHERE Guid_status_log = " . $logid;
 
 	$conn->query($sql);
 	
@@ -4605,7 +4605,7 @@ function perform_login(&$error) {
 		$Guid_salesrep = $salesrep['Guid_salesrep'];
 	}
 	
-	$sql = "INSERT INTO tbl_mdl_status_log(currentstatus, Guid_patient, Guid_account, account, Guid_salesrep, Guid_status, Guid_user, salesrep_fname, salesrep_lname, Date, Date_created) VALUES ('Y'," . $Guid_patient . ", " . $Guid_account  . ", " . $account_number . ", ";
+	$sql = "INSERT INTO tbl_mdl_status_log(currentstatus, Guid_patient, Guid_account, account, Guid_salesrep, Guid_status, Guid_user, salesrep_fname, salesrep_lname, deviceid, Date, Date_created) VALUES ('Y'," . $Guid_patient . ", " . $Guid_account  . ", " . $account_number . ", ";
 	
 	if (isset($Guid_salesrep))  {
 		$sql .= $Guid_salesrep;
@@ -4620,6 +4620,8 @@ function perform_login(&$error) {
 	} else {
 		$sql .= "NULL, NULL";
 	}
+	
+	$sql .= ", '" . $conn->real_escape_string(trim($_GET['dv'])) . "'";
 	
 	$sql .= ", '" . $date->format('Y-m-d H:i:s') . "', '" . $date->format('Y-m-d H:i:s') . "')";
 
@@ -4689,10 +4691,15 @@ function send_email($content, $title, $email="", $additional="", $not_qualified=
 	$headers .= 'From: BRCAcare Application <BRCA_Questionnaire_Support@mdlab.com>';
 
 	if (strlen($email)) {
+		if (strlen($qualify['account_number'])) {
+			$result = $conn->query("SELECT sr.first_name, sr.last_name FROM tblaccount a LEFT JOIN tblaccountrep ar ON a.Guid_account = ar.Guid_account LEFT JOIN tblsalesrep sr ON ar.Guid_salesrep = sr.Guid_salesrep WHERE account = '" . $qualify['account_number'] . "'");
+			$account = $result->fetch_assoc();
+			$account_name = ", " . $account['first_name'] . " " . $account['last_name'];
+		}
 		if ($not_qualified) {
-			$subject = "BRCA Questionnaire Completion Notification - Not Qualified";
+			$subject = "BRCA Questionnaire (Not Qualified" . $account_name . ")";
 		} else {
-			$subject = "BRCA Questionnaire Completion Notification- Qualified";			
+			$subject = "BRCA Questionnaire (Qualified" . $account_name . ")";
 		}
 		mail($email, $subject, $message, $headers);
 	} else {
