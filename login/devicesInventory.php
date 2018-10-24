@@ -207,15 +207,15 @@ require_once ('navbar.php');
                                                     Registered 
                                                     <img src="assets/eventschedule/icons/silhouette_icon.png">
                                                     <?php 
-                                                        $Registered = getDeviceStatusCount($db, $Guid_salesrep, '28' ); //28->Registered 
-                                                        echo ($Registered>0)?Registered:'-';
+                                                        $Registered = getDeviceStatusCount($db, $Guid_salesrep, '28', $id ); //28->Registered 
+                                                        echo ($Registered>0)?$Registered:'-';
                                                     ?>
                                                 </span>
                                                 <span class="completed">
                                                     Completed
                                                     <img src="assets/eventschedule/icons/checkmark_icon.png">
                                                     <?php 
-                                                    $Completed = getDeviceStatusCount($db, $Guid_salesrep, '36'); //36->Questionnaire Completed 
+                                                    $Completed = getDeviceStatusCount($db, $Guid_salesrep, '36', $id); //36->Questionnaire Completed 
                                                     echo ($Completed>0)?$Completed:'-';
                                                     ?>
                                                 </span>
@@ -223,7 +223,7 @@ require_once ('navbar.php');
                                                     Qualified
                                                     <img src="assets/eventschedule/icons/dna_icon.png">
                                                     <?php 
-                                                    $Qualified = getDeviceStatusCount($db, $Guid_salesrep, '29'); //29->Questionnaire Completed->Qualified 
+                                                    $Qualified = getDeviceStatusCount($db, $Guid_salesrep, '29', $id); //29->Questionnaire Completed->Qualified 
                                                     echo ($Qualified>0)?$Qualified:'-';
                                                     ?>
                                                 </span>
@@ -231,8 +231,8 @@ require_once ('navbar.php');
                                                     Submitted
                                                     <img src="assets/eventschedule/icons/flask_icon.png">
                                                     <?php 
-                                                    $Submitted = getDeviceStatusCount($db, $Guid_salesrep, '1' ); //28->Submitted (Specimen Collected) 
-                                                    echo ($Submitted>0)?$Submitted:'';
+                                                    $Submitted = getDeviceStatusCount($db, $Guid_salesrep, '1', $id ); //28->Submitted (Specimen Collected) 
+                                                    echo ($Submitted>0)?$Submitted:'-';
                                                     ?>
                                                 </span>
                                             </div>
@@ -391,13 +391,15 @@ require_once ('navbar.php');
                             <tr>                                
                                 <?php if(isFieldVisibleByRole($isSalesRepView, $roleID)) {?>
                                     <td>
-                                        <a href="<?php echo SITE_URL; ?>/devicesInventory.php?action=edit&id=<?php echo $v['id']; ?>">
                                         <?php echo $v['first_name']." ".$v['last_name']; ?>
-                                        </a>
                                     </td>
                                 <?php } ?>
                                 <?php if(isFieldVisibleByRole($isDeviceNameView, $roleID)) {?>
-                                    <td><?php echo $v['device_name']; ?></td>
+                                    <td>
+                                        <a href="<?php echo SITE_URL; ?>/devicesInventory.php?action=edit&id=<?php echo $v['id']; ?>">
+                                        <?php echo $v['device_name']; ?>
+                                        </a>
+                                    </td>
                                 <?php } ?>
                                 <?php if(isFieldVisibleByRole($isSerialView, $roleID)) {?>
                                     <td><?php echo $v['serial_number']; ?></td>
@@ -405,25 +407,25 @@ require_once ('navbar.php');
                                     
                                 <td>
                                     <?php 
-                                    $Registered = getDeviceStatusCount($db, $v['Guid_salesrep'], '28' ); //28->Registered 
+                                    $Registered = getDeviceStatusCount($db, $v['Guid_salesrep'], '28', $v['id'] ); //28->Registered 
                                     echo ($Registered>0)?$Registered:'-';
                                     ?>
                                 </td>
                                 <td>
                                     <?php 
-                                    $Completed = getDeviceStatusCount($db, $v['Guid_salesrep'], '36'); //36->Questionnaire Completed
+                                    $Completed = getDeviceStatusCount($db, $v['Guid_salesrep'], '36', $v['id']); //36->Questionnaire Completed
                                     echo ($Completed>0)?$Completed:'-';
                                     ?>
                                 </td>
                                 <td>
                                     <?php 
-                                    $Qualified = getDeviceStatusCount($db, $v['Guid_salesrep'], '29'); //29->Questionnaire Completed->Qualified 
+                                    $Qualified = getDeviceStatusCount($db, $v['Guid_salesrep'], '29', $v['id']); //29->Questionnaire Completed->Qualified 
                                     echo ($Qualified>0)?$Qualified:'-';
                                     ?>
                                 </td>
                                 <td>
                                     <?php 
-                                    $Submitted = getDeviceStatusCount($db, $v['Guid_salesrep'], '1' ); //28->Submitted (Specimen Collected) 
+                                    $Submitted = getDeviceStatusCount($db, $v['Guid_salesrep'], '1', $v['id'] ); //28->Submitted (Specimen Collected) 
                                     echo ($Submitted>0)?$Submitted:'-';
                                     ?>
                                 </td>
