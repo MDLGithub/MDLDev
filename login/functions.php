@@ -2202,7 +2202,7 @@ function dmdl_refresh($db){
     $content .= "<th>First Name</th>";
     $content .= "<th>Last Name</th>";
     $content .= "<th>DOB</th>";
-    $content .= "<th>Suggested</th>";
+    $content .= "<th>Suggested Patients For Update</th>";
     $content .= "</tr></thead>";
     $content .= "<tbody>";
     foreach ( $dmdlResult as $k=>$v ){
@@ -2235,23 +2235,39 @@ function dmdl_refresh($db){
                 'lastname' => $lastname,
                 'dob' => $Date_Of_Birth
             );
-            $query = "SELECT Guid_patient,firstname,lastname,dob FROM tblpatient "
-                    . "WHERE firstname='".$firstname."' "
-                    . "AND lastname='".$lastname."' "
-                    . "AND dob='".$Date_Of_Birth."'";
-            //var_dump($query);
+            $query = "SELECT Guid_patient,Guid_user,firstname,lastname,dob FROM tblpatient "
+                    . "WHERE firstname=:firstname "
+                    . "AND lastname=:lastname "
+                    . "AND dob=:dob";
             $getPatient = $db->query($query, $where );
             $content .= "<tr>";
             if(empty($getPatient)){
+                //patient not match with dmdl data
                 $content .= "<td class='mn no'>No</td>";
                 $content .= "<td>$Guid_MDLNumber</td>";
                 $content .= "<td>$firstname</td>";
                 $content .= "<td>$lastname</td>";
                 $content .= "<td>$Date_Of_Birth</td>";
-                $content .= "<td></td>";
-            } else {
-                
+                $SQuery = "SELECT Guid_patient,Guid_user,firstname,lastname,dob FROM tblpatient "
+                    . "WHERE firstname LIKE '%".$firstname."%' "
+                    . "OR lastname LIKE '%".$lastname."%' "
+                    . "AND dob='".$Date_Of_Birth."'";
+                $SGetPatient = $db->query($SQuery);
+                $sContent = "";
+                if(!empty($SGetPatient)){
+                    foreach ($SGetPatient as $k=>$v){
+                        $sContent .= "<p>";
+                        $sContent .= "<label>Guid patient:</label> ".$v['Guid_patient'].", ";
+                        $sContent .= "<label>First name:</label> ".$v['firstname'].", ";
+                        $sContent .= "<label>Last name:</label> ".$v['lastname'].", ";
+                        $sContent .= "<label>DOB:</label> ".$v['dob'];
+                        $sContent .= "</p>";
+                    }
+                }
+                $content .= "<td>".$sContent."</td>";
+            } else {                
                 if(count($getPatient)>1){
+                    //duplicate records
                     $content .= "<td class='hasDuplicate'>Duplicate</td>";
                     $content .= "<td>$Guid_MDLNumber</td>";
                     $content .= "<td>$firstname</td>";
@@ -2268,6 +2284,14 @@ function dmdl_refresh($db){
                     }
                     $content .= "</td>";
                 }else{
+                    //update mdl# for this perfect match
+                    $Guid_user = $getPatient['0']['Guid_user'];
+                    $checkMdl = $db->query("SELECT Guid_user, mdl_number FROM tbl_mdl_number WHERE Guid_user=:Guid_user", array('Guid_user'=>$Guid_user));
+                    if(!empty($checkMdl)){
+                        updateTable($db, 'tbl_mdl_number', array('mdl_number'=>$Guid_MDLNumber), array('Guid_user'=>$Guid_user));
+                    } else {
+                        insertIntoTable($db, 'tbl_mdl_number', array('mdl_number'=>$Guid_MDLNumber,'Guid_user'=>$Guid_user));
+                    }
                     $content .= "<td class='mn yes'>Yes</td>";
                     $content .= "<td>$Guid_MDLNumber</td>";
                     $content .= "<td>$firstname</td>";
@@ -2276,55 +2300,11 @@ function dmdl_refresh($db){
                     $content .= "<td></td>";
                 }
             }
-           // print_r($getPatient);
             $content .= "</tr>";
-        }; 
-        
-        
-
-        
-        
+        };        
     }
     $content .= "</tbody>";
     $content .= "</table>";
     
-    return $content;
-    
-
-    
-    //$result = (array)$client->ServiceTest();
-
-    
-    
-    
-    /*[Guid_PatientId] => 2196605
-    [GUID_PhysicianID] => 36117
-    [Guid_MDLNumber] => 5663202
-    [Patient_Name] => DOE JANE
-    [Date_Of_Birth] => 05-16-1983
-    [Physician_Name] => DOE JOHN MD
-    [Insurance_Company] => BLUE CROSS BLUE SHIELD
-    [DOS] => 12-01-2014
-    [Date_Accessioned] => 12-02-2014
-    [All_Completed_Forms_Received] => N   
-    [NecessityReview_Status] => Completed
-    [NecessityReview_Date] => 09-02-2015    
-    [Genetic_Counseling_Status] => Pending
-    [Genetic_Counseling_Status_Date] => 09-02-2015
-    [Preauthorization_Status] => Pending
-    [Patient_PaymentStatus] => Not Applicable
-    [Preauthorization_Status_Date] => 09-02-2015    
-    [Genetic_Counseling] => 0.00
-    [Testing_Status] => Pending
-    [Testing_Status_Date] => 12-02-2014
-    [Results_Status] => Available
-    [DateTime_ResultsStatus] => 05-16-2016
-    [Result_Status] => 0
-    [DateTime_ResultStatus] => 12-02-2014
-    [Txt_FIN] => BCBS
-    [Payer] => BCBSAR */
-
-
-   
-    
+    return $content;       
 }
