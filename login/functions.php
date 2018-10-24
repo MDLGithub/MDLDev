@@ -2286,12 +2286,17 @@ function dmdl_refresh($db){
                 }else{
                     //update mdl# for this perfect match
                     $Guid_user = $getPatient['0']['Guid_user'];
+                    $Guid_patient = $getPatient['0']['Guid_patient'];
+                    
+                    updateTable($db, 'tblpatient', array('Guid_dmdl_patient'=>$Guid_PatientId),  array('Guid_patient'=>$Guid_patient));
+                    
                     $checkMdl = $db->query("SELECT Guid_user, mdl_number FROM tbl_mdl_number WHERE Guid_user=:Guid_user", array('Guid_user'=>$Guid_user));
                     if(!empty($checkMdl)){
                         updateTable($db, 'tbl_mdl_number', array('mdl_number'=>$Guid_MDLNumber), array('Guid_user'=>$Guid_user));
                     } else {
                         insertIntoTable($db, 'tbl_mdl_number', array('mdl_number'=>$Guid_MDLNumber,'Guid_user'=>$Guid_user));
                     }
+                    
                     $content .= "<td class='mn yes'>Yes</td>";
                     $content .= "<td>$Guid_MDLNumber</td>";
                     $content .= "<td>$firstname</td>";
