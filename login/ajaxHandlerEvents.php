@@ -182,68 +182,42 @@ if(isset($_POST['account']) && isset($_POST['action']) && $_POST['action'] == "g
 
 /* --------------------- Render Piechart Data ------------------------- */
 
-if( isset($_POST['action']) && $_POST['action'] == 'barChart' ){
-    $datecreated = isset($_POST['startdate'])? $_POST['startdate'] : 0;
-    $sqlTbl = "SELECT "
-        . "a.name as account_name, a.Guid_account,"
-        . "CONCAT (srep.first_name, ' ', srep.last_name) AS salesrep_name, srep.Guid_salesrep, "
-        . "u.email, u.marked_test,  u.Guid_role, "
-        . "q.Date_created AS date, COUNT(q.Date_created) as qCnt FROM tbl_ss_qualify q "
-        . "LEFT JOIN tblaccount a ON q.account_number = a.account "
-        . "LEFT JOIN tblaccountrep arep ON arep.Guid_account = a.Guid_account "
-        . "LEFT JOIN tblsalesrep srep ON srep.Guid_salesrep = arep.Guid_salesrep "
-        . "LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user "
-        . "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user "
-        . "WHERE u.marked_test='0' AND q.Date_created BETWEEN '2018-09-16' AND '2018-09-22' "
-        . "ORDER BY date DESC";
-
-        $qualify_requests = $db->query($sqlTbl);
-        var_dump($qualify_requests);
-    
-
-}
-/* --------------------- Render Piechart Data ------------------------- */
-
 if( isset($_POST['action']) && $_POST['action'] == 'piechart' ){
 
     $datecreated = isset($_POST['startdate'])? $_POST['startdate'] : 0;
+    $piedata = [];
     
-    $query = "SELECT acc.Guid_account, CONCAT(acc.name) as accname, "
-                . "(SELECT  count(*) FROM tblqualify tblqf "
+    /*$query = "SELECT acc.Guid_account, CONCAT(acc.name) as accname, "
+                    . "(SELECT count(*) FROM tblqualify tblqf "
                             . "INNER JOIN tblaccount tblacc ON tblqf.account_number = tblacc.account "
                             . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
+                            . "INNER JOIN tbl_mdl_status_log tbllog ON tblacc.account = tbllog.account "
                             . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
-                            . "WHERE tblacc.Guid_account = acc.Guid_account AND YEARWEEK(tblqf.Date_created)=YEARWEEK(:datecreated) ) as registeredCnt, "
-                    . "(SELECT count(*) FROM tbl_ss_qualify tblqfss "
-                            . "LEFT JOIN tblqualify tblqf ON tblqfss.Guid_qualify = tblqf.Guid_qualify "
-                            . "INNER JOIN tblaccount tblacc ON tblqf.account_number = tblacc.account "
-                            . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
-                            . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
-                            . "WHERE tblacc.Guid_account = acc.Guid_account "
-                            . "AND tblqfss.qualified = 'Yes') as qualifiedCnt, "
-                    . "(SELECT count(*) FROM tbl_ss_qualify tblqfss "
-                            . "LEFT JOIN tblqualify tblqf ON tblqfss.Guid_qualify = tblqf.Guid_qualify "
-                            . "INNER JOIN tblaccount tblacc ON tblqf.account_number = tblacc.account "
-                            . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
-                            . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
-                            . "WHERE tblacc.Guid_account = acc.Guid_account "
-                            . "AND tblqfss.qualified IN ('Yes','No','Unknown')) as completedCnt, "
-                    . "(SELECT count(*) FROM tblpatient tblpat "
-                            //."LEFT JOIN tblevents tblevt ON tblevt.title = 'BRCA DAY' "
-                            . "WHERE tblpat.specimen_collected = 'Yes' "
-                            . "AND YEARWEEK(tblpat.Date_created) = YEARWEEK(:datecreated) ) as submittedCnt "
+                            . "WHERE tblacc.Guid_account = acc.Guid_account AND tbllog.Guid_status = '1' "
+                            . "AND YEARWEEK(tblqf.Date_created) = YEARWEEK(:datecreated) ) as submittedCnt "
                 . "FROM tblaccount acc "
-                . "GROUP BY acc.Guid_account  ORDER BY registeredCnt DESC LIMIT 5";
-
-    $result = $db->query($query,array("datecreated"=>$datecreated));
-
+                . "GROUP BY acc.Guid_account DESC LIMIT 5 ";*/
     $colors = array('#00713D','#89CB46','#3065B1','#00B7D0','#7C55A5');
-    $i = 0;
-    foreach($result as $row){
-        $acc = wordwrap(ucwords(strtolower($row['accname'])), 40, "\n");
-        $piedata[] = array('category' => $acc, 'value' => (int)$row['registeredCnt'], 'color'=> $colors[$i]);
-        $i++;
+    $i=0;
+    foreach ($_POST['acc'] as $acc) {
+        echo $i."<br>";
+        $query = "SELECT COUNT(*) AS count, "
+        . "(SELECT acc.name FROM tblaccount acc WHERE acc.account = l.account ) as accname "
+        . "FROM `tbl_mdl_status_log` l "
+        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
+        . "WHERE l.Guid_status ='1' AND l.account=:account AND u.marked_test='0' AND DATE(l.Date) BETWEEN DATE(:startdate)  AND DATE(:enddate) GROUP BY l.account DESC LIMIT 5";
+        $result = $db->query($query,array("startdate"=>$datecreated, 'enddate'=>$_POST['enddate'], "account" => $acc));
+        //print_r($result);
+        foreach($result as $row){
+            if($row['accname'] != null){
+                $acc = wordwrap(ucwords(strtolower($row['accname'])), 40, "\n");
+                $piedata[] = array('category' => $acc, 'value' => (int)$row['count'], 'color'=> $colors[$i]);
+                $i++;
+            }
+        }
+        
     }
+    
     $data = array(  'type' => 'pie',
                     'data' => $piedata
             );
@@ -344,4 +318,58 @@ if(isset($_POST['action']) && $_POST['action'] == "getLogo")
     $query = "SELECT logo FROM tblaccount WHERE Guid_account =:id ";
     $result = $db->query($query, array("id"=>$id));
     echo json_encode($result);
+}
+
+
+
+
+if(isset($_POST['action']) && $_POST['action'] == 'getBarChart'){
+    $count = 1;
+    $registered = $salereps = $completed = $qualified = $submitted = $regSalereps = [];
+    foreach ($_POST['ids'] as $id) {
+       
+        $query = "select CONCAT(t.salesrep_fname, ' ', t.salesrep_lname) as names,
+                   (select count(*) from tbl_mdl_status_log t1 where t1.Guid_status = '28' and t1.Guid_salesrep = t.Guid_salesrep and DATE(Date) BETWEEN DATE(:startdate)  AND DATE(:enddate)) as 'registeredCnt',
+                   (select count(*) from tbl_mdl_status_log t1 where t1.Guid_status = '29' and t1.Guid_salesrep = t.Guid_salesrep and DATE(Date) BETWEEN DATE(:startdate)  AND DATE(:enddate)) as 'qualifiedCnt',
+                   (select count(*) from tbl_mdl_status_log t1 where t1.Guid_status = '36' and t1.Guid_salesrep = t.Guid_salesrep and DATE(Date) BETWEEN DATE(:startdate)  AND DATE(:enddate)) as 'completedCnt',
+                   (select count(*) from tbl_mdl_status_log t1 where t1.Guid_status = '1' and t1.Guid_salesrep = t.Guid_salesrep and DATE(Date) BETWEEN DATE(:startdate)  AND DATE(:enddate)) as 'submittedCnt'
+                   
+            from tbl_mdl_status_log t
+            LEFT JOIN tbluser u ON t.Guid_user = u.Guid_user
+            INNER JOIN tblevents e ON t.Guid_salesrep = e.salesrepid 
+            WHERE e.salesrepid =:salesrepid and u.marked_test = '0' GROUP By Guid_salesrep ORDER BY 'registeredCnt' LIMIT 5";
+
+        $result = $db->query($query, array("salesrepid"=>$id, 'startdate'=>$_POST['startdate'], 'enddate'=>$_POST['enddate']));
+
+        foreach($result as $row){
+            $registered[] = (int)$row['registeredCnt'];
+            $qualified[] = (int)$row['qualifiedCnt'];
+            $completed[] = (int)$row['completedCnt'];
+            $submitted[] = (int)$row['submittedCnt'];
+            $salereps[] = $row['names'];
+        }
+    } 
+    //print_r($registered);
+    $data = array( 
+            'series' => array ( [
+                    'name'=> "Registered",
+                    'data'=> $registered,
+                    'color'=> "#bce273"
+                ],[
+                    'name'=> "Completed",
+                    'data'=> $completed,
+                    'color'=> "#263805"
+                ],[
+                    'name'=> "Qualified",
+                    'data'=> $qualified,
+                    'color'=> "#5b870a"
+                ],[
+                    'name'=> 'Submitted',
+                    'data'=> $submitted,
+                    'color'=> "#919191"
+                ]
+            ),
+            'categories' => $salereps 
+    );
+    echo json_encode($data);
 }
