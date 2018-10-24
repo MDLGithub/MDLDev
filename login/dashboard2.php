@@ -60,7 +60,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 <script src="assets/eventschedule/kendoUI/js/jszip.min.js"></script>
 <script src="assets/eventschedule/kendoUI/js/kendo.all.min.js"></script>
 <script src="assets/eventschedule/js/myweekview.js"></script>
-<script src="assets/eventschedule/js/moment.min.js"></script>
+<!-- <script src="assets/eventschedule/js/moment.min.js"></script> -->
 <script src="assets/eventschedule/js/fullcalendar.min.js"></script>
 <script src="assets/eventschedule/js/bootstrap-datetimepicker.min.js"></script>
 
@@ -134,14 +134,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     
     
     select#sidebar_select { border: 1px solid #ccc; border-radius: 20px; width: 100%; padding: 5px 8px;   margin-bottom: 8px;}
-    .modalaccounttype.hide { display: none; }
+    .modalaccounttype.hide, .salesrep_dropdown.hide { display: none; }
     .below_avg, .above_avg, .top_performer_avg {
         position: relative;
     }
     .below_avg:before, .above_avg:before, .top_performer_avg:before {
         content: "";
         background-repeat: no-repeat;
-        left: 39px;
+        left: 43px;
         position: absolute;
         width: 18px;
         height: 23px;

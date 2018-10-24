@@ -186,28 +186,16 @@ if( isset($_POST['action']) && $_POST['action'] == 'piechart' ){
 
     $datecreated = isset($_POST['startdate'])? $_POST['startdate'] : 0;
     $piedata = [];
-    
-    /*$query = "SELECT acc.Guid_account, CONCAT(acc.name) as accname, "
-                    . "(SELECT count(*) FROM tblqualify tblqf "
-                            . "INNER JOIN tblaccount tblacc ON tblqf.account_number = tblacc.account "
-                            . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
-                            . "INNER JOIN tbl_mdl_status_log tbllog ON tblacc.account = tbllog.account "
-                            . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
-                            . "WHERE tblacc.Guid_account = acc.Guid_account AND tbllog.Guid_status = '1' "
-                            . "AND YEARWEEK(tblqf.Date_created) = YEARWEEK(:datecreated) ) as submittedCnt "
-                . "FROM tblaccount acc "
-                . "GROUP BY acc.Guid_account DESC LIMIT 5 ";*/
     $colors = array('#00713D','#89CB46','#3065B1','#00B7D0','#7C55A5');
     $i=0;
     foreach ($_POST['acc'] as $acc) {
-        //echo $i."<br>";
         $query = "SELECT COUNT(*) AS count, "
         . "(SELECT acc.name FROM tblaccount acc WHERE acc.account = l.account ) as accname "
         . "FROM `tbl_mdl_status_log` l "
         . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
         . "WHERE l.Guid_status ='1' AND l.account=:account AND u.marked_test='0' AND DATE(l.Date) BETWEEN DATE(:startdate)  AND DATE(:enddate) GROUP BY l.account DESC LIMIT 5";
         $result = $db->query($query,array("startdate"=>$datecreated, 'enddate'=>$_POST['enddate'], "account" => $acc));
-        //print_r($result);
+        
         foreach($result as $row){
             if($row['accname'] != null){
                 $acc = wordwrap(ucwords(strtolower($row['accname'])), 40, "\n");
@@ -236,7 +224,6 @@ if( isset($_POST['action']) && $_POST['action'] == 'piechart' ){
             );
     echo json_encode($data);
 }
-
 
 /* --------------------- BRCA Days Member Account  ------------------------- */
 
@@ -333,8 +320,7 @@ if(isset($_POST['action']) && $_POST['action'] == "getLogo")
     echo json_encode($result);
 }
 
-
-
+/* --------------------- Dashboard Bar Chart ------------------------- */
 
 if(isset($_POST['action']) && $_POST['action'] == 'getBarChart'){
     $count = 1;
@@ -362,7 +348,6 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart'){
             $salereps[] = $row['names'];
         }
     } 
-    //print_r($registered);
     $data = array( 
             'series' => array ( [
                     'name'=> "Registered",
