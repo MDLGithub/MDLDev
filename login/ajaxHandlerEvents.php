@@ -200,7 +200,7 @@ if( isset($_POST['action']) && $_POST['action'] == 'piechart' ){
     $colors = array('#00713D','#89CB46','#3065B1','#00B7D0','#7C55A5');
     $i=0;
     foreach ($_POST['acc'] as $acc) {
-        echo $i."<br>";
+        //echo $i."<br>";
         $query = "SELECT COUNT(*) AS count, "
         . "(SELECT acc.name FROM tblaccount acc WHERE acc.account = l.account ) as accname "
         . "FROM `tbl_mdl_status_log` l "
@@ -211,15 +211,28 @@ if( isset($_POST['action']) && $_POST['action'] == 'piechart' ){
         foreach($result as $row){
             if($row['accname'] != null){
                 $acc = wordwrap(ucwords(strtolower($row['accname'])), 40, "\n");
-                $piedata[] = array('category' => $acc, 'value' => (int)$row['count'], 'color'=> $colors[$i]);
-                $i++;
+                $piedata[] = array('category' => $acc, 'value' => (int)$row['count']);
             }
         }
-        
     }
+
+    function method1($a,$b) 
+    {
+        return ($a["value"] <= $b["value"]) ? 1 : -1;
+    }
+    usort($piedata, "method1");
     
+    $array = array_slice($piedata, 0, 5);
+    for($i=0; $i<5;$i++) {
+        $els2 = $array;
+        foreach ($els2 as &$el) {
+            $el['color'] = $colors[$i];
+            $i++;
+        }
+        unset($el);
+    }
     $data = array(  'type' => 'pie',
-                    'data' => $piedata
+                    'data' => $els2
             );
     echo json_encode($data);
 }

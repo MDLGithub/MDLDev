@@ -754,7 +754,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                                 
                 
                 
-                top_stats();
+                
                 
                 var events = $('#calendar').fullCalendar('getView');
                 var ele_events = events._props.currentEvents;
@@ -829,6 +829,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     chart.refresh();
                     }
                 });
+
+                top_stats();
             },
         });
         
@@ -1761,7 +1763,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                         $("#mecomcnt").text(cmCnt).addClass(cmCntimg).removeClass('decrease');
                         $("#mesubcnt").text(subCnt).addClass(subCntimg).removeClass('decrease');
                     });
-                }, 3500);
+                }, 5500);
             }
         }
 
