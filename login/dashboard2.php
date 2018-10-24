@@ -162,6 +162,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     #piechart svg > g > g:nth-child(4) > g text, #chart svg > g > g:nth-child(4) > g text {
         font-weight: 800 !important;
     }
+    p.acc-click {
+        color: #343;
+    }
 </style>
 <script>
     
@@ -445,8 +448,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable" style="' + borderColor + '">' +
                         '<div class="fc-content evtcontent">' +
                         '<div class="' + icon + '"></div>' +
-                        '<div class="fc-title evttitle"><a class="acc-click" href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>' +
-                        salesrep ;
+                        '<div class="fc-title evttitle">';
+                    if(event.accountid == '0' || event.accountid == "" || event.accountid == 0)
+                        content += '<p class="acc-click" id="acc-'+event.accountid+'" >' + modifiedName + '</p></div>';
+                    else{
+                        content += '<a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id="'+event.accountid+'">' + modifiedName + '</a></div>';
+                    }
+
+                    content +=  salesrep ;
                     if (parsedEventTime < parsedNow) {
                         content += '<div class="fc-stats"></div>';
                     }
@@ -466,8 +475,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     if (parsedEventTime < parsedNow) {
                         
                     var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable days-' + eventDate + '"  style="' + borderColor + '">' +
-                                '<div class="fc-content evtcontent">'+                                
-                                '<div class="fc-title evttitle"><a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>' + salesrep;
+                                '<div class="fc-content evtcontent">' + '<div class="fc-title evttitle">';
+                       if(event.accountid == '0' || event.accountid == "" || event.accountid == 0)
+                            content += '<p class="acc-click" id="acc-'+event.accountid+'" >' + modifiedName + '</p></div>';
+                        else{
+                            content += '<a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id="'+event.accountid+'">' + modifiedName + '</a></div>';
+                        }
+
+                        content += salesrep;
                             //content += cmts;
                             if (parsedEventTime < parsedNow) {
                                 content += '<div class="fc-stats"></div>';
