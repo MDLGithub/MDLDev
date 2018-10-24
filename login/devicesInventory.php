@@ -232,7 +232,7 @@ require_once ('navbar.php');
                                                     <img src="assets/eventschedule/icons/flask_icon.png">
                                                     <?php 
                                                     $Submitted = getDeviceStatusCount($db, $Guid_salesrep, '1', $id ); //28->Submitted (Specimen Collected) 
-                                                    echo ($Submitted>0)?$Submitted:'';
+                                                    echo ($Submitted>0)?$Submitted:'-';
                                                     ?>
                                                 </span>
                                             </div>

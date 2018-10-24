@@ -806,10 +806,9 @@ function getSalesrepStatusCount($db, $Guid_salesrep, $Guid_status ){
  * @return type
  */
 function getDeviceStatusCount($db, $Guid_salesrep, $Guid_status, $deviceinventoryID ){     
-    $q = "SELECT COUNT(*) AS `count` FROM `tbldeviceinv` d "
-        . "LEFT JOIN `tbl_mdl_status_log` l ON d.Guid_salesrep=l.Guid_salesrep "
+    $q = "SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l "
         . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
-        . "WHERE d.id=:id AND l.Guid_status =:Guid_status AND l.Guid_salesrep=:Guid_salesrep AND u.marked_test='0'"; 
+        . "WHERE l.deviceid=:id AND l.Guid_status =:Guid_status AND l.Guid_salesrep=:Guid_salesrep AND u.marked_test='0'"; 
     $where = array(
                 'Guid_salesrep'=>$Guid_salesrep,
                 'Guid_status'=>$Guid_status,
