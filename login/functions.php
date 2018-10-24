@@ -2115,8 +2115,7 @@ function get_status_state($db, $parent = 0, $searchData=array(), $linkArr=array(
 }
 
 
-function get_stats_info_today($db, $statusID, $hasChildren=FALSE, $searchData=array(), $today){
-    
+function get_stats_info_today($db, $statusID, $hasChildren=FALSE, $searchData=array(), $today){    
     //exclude test users
     $markedTestUserIds = getMarkedTestUserIDs($db);
     $testUserIds = getTestUserIDs($db);
@@ -2174,4 +2173,158 @@ function get_stats_info_today($db, $statusID, $hasChildren=FALSE, $searchData=ar
     }  
     
     return $result;
+}
+
+function dmdl_refresh($db){ 
+    require_once 'classes/xmlToArrayParser.php';
+    ini_set("soap.wsdl_cache_enabled", 0);
+    try {
+        $opts = array('ssl' => array('ciphers'=>'RC4-SHA'));
+        $client = new SoapClient('https://patientpayment.mdlab.com/MDL.WebService/BillingWebService?wsdl',
+        array ('stream_context' => stream_context_create($opts),"exceptions"=>0));
+    } catch (Exception $e) { 
+        $headers = "MIME-Version: 1.0\r\n";
+        $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+        $headers .= 'From: billingcustomerservice@mdlab.com' . "\r\n";
+        $message = "faultcode: " . $e->faultcode . ", faultstring: " . $e->faultstring;
+        $subject = "SOAP Fault";  
+        mail('agokhale@mdlab.com', $subject, $message, $headers);
+        trigger_error("SOAP Fault: (faultcode: {$e->faultcode}, faultstring: {$e->faultstring})", E_USER_ERROR);
+        return;
+    }    
+
+    $dmdlResult = $db->query("SELECT * FROM tbl_mdl_dmdl WHERE ToUpdate='Y'");
+    
+    $content = "<table class='table'>";
+    $content .= "<thead><tr>";
+    $content .= "<th>Exact Match</th>";
+    $content .= "<th>MDL#</th>";
+    $content .= "<th>First Name</th>";
+    $content .= "<th>Last Name</th>";
+    $content .= "<th>DOB</th>";
+    $content .= "<th>Suggested</th>";
+    $content .= "</tr></thead>";
+    $content .= "<tbody>";
+    foreach ( $dmdlResult as $k=>$v ){
+        $param = array(
+            "patientId" => $v['PatientID'], 
+            "physicianId" => $v['PhysicianID']
+        );
+        $result = (array)$client->GetCombinedResults($param);
+        
+        $domObj = new xmlToArrayParser($result['GetCombinedResultsResult']); 
+        $domArr = $domObj->array; 
+        if($domObj->parse_error){ 
+            echo $domObj->get_xml_error();            
+        } else {        
+            $res = $domArr['CombinedResults']['GeneticResults'];
+            
+            $Guid_PatientId = $res['Guid_PatientId'];
+            $GUID_PhysicianID = $res['GUID_PhysicianID'];
+            $Guid_MDLNumber = $res['Guid_MDLNumber'];
+            $Patient_Name = $res['Patient_Name'];
+            $Date_Of_Birth = $res['Date_Of_Birth'];
+            $Date_Accessioned = $res['Date_Accessioned'];
+
+            $name = explode(" ", $Patient_Name);
+            $firstname = $name['0'];
+            $lastname = $name['1'];
+
+            $where = array(
+                'firstname' => $firstname,
+                'lastname' => $lastname,
+                'dob' => $Date_Of_Birth
+            );
+            $query = "SELECT Guid_patient,firstname,lastname,dob FROM tblpatient "
+                    . "WHERE firstname='".$firstname."' "
+                    . "AND lastname='".$lastname."' "
+                    . "AND dob='".$Date_Of_Birth."'";
+            //var_dump($query);
+            $getPatient = $db->query($query, $where );
+            $content .= "<tr>";
+            if(empty($getPatient)){
+                $content .= "<td class='mn no'>No</td>";
+                $content .= "<td>$Guid_MDLNumber</td>";
+                $content .= "<td>$firstname</td>";
+                $content .= "<td>$lastname</td>";
+                $content .= "<td>$Date_Of_Birth</td>";
+                $content .= "<td></td>";
+            } else {
+                
+                if(count($getPatient)>1){
+                    $content .= "<td class='hasDuplicate'>Duplicate</td>";
+                    $content .= "<td>$Guid_MDLNumber</td>";
+                    $content .= "<td>$firstname</td>";
+                    $content .= "<td>$lastname</td>";
+                    $content .= "<td>$Date_Of_Birth</td>";
+                    $content .= "<td>"; 
+                    foreach ($getPatient as $k=>$v){
+                        $content .= "<p>";
+                        $content .= "<label>Guid patient:</label> ".$v['Guid_patient'].", ";
+                        $content .= "<label>First name:</label> ".$v['firstname'].", ";
+                        $content .= "<label>Last name:</label> ".$v['lastname'].", ";
+                        $content .= "<label>DOB:</label> ".$v['dob'];
+                        $content .= "</p>";
+                    }
+                    $content .= "</td>";
+                }else{
+                    $content .= "<td class='mn yes'>Yes</td>";
+                    $content .= "<td>$Guid_MDLNumber</td>";
+                    $content .= "<td>$firstname</td>";
+                    $content .= "<td>$lastname</td>";
+                    $content .= "<td>$Date_Of_Birth</td>";
+                    $content .= "<td></td>";
+                }
+            }
+           // print_r($getPatient);
+            $content .= "</tr>";
+        }; 
+        
+        
+
+        
+        
+    }
+    $content .= "</tbody>";
+    $content .= "</table>";
+    
+    return $content;
+    
+
+    
+    //$result = (array)$client->ServiceTest();
+
+    
+    
+    
+    /*[Guid_PatientId] => 2196605
+    [GUID_PhysicianID] => 36117
+    [Guid_MDLNumber] => 5663202
+    [Patient_Name] => DOE JANE
+    [Date_Of_Birth] => 05-16-1983
+    [Physician_Name] => DOE JOHN MD
+    [Insurance_Company] => BLUE CROSS BLUE SHIELD
+    [DOS] => 12-01-2014
+    [Date_Accessioned] => 12-02-2014
+    [All_Completed_Forms_Received] => N   
+    [NecessityReview_Status] => Completed
+    [NecessityReview_Date] => 09-02-2015    
+    [Genetic_Counseling_Status] => Pending
+    [Genetic_Counseling_Status_Date] => 09-02-2015
+    [Preauthorization_Status] => Pending
+    [Patient_PaymentStatus] => Not Applicable
+    [Preauthorization_Status_Date] => 09-02-2015    
+    [Genetic_Counseling] => 0.00
+    [Testing_Status] => Pending
+    [Testing_Status_Date] => 12-02-2014
+    [Results_Status] => Available
+    [DateTime_ResultsStatus] => 05-16-2016
+    [Result_Status] => 0
+    [DateTime_ResultStatus] => 12-02-2014
+    [Txt_FIN] => BCBS
+    [Payer] => BCBSAR */
+
+
+   
+    
 }

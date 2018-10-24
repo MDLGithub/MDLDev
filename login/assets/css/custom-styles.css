@@ -996,7 +996,7 @@ table.dataTable thead .sorting {
 #home .formContent{
     display:flex;
     /*flex-direction:column;*/
-    height:calc(100% - 50px);
+    height:calc(100% - 80px);
 }
 
 
@@ -2014,7 +2014,8 @@ a.button.cancel.half{
     left: 190px;
 }
 .dmdlForm{
-    margin-top: -70px;
+    margin-bottom: -70px;
+    padding-top: 10px;
 }
 .dmdlForm form button.refresh{
     display: inline-block;
@@ -2039,13 +2040,27 @@ a.button.cancel.half{
     margin-top: 5px;
 }
 .dmdlRefresh{
-    float: left;
-    font-size: 28px;
+    float: right;
+    font-size: 30px;
+    margin-right: 9px;
 }
 .dmdlForm form{
     display: inline-block;
 }
 .dmdlForm .uploadMsg{
     color: #9bae41;
+    font-weight: bold;
+    line-height: 1;
+    font-size: 13px;
+    padding-bottom: 10px;
+}
+
+.modalBlock .refreshModal{
+    width: 80%;
+    left: 10%;
+    margin-bottom: 50px;
+}
+.hasDuplicate{
+    color: #ff930d;
     font-weight: bold;
 }

@@ -205,30 +205,6 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     }
 ?>
 
-<?php     
-    if(isset($_POST['dmdlUpload'])){        
-        $tmpName = $_FILES['dmdlCsvUpload']['tmp_name'];
-        $csvArray = array_map('str_getcsv', file($tmpName));
-        $tableFields = $csvArray[0];
-        unset($csvArray[0]);        
-        $data = array();
-        $csvArrData = array();
-        for($i=0;$i<count($tableFields); $i++){           
-           for($j=1;$j<=count($csvArray); $j++){
-               $data[$j][$tableFields[$i]] = $csvArray[$j][$i];
-           }
-        }
-        foreach ($data as $k=>$v){
-            $insert = insertIntoTable($db, 'tbl_mdl_dmdl', $v);
-            if($insert['insertID']){
-                $uploadMessage = "<p>Data loaded successfully!</p>";
-            } else {
-                $uploadMessage .= "<p class='color-red'>Data loaded Error.</p>";
-            }
-        } 
-    }
-?>
-
 <link rel="stylesheet" href="assets/css/brca_forms.css">
 <script src="assets/js/brca_forms.js"></script>
 
@@ -801,26 +777,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
             </div>
         </div> 
             
-        <div class="row">
-            <div class="col-md-4"></div>
-            <div class="col-md-4 dmdlForm">
-                <form action="" method="POST" enctype="multipart/form-data">
-                    <?php if($role=='Admin'){ ?>                                    
-                    <span class="dmdlCsvUpload">  
-                        <input type="file" name="dmdlCsvUpload" />
-                    </span> 
-                    <button class="upload" type="submit" name="dmdlUpload">Upload</button>
-                    <?php } ?>
-                    <span class="dmdlRefresh">  
-                        <button class="refresh" type="submit" name="refreshDmdl"><i class="fas fa-sync-alt"></i></button>
-                    </span>
-                </form>
-                <div class="uploadMsg">
-                <?php if($uploadMessage!=""){ echo $uploadMessage; }?>
-                </div>
-            </div>
-            <div class="col-md-4"></div>
-        </div>
+        
           
         </div>
         <?php } else { ?>
