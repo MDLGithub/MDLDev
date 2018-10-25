@@ -231,6 +231,11 @@ main.full-width{
     background-size: contain;
     height: 30px;
 }
+
+#geneveda-export-modal .button.export {
+    margin-right: 8%;
+}
+
 .mdlLogo .image{
     background: url(../images/logo_mdl.png) 0 0 no-repeat;
     background-size: contain;
@@ -1234,7 +1239,10 @@ and (orientation : portrait) {
         float:initial !important;
     }
 
-
+    #geneveda-export-modal .contentBlock {
+        width: 50%;
+        left: 25%;
+    }
 
 
 }
@@ -1330,6 +1338,11 @@ and (-webkit-min-device-pixel-ratio: 2) {
 
     a.button.cancel.half{
         float:initial !important;
+    }
+
+    #geneveda-export-modal .contentBlock {
+        width: 50%;
+        left: 25%;
     }
 
 }

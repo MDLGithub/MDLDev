@@ -607,8 +607,9 @@ main {
 }
 
 .button.export {
-    margin-right: 8%;
+    margin-right: 9%;
 }
+
 
 .button.export::before {
     content: "";
