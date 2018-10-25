@@ -25,6 +25,10 @@ $searchData = array();
 if(isset($_POST['filter'])){
     $searchData = $_POST;
 }
+if($role=='Sales Rep'){
+    $Guid_salesrep = $db->row("SELECT Guid_salesrep FROM tblsalesrep WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
+    $searchData['Guid_salesrep'] = $Guid_salesrep['Guid_salesrep'];
+}
 
 require_once ('navbar.php');
 ?>
@@ -58,6 +62,7 @@ require_once ('navbar.php');
                                     <input name="from_date" class="date datepicker" type="text" autocomplete="off" value="<?php echo (isset($_POST['from_date']))?$_POST['from_date']:"";?>" />
                                     <label>To: </label> <input name="to_date" class="date datepicker" type="text" autocomplete="off" value="<?php echo (isset($_POST['to_date']))?$_POST['to_date']:"";?>" />
                                     <label>MDL#: </label> <input name="mdl_number" class="stat_mdl_number" type="text" autocomplete="off" value="<?php echo isset($_POST['mdl_number'])?$_POST['mdl_number']:"";?>"/>
+                                    <?php if ($role != "Sales Rep") { ?>
                                     <select name="Guid_salesrep" class="salesrep">
                                         <option value="">Genetic Consultant</option>
                                         <?php $salesReps = $db->query("SELECT Guid_salesrep, CONCAT(first_name,' ', last_name) AS name FROM tblsalesrep ORDER BY name "); ?>
@@ -68,9 +73,31 @@ require_once ('navbar.php');
                                             <?php } ?>
                                         <?php } ?>
                                     </select>
+                                    <?php } ?>
                                     <select name="Guid_account" class="account">
                                         <option value="">Account</option>
-                                        <?php $accounts = $db->query("SELECT Guid_account, name, account FROM tblaccount ORDER BY account"); ?>
+                                        <?php 
+                                            if ($role == "Sales Rep") {
+                                                $query = "SELECT 
+                                                tblaccount.*                   
+                                                FROM tblsalesrep 
+                                                LEFT JOIN `tblaccountrep` ON  tblsalesrep.Guid_salesrep = tblaccountrep.Guid_salesrep
+                                                LEFT JOIN `tblaccount` ON tblaccountrep.Guid_account = tblaccount.Guid_account                    
+                                                WHERE tblsalesrep.Guid_user=";
+
+                                                if (isset($_POST['salesrep']) && strlen($_POST['salesrep'])) {
+                                                    $query .= $_POST['salesrep'];
+                                                } else {
+                                                    $query .= $_SESSION['user']['id'];
+                                                }
+                                            } else {
+                                                $query = "SELECT * FROM tblaccount";
+                                            }
+
+                                            $query .= " ORDER BY account";
+
+                                            $accounts = $db->query($query);
+                                        ?>
                                         <?php foreach ($accounts as $k=>$v){ ?>
                                         <?php $selected = (isset($_POST['Guid_account'])&&$_POST['Guid_account']==$v['Guid_account'])?" selected": ""; ?>
                                             <?php if (trim($v['name'])!=""){ ?>
