@@ -272,6 +272,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .fc-basicWeek-view tbody .fc-today, .fc-basicDay-view tbody .fc-today{
         background: repeating-linear-gradient(135deg, #c1d4ea 13px, #fff 9px, #c1d4ea 17px, #fff 18px) !important;
     }
+    p.acc-click {
+        color: #343;
+    }
 
     @media only screen 
     and (min-device-width : 768px) 
@@ -648,10 +651,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         '<div class="fc-content evtcontent">' +
                         '<div class="fc-title evttitle">';
 
-                        if(event.accountid == 0 || event.accountid == "")
-                            content += '<p class="acc-click" id="acc-'+event.accountid+'" >' + modifiedName + '</p></div>';
+                        if(event.title == "Health Care Fair")
+                            content += '<p class="acc-click" id="acc'+event.accountid+'" >' + modifiedName + '</p></div>';
                         else{
-                            content += '<a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id="'+event.accountid+'">' + modifiedName + '</a></div>';
+                            content += '<a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>';
                         }
                         content += salesrep + cmts +
                         '<div class="' + icon + '"></div>' +
@@ -671,8 +674,13 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 } else {
                     if (parsedEventTime < parsedNow) {
                         var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable days-' + eventDate + '"  style="' + borderColor + '">' +
-                                '<div class="fc-content evtcontent">'+                                
-                                '<div class="fc-title evttitle"><a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>' + salesrep + cmts;
+                                '<div class="fc-content evtcontent">'+ '<div class="fc-title evttitle">';
+                            if(event.title == "Health Care Fair")
+                                content += '<p class="acc-click" id="acc'+event.accountid+'" >' + modifiedName + '</p></div>';
+                            else{
+                                content += '<a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>';
+                            } 
+                            content += salesrep + cmts;
                             content += "<div class='state2_count'>"
                             if(view.name != 'basicDay'){
                                 content += '<div class="show-stats"><span class="silhouette"><span>0</span> <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"><span> 0</span> <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna"><span>0</span> <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask"><span>0</span> <img src="assets/eventschedule/icons/flask_icon.png"></span></div>';

@@ -186,14 +186,14 @@ if( isset($_POST['action']) && $_POST['action'] == 'piechart' ){
 
     $datecreated = isset($_POST['startdate'])? $_POST['startdate'] : 0;
     $piedata = [];
-    $colors = array('#00713D','#89CB46','#3065B1','#00B7D0','#7C55A5');
+    $colors = array('#00713D','#89CB46','#3065B1','#00B7D0','#7C55A5', '#89BD46', '#00D7D0', '#30DDB1', '#7B11A5',);
     $i=0;
     foreach ($_POST['acc'] as $acc) {
         $query = "SELECT COUNT(*) AS count, "
         . "(SELECT acc.name FROM tblaccount acc WHERE acc.account = l.account ) as accname "
         . "FROM `tbl_mdl_status_log` l "
         . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
-        . "WHERE l.Guid_status ='1' AND l.account=:account AND u.marked_test='0' AND DATE(l.Date) BETWEEN DATE(:startdate)  AND DATE(:enddate) GROUP BY l.account DESC LIMIT 5";
+        . "WHERE l.Guid_status ='1' AND l.account=:account AND u.marked_test='0' AND DATE(l.Date) BETWEEN DATE(:startdate)  AND DATE(:enddate) GROUP BY l.account";
         $result = $db->query($query,array("startdate"=>$datecreated, 'enddate'=>$_POST['enddate'], "account" => $acc));
         
         foreach($result as $row){
@@ -209,16 +209,25 @@ if( isset($_POST['action']) && $_POST['action'] == 'piechart' ){
         return ($a["value"] <= $b["value"]) ? 1 : -1;
     }
     usort($piedata, "method1");
+    //$lastIndex = (sizeof($piedata) < 10) ? sizeof($piedata) : 9;
+    //$array1 = array_slice($piedata, 0, 5);
+    //$others = array_slice($piedata, 5, $lastIndex);
+    $total_submitted = 0;
+    foreach ($piedata as $item) {
+        $total_submitted += $item['value'];
+    }
+    //print_r($total_submitted);
     
-    $array = array_slice($piedata, 0, 5);
-    for($i=0; $i<5;$i++) {
-        $els2 = $array;
+   for($i=0; $i<5;$i++) {
+        $els2 = $piedata;
         foreach ($els2 as &$el) {
             $el['color'] = $colors[$i];
+            $el['value'] = ($el['value']/$total_submitted) * 100;
             $i++;
         }
         unset($el);
     }
+
     $data = array(  'type' => 'pie',
                     'data' => $els2
             );
@@ -324,19 +333,19 @@ if(isset($_POST['action']) && $_POST['action'] == "getLogo")
 
 if(isset($_POST['action']) && $_POST['action'] == 'getBarChart'){
     $count = 1;
-    $registered = $salereps = $completed = $qualified = $submitted = $regSalereps = [];
+    $registered = $salereps = $completed = $qualified = $submitted = $regSalereps = array();
     foreach ($_POST['ids'] as $id) {
        
         $query = "select CONCAT(t.salesrep_fname, ' ', t.salesrep_lname) as names,
                    (select count(*) from tbl_mdl_status_log t1 where t1.Guid_status = '28' and t1.Guid_salesrep = t.Guid_salesrep and DATE(Date) BETWEEN DATE(:startdate)  AND DATE(:enddate)) as 'registeredCnt',
                    (select count(*) from tbl_mdl_status_log t1 where t1.Guid_status = '29' and t1.Guid_salesrep = t.Guid_salesrep and DATE(Date) BETWEEN DATE(:startdate)  AND DATE(:enddate)) as 'qualifiedCnt',
                    (select count(*) from tbl_mdl_status_log t1 where t1.Guid_status = '36' and t1.Guid_salesrep = t.Guid_salesrep and DATE(Date) BETWEEN DATE(:startdate)  AND DATE(:enddate)) as 'completedCnt',
-                   (select count(*) from tbl_mdl_status_log t1 where t1.Guid_status = '1' and t1.Guid_salesrep = t.Guid_salesrep and DATE(Date) BETWEEN DATE(:startdate)  AND DATE(:enddate)) as 'submittedCnt'
+                   (select count(*) from tbl_mdl_status_log t1 where t1.Guid_status = '1' and t1.Guid_salesrep = t.Guid_salesrep and DATE(Date) BETWEEN DATE(:startdate)  AND DATE(:enddate)) as submittedCnt
                    
             from tbl_mdl_status_log t
             LEFT JOIN tbluser u ON t.Guid_user = u.Guid_user
             INNER JOIN tblevents e ON t.Guid_salesrep = e.salesrepid 
-            WHERE e.salesrepid =:salesrepid and u.marked_test = '0' GROUP By Guid_salesrep ORDER BY 'registeredCnt' LIMIT 5";
+            WHERE e.salesrepid =:salesrepid and u.marked_test = '0' GROUP By Guid_salesrep ORDER BY submittedCnt DESC LIMIT 5";
 
         $result = $db->query($query, array("salesrepid"=>$id, 'startdate'=>$_POST['startdate'], 'enddate'=>$_POST['enddate']));
 
@@ -348,23 +357,11 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart'){
             $salereps[] = $row['names'];
         }
     } 
-    $data = array( 
-            'series' => array ( [
-                    'name'=> "Registered",
-                    'data'=> $registered,
-                    'color'=> "#bce273"
-                ],[
-                    'name'=> "Completed",
-                    'data'=> $completed,
-                    'color'=> "#263805"
-                ],[
-                    'name'=> "Qualified",
-                    'data'=> $qualified,
-                    'color'=> "#5b870a"
-                ],[
+    $data = array(
+            'series' => array ([
                     'name'=> 'Submitted',
                     'data'=> $submitted,
-                    'color'=> "#919191"
+                    'color'=> "#bce273"
                 ]
             ),
             'categories' => $salereps 

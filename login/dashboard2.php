@@ -449,10 +449,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         '<div class="fc-content evtcontent">' +
                         '<div class="' + icon + '"></div>' +
                         '<div class="fc-title evttitle">';
-                    if(event.accountid == '0' || event.accountid == "" || event.accountid == 0)
-                        content += '<p class="acc-click" id="acc-'+event.accountid+'" >' + modifiedName + '</p></div>';
+                console.log(event.accountid, " => ", modifiedName);
+                    if(event.title == "Health Care Fair")
+                        content += '<p class="acc-click" id="acc'+event.accountid+'" >' + modifiedName + '</p></div>';
                     else{
-                        content += '<a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id="'+event.accountid+'">' + modifiedName + '</a></div>';
+                        content += '<a class="acc-click" id="acc-'+event.accountid+'" href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>';
                     }
 
                     content +=  salesrep ;
@@ -476,10 +477,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         
                     var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable days-' + eventDate + '"  style="' + borderColor + '">' +
                                 '<div class="fc-content evtcontent">' + '<div class="fc-title evttitle">';
-                       if(event.accountid == '0' || event.accountid == "" || event.accountid == 0)
-                            content += '<p class="acc-click" id="acc-'+event.accountid+'" >' + modifiedName + '</p></div>';
+                        console.log(event.accountid, " => ", modifiedName);
+                        if(event.title == "Health Care Fair")
+                            content += '<p class="acc-click" id="acc'+event.accountid+'" >' + modifiedName + '</p></div>';
                         else{
-                            content += '<a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id="'+event.accountid+'">' + modifiedName + '</a></div>';
+                            content += '<a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>';
                         }
 
                         content += salesrep;
@@ -763,76 +765,43 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     }
                 });
                 
-
                 var startdate = moment(event.start._d).format('YYYY-MM-DD');
                 var enddate = moment(event.end._d).format('YYYY-MM-DD');
-                                
-                
-                
-                
-                
+
                 var events = $('#calendar').fullCalendar('getView');
                 var ele_events = events._props.currentEvents;
                 var categories = salesrepIds = [];
                 $.each(ele_events,function(k, v){
                     salesrepIds.push(v.salesrepid);
-                    //accounts.push(v.account)
                 });
                 var uniqueIds = salesrepIds.filter( onlyUnique );
                 $.ajax({
-                    url: 'ajaxHandlerEvents.php',
-                    data: {ids: uniqueIds, startdate:start, enddate: enddate, action: 'getBarChart'},
                     type: 'POST',
-                    success: function(res){
-                        var result = JSON.parse(res);
-
-                        $("#chart").kendoChart({
-                            title: {
-                                text: "Top Genetic Consultants"
-                            },
-                            legend: {
-                            },
-                            seriesDefaults: {
-                                type: "column",
-                                stack: true
-                            },
-                            valueAxis: {
-                                line: {
-                                },
-                                minorGridLines: {
-                                }
-                            },
-                            series: result.series ,
-
+                    url: 'ajaxHandlerEvents.php',
+                    data: {ids: uniqueIds, startdate: startdate, enddate: enddate, action: 'getBarChart'},
+                    dataType: 'json',
+                    success: function(returndata){
+                        var chart = $("#chart").data("kendoChart");
+                        var catr = returndata.categories;
+                        chart.setOptions({
+                            series: returndata.series,
                             categoryAxis: {
-                                categories: result.categories,
-                                majorGridLines: {
-                                    visible: false
-                                },
-                                labels: {
-                                    template: labelTemplate
-                                }
-                            },
-                            tooltip: {
-                                visible: true,
-                                template: "#= series.name #: #= value #"
-                            },
-                            chartArea: {
-                                width: 600,
-                                height: 230
-                            },
+                                categories: catr},
+                            valueAxis:{
+                                max:returndata.yaxis
+                            }
                         });
+                        chart.refresh();
                     }
                 });
                 var accounts = [];
                 $.each(ele_events,function(k, v){
-                    //salesrepIds.push(v.salesrepid);
                     accounts.push(v.account)
                 });
                 var uniqueAcc = accounts.filter( onlyUnique );
                 $.ajax({
                     type : 'POST',
-                    data : { acc: uniqueAcc, startdate: start, enddate:enddate, action:'piechart' },
+                    data : { acc: uniqueAcc, startdate: startdate, enddate:enddate, action:'piechart' },
                     dataType: 'json',
                     url : 'ajaxHandlerEvents.php',
                     success : function(returndata){
@@ -1681,7 +1650,40 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
 <script>
         function createChart() {
           
-            
+            $("#chart").kendoChart({
+                title: {
+                    text: "Top Genetic Consultants"
+                },
+                legend: {
+                },
+                seriesDefaults: {
+                    type: "column",
+                    stack: true
+                },
+                valueAxis: {
+                    line: {
+                    },
+                    minorGridLines: {
+                    }
+                },
+                categoryAxis: {
+                    majorGridLines: {
+                        visible: false
+                    },
+                    labels: {
+                        template: labelTemplate
+                    }
+                },
+                tooltip: {
+                    visible: true,
+                    template: "#= series.name #: #= value #"
+                },
+                chartArea: {
+                    width: 600,
+                    height: 230
+                },
+            });
+
             $("#piechart").kendoChart({
                 title: {
                     text: "Top Submitting Accounts"
