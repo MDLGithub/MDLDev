@@ -222,7 +222,7 @@ if( isset($_POST['action']) && $_POST['action'] == 'piechart' ){
         $els2 = $piedata;
         foreach ($els2 as &$el) {
             $el['color'] = $colors[$i];
-            $el['value'] = ($el['value']/$total_submitted) * 100;
+            $el['value'] = round(($el['value']/$total_submitted) * 100 , 2);
             $i++;
         }
         unset($el);
@@ -367,4 +367,64 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart'){
             'categories' => $salereps 
     );
     echo json_encode($data);
+}
+
+/* --------------------- Dashboard Bar Chart ------------------------- */
+
+if(isset($_POST['action']) && $_POST['action'] == 'tableStats'){
+    $count = 1;
+    $registered = $completed = $qualified = $submitted = 0;
+    foreach ($_POST['acc'] as $acc) {
+       
+        $regQuery = "SELECT COUNT(*) AS regCount "
+        . "FROM `tbl_mdl_status_log` l "
+        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
+        . "WHERE l.Guid_status ='28' AND l.account=:account AND u.marked_test='0' AND DATE(l.Date) BETWEEN DATE(:startdate)  AND DATE(:enddate) GROUP BY l.account";
+        $regResult = $db->query($regQuery,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate'], "account" => $acc));
+        
+        $comQuery = "SELECT COUNT(*) AS comCount "
+        . "FROM `tbl_mdl_status_log` l "
+        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
+        . "WHERE l.Guid_status ='36' AND l.account=:account AND u.marked_test='0' AND DATE(l.Date) BETWEEN DATE(:startdate)  AND DATE(:enddate) GROUP BY l.account";
+        $comResult = $db->query($comQuery,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate'], "account" => $acc));
+
+        $quaQuery = "SELECT COUNT(*) AS quaCount "
+        . "FROM `tbl_mdl_status_log` l "
+        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
+        . "WHERE l.Guid_status ='29' AND l.account=:account AND u.marked_test='0' AND DATE(l.Date) BETWEEN DATE(:startdate)  AND DATE(:enddate) GROUP BY l.account";
+        $quaResult = $db->query($quaQuery,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate'], "account" => $acc));
+
+        $subQuery = "SELECT COUNT(*) AS subCount "
+        . "FROM `tbl_mdl_status_log` l "
+        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
+        . "WHERE l.Guid_status ='1' AND l.account=:account AND u.marked_test='0' AND DATE(l.Date) BETWEEN DATE(:startdate)  AND DATE(:enddate) GROUP BY l.account";
+        $subResult = $db->query($subQuery,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate'], "account" => $acc));
+        
+        foreach($regResult as $reg){
+            $registered += $reg['regCount'];  
+        }
+        foreach($comResult as $com){
+            $completed += $com['comCount'];  
+        }
+        foreach($quaResult as $qua){
+            $qualified += $qua['quaCount'];  
+        }
+        foreach($subResult as $sub){
+            $submitted += $sub['subCount'];  
+        }
+        echo json_encode(array(
+            'reg' => $registered,
+            'com' => $completed,
+            'qua' => $qualified,
+            'sub' => $submitted
+        ));
+    }
+
+
+    echo json_encode(array(
+        'reg' => $registered,
+        'com' => $completed,
+        'qua' => $qualified,
+        'sub' => $submitted
+    ));
 }

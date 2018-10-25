@@ -1,5 +1,6 @@
 /* Updated Files List */
 
 - dashboard2.php
-- eventschedule.php
 - ajaxHandlerEvents.php
+- assets/js/scripts.js
+- assets/images/icon_forms.png

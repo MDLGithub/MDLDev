@@ -70,11 +70,11 @@ $(document).ready(function () {
      * Dashboard Calendar Sales Rep Dropdown filter
      * used on dashboard2.php dashboard calendar
      */
-    $(".info_block_arrow").click(function(){
+    /*$(".info_block_arrow").click(function(){
         $(".salesrep_dropdown").toggleClass("dropdown_hide");
         $(".info_block h1").toggleClass("hide");
         $(".info_block_arrow").toggleClass("info_block_arrow_show");
-    });  
+    });*/  
     
     $('.toggleRoles').on('click', function(){
         if($('.edit-status-form .rolesBlock').hasClass('hidden')){
