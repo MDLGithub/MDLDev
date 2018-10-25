@@ -249,7 +249,9 @@ $(document).ready(function () {
         }
     });
     
-        
+    $('.dmdlRefresh').on('click', function(){
+        $('.preloader').removeClass('hidden');
+    });
     /**
      * Home page toggle for search sidebar
      */
@@ -300,8 +302,7 @@ $(document).ready(function () {
             $('.checkboxSelect').prop('checked', false);
             $('.switchLabel').text('Select All');
         }
-    });
-    
+    });    
     /**
      * Check all checkboxes on click to select All checkbox
      * by given data-id

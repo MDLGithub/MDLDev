@@ -2096,3 +2096,17 @@ a.button.cancel.half{
     color: #fff;
 }
 #refresh-log-table tr.tableHeader{}
+.preloader {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    text-align: center;
+    background: rgba(9, 46, 84, 0.6);
+   
+}
+.preloader img{
+     margin-top: 20%;
+}

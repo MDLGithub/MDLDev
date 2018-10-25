@@ -719,6 +719,8 @@ $num_estimates = $qualify_requests;
 
 <button id="action_palette_toggle" class=""><i class="fa fa-2x fa-angle-left"></i></button>
 
+
+
 <?php if( (isset($_GET['refresh'])) && $_GET['refresh']=="1" ){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock refreshModal">
@@ -732,6 +734,8 @@ $num_estimates = $qualify_requests;
     </div>
 </div>
 <?php } ?>
+
+<div class="preloader hidden"><img src="<?php echo SITE_URL.'/assets/images/preloader.gif'; ?>" /></div>
 
 <?php require_once 'scripts.php'; ?>
 <script type="text/javascript">
