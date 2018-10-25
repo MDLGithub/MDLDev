@@ -308,11 +308,16 @@ if(isset($_POST['dmdlUpload'])){
        }
     }
     foreach ($data as $k=>$v){
-        $insert = insertIntoTable($db, 'tbl_mdl_dmdl', $v);
-        if($insert['insertID']){
-            $uploadMessage = "<p>Data loaded successfully!</p>";
-        } else {
-            $uploadMessage .= "<p class='color-red'>Data loaded Error.</p>";
+        $checkMdlNum = $db->row("SELECT `MDLNumber` FROM `tbl_mdl_dmdl` WHERE MDLNumber=:MDLNumber", array('MDLNumber'=>$v['MDLNumber']));
+        
+        if(!$checkMdlNum || empty($checkMdlNum)){
+            $insert = insertIntoTable($db, 'tbl_mdl_dmdl', $v);
+
+            if($insert['insertID']){
+                $uploadMessage = "<p>Data loaded successfully!</p>";
+            } else {
+                $uploadMessage .= "<p class='color-red'>Data loaded Error.</p>";
+            }
         }
     } 
 }
@@ -714,13 +719,12 @@ $num_estimates = $qualify_requests;
 
 <button id="action_palette_toggle" class=""><i class="fa fa-2x fa-angle-left"></i></button>
 
-
 <?php if( (isset($_GET['refresh'])) && $_GET['refresh']=="1" ){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock refreshModal">
-        <a class="close" href="<?php echo ''; ?>">X</a> 
+        <a class="close" href="<?php echo SITE_URL."/dashboard.php"; ?>">X</a> 
         <h5 class="title">
-            Refresh Result Log
+            Refresh Results
         </h5>
         <div class="content">
             <?php echo dmdl_refresh($db); ?>        
@@ -731,6 +735,22 @@ $num_estimates = $qualify_requests;
 
 <?php require_once 'scripts.php'; ?>
 <script type="text/javascript">
+    if ($('#refresh-log-table').length ) { 
+        var table = $('#refresh-log-table').DataTable({
+            orderCellsTop: true,
+            fixedHeader: true,
+            searching: false,
+            lengthChange: false,
+            "paging":   false,
+            "info":     false,
+            "bSortCellsTop": false,
+            "aoColumnDefs": [
+              { 
+                  "bSortable": false, 
+                  "aTargets": [ 5,6 ] } 
+            ]
+        });  
+    }
     if ($('#dataTableHome').length ) { 
         var table = $('#dataTableHome').DataTable({
                         dom: '<"top"i>rt<"bottom"flp><"wider-bottom"><"clear">',

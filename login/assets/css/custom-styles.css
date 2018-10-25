@@ -76,6 +76,9 @@ body{
 .pB-10{
     padding-bottom: 10px!important; 
 }
+.pB-15{
+    padding-bottom: 15px!important; 
+}
 .pL-30{
     padding-left: 30px!important; 
 }
@@ -2077,3 +2080,19 @@ a.button.cancel.half{
     color: #ff930d;
     font-weight: bold;
 }
+#refresh-log-table select{
+    border: 1px solid #8fa2ba;
+    padding: 2px 10px;
+    width: 100%;
+}
+#refresh-log-table tr.tableTopInfo{}
+#refresh-log-table tr.tableTopInfo .dmdl{
+    background: #002060;
+    color: #fff;
+    text-align: center;
+}
+#refresh-log-table tr.tableTopInfo .braca{
+    background: #00B050;
+    color: #fff;
+}
+#refresh-log-table tr.tableHeader{}

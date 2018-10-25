@@ -2198,14 +2198,35 @@ function dmdl_refresh($db){
 
     $dmdlResult = $db->query("SELECT * FROM tbl_mdl_dmdl WHERE ToUpdate='Y'");
     
-    $content = "<table class='table'>";
-    $content .= "<thead><tr>";
-    $content .= "<th>Exact Match</th>";
+    $content = "";
+    
+    $content .= "<form action='' method='POST'>";
+    
+    $content .= "<div class='pB-15 text-right'>";
+    $content .= "<button name='' type='submit' class='botton btn-inline'>Update</button>";
+    $content .= "<button name='' type='submit' class='botton btn-inline'>Create New</button>";    
+    $content .= "</div>";
+    $content .= "<table id='refresh-log-table' class='table'>";
+    $content .= "<thead>";
+    $content .= "<tr class='tableTopInfo'>";
+    $content .= "<th colspan='5' class='dmdl'>dMDL</th>";
+    $content .= "<th colspan='2' class='braca'>BRCA Admin</th>";
+    $content .= "</tr>";
+    $content .= "<tr class='tableHeader'>";
+    $content .= "<th>Matched</th>";
     $content .= "<th>MDL#</th>";
-    $content .= "<th>First Name</th>";
-    $content .= "<th>Last Name</th>";
+    $content .= "<th>Patient F Name</th>";
+    $content .= "<th>Patient L Name</th>";
     $content .= "<th>DOB</th>";
-    $content .= "<th>Suggested Patients For Update</th>";
+    $content .= "<th>Possible Match</th>";
+    $content .= "<th>
+                    <label class='switch'>
+                        <input class='selectAllCheckboxes' type='checkbox'>
+                        <span class='slider round'>
+                            <span id='switchLabel' class='switchLabel'>Select All</span>
+                        </span>
+                    </label>
+                </th>";
     $content .= "</tr></thead>";
     $content .= "<tbody>";
     foreach ( $dmdlResult as $k=>$v ){
@@ -2226,13 +2247,16 @@ function dmdl_refresh($db){
             $GUID_PhysicianID = $res['GUID_PhysicianID'];
             $Guid_MDLNumber = $res['Guid_MDLNumber'];
             $Patient_Name = $res['Patient_Name'];
-            $Date_Of_Birth = $res['Date_Of_Birth'];
+            $Date_Of_Birth = $res['Date_Of_Birth']; //07-22-1962 => m/d/Y
             $Date_Accessioned = $res['Date_Accessioned'];
 
             $name = explode(" ", $Patient_Name);
             $firstname = $name['0'];
             $lastname = $name['1'];
-
+            
+            $bday  = explode("-", $Date_Of_Birth) ;
+            $dob = str_replace('-','/',$Date_Of_Birth);
+            
             $where = array(
                 'firstname' => $firstname,
                 'lastname' => $lastname,
@@ -2250,7 +2274,7 @@ function dmdl_refresh($db){
                 $content .= "<td>$Guid_MDLNumber</td>";
                 $content .= "<td>$firstname</td>";
                 $content .= "<td>$lastname</td>";
-                $content .= "<td>$Date_Of_Birth</td>";
+                $content .= "<td>$dob</td>";
                 $SQuery = "SELECT Guid_patient,Guid_user,firstname,lastname,dob FROM tblpatient "
                     . "WHERE firstname LIKE '%".$firstname."%' "
                     . "OR lastname LIKE '%".$lastname."%' "
@@ -2258,61 +2282,58 @@ function dmdl_refresh($db){
                 $SGetPatient = $db->query($SQuery);
                 $sContent = "";
                 if(!empty($SGetPatient)){
+                    $sContent .= "<select name=''>";
+                    $sContent .= "<option value=''>Select From Possible Match</option>";
                     foreach ($SGetPatient as $k=>$v){
-                        $sContent .= "<p>";
-                        $sContent .= "<label>Guid patient:</label> ".$v['Guid_patient'].", ";
-                        $sContent .= "<label>First name:</label> ".$v['firstname'].", ";
-                        $sContent .= "<label>Last name:</label> ".$v['lastname'].", ";
-                        $sContent .= "<label>DOB:</label> ".$v['dob'];
-                        $sContent .= "</p>";
+                        $sContent .= "<option value='".$v['Guid_patient']."'>";
+                        $sContent .= "First name: ".$v['firstname'].", ";
+                        $sContent .= "Last name: ".$v['lastname'].", ";
+                        $sContent .= "DOB:".$v['dob'];
+                        $sContent .= "</option>";
                     }
+                    $sContent .= "</select>";
                 }
                 $content .= "<td>".$sContent."</td>";
             } else {                
                 if(count($getPatient)>1){
-                    //duplicate records
+                    //duplicate records                    
                     $content .= "<td class='hasDuplicate'>Duplicate</td>";
                     $content .= "<td>$Guid_MDLNumber</td>";
                     $content .= "<td>$firstname</td>";
                     $content .= "<td>$lastname</td>";
-                    $content .= "<td>$Date_Of_Birth</td>";
-                    $content .= "<td>"; 
+                    $content .= "<td>$dob</td>";
+                    $content .= "<td>";
+                    $content .= "<select name=''>";
+                    $content .= "<option value=''>Select From Possible Match</option>";
                     foreach ($getPatient as $k=>$v){
-                        $content .= "<p>";
-                        $content .= "<label>Guid patient:</label> ".$v['Guid_patient'].", ";
-                        $content .= "<label>First name:</label> ".$v['firstname'].", ";
-                        $content .= "<label>Last name:</label> ".$v['lastname'].", ";
-                        $content .= "<label>DOB:</label> ".$v['dob'];
+                        $content .= "<option value='".$v['Guid_patient']."'>";
+                        $content .= "First name: ".$v['firstname'].", ";
+                        $content .= "Last name: ".$v['lastname'].", ";
+                        $content .= "DOB: ".$v['dob'];
                         $content .= "</p>";
                     }
+                    $content .= "</select>";
                     $content .= "</td>";
                 }else{
                     //update mdl# for this perfect match
                     $Guid_user = $getPatient['0']['Guid_user'];
                     $Guid_patient = $getPatient['0']['Guid_patient'];
-                    
-                    updateTable($db, 'tblpatient', array('Guid_dmdl_patient'=>$Guid_PatientId),  array('Guid_patient'=>$Guid_patient));
-                    
-                    $checkMdl = $db->query("SELECT Guid_user, mdl_number FROM tbl_mdl_number WHERE Guid_user=:Guid_user", array('Guid_user'=>$Guid_user));
-                    if(!empty($checkMdl)){
-                        updateTable($db, 'tbl_mdl_number', array('mdl_number'=>$Guid_MDLNumber), array('Guid_user'=>$Guid_user));
-                    } else {
-                        insertIntoTable($db, 'tbl_mdl_number', array('mdl_number'=>$Guid_MDLNumber,'Guid_user'=>$Guid_user));
-                    }
-                    
+                                       
                     $content .= "<td class='mn yes'>Yes</td>";
                     $content .= "<td>$Guid_MDLNumber</td>";
                     $content .= "<td>$firstname</td>";
                     $content .= "<td>$lastname</td>";
-                    $content .= "<td>$Date_Of_Birth</td>";
+                    $content .= "<td>$dob</td>";
                     $content .= "<td></td>";
                 }
             }
+            $content .= "<td class='text-center'><input name='selectAll' type='checkbox'  class='checkboxSelect' /></td>";
             $content .= "</tr>";
         };        
     }
     $content .= "</tbody>";
     $content .= "</table>";
+    $content .= "</form>";
     
     return $content;       
 }

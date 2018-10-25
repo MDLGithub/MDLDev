@@ -497,11 +497,7 @@ require_once ('navbar.php');
             lengthChange: false,
             "paging":   false,
             "info":     false,
-            "aoColumnDefs": [
-              { 
-                  "bSortable": false, 
-                  "aTargets": [ 3,6 ] } 
-            ]
+            
         });
     }
    

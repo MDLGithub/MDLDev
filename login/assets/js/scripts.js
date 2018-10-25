@@ -292,6 +292,16 @@ $(document).ready(function () {
             $('#switchLabel').text('Select All');
         }
     });
+    $(".selectAllCheckboxes").change(function() {
+        if(this.checked) {
+            $('.checkboxSelect').prop('checked', true);
+            $('.switchLabel').text('Remove All');
+        }else{
+            $('.checkboxSelect').prop('checked', false);
+            $('.switchLabel').text('Select All');
+        }
+    });
+    
     /**
      * Check all checkboxes on click to select All checkbox
      * by given data-id

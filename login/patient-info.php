@@ -258,10 +258,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                                 echo " (".$qualifyResult['other_insurance'].")";
                                             }?>                                  
                                 </p>
-                                <p><label>Account: </label>
-                                    <a href="<?php echo SITE_URL.'/accounts.php?account_id='.$accountInfo['Guid_account']; ?>">
-                                        <?php echo $qualifyResult['account_number']; ?>
-                                    </a>
+                                <p><label>Account: </label><a href="<?php echo SITE_URL.'/accounts.php?account_id='.$accountInfo['Guid_account']; ?>"><?php echo $qualifyResult['account_number']; ?></a>
                                     <?php
                                         if($accountInfo['account_name']!=""){
                                             echo " - ". ucwords(strtolower($accountInfo['account_name']));
@@ -272,8 +269,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 
                                 <p><label>Health Care Providers: </label><?php echo $qualifyResult['provider']; ?>
                                 <p>
-                                    <label>Event: </label>
-                                    <?php echo $qualifyResult['source']; ?> 
+                                    <label>Event: </label><?php echo $qualifyResult['source']; ?> 
                                 </p>
                             </div>
                         
