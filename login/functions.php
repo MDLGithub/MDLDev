@@ -805,13 +805,16 @@ function getSalesrepStatusCount($db, $Guid_salesrep, $Guid_status ){
  * @param type $Guid_status
  * @return type
  */
-function getDeviceStatusCount($db, $Guid_salesrep, $Guid_status ){     
-    $q = "SELECT COUNT(*) AS `count` FROM `tbldeviceinv` d "
-        . "LEFT JOIN `tbl_mdl_status_log` l ON d.Guid_salesrep=l.Guid_salesrep "
+function getDeviceStatusCount($db, $Guid_salesrep, $Guid_status, $deviceinventoryID ){     
+    $q = "SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l "
         . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
-        . "WHERE l.Guid_status =:Guid_status AND l.Guid_salesrep=:Guid_salesrep AND u.marked_test='0'"; 
-    
-    $result = $db->row($q, array('Guid_salesrep'=>$Guid_salesrep,'Guid_status'=>$Guid_status));    
+        . "WHERE l.deviceid=:id AND l.Guid_status =:Guid_status AND l.Guid_salesrep=:Guid_salesrep AND u.marked_test='0'"; 
+    $where = array(
+                'Guid_salesrep'=>$Guid_salesrep,
+                'Guid_status'=>$Guid_status,
+                'id'=>$deviceinventoryID
+            );
+    $result = $db->row($q, $where);    
     return $result['count'];
 }
 /**
@@ -2115,8 +2118,7 @@ function get_status_state($db, $parent = 0, $searchData=array(), $linkArr=array(
 }
 
 
-function get_stats_info_today($db, $statusID, $hasChildren=FALSE, $searchData=array(), $today){
-    
+function get_stats_info_today($db, $statusID, $hasChildren=FALSE, $searchData=array(), $today){    
     //exclude test users
     $markedTestUserIds = getMarkedTestUserIDs($db);
     $testUserIds = getTestUserIDs($db);
@@ -2174,4 +2176,164 @@ function get_stats_info_today($db, $statusID, $hasChildren=FALSE, $searchData=ar
     }  
     
     return $result;
+}
+
+function dmdl_refresh($db){ 
+    require_once 'classes/xmlToArrayParser.php';
+    ini_set("soap.wsdl_cache_enabled", 0);
+    try {
+        $opts = array('ssl' => array('ciphers'=>'RC4-SHA'));
+        $client = new SoapClient('https://patientpayment.mdlab.com/MDL.WebService/BillingWebService?wsdl',
+        array ('stream_context' => stream_context_create($opts),"exceptions"=>0));
+    } catch (Exception $e) { 
+        $headers = "MIME-Version: 1.0\r\n";
+        $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+        $headers .= 'From: billingcustomerservice@mdlab.com' . "\r\n";
+        $message = "faultcode: " . $e->faultcode . ", faultstring: " . $e->faultstring;
+        $subject = "SOAP Fault";  
+        mail('agokhale@mdlab.com', $subject, $message, $headers);
+        trigger_error("SOAP Fault: (faultcode: {$e->faultcode}, faultstring: {$e->faultstring})", E_USER_ERROR);
+        return;
+    }    
+
+    $dmdlResult = $db->query("SELECT * FROM tbl_mdl_dmdl WHERE ToUpdate='Y'");
+    
+    $content = "";
+    
+    $content .= "<form action='' method='POST'>";
+    
+    $content .= "<div class='pB-15 text-right'>";
+    $content .= "<button name='' type='submit' class='botton btn-inline'>Update</button>";
+    $content .= "<button name='' type='submit' class='botton btn-inline'>Create New</button>";    
+    $content .= "</div>";
+    $content .= "<table id='refresh-log-table' class='table'>";
+    $content .= "<thead>";
+    $content .= "<tr class='tableTopInfo'>";
+    $content .= "<th colspan='5' class='dmdl'>dMDL</th>";
+    $content .= "<th colspan='2' class='braca'>BRCA Admin</th>";
+    $content .= "</tr>";
+    $content .= "<tr class='tableHeader'>";
+    $content .= "<th>Matched</th>";
+    $content .= "<th>MDL#</th>";
+    $content .= "<th>Patient F Name</th>";
+    $content .= "<th>Patient L Name</th>";
+    $content .= "<th>DOB</th>";
+    $content .= "<th>Possible Match</th>";
+    $content .= "<th>
+                    <label class='switch'>
+                        <input class='selectAllCheckboxes' type='checkbox'>
+                        <span class='slider round'>
+                            <span id='switchLabel' class='switchLabel'>Select All</span>
+                        </span>
+                    </label>
+                </th>";
+    $content .= "</tr></thead>";
+    $content .= "<tbody>";
+    foreach ( $dmdlResult as $k=>$v ){
+        $param = array(
+            "patientId" => $v['PatientID'], 
+            "physicianId" => $v['PhysicianID']
+        );
+        $result = (array)$client->GetCombinedResults($param);
+        
+        $domObj = new xmlToArrayParser($result['GetCombinedResultsResult']); 
+        $domArr = $domObj->array; 
+        if($domObj->parse_error){ 
+            echo $domObj->get_xml_error();            
+        } else {        
+            $res = $domArr['CombinedResults']['GeneticResults'];
+            
+            $Guid_PatientId = $res['Guid_PatientId'];
+            $GUID_PhysicianID = $res['GUID_PhysicianID'];
+            $Guid_MDLNumber = $res['Guid_MDLNumber'];
+            $Patient_Name = $res['Patient_Name'];
+            $Date_Of_Birth = $res['Date_Of_Birth']; //07-22-1962 => m/d/Y
+            $Date_Accessioned = $res['Date_Accessioned'];
+
+            $name = explode(" ", $Patient_Name);
+            $firstname = $name['0'];
+            $lastname = $name['1'];
+            
+            $bday  = explode("-", $Date_Of_Birth) ;
+            $dob = str_replace('-','/',$Date_Of_Birth);
+            
+            $where = array(
+                'firstname' => $firstname,
+                'lastname' => $lastname,
+                'dob' => $Date_Of_Birth
+            );
+            $query = "SELECT Guid_patient,Guid_user,firstname,lastname,dob FROM tblpatient "
+                    . "WHERE firstname=:firstname "
+                    . "AND lastname=:lastname "
+                    . "AND dob=:dob";
+            $getPatient = $db->query($query, $where );
+            $content .= "<tr>";
+            if(empty($getPatient)){
+                //patient not match with dmdl data
+                $content .= "<td class='mn no'>No</td>";
+                $content .= "<td>$Guid_MDLNumber</td>";
+                $content .= "<td>$firstname</td>";
+                $content .= "<td>$lastname</td>";
+                $content .= "<td>$dob</td>";
+                $SQuery = "SELECT Guid_patient,Guid_user,firstname,lastname,dob FROM tblpatient "
+                    . "WHERE firstname LIKE '%".$firstname."%' "
+                    . "OR lastname LIKE '%".$lastname."%' "
+                    . "AND dob='".$Date_Of_Birth."'";
+                $SGetPatient = $db->query($SQuery);
+                $sContent = "";
+                if(!empty($SGetPatient)){
+                    $sContent .= "<select name=''>";
+                    $sContent .= "<option value=''>Select From Possible Match</option>";
+                    foreach ($SGetPatient as $k=>$v){
+                        $sContent .= "<option value='".$v['Guid_patient']."'>";
+                        $sContent .= "First name: ".$v['firstname'].", ";
+                        $sContent .= "Last name: ".$v['lastname'].", ";
+                        $sContent .= "DOB:".$v['dob'];
+                        $sContent .= "</option>";
+                    }
+                    $sContent .= "</select>";
+                }
+                $content .= "<td>".$sContent."</td>";
+            } else {                
+                if(count($getPatient)>1){
+                    //duplicate records                    
+                    $content .= "<td class='hasDuplicate'>Duplicate</td>";
+                    $content .= "<td>$Guid_MDLNumber</td>";
+                    $content .= "<td>$firstname</td>";
+                    $content .= "<td>$lastname</td>";
+                    $content .= "<td>$dob</td>";
+                    $content .= "<td>";
+                    $content .= "<select name=''>";
+                    $content .= "<option value=''>Select From Possible Match</option>";
+                    foreach ($getPatient as $k=>$v){
+                        $content .= "<option value='".$v['Guid_patient']."'>";
+                        $content .= "First name: ".$v['firstname'].", ";
+                        $content .= "Last name: ".$v['lastname'].", ";
+                        $content .= "DOB: ".$v['dob'];
+                        $content .= "</p>";
+                    }
+                    $content .= "</select>";
+                    $content .= "</td>";
+                }else{
+                    //update mdl# for this perfect match
+                    $Guid_user = $getPatient['0']['Guid_user'];
+                    $Guid_patient = $getPatient['0']['Guid_patient'];
+                                       
+                    $content .= "<td class='mn yes'>Yes</td>";
+                    $content .= "<td>$Guid_MDLNumber</td>";
+                    $content .= "<td>$firstname</td>";
+                    $content .= "<td>$lastname</td>";
+                    $content .= "<td>$dob</td>";
+                    $content .= "<td></td>";
+                }
+            }
+            $content .= "<td class='text-center'><input name='selectAll' type='checkbox'  class='checkboxSelect' /></td>";
+            $content .= "</tr>";
+        };        
+    }
+    $content .= "</tbody>";
+    $content .= "</table>";
+    $content .= "</form>";
+    
+    return $content;       
 }

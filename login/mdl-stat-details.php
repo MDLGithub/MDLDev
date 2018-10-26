@@ -17,7 +17,6 @@ $role = $roleInfo['role'];
 $roleID = $roleInfo['Guid_role'];
 
 $accessRole = getAccessRoleByKey('mdlStats');
-var_dump($accessRole);
 
 if($role!="Admin"){
     //Leave(SITE_URL."/no-permission.php");
@@ -59,8 +58,15 @@ $initLabels = array(
     //adding filter conditions 
     $searchData = array();
     if(isset($_GET['salesrep'])&&$_GET['salesrep']!=""){
-        $initQ .= 'AND s.Guid_salesrep='.$_GET['salesrep'].' ';
-        $searchData['Guid_salesrep'] = $_GET['salesrep'];
+        
+        if($role=='Sales Rep'){
+            $thisSalserep = $db->row("SELECT Guid_salesrep FROM tblsalesrep WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
+            $initQ .= 'AND s.Guid_salesrep='.$thisSalserep['Guid_salesrep'].' ';
+            $searchData['Guid_salesrep'] = $thisSalserep['Guid_salesrep'];                
+        } else {
+            $initQ .= 'AND s.Guid_salesrep='.$_GET['salesrep'].' ';
+            $searchData['Guid_salesrep'] = $_GET['salesrep'];
+        }
     }
     if(isset($_GET['account'])&&$_GET['account']!=""){
         $initQ .= 'AND a.Guid_account='.$_GET['account'].' ';
