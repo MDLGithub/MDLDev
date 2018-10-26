@@ -1,0 +1,72 @@
+body{ background: transparent; overflow: auto;}
+section.form.follow-up.geneveda {
+    padding: 85px 40px 0;
+    font-family: "Open Sans";
+    line-height: 1.2
+}
+
+section.form.follow-up.geneveda p,
+section.form.follow-up.geneveda h1,
+section.form.follow-up.geneveda h2,
+section.form.follow-up.geneveda h3,
+section.form.follow-up.geneveda h4,
+section.form.follow-up.geneveda h5,
+section.form.follow-up.geneveda h6{ font-family: "Open Sans"; font-size: 16px; }
+
+.header .col.one, .header .col.two {
+    width: 49%;
+    display: block;
+    float: left;
+}
+.header {
+    margin-bottom: 25px;
+    display: inline-block;
+    width: 100%;
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 20px;
+}
+
+.header .col.one p {
+    width: 55%;
+    line-height: 22px;
+}
+.header figure img {
+    max-width: 260px;
+    margin-bottom: 30px;
+}
+.header figure.lab {
+    float: right;
+    width: 100%;
+}
+.header figure.lab img {
+    float: right;
+}
+.header .col.two table {
+    float: right;
+    border: 0;
+}
+.header .col.two table tbody tr td{
+    border: 1px solid #000;
+    padding: 5px 25px;
+}
+.header .col.two table tbody tr:first-child td{
+    border-top: 0;
+}
+.header .col.two table tbody tr:last-child td{ 
+    border-bottom: 0; 
+}
+.header table.stat_table thead{ background: transparent; box-shadow: none; border: 0; }
+.header .col.two table thead tr th {
+    padding: 7px 10px;
+    box-shadow: none;
+    border-left: 1px solid #000;
+    border-right: 1px solid #000;
+}
+.header .col.two table tbody tr td:nth-child(2) {
+    background: #9fdc9e;
+}
+section.form.follow-up.geneveda .main p {
+    text-align: left;
+    letter-spacing: 0.5px;
+    padding-bottom: 10px;
+}

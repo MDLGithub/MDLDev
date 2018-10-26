@@ -15,7 +15,7 @@ $userID = $_SESSION['user']["id"];
 $roleInfo = getRole($db, $userID);
 $roleID = $roleInfo['Guid_role'];
 $accessRole = getAccessRoleByKey('devices');
-$roleIDs = unserialize($accessRole['value']);
+$roleIDs = unserialize($accessRole['role_ids']);
 $dataViewAccess = isUserHasAnyAccess($roleIDs, $roleID, 'view');
 
 
@@ -77,7 +77,6 @@ $salesreps = $db->selectAll('tblsalesrep');
                 <?php } ?>
             </h4>
             <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>
-            <a href="<?php echo SITE_URL; ?>/dashboard2.php" class="button homeIcon"></a>
             <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
         </section>       
 

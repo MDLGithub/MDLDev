@@ -29,14 +29,14 @@ $tables = array(
         'account'=>'Account',
         'provider'=>'Provider',
         'location'=>'Location',
-        'salesrep'=>'Genetic Consultants'
+        'salesrep'=>'Sales Rep'
     ),
     'account' => array(
         'tableName' => 'Account',
         'tableActions' => array('add', 'edit', 'delete'),
         'account' => 'Account',
         'name' => 'Name',
-        'Guid_salesrep'=>'Genetic Consultant',
+        'Guid_salesrep'=>'Sales Rep',
         'logo'=>'Logo',
         'address'=>'Address',
         'city'=>'City',
@@ -50,14 +50,14 @@ $tables = array(
         'tableName' => 'Devices',
         'tableActions' => array('add', 'edit', 'delete'),
         'serial_number'=>'Serial',
-        'Guid_salesrep'=>'Genetic Consultant',
+        'Guid_salesrep'=>'Sales Rep',
         'deviceid'=>'Device Name',
         'inservice_date'=>'In-Service Date',
         'outservice_date'=>'Out-Of-Service Date',
         'comment'=>'Comment'
     ),
     'salesreps' => array(
-        'tableName' => 'Genetic Consultants',
+        'tableName' => 'Sales Reps',
         'tableActions' => array('add', 'edit', 'delete'),
         'first_name' => 'First Name',
         'last_name' => 'Last Name',
@@ -69,7 +69,6 @@ $tables = array(
         'city' => 'City',
         'state' => 'State',
         'zip' => 'Zip',
-        'color' => 'Color',
         'phone_number' => 'Phone'
     ),        
 );
@@ -84,29 +83,21 @@ if($role!="Admin"){
 $thisMessage = "";
 if(isset($_POST['submit_config_tables'])){  
     extract($_POST);
-    $data = $_POST;  
-    $data['table_id']=$_GET['tableid'];
-    unset($data['submit_config_tables']);
-    
-    foreach ($tables as $tableKey=>$tableVal){ 
-        if($tableKey==$data['table_id']){
-            unset($tableVal['tableName']);
-            foreach ($tableVal as $fieldKey=>$fieldVal ) {
-                if(isset($data['role'])){
-                    if(!array_key_exists($tableKey, $data['role']) ){
-                        $data['role'][$tableKey] = array();
-                    }
-                }else{
-                    $data['role'][$tableKey] = array();
-                }
-            }  
-        }
-    }    
-    
-    if(saveTableAccessRole($db, $data['role'])){
-        $thisMessage = "Changes have been saved";
+    $data = $_POST;    
+    foreach ($tables as $tableKey=>$tableVal){
+        unset($tableVal['tableName']);
+        foreach ($tableVal as $fieldKey=>$fieldVal ) {
+            if(!array_key_exists($tableKey, $data['role']) ){
+                $data['role'][$tableKey] = array();
+            }
+        }        
     }
-    
+    unset($data['submit_config_tables']);
+    if(isset($data['role'])){        
+        if(saveTableAccessRole($db, $data['role'])){
+            $thisMessage = "Changes have been saved";
+        }
+    }
 }
 
 
@@ -134,7 +125,6 @@ require_once ('navbar.php');
                 </ol>      
             </h4>
             <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>
-            <a href="<?php echo SITE_URL; ?>/dashboard2.php" class="button homeIcon"></a>
             <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
         </section>
         <div class="scroller access-roles"> 
@@ -144,7 +134,7 @@ require_once ('navbar.php');
             <p><a href="<?php echo SITE_URL; ?>/access-roles.php?config=tables&tableid=home"><i class="fas fa-arrow-circle-right"></i> Home</a></p>
             <p><a href="<?php echo SITE_URL; ?>/access-roles.php?config=tables&tableid=account"><i class="fas fa-arrow-circle-right"></i> Accounts</a></p>
             <p><a href="<?php echo SITE_URL; ?>/access-roles.php?config=tables&tableid=devices"><i class="fas fa-arrow-circle-right"></i> Devices</a></p>
-            <p><a href="<?php echo SITE_URL; ?>/access-roles.php?config=tables&tableid=salesreps"><i class="fas fa-arrow-circle-right"></i> Genetic Consultants</a></p>
+            <p><a href="<?php echo SITE_URL; ?>/access-roles.php?config=tables&tableid=salesreps"><i class="fas fa-arrow-circle-right"></i> Sales Reps</a></p>
         </div>  
         <?php } ?>   
         <!-- ./Config Tables -->

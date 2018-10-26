@@ -6,10 +6,10 @@ function sec_session_start() {
     // This stops JavaScript being able to access the session id.
     $httponly = true;
     // Forces sessions to only use cookies.
-    if (ini_set('session.use_only_cookies', 1) === FALSE) {
+    /*if (ini_set('session.use_only_cookies', 1) === FALSE) {
         header("Location: error.php?err=Could not initiate a safe session (ini_set)");
         exit();
-    }
+    }*/
     // Gets current cookies params.
     $cookieParams = session_get_cookie_params();
     session_set_cookie_params($cookieParams["lifetime"], $cookieParams["path"], $cookieParams["domain"], $secure, $httponly);
@@ -21,6 +21,7 @@ function sec_session_start() {
     session_regenerate_id();    // regenerated the session, delete the old one. 
 }
 function login($email, $password, $db) {
+    // Using prepared statements means that SQL injection is not possible.
     $db->bind("email",$email);
     $user = $db->row("SELECT * FROM `".DB_PREFIX."user` WHERE email = :email"); 
     if ($user) { 
@@ -28,7 +29,7 @@ function login($email, $password, $db) {
             // Account is locked 
             // Send an email to user saying their account is locked 
             $showMsg = false;
-            $message = "Your account has been locked for 2 hours due to the multiple failed login attempts. Please try again later. If you need immediate assistance, please contact your support team.";
+            $message = "Your Account locked for 2 hours for security reason.";
             $returnData = array('status'=>false, $showMsg=>false, 'message'=>$message);
             return $returnData;
         } else {            
@@ -95,8 +96,8 @@ function login_check($db) {
         $username = $_SESSION['user']['email'];
         // Get the user-agent string of the user.
         $user_browser = $_SERVER['HTTP_USER_AGENT'];
-        $db->bindMore( array('Guid_user'=>$Guid_user, 'status'=>'1') );
-        $stmt = $db->row("SELECT * FROM tbluser WHERE Guid_user=:Guid_user AND status=:status LIMIT 1");
+        $db->bind('Guid_user', $Guid_user);
+        $stmt = $db->row("SELECT * FROM tbluser WHERE Guid_user = :Guid_user LIMIT 1");
         
         if (!empty($stmt)) {
             // If the user exists get variables from result.

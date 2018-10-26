@@ -1,9 +1,49 @@
 $(document).ready(function () {
+    
+    /** Salutation message for Physicians */
+    if($('#salutation').length != 0){
+        var userTimeZone = moment.tz.guess();
+        var thisUserId = $('#salutation').attr('data-user-id');
+        var thisUserRole = $('#salutation').attr('data-role');    
+        var ajaxUrl = baseUrl+'/ajaxHandler.php';
+        $.ajax( ajaxUrl , {
+            type: 'POST',
+            data: {
+               get_salutation_message: '1',
+               userId: thisUserId,
+               userRole: thisUserRole,
+               userTimeZone: userTimeZone
+            },
+            success: function(response) {
+                var result = JSON.parse(response);
+                if(result['salutation']){
+                    $('#salutation').html(result['salutation']);
+                }             
+            },
+            error: function() {
+                console.log('0');
+            }
+        });   
+    }
+    /** Salutation message for Physicians END */
+    
+    var opt = {
+	beforeShow: function() {
+	    setTimeout(function(){
+		$('.ui-datepicker').css('z-index', 1001);
+	    }, 0);
+	},
+	showOn:'focus',
+	dateFormat: 'm/d/yy'
+    };
+
+    $('.datepicker_from').not('.hasDatePicker').datepicker(opt);
+    $('.datepicker_to').not('.hasDatePicker').datepicker(opt);
     $('.phone_us').mask('(000) 000-0000');
    // $('.h-filters .date').mask("00/00/0000", {placeholder: "__/__/____"});
     $('.h-filters .stat_mdl_number').mask("0000000");
     
-    $('#file.accountLogoInput').inputFileText( {
+    /*$('#file.accountLogoInput').inputFileText( {
         text: 'Account Logo',  
         buttonCLass: 'cooseFileBtn',
         textClass: 'chooseFileTxt' 
@@ -12,7 +52,7 @@ $(document).ready(function () {
         text: 'Upload User\'s Photo',  
         buttonCLass: 'cooseFileBtn',
         textClass: 'chooseFileTxt' 
-    });
+    });*/
     
     /**
      * Dashboard Calendar Date Dropdown filter
@@ -30,11 +70,11 @@ $(document).ready(function () {
      * Dashboard Calendar Sales Rep Dropdown filter
      * used on dashboard2.php dashboard calendar
      */
-    $(".info_block_arrow").click(function(){
+    /*$(".info_block_arrow").click(function(){
         $(".salesrep_dropdown").toggleClass("dropdown_hide");
         $(".info_block h1").toggleClass("hide");
         $(".info_block_arrow").toggleClass("info_block_arrow_show");
-    });  
+    });*/  
     
     $('.toggleRoles').on('click', function(){
         if($('.edit-status-form .rolesBlock').hasClass('hidden')){
@@ -167,12 +207,13 @@ $(document).ready(function () {
      * used on patient info page
      */
     $('body').delegate( ".mdlnumber", "input", function() {       
-        var val = $(this).val(); 
-        if(val.length>7){
-            $(this).val(val.slice(0, 7));
+        var thisVal = $(this).val(); 
+        $('#mdlNumber').val(thisVal);
+        if(thisVal.length>7){
+            $(this).val(thisVal.slice(0, 7));
+            $('#mdlNumber').val(thisVal.slice(0, 7));
         }else{
-            console.log(val.length);
-            if(val.length==7 || val.length==0){
+            if(thisVal.length==7 || thisVal.length==0){
                 $(this).removeClass('error error-border');
                 $('#message').html("");
             } else {
@@ -208,7 +249,9 @@ $(document).ready(function () {
         }
     });
     
-        
+    $('.dmdlRefresh').on('click', function(){
+        $('.preloader').removeClass('hidden');
+    });
     /**
      * Home page toggle for search sidebar
      */
@@ -251,6 +294,15 @@ $(document).ready(function () {
             $('#switchLabel').text('Select All');
         }
     });
+    $(".selectAllCheckboxes").change(function() {
+        if(this.checked) {
+            $('.checkboxSelect').prop('checked', true);
+            $('.switchLabel').text('Remove All');
+        }else{
+            $('.checkboxSelect').prop('checked', false);
+            $('.switchLabel').text('Select All');
+        }
+    });    
     /**
      * Check all checkboxes on click to select All checkbox
      * by given data-id
@@ -273,6 +325,25 @@ $(document).ready(function () {
     $('.openUserInfoModal').on('click', function(e){
         e.preventDefault();
         $('.modalBlock').removeClass('hidden').addClass('show');
+    });
+    
+    /**
+     *  Salesrep page open color Box 
+     */
+    $('.color-block').delegate( ".openColorBox", "click", function() {
+        if($(this).parent().find('.colorBox').hasClass('closed')){
+            $(this).parent().find('.colorBox').removeClass('closed').show();
+        }else{
+            $(this).parent().find('.colorBox').addClass('closed').hide();
+        }        
+    });
+    $('.color-block .colorBox label').on( "click", function() {
+        $(this).parent().parent().find('label').removeClass('checked');
+        $(this).addClass('checked');
+        var thisColor = $(this).attr('data-color');
+        $(this).parent().parent().parent().parent().find(".selected-color-box span").removeClass('active');
+        $(this).parent().parent().parent().parent().find(".selected-color-box span").css("background-color", thisColor).addClass('active');
+        $(this).parent().parent().addClass('closed').hide();
     });
     
     /**
@@ -339,28 +410,33 @@ $(document).ready(function () {
         var val =  this.value;
         //console.log(accountId);
         $(this).parent().parent().nextAll().remove();
+        getGetSubDropdown(val);
+    }); 
+    
+    function getGetSubDropdown(val){        
         var ajaxUrl = baseUrl+'/ajaxHandler.php';
         if(val && val!="0"){
             $.ajax( ajaxUrl , {
-
                 type: 'POST',
                 data: {
                    status_dropdown: '1',
                    parent_id: val,
                 },
                 success: function(response) {
-                    var result = JSON.parse(response);
+                    var result = JSON.parse(response);                    
                     if(result.content !=""){
                         var content = result.content
                         $('#status-dropdowns-box').append(content);
                     }
+                    var newVal = result['statusID'];
+                    getGetSubDropdown(newVal)                     
                 },
                 error: function() {
                     console.log('0');
                 }
             });
         }
-    });    
+    }
     
     /**
      * Homepage Filter 
@@ -785,26 +861,29 @@ $(document).ready(function () {
     });
  
  
-    $('#accounts #selectAccount__').on('change', function() {
+    $('.patientInfo .patientAccount').on('change', function() {
         var accountId =  this.value;
-        $.ajax( 'ajaxHandler.php', {
+        console.log(accountId);
+        var ajaxUrl = baseUrl+'/ajaxHandler.php';
+        $.ajax( ajaxUrl, {
             type: 'POST',
             data: {
-               get_account_full_info: '1',
+               get_patient_info_providers: '1',
                account_id: accountId
             },
             success: function(response) {
                 var result = JSON.parse(response);
                 console.log(result);
-                var accountData = result['accountInfo'];
-                var providers = result['providers']
-                updateAccountFullInfo(accountData['0'], providers);
+                if(result['options']){
+                    $('select#pInfoAccountProviders').html(result['options']);
+                }
             },
             error: function() {
                 console.log('0');
             }
         });
     });
+    
     function updateAccountFullInfo(accountData, providers){
         
         var dataEditUrl = $("#edit-selected-account").attr("data-edit-url");
@@ -881,79 +960,7 @@ $(document).ready(function () {
          $('#specimen-collected-cbox').prop('checked', false);
          $('#specimen-notcollected-cbox').prop('checked', false);
     });
-    /**
-     * Patient Info screen Specimen collected options(Yes, No) functions
-     */
-    $('#save-specimen-collected').on('click', function(){
-        var dateVal = $('#specimen .datepicker').val();
-        var redirectUrl = $('#redirectUrl').val();
-        var Guid_user = $('#Guid_user').val();
-        var account = $('#account').val();
-        $('#specimen .datepicker').removeClass('error-border');
-        if(dateVal == ""){
-            $('#specimen .datepicker').addClass('error-border');
-        } else {
-            //save spacimen collected into logs
-            var ajaxUrl = baseUrl+'/ajaxHandler.php';
-            $.ajax( ajaxUrl , {
-                type: 'POST',
-                data: {
-                   save_specimen_into_logs: '1',                   
-                   date: dateVal,
-                   Guid_user: Guid_user,
-                   account: account
-                },
-                success: function(response) {
-                    var result = JSON.parse(response);
-                    console.log(result);
-                    window.location.replace(redirectUrl);
-                },
-                error: function() {
-                    console.log('0');
-                }
-            });
-        }
-    });
-    $('#save-specimen-notcollected').on('click', function(){
-        var dateVal = $('#specimen .datepicker').val();
-        var redirectUrl = $('#redirectUrl').val();
-        var Guid_user = $('#Guid_user').val();
-        var account = $('#account').val();
-        var statusVal = $('#specimen-not-collected').val();
-      
-        $('#specimen .datepicker').removeClass('error-border');
-        $('#specimen #specimen-not-collected').removeClass('error-border');
-        if(dateVal == ""){
-            $('#specimen .datepicker').addClass('error-border');
-        } 
-        if(statusVal == "" || statusVal == "37"){ //37 is ID for speciment not collected status
-            $('#specimen #specimen-not-collected').addClass('error-border');
-        } 
         
-        if(dateVal != "" && statusVal != "" && statusVal != "37" ) {
-            //save spacimen collected into logs
-            var ajaxUrl = baseUrl+'/ajaxHandler.php';
-            $.ajax( ajaxUrl , {
-                type: 'POST',
-                data: {
-                   save_specimen_not_collected_into_logs: '1',                   
-                   date: dateVal,
-                   Guid_user: Guid_user,
-                   account: account,
-                   status: statusVal
-                },
-                success: function(response) {
-                    var result = JSON.parse(response);
-                    console.log(result);
-                    window.location.replace(redirectUrl);
-                },
-                error: function() {
-                    console.log('0');
-                }
-            });
-        }
-    });
-    
     
     $('#add-patient-deductable').on('click', function(){
         $('#total-deductible').toggleClass('hidden');
@@ -1240,3 +1247,20 @@ function goBack() {
     return str.replace(/^(.)|\s(.)/g, function($1){ return $1.toUpperCase( ); });
 }
 
+$('.export_filters #salesrep').on('change', function() {
+    var ajaxUrl = baseUrl+'/ajaxHandler.php';
+    $.ajax(ajaxUrl, {
+    type: 'POST',
+    data: {
+       updateAccounts: 'ok',
+       salesrep: $('.export_filters #salesrep').val()
+    },
+      success: function (response) {
+		var result = JSON.parse(response);
+		$("#matrix_parameters #account").empty();
+		$("#matrix_parameters #account").removeClass('no-selection');
+		$("#matrix_parameters #account").parent().parent().removeClass('show-label valid');
+		$("#matrix_parameters #account").append(result.accounts_html);
+      }
+    });
+});

@@ -45,46 +45,20 @@ $sources = $db->selectAll('tblsource', ' ORDER BY description ASC');
 $lastConfigData = getLastUrlConfig($db);
 $urlData = $lastConfigData;
 $currentUserId = $_SESSION['user']['id'];
-$urlPath = parse_url(SITE_URL,PHP_URL_PATH);
-$urlMain = "https://www.mdlab.com/dev";
-if (strpos($urlPath, 'questionnaire') !== false) {
-    $urlMain = "https://www.mdlab.com/questionnaire";
-}
+$urlMain = "https://www.mdlab.com/questionnaire";
 $urlPrev = "https://www.mdlab.com/previous";
 $urlStr = "";
 $generateUrlLink = $urlMain;
 $isValid = TRUE;
-$accountMessage=""; $dvMessage="";
 if (isset($_POST['generate_url_config']) && $_POST['generate_url_config']=='1'){     
     
     extract($_POST);
     
-    //$reqLocations = array('D', 'F', 'L', 'DE');
     $reqLocations = array('D', 'F', 'L', 'DE');
     if($role=='Sales Rep' && $dv=='' && in_array($lc, $reqLocations)){
         $isValid = FALSE;
         $generateUrlLink = "";
         $dvMessage = "<div class='error-text'>Please select device.</div>";
-    }
-    $accountNumber = $_POST['an'];
-    
-    if(in_array($lc, array('D', 'O', 'L', 'W', 'PM'))){
-        if( $an=='' || $an=='0'){
-            $isValid = FALSE;
-            $generateUrlLink = "";
-            $accountMessage .= "<div class='error-text'>Account Number is required for this Location.</div>";
-        }
-    }
-    
-    $hasAccountProviders = $db->query("SELECT Guid_provider FROM tblprovider WHERE account_id=:account_id", array('account_id'=>$accountNumber));
-    if($lc!="F"){
-        if( $an!=''&&$an!='0'){
-            if(empty($hasAccountProviders)){
-                $isValid = FALSE;
-                $generateUrlLink = "";
-                $accountMessage .= "<div class='error-text'>Selected account doesn't have providers.</div>";
-            }
-        }
     }
     
     if(isset($_POST['previous']) && $_POST['previous'] != ""){
@@ -150,7 +124,6 @@ $accountProviders = '';
         <section id="palette_top">
             <h4>URL Configuration</h4>
             <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>
-            <a href="<?php echo SITE_URL; ?>/dashboard2.php" class="button homeIcon"></a>
             <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
         </section>
         
@@ -280,8 +253,8 @@ $accountProviders = '';
                     </div>
                       <div class="row">
                           <div class="col-md-12">
-                                <div class="form-group ">
-                                    <select name="an" id="account" class="form-control <?php if(!$isValid && $accountMessage!="") { echo 'error-border'; }?>">
+                              <div class="form-group">
+                                    <select name="an" id="account" class="form-control">
                                         <option value="0">Account</option>
                                      <?php
                                          foreach ($accounts as $k=>$v){
@@ -343,7 +316,7 @@ $accountProviders = '';
                                       
                                       ?>
                                     <div class="form-group">
-                                        <select name="dv" id="deviceId" class="form-control <?php if(!$isValid && $dvMessage!="") { echo 'error-border'; }?>">
+                                        <select name="dv" id="deviceId" class="form-control <?php if(!$isValid) { echo 'error-border'; }?>">
                                             <option value="">Device ID</option>                                            
                                             <?php 
                                             $thisSalesRep = get_field_value($db, 'tblsalesrep', 'Guid_salesrep', ' WHERE Guid_user='.$userID);
@@ -355,12 +328,10 @@ $accountProviders = '';
                                             <option <?php echo $isDevice; ?> value="<?php echo $v['id'];?>" ><?php echo $v['serial_number']." - ".$v['device_name'];?></option>
                                            <?php } ?>
 
-                                        </select>                                        
+                                        </select>
+                                        <?php if(!$isValid) { echo $dvMessage; }?>
                                     </div>
-                                    <?php if(!$isValid && $dvMessage!="") { echo $dvMessage; }?>
                                   <?php } ?>
-                                  
-                                    <?php if(!$isValid && $accountMessage!="") { echo $accountMessage; }?>
                                  <div class="text-center">
                                     <button name="generate_url_config" value="1" type="submit" class="btn btn-info">Generate URL</button>                  
                                  </div>                              
@@ -370,13 +341,6 @@ $accountProviders = '';
                       
                       
                      </fieldset>
-                    <div class="col-md-12 text-center">
-                        <?php if(isset($_POST['generate_url_config']) && $generateUrlLink!=''){ ?>
-                            <a class="pT-30" id="urlLink" target="_blank" href="<?php echo $generateUrlLink; ?>"> 
-                              Website Link
-                            </a>
-                        <?php } ?>
-                    </div>
               </div>
               <div class="col-md-6">
                   <div class="row">
@@ -457,8 +421,6 @@ $accountProviders = '';
                         }
                     ?>
                   </div>
-                  
-                  
               </div>
             </div>
             
@@ -467,7 +429,18 @@ $accountProviders = '';
         
         </div>
 
-        
+        <div class="row">
+              <div class="col-md-5"></div>
+              <div class="col-md-7">
+                  <br/>
+                  <?php if(isset($_POST['generate_url_config']) && $generateUrlLink!=''){ ?>
+                  <a class="pL-30" id="urlLink" target="_blank" href="<?php echo $generateUrlLink; ?>"> 
+                    Link: 
+                    <?php echo $generateUrlLink; ?>
+                  </a>
+                  <?php } ?>
+              </div>
+          </div>
     </div>
 
 

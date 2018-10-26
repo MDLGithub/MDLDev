@@ -72,7 +72,8 @@ require_once ('navbar.php');
                                         <?php foreach ($accounts as $k=>$v){ ?>
                                         <?php $selected = (isset($_POST['Guid_account'])&&$_POST['Guid_account']==$v['Guid_account'])?" selected": ""; ?>
                                             <?php if (trim($v['name'])!=""){ ?>
-                                            <option <?php echo $selected; ?>  value="<?php echo $v['Guid_account']; ?>"><?php echo $v['account']." - ".ucfirst(strtolower($v['name'])); ?></option>
+                                            <?php $dots = strlen($v['name']) <= 35 ? ' ' : '...'; ?>
+                                            <option <?php echo $selected; ?>  value="<?php echo $v['Guid_account']; ?>"><?php echo $v['account']." - ".ucfirst(strtolower(substr($v['name'], 0, 35))).$dots; ?></option>
                                             <?php } ?>
                                         <?php } ?>                                        
                                     </select>

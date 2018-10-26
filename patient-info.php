@@ -18,6 +18,11 @@ $roleID = $roleInfo['Guid_role'];
 $role = $roleInfo['role'];
 $default_account = "";
 
+//check if patient (the same as Guid_user) empty 
+if(!isset($_GET['patient']) || $_GET['patient']==''){
+    Leave(SITE_URL);
+}
+
 $accessRole = getAccessRoleByKey('home');
 $roleIDs = unserialize($accessRole['value']);
 $dataViewAccess = isUserHasAnyAccess($roleIDs, $roleID, 'view');
@@ -37,6 +42,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     q.other_insurance,q.Date_created as qDate,q.provider_id, q.source, 
                     CONCAT(prov.first_name,' ',prov.last_name) provider,
                     p.*, u.email, u.marked_test ";
+    
     if(isset($_GET['incomplete'])){
         $sqlQualify .= "FROM tblqualify q ";
     } else {
@@ -45,8 +51,24 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     $sqlQualify .= "LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user
                     LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user 
                     LEFT JOIN tblprovider prov ON prov.Guid_provider = q.provider_id
-                    WHERE q.Guid_user=:Guid_user ORDER BY q.`Date_created` DESC LIMIT 1";
-    $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$Guid_user));    
+                    WHERE q.Guid_user=:Guid_user ";
+    if($role == 'Sales Rep'){
+        $salesrepAccountIDs = getSalesrepAccounts($db, $userID);        
+        $sqlQualify .= " AND q.account_number IN (" . $salesrepAccountIDs . ") ";
+    }
+    if($role=='Physician'){
+        $physicianInfo = $db->row('SELECT account_id FROM tblprovider WHERE Guid_user='.$userID);
+        $account_id = $physicianInfo['account_id']; 
+        $sqlQualify .= " AND q.account_number IN (" . $account_id . ")";
+    }
+    $sqlQualify .= "ORDER BY q.`Date_created` DESC LIMIT 1";
+    $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$Guid_user));  
+    
+    //If one is a physician or sales rep, 
+    //should not be able to see other patients that they are not allowed to
+    if(!$qualifyResult){
+        Leave(SITE_URL);
+    }
         
     $mdlInfoQ = "SELECT * FROM tbl_mdl_number WHERE Guid_user=:Guid_user";
     $mdlInfo = $db->row($mdlInfoQ, array('Guid_user'=>$Guid_user));
@@ -781,10 +803,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         
                     <div class="row actionButtons pB-30">
                         <div class="col-md-12">
-                            <?php if($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager' ){ ?>
+                            
+                            <?php if( $qualifyResult['source']=='HealthCare Fair' && ($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager') ){ ?>
                             <span class="pull-left markTest">                               
                                 <input id="test-kit" <?php echo $qualifyResult['test_kit']=='1'?' checked': ''; ?>  type="checkbox" name="test_kit" value="1" /> 
-                                <label for="test-kit">Test kit has been given to the patient.</label>
+                                <label for="test-kit">Test kit has been given to the patient</label>
                             </span><br/>
                             <?php } ?>
                             <?php if($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager' ){ ?>

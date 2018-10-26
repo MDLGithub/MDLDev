@@ -3,8 +3,8 @@
     require_once('settings.php'); 
     
     $checkLogin = login_check($db);
-    if ($checkLogin['status']) {
-        Leave('dashboard.php');
+    if ($checkLogin['status']) {        
+        Leave(SITE_URL.'/dashboard.php');        
     } else {
         require_once 'login.php';
     }  

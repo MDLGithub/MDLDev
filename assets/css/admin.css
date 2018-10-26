@@ -24,7 +24,7 @@ body {
     background: url(../images/admin_bg.png), radial-gradient(ellipse at center, #dadada 0%,#b7b7b7 80%,#b7b7b7 80%);
     font-size: 1em;
     display: block;
-    
+
 }
 
 body::before {
@@ -119,6 +119,10 @@ input:focus, select:focus, textarea:focus, button:focus {
     font-weight: bold;
     letter-spacing: .04em;
     text-align: center;
+}
+
+.ef_box {
+    padding: 0 20px;
 }
 
 #action_palette .box_top {
@@ -602,6 +606,15 @@ main {
     color: #1c487b;
 }
 
+.button.export::before {
+    content: "";
+    background: url(../images/arrow-up.png) no-repeat center;
+}
+
+.button.export > strong {
+    color: #1c487b;
+}
+
 .button.half {
     max-width: 49%;
     width: 100%;
@@ -980,11 +993,11 @@ form h2 {
 
 @keyframes errorPulse {
     0%, 100% {
-        opacity: 0;
+	opacity: 0;
     }
 
     50% {
-        opacity: 1;
+	opacity: 1;
     }
 }
 
@@ -1108,11 +1121,11 @@ form > .row:nth-child(1) .col-md-6:nth-child(2) > .row:nth-child(4) > div:nth-ch
 
 @keyframes successDisplay {
     0%, 100% {
-        height: 0;
+	height: 0;
     }
 
     10%, 90% {
-        height: 3.7em;
+	height: 3.7em;
     }
 }
 
@@ -1137,11 +1150,11 @@ form > .row:nth-child(1) .col-md-6:nth-child(2) > .row:nth-child(4) > div:nth-ch
 
 @keyframes successDisplayh4 {
     0%, 100% {
-        transform: translateY(-2em);
+	transform: translateY(-2em);
     }
 
     11%, 91% {
-        transform: translateY(0em);
+	transform: translateY(0em);
     }
 }
 
@@ -1211,9 +1224,9 @@ input[type='radio']:checked {
 
 /*gabby start*/
 /*iPad landscape*/
-@media only screen 
-and (min-device-width : 64em) 
-and (max-device-width : 85em) 
+@media only screen
+and (min-device-width : 64em)
+and (max-device-width : 85em)
 and (orientation : landscape) {
 
   #app_data.scroller {
@@ -1270,40 +1283,40 @@ and (orientation : landscape) {
     /*Accounts/Sales*/
 
     .box.visible {
-        overflow: visible;
-        border-radius: .5em;
-        padding-left:0px;
+	overflow: visible;
+	border-radius: .5em;
+	padding-left:0px;
     }
 
     /*#accounts main{
-        padding-left:10px;
-        padding-right:10px;
+	padding-left:10px;
+	padding-right:10px;
     }*/
 
     /*#accounts .scroller{
-        padding-right:0px;
+	padding-right:0px;
     }*/
 
     /*Add Account*/
 
     /*Sales Rep Input*/
     form .row .col-md-6 .col-md-9 .f2:nth-child(1){
-        margin-left:-15px;
+	margin-left:-15px;
     }
 
     form .row:nth-child(1) .col-md-6:nth-child(2) .f2{
-        width:100%;
-        display:block;
+	width:100%;
+	display:block;
     }
 
 
 }
 
 /*iPad portrait*/
-@media only screen 
-and (min-device-width : 768px) 
-and (max-device-width : 1024px) 
-and (orientation : portrait){ 
+@media only screen
+and (min-device-width : 768px)
+and (max-device-width : 1024px)
+and (orientation : portrait){
 
   #action_palette {
     width: 13em;
@@ -1354,17 +1367,21 @@ and (orientation : portrait){
 /*Sales Rep Form*/
     /*Zip*/
     form .row:nth-child(1) .col-md-6:nth-child(2) .row:nth-child(3) > div:nth-child(2){
-        padding-left:0;
+	padding-left:0;
     }
 
     /*fax*/
     form > .row:nth-child(1) .col-md-6:nth-child(2) > .row:nth-child(4) > div:nth-child(2){
-        padding-left:0;
+	padding-left:0;
     }
 
     form .row:nth-child(1) .col-md-6:nth-child(2) .row div:nth-child(1){
-        padding-right:0;
+	padding-right:0;
     }
 
 }
 /*gabby end*/
+
+.hidden {
+    display: none;
+}
