@@ -243,9 +243,19 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             if(salesrep != 0){
                 $(".info_block h1").removeClass('hide').html(salesrepName);
                 $("#topregcnt").addClass('consultant_changed');
+                $("#topqualcnt").addClass('consultant_changed');
+                $("#topcomcnt").addClass('consultant_changed');
+                $("#topsubcnt").addClass('consultant_changed');
+                $("#topbrcacnt").addClass('consultant_changed');
+                $("#topeventcnt").addClass('consultant_changed');
             }else{
                 $(".info_block h1").removeClass('hide').html('All<i class="fas fa-angle-down info_block_arrow" style="float:right;"></i><br>Genetic<br>Consultants');
                 $("#topregcnt").removeClass('consultant_changed');
+                $("#topqualcnt").addClass('consultant_changed');
+                $("#topcomcnt").addClass('consultant_changed');
+                $("#topsubcnt").addClass('consultant_changed');
+                $("#topbrcacnt").addClass('consultant_changed');
+                $("#topeventcnt").addClass('consultant_changed');
             }
             //top_stats();
         });
@@ -567,13 +577,13 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     success : function(data){
                         $.each(data, function(k, v) {
                             if(v.topbrcacount) $('#topbrcacnt').html(v.topbrcacount);
-                            $('#mebrcacnt').removeClass('increase decrease gold_stat gold_stat_star');
+                            //$('#mebrcacnt').removeClass('increase decrease gold_stat gold_stat_star');
                             
                             if($('#mebrcacnt').html() < $('#topbrcacnt').html()) $('#mebrcacnt').addClass('decrease');
                             if($('#mebrcacnt').html() > $('#topbrcacnt').html()) $('#mebrcacnt').addClass('increase');
                             if($('#mebrcacnt').html() === $('#topbrcacnt').html()){
-                                $('#mebrcacnt').addClass('gold_stat gold_stat_star');
-                                $('#topbrcacnt').addClass('gold_stat');
+                                /*$('#mebrcacnt').addClass('gold_stat gold_stat_star');
+                                $('#topbrcacnt').addClass('gold_stat');*/
                             }    
                         });
                     },
@@ -583,8 +593,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             if($('#mebrcacnt').html() < $('#topbrcacnt').html()) $('#mebrcacnt').addClass('decrease');
                             if($('#mebrcacnt').html() > $('#topbrcacnt').html()) $('#mebrcacnt').addClass('increase');
                             if($('#mebrcacnt').html() === $('#topbrcacnt').html()){
-                                $('#mebrcacnt').addClass('gold_stat gold_stat_star');
-                                $('#topbrcacnt').addClass('gold_stat');
+                                /*$('#mebrcacnt').addClass('gold_stat gold_stat_star');
+                                $('#topbrcacnt').addClass('gold_stat');*/
                             }
                         }    
                     }
@@ -603,8 +613,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             if($('#meeventcnt').html() < $('#topeventcnt').html()) $('#meeventcnt').addClass('decrease');
                             if($('#meeventcnt').html() > $('#topeventcnt').html()) $('#meeventcnt').addClass('increase');
                             if($('#meeventcnt').html() === $('#topeventcnt').html()){
-                                $('#meeventcnt').addClass('gold_stat gold_stat_star');
-                                $('#topeventcnt').addClass('gold_stat');
+                                /*$('#meeventcnt').addClass('gold_stat gold_stat_star');
+                                $('#topeventcnt').addClass('gold_stat');*/
                             }    
                         });
                     },
@@ -614,8 +624,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             if($('#meeventcnt').html() < $('#topeventcnt').html()) $('#meeventcnt').addClass('decrease');
                             if($('#meeventcnt').html() > $('#topeventcnt').html()) $('#meeventcnt').addClass('increase');
                             if($('#meeventcnt').html() === $('#topeventcnt').html()){
-                                $('#meeventcnt').addClass('gold_stat gold_stat_star');
-                                $('#topeventcnt').addClass('gold_stat');
+                                /*$('#meeventcnt').addClass('gold_stat gold_stat_star');
+                                $('#topeventcnt').addClass('gold_stat');*/
                             }
                         }    
                     }
@@ -632,7 +642,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         });
                     }
                 });
-                $.ajax({
+                /*$.ajax({
                     type : 'POST',
                     data : inputparam,
                     dataType: 'json',
@@ -653,7 +663,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             if(v.mecompletedcount) $('#mecomcnt').html(v.mecompletedcount);
                         });
                     }
-                });
+                });*/
                 $.ajax({
                     type : 'POST',
                     data : inputparam,
@@ -666,8 +676,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             if($('#meregcnt').html() < $('#topregcnt').html()) $('#meregcnt').addClass('decrease');
                             if($('#meregcnt').html() > $('#topregcnt').html()) $('#meregcnt').addClass('increase');
                             if($('#meregcnt').html() === $('#topregcnt').html()){
-                                $('#meregcnt').addClass('gold_stat gold_stat_star');
-                                $('#topregcnt').addClass('gold_stat');
+                                /*$('#meregcnt').addClass('gold_stat gold_stat_star');
+                                $('#topregcnt').addClass('gold_stat');*/
                             }    
                         });
                     },
@@ -677,8 +687,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             if($('#meregcnt').html() < $('#topregcnt').html()) $('#meregcnt').addClass('decrease');
                             if($('#meregcnt').html() > $('#topregcnt').html()) $('#meregcnt').addClass('increase');
                             if($('#meregcnt').html() === $('#topregcnt').html()){
-                                $('#meregcnt').addClass('gold_stat gold_stat_star');
-                                $('#topregcnt').addClass('gold_stat');
+                                /*$('#meregcnt').addClass('gold_stat gold_stat_star');
+                                $('#topregcnt').addClass('gold_stat');*/
                             }    
                         }   
                     }
