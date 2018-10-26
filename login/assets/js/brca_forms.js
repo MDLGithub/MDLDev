@@ -45,6 +45,14 @@ $(document).ready(function(){
   $("#forms").click(function(){
     firsttab.show();
     secondtab.hide();
+
+    $(this).addClass("active-tab");
+    $("#form-details").removeClass("active-tab");
+
+    $(".contentBlock.patientForms").css({
+      width:"50%",
+      left: "25%"
+    });
   });
 
    $("#info_button").click(function(){
@@ -77,46 +85,64 @@ $(document).ready(function(){
   $("#form-details").click(function(){
     firsttab.hide();
     secondtab.show();
+
+    secondtab.css('display', 'flex');
+
+      $("#forms").removeClass("active-tab");
+      $(this).addClass("active-tab");
+
+      $(".contentBlock.patientForms").css({
+        width:"60%",
+        left: "24%"
+      });
   });
 
    activeItem = $("#accordion li:first");
    $(activeItem).addClass('active');
 
    $("#accordion #form-bar").click(function(){
-       $(activeItem).animate({width: "50px"}, {duration:300, queue:false});
-       $(this).parent().animate({width: "80%"}, {duration:300, queue:false});
-       activeItem = $(this).parent();
-   });
+    /*$(activeItem).animate({width: "50px"}, {duration:300, queue:false});
+    $(this).parent().animate({width: "80%"}, {duration:300, queue:false});*/
 
-    $(".next-button").click(function(){
-      $(this).parent().parent().parent().animate({width: "50px"}, {duration:300, queue:false});
-      $(activeItem).next().animate({width: "80%"}, {duration:300, queue:false});
-      activeItem = $(activeItem).next();
-    });
+    $(activeItem).css('width', '50px');
+    $(this).parent().css('width', '80%');
+
+    activeItem = $(this).parent();
+});
+
+ $(".next-button").click(function(){
+   $(activeItem).css('width', '50px');
+   $(activeItem).next().css('width', '80%');
+   activeItem = $(activeItem).next();
+ });
 
 
-    $(".prev-button").click(function(){
-      /*$(activeItem).animate({width: "50px"}, {duration:300, queue:false});
-      $(activeItem).prev().animate({width: "80%"}, {duration:300, queue:false});*/
-      $(this).parent().parent().parent().animate({width: "50px"}, {duration:300, queue:false});
-      $(activeItem).prev().animate({width: "80%"}, {duration:300, queue:false});
-      activeItem = $(activeItem).prev();
-    });
+ $(".prev-button").click(function(){
+   $(activeItem).css('width', '50px');
+   $(activeItem).prev().css('width', '80%');
+   activeItem = $(activeItem).prev();
+ });
 
-  $(".patient_forms").on('click', function() {
-    $('#patient_brca_forms').css('display', 'block');
-  });
+     $(".patient_forms").on('click', function() {
+       $('#patient_brca_forms').css('display', 'block');
+         $(".contentBlock.patientForms").css({
+           width:"50%",
+           left: "25%"
+         }); 
+     });
 
-  $('.close').on('click', function () {
-    $('#patient_brca_forms').css('display', 'none');
-  });
+     // When the user clicks on <span> (x), close the modal
+     $('.close').on('click', function () {
+       $('#patient_brca_forms').css('display', 'none');
+     });
 
-  $(document).on('click', function (event) {
-    var target = $(event.target);
-    if (target.is( "#patient_brca_forms" )) {
-      $('#patient_brca_forms').css('display', 'none');
-    }
-  });
+     // When the user clicks anywhere outside of the modal, close it
+     $(document).on('click', function (event) {
+       var target = $(event.target);
+       if (target.is( "#patient_brca_forms" )) {
+         $('#patient_brca_forms').css('display', 'none');
+       }
+     });
 
   $('.openPdf').on('click', function() {
     $.ajax('ajaxHandler.php', {

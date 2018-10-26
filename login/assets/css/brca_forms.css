@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+
+
 #myModal{
   display:none;
   height: 100%;
@@ -47,11 +50,12 @@
   padding: 0;
   height: 500px;
   overflow: hidden;
+
 }
 
 #accordion::after {
   content: '';
-  position: absolute;
+  position: relative;
   background: rgb(28,72,123);
   width: 30px;
   height: 500px;
@@ -119,12 +123,13 @@ cursor:pointer;
   margin-left:50px;
 }
 
-#accordion .form-info strong{
+#accordion .form-info .fh{
   font-size: 30px;
-  font-family: "Open Sans";
+  font-family: 'Open Sans', sans-serif;
   color: rgb(28, 72, 123);
   font-weight: bold;
   line-height: 1.333;
+  background:none;
 }
 
 #accordion li {
@@ -138,6 +143,7 @@ cursor:pointer;
   text-decoration: none;
   font-size: 16px;
   line-height: 1.5em;
+  transition: width 0.3s 0s;
 }
 
 #accordion li img {
@@ -148,6 +154,38 @@ cursor:pointer;
 
 #accordion li.active {
   width: 80%;
+}
+
+#form-print{
+  height: 35px;
+  width: 80px;
+  position: absolute;
+  right: 50px;
+  top: 30px;
+  background: rgb(255,255,255);
+  background: linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%);
+  border: 0;
+  outline: 0;
+  cursor: pointer;
+  border: 1px solid #b7b7b7;
+  box-shadow: inset 0 0 30px rgba(255,255,255,.8), 0 1px 6px rgba(0,0,0,.31);
+  border-radius: 2em;
+  text-align:center;
+}
+
+#form-print strong{
+  vertical-align: sub;
+  color: #1c487b;
+}
+
+
+#form-print:hover {
+    box-shadow: inset 0 0 30px rgba(255,255,255,1), 0 1px 10px rgba(155,174,65,1);
+    border-color: #9bae41;
+}
+
+.active-tab{
+  background:white !important;
 }
 
 #form-details{
@@ -163,7 +201,7 @@ cursor:pointer;
 
 #form-details h2{
   font-size: 24px;
-  font-family: "Open Sans";
+  font-family: 'Open Sans', sans-serif;
   color: rgb(71, 71, 71);
   font-weight: bold;
   line-height: 1.2;
@@ -183,7 +221,7 @@ cursor:pointer;
 
 #forms h2{
   font-size: 24px;
-  font-family: "Open Sans";
+  font-family: 'Open Sans', sans-serif;
   color: rgb(28, 72, 123);
   font-weight: bold;
   line-height: 1.2;
@@ -211,7 +249,7 @@ cursor:pointer;
 #form-bar h2{
   writing-mode: vertical-rl;
   font-size: 22px;
-  font-family: "Open Sans";
+  font-family: 'Open Sans', sans-serif;
   color: rgb(28, 72, 123);
   font-weight: bold;
   line-height: 1.2;
@@ -239,7 +277,7 @@ cursor:pointer;
   display: flex;
   justify-content: center;
   margin-top: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 30px;
 }
 
 #form-option-table td.printSelectBlock {
@@ -248,6 +286,11 @@ cursor:pointer;
 
 #form-option-table thead th.no-bg{
     width:30%;
+}
+
+#form-option-table tbody tr td.left-td{
+  text-align: left;
+  font-weight: 600;
 }
 
 #info_button{
@@ -268,7 +311,7 @@ display:inline-block;
     margin-bottom: 40px;
     overflow:hidden;
     margin:auto;
-    padding-top: 20px;
+    margin-top:30px;
 }
 
 #form-option-table table tbody tr{

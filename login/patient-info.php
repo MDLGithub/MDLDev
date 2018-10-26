@@ -810,7 +810,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 </div>
                 <div class = "form-info-container">
                 <div class = "form-info col-md-8 patient_demographics">
-                    <strong>Patient Demographics</strong><br/>
+                    <strong class = "fh">Patient Demographics</strong><br/>
                         <div class="f2 required col-md-6 form_field first_name">
                             <label class="dynamic" for="form_first_name"><span>First name</span></label>
                                 <div class="group">
@@ -917,7 +917,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                  </div>
                 <div class = "form-info-container">
                 <div class = "form-info col-md-8">
-                    <strong>Insurance</strong><br/>
+                    <strong class = "fh">Insurance</strong><br/>
                         <div class="f2 required col-md-6">
                             <label class="dynamic" for="serial_number"><span>Serial</span></label>
                                 <div class="group">
@@ -942,7 +942,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                  </div>
                 <div class = "form-info-container">
                 <div class = "form-info col-md-8">
-                    <strong>Test</strong><br/>
+                    <strong class = "fh">Test</strong><br/>
                         <div class="f2 required col-md-6">
                             <label class="dynamic" for="serial_number"><span>Serial</span></label>
                                 <div class="group">
@@ -967,7 +967,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                  </div>
                 <div class = "form-info-container">
                 <div class = "form-info col-md-8">
-                    <strong>Genetic Counseling</strong><br/>
+                    <strong class = "fh">Genetic Counseling</strong><br/>
                         <div class="f2 required col-md-6">
                             <label class="dynamic" for="serial_number"><span>Serial</span></label>
                                 <div class="group">
@@ -992,7 +992,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                  </div>
                 <div class = "form-info-container">
                 <div class = "form-info col-md-8">
-                    <strong>Physician</strong><br/>
+                    <strong class = "fh">Physician</strong><br/>
                         <div class="f2 required col-md-6">
                             <label class="dynamic" for="serial_number"><span>Serial</span></label>
                                 <div class="group">
