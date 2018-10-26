@@ -63,7 +63,13 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     }
     $sqlQualify .= "ORDER BY q.`Date_created` DESC LIMIT 1";
     $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$Guid_user));  
-    
+
+    $patientData = $qualifyResult;
+    unset($patientData['firstname_enc']);
+    unset($patientData['lastname_enc']);
+
+    $patientInfo = json_encode($patientData);
+
     //If one is a physician or sales rep, 
     //should not be able to see other patients that they are not allowed to
     if(!$qualifyResult){
@@ -233,7 +239,10 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 <script src="assets/js/brca_forms.js"></script>
 
 <?php require_once 'navbar.php'; ?> 
+
 <main class="full-width">
+    <input type="hidden" id="guid_patient" />
+    <input type="hidden" id="post" value='<?php echo $patientInfo; ?>' />
         <?php 
         $thisMessage = "";
         if(isset($_GET['u']) || isset($_GET['i']) ){ 
@@ -847,9 +856,9 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     <h2>Patient Demographics</h2>
                 </div>
                 <div class = "form-info-container">
-                <div class = "form-info col-md-8">
+                <div class = "form-info col-md-8 patient_demographics">
                     <strong>Patient Demographics</strong><br/>
-                        <div class="f2 required col-md-6">
+                        <div class="f2 required col-md-6 form_field first_name">
                             <label class="dynamic" for="form_first_name"><span>First name</span></label>
                                 <div class="group">
                                     <input id="form_first_name" name="form_first_name" type="text" value="<?php echo $qualifyResult['firstname'] ?>" placeholder="First name" required="">
@@ -858,7 +867,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                     </p>
                                 </div>
                         </div>
-                        <div class="f2 required col-md-6">
+                        <div class="f2 required col-md-6 form_field last_name">
                             <label class="dynamic" for="form_last_name"><span>Last name</span></label>
                                 <div class="group">
                                     <input id="form_last_name" name="form_last_name" type="text" value="<?php echo $qualifyResult['lastname'] ?>" placeholder="Last name" required="">
@@ -867,7 +876,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                     </p>
                                 </div>
                         </div>
-                        <div class="f2 required col-md-6">
+                        <div class="f2 required col-md-6 form_field dob">
                             <label class="dynamic" for="form_dob"><span>DOB</span></label>
                                 <div class="group">
                                     <input id="form_dob" name="form_dob" type="text" value="<?php echo $qualifyResult['dob'] ?>" placeholder="Date of birth" required="">
@@ -876,7 +885,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                     </p>
                                 </div>
                         </div>
-                        <div class="f2 required col-md-6">
+                        <div class="f2 required col-md-6 form_field addr1">
                             <label class="dynamic" for="form_addr1"><span>Address line 1</span></label>
                                 <div class="group">
                                     <input id="form_addr1" name="form_addr1" type="text" value="<?php echo $qualifyResult['address'] ?>" placeholder="Address line 1" required="">
@@ -885,7 +894,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                     </p>
                                 </div>
                         </div>
-                        <div class="f2 required col-md-6">
+                        <div class="f2 required col-md-6 form_field addr2">
                             <label class="dynamic" for="form_addr2"><span>Address line 2</span></label>
                                 <div class="group">
                                     <input id="form_addr2" name="form_addr2" type="text" value="" placeholder="Address line 2" required="">
@@ -894,7 +903,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                     </p>
                                 </div>
                         </div>
-                        <div class="f2 required col-md-6">
+                        <div class="f2 required col-md-6 form_field city">
                             <label class="dynamic" for="form_city"><span>City</span></label>
                                 <div class="group">
                                     <input id="form_city" name="form_city" type="text" value="<?php echo $qualifyResult['city'] ?>" placeholder="City" required="">
@@ -903,7 +912,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                     </p>
                                 </div>
                         </div>
-                        <div class="f2 required col-md-6">
+                        <div class="f2 required col-md-6 form_field state">
                             <label class="dynamic" for="form_state"><span>State</span></label>
                                 <div class="group">
                                     <input id="form_state" name="form_state" type="text" value="<?php echo $qualifyResult['state'] ?>" placeholder="State" required="">
@@ -912,7 +921,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                     </p>
                                 </div>
                         </div>
-                        <div class="f2 required col-md-6">
+                        <div class="f2 required col-md-6 form_field zip">
                             <label class="dynamic" for="form_zip"><span>Zip</span></label>
                                 <div class="group">
                                     <input id="form_zip" name="form_zip" type="text" value="<?php echo $qualifyResult['zip'] ?>" placeholder="Zip" required="">
@@ -921,7 +930,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                     </p>
                                 </div>
                         </div>
-                        <div class="f2 required col-md-6">
+                        <div class="f2 required col-md-6 form_field phone">
                             <label class="dynamic" for="form_phone"><span>Phone</span></label>
                                 <div class="group">
                                     <input id="form_phone" name="form_phone" type="text" value="<?php echo $qualifyResult['phone_number'] ?>" placeholder="Phone" required="">
@@ -930,7 +939,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                     </p>
                                 </div>
                         </div>
-                        <div class="f2 required col-md-6">
+                        <div class="f2 required col-md-6 form_field ethnicity">
                             <label class="dynamic" for="form_ethnicity"><span>Ethnicity</span></label>
                                 <div class="group">
                                     <input id="form_ethnicity" name="form_ethnicity" type="text" value="<?php ?>" placeholder="Ethnicity" required="">
@@ -1126,7 +1135,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" value="test_req_form" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="http://www.mdlab.com/forms/Flyers/BRCA_Genetic_Req_IH0119_10_2018.pdf">Test Req</a>
+                                <a class="openPdf" pdf_name="BRCA_Genetic_Req_IH0119_10_2018.pdf">Test Req</a>
                             </td>
                         </tr>
                         <tr class="t_row">

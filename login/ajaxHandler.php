@@ -1,6 +1,7 @@
 <?php
 require_once('config.php');
 require_once('settings.php');
+use mikehaertl\pdftk\Pdf;
 
 if(isset($_POST['url_config']) && $_POST['url_config']=='1'){
     load_url_config($db, $_POST['id']);
@@ -65,6 +66,12 @@ if (isset($_POST['get_patient_info_providers'])) {
 }
 if (isset($_POST['get_salutation_message'])) {
     salutationMessage($db,$_POST['userRole'], $_POST['userId'], $_POST['userTimeZone']);
+}
+if (isset($_POST['openPdf'])) {
+    fillPdf($db, $_POST['pdf_name'], $_POST['patientInfo']);
+}
+if (isset($_POST['unlinkPdf'])) {
+    removeTmpPdf($db, $_POST['pdf_name']);
 }
 
 /**
@@ -945,4 +952,101 @@ function rangeYear () {
             'end' => $end->format('n/j/Y')
         ));
         exit();
+    }
+
+    function fillPdf($db, $pdf, $patientInfo) {
+
+//         stdClass Object
+// (
+//     [Guid_qualify] => 783
+//     [Guid_user] => 798
+//     [insurance] => Other
+//     [other_insurance] => Umr
+//     [account_number] => 34805
+//     [qDate] => 2018-09-14 14:26:43
+//     [provider_id] => 
+//     [source] => In Office
+//     [provider] => 
+//     [Guid_patient] => 733
+//     [patientid] => 
+//     [clientid] => 
+//     [salutation] => 
+//     [firstname] => atul
+//     [lastname] => gokhale
+//     [dob] => 2018-09-17
+//     [gender] => 
+//     [address] => 
+//     [city] => 
+//     [state] => 
+//     [zip] => 
+//     [phone_number] => 
+//     [physician_name] => 
+//     [physician_address] => 
+//     [physician_city] => 
+//     [physician_state] => 
+//     [physician_zip] => 
+//     [Guid_race] => 
+//     [insurance_name] => 
+//     [insurance_address] => 
+//     [insurance_city] => 
+//     [insurance_state] => 
+//     [insurance_zip] => 
+//     [insurance_policy_number] => 
+//     [insurance_type] => 
+//     [file_front] => 
+//     [file_back] => 
+//     [personal_history_cancer] => 
+//     [family_history_cancer] => 
+//     [family_history_mutations] => 
+//     [specimen_collected] => Yes
+//     [Guid_reason] => 
+//     [total_deductible] => 
+//     [test_kit] => 0
+//     [Date_created] => 2018-09-17 15:56:19
+//     [Date_modified] => 
+//     [email] => 
+//     [marked_test] => 0
+// )
+
+
+        $data = json_decode($patientInfo);
+        $physician_info = $data->physician_name . ', ' . 
+                            $data->physician_address . ', ' . 
+                            $data->physician_city . ', ' . 
+                            $data->physician_state . ', ' . 
+                            $data->physician_zip;
+
+
+        $directory = SITE_ROOT . '/forms/'; 
+        $pdftk = new Pdf($directory . $pdf);
+        // $structure = $pdftk->getDataFields();
+        // print_r($structure);
+        // die;
+
+        $pdftk->fillForm([
+                'untitled59' => $physician_info,
+                'untitled6' => $data->lastname . ' ' . $data->firstname,
+                'untitled8' => $data->address,
+                'untitled9' => $data->city,
+                'untitled10' => $data->state,
+                'untitled11' => $data->zip,
+                'untitled3' => $data->dob,
+                'untitled14' => $data->phone_number,
+                'untitled30' => $data->insurance_name != '' ? $data->insurance_name : $data->other_insurance,
+                'untitled34' => $data->insurance_policy_number,
+                'untitled4' => $data->gender == 'Male' ? 1 : 0
+            ])
+            ->needAppearances() 
+            ->saveAs($directory . 'filled.pdf');
+
+        echo json_encode(array(
+            'file' => './forms/filled.pdf', 
+            'filename' => 'filled.pdf'
+        ));
+        exit();
+    }
+
+    function removeTmpPdf($db, $pdf) {
+        $directory = SITE_ROOT . '/forms/' . $pdf; 
+        unlink($directory);
     }
