@@ -70,11 +70,11 @@ $(document).ready(function () {
      * Dashboard Calendar Sales Rep Dropdown filter
      * used on dashboard2.php dashboard calendar
      */
-    $(".info_block_arrow").click(function(){
+    /*$(".info_block_arrow").click(function(){
         $(".salesrep_dropdown").toggleClass("dropdown_hide");
         $(".info_block h1").toggleClass("hide");
         $(".info_block_arrow").toggleClass("info_block_arrow_show");
-    });  
+    });*/  
     
     $('.toggleRoles').on('click', function(){
         if($('.edit-status-form .rolesBlock').hasClass('hidden')){
@@ -249,7 +249,9 @@ $(document).ready(function () {
         }
     });
     
-        
+    $('.dmdlRefresh').on('click', function(){
+        $('.preloader').removeClass('hidden');
+    });
     /**
      * Home page toggle for search sidebar
      */
@@ -292,6 +294,15 @@ $(document).ready(function () {
             $('#switchLabel').text('Select All');
         }
     });
+    $(".selectAllCheckboxes").change(function() {
+        if(this.checked) {
+            $('.checkboxSelect').prop('checked', true);
+            $('.switchLabel').text('Remove All');
+        }else{
+            $('.checkboxSelect').prop('checked', false);
+            $('.switchLabel').text('Select All');
+        }
+    });    
     /**
      * Check all checkboxes on click to select All checkbox
      * by given data-id

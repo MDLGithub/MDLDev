@@ -291,8 +291,36 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 </aside>
 <!--SEARCH FORM BLOCK END-->
 
-<?php
 
+<?php  
+//upload and save dmdl data 
+$uploadMessage = "";
+if(isset($_POST['dmdlUpload'])){        
+    $tmpName = $_FILES['dmdlCsvUpload']['tmp_name'];
+    $csvArray = array_map('str_getcsv', file($tmpName));
+    $tableFields = $csvArray[0];
+    unset($csvArray[0]);        
+    $data = array();
+    $csvArrData = array();
+    for($i=0;$i<count($tableFields); $i++){           
+       for($j=1;$j<=count($csvArray); $j++){
+           $data[$j][$tableFields[$i]] = $csvArray[$j][$i];
+       }
+    }
+    foreach ($data as $k=>$v){
+        $checkMdlNum = $db->row("SELECT `MDLNumber` FROM `tbl_mdl_dmdl` WHERE MDLNumber=:MDLNumber", array('MDLNumber'=>$v['MDLNumber']));
+        
+        if(!$checkMdlNum || empty($checkMdlNum)){
+            $insert = insertIntoTable($db, 'tbl_mdl_dmdl', $v);
+
+            if($insert['insertID']){
+                $uploadMessage = "<p>Data loaded successfully!</p>";
+            } else {
+                $uploadMessage .= "<p class='color-red'>Data loaded Error.</p>";
+            }
+        }
+    } 
+}
 //updating mark as test users
 if(isset($_POST['mark_as_test'])){    
     if( isset($_POST['markedRow']['user']) ){
@@ -467,9 +495,7 @@ $num_estimates = $qualify_requests;
                         $img = ($salesRep['photo_filename']!="")? $salesRep['photo_filename']: ""; 
                         $image = ($img!="") ? SITE_URL.'/images/users/'.$img : "assets/images/default.png";
                         $address = "";
-                    ?>
-                        
-                        
+                    ?>  
                     <div class="salesrepInfoBlock">
                         <div id="physician-gc" class="col-md-12">
                             <label class="col-md-12 col-sm-4"><?php if($salesRep['title']) { echo " ".$salesRep['title']; } ?></label>
@@ -501,6 +527,26 @@ $num_estimates = $qualify_requests;
                     </div>                                          
                 </div>
                 <?php } ?>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4"></div>
+                <div class="col-md-8 dmdlForm">
+                    <form action="" method="POST" enctype="multipart/form-data">
+                        <?php if($role=='Admin'){ ?>                                    
+                        <span class="dmdlCsvUpload">  
+                            <input type="file" name="dmdlCsvUpload" />
+                        </span> 
+                        <button class="upload" type="submit" name="dmdlUpload">Upload</button>
+                        <?php } ?>
+                        <span class="dmdlRefresh">  
+                            <a href="<?php echo SITE_URL.'/dashboard.php?refresh=1'; ?>" class="refresh" type="submit" name="dmdlRefresh"><i class="fas fa-sync-alt"></i></a>
+                        </span>
+                    </form>
+                    <div class="uploadMsg">
+                    <?php if($uploadMessage!=""){ echo $uploadMessage; }?>
+                    </div>
+                </div>
             </div>
             
             <form id="patient_information" action="" method="post" class="<?php echo $role."_table";?>">
@@ -675,8 +721,40 @@ $num_estimates = $qualify_requests;
 
 
 
+<?php if( (isset($_GET['refresh'])) && $_GET['refresh']=="1" ){ ?>
+<div id="manage-status-modal" class="modalBlock ">
+    <div class="contentBlock refreshModal">
+        <a class="close" href="<?php echo SITE_URL."/dashboard.php"; ?>">X</a> 
+        <h5 class="title">
+            Refresh Results
+        </h5>
+        <div class="content">
+            <?php echo dmdl_refresh($db); ?>        
+        </div>
+    </div>
+</div>
+<?php } ?>
+
+<div class="preloader hidden"><img src="<?php echo SITE_URL.'/assets/images/preloader.gif'; ?>" /></div>
+
 <?php require_once 'scripts.php'; ?>
 <script type="text/javascript">
+    if ($('#refresh-log-table').length ) { 
+        var table = $('#refresh-log-table').DataTable({
+            orderCellsTop: true,
+            fixedHeader: true,
+            searching: false,
+            lengthChange: false,
+            "paging":   false,
+            "info":     false,
+            "bSortCellsTop": false,
+            "aoColumnDefs": [
+              { 
+                  "bSortable": false, 
+                  "aTargets": [ 5,6 ] } 
+            ]
+        });  
+    }
     if ($('#dataTableHome').length ) { 
         var table = $('#dataTableHome').DataTable({
                         dom: '<"top"i>rt<"bottom"flp><"wider-bottom"><"clear">',
