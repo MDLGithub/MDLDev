@@ -350,17 +350,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             }
         });
 
-        /*$("input[name='modaleventtype']").click(function () {
-            var modalevtType = $(this).val();
-            if (modalevtType == 2) {
-                $("div.modalaccounttype").addClass('hide').removeClass('show');//  hide();
-                $("div.modalhealthcare").addClass('show').removeClass('hide'); //show();
-            } else {
-                $("div.modalaccounttype").addClass('show').removeClass('hide'); //show();
-                $("div.modalhealthcare").addClass('hide').removeClass('show'); //hide();
-            }
-        });*/
-
         $("input[name='modaleventtype']").click(function () {
             var modalevtType = $(this).val();
             if (modalevtType == 2) {
@@ -405,7 +394,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 $('#calendar').fullCalendar('addEventSource', cursource);
             }
             $('#calendar').fullCalendar('refetchEvents');
-            top_stats();
+            //top_stats();
         });
 
         // when summary button is clicked
@@ -430,7 +419,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $('#calendar').fullCalendar('refetchEvents');
             $("#summary").css("background", "#90bcf7").css("color","#000").css("box-shadow", "inset 0 0 30px rgba(255,255,255,.8), 0 1px 6px rgba(0,0,0,.31)");
             $("#detail").css("background", "#1c487b").css("color","#fff").css("box-shadow", "none");
-            /*$("#detail").css("background", "linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)");*/
+          
         });
 
         var state_count = 0, count = 0, state_count1 = 0, count1 = 0;
@@ -468,24 +457,20 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     mm = '0' + mm;
                 }
                 var today2 = dd + '-' + mm + '-' + yyyy;
-                //var moment = $('#calendar').fullCalendar('getDate');
-                //alert(date.format('DD-MM-YYYY'))
-                //if (date._d.getDate() === today.getDate()) {
-                //if(moment.format("DD-MM-YYYY") === today ){
+                
                 if (date.format('DD-MM-YYYY') === today2) {
                     cell.css("background-image", "url('assets/images/active_background.png')");
                     cell.css("background-size", "100% 100%");
                 }
             },
-            viewRender: function(view, element) {
+            /*viewRender: function(view, element) {
                 top_stats();
-            },
+            },*/
             eventClick: function (event, jsEvent, view)
             {
                 var moment = $.datepicker.formatDate('yy-mm-dd', new Date());
                 // Get the modal
                 var modal = document.getElementById('myModal');
-                //var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD HH:mm:ss");
                 var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
                 var thisdate = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
                 if (moment <= thisdate) {
@@ -752,13 +737,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         var quaHTML = res.qua;
                         
                         if(view.name != 'basicDay' && parsedEventTime < parsedNow){
-                            //console.log(element[0].childNodes);
                             element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[0].childNodes[0].innerHTML = regHTML;
                             element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[2].childNodes[0].innerHTML = comHTML;
                             element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].childNodes[0].innerHTML = quaHTML;
                             element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[6].childNodes[0].innerHTML = subHTML;
                         }else if(view.name == 'basicDay' && parsedEventTime < parsedNow){
-                            //console.log(element[0].childNodes[0].childNodes[3].childNodes[0].childNodes[2].childNodes);
                             element[0].childNodes[0].childNodes[3].childNodes[0].childNodes[0].childNodes[0].innerHTML = regHTML;
                             element[0].childNodes[0].childNodes[3].childNodes[0].childNodes[2].childNodes[0].innerHTML = comHTML;
                             element[0].childNodes[0].childNodes[3].childNodes[0].childNodes[4].childNodes[0].innerHTML = quaHTML;
@@ -769,6 +752,33 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 
             },
             eventAfterAllRender: function(view) {
+                var events = $('#calendar').fullCalendar('getView');
+                var ele_events = events._props.currentEvents;
+                //console.log(ele_events);
+                var accounts = [];
+                $.each(ele_events,function(k, v){
+                    accounts.push(v.account)
+                });
+                var uniqueAcc = accounts.filter( onlyUnique );
+                var startdate = moment(view.start._d).format('YYYY-MM-DD');
+                var enddate = moment(view.end._d).format('YYYY-MM-DD');
+                
+                $.ajax({
+                    type : 'POST',
+                    data : { acc: uniqueAcc, startdate: startdate, enddate:enddate, action:'tableStats' },
+                    dataType: 'json',
+                    url : 'ajaxHandlerEvents.php',
+                    success : function(returndata){
+                        $(".regCnt").text(returndata.reg);
+                        $(".quaCnt").text(returndata.qua);
+                        $(".comCnt").text(returndata.com);
+                        $(".subCnt").text(returndata.sub);
+                    }
+                });
+
+                function onlyUnique(value, index, self) { 
+                    return self.indexOf(value) === index;
+                }
             },
         });
 
@@ -1625,10 +1635,10 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                         <div class="row">
                                             <div class="col-md-12 top-stats-cal">
 
-                                                <span class="regCnt">Registered <img src="assets/eventschedule/icons/silhouette_icon.png"> 0 </span>
-                                                <span class="comCnt">Completed <img src="assets/eventschedule/icons/checkmark_icon.png"> 0 </span>
-                                                <span class="quaCnt">Qualified <img src="assets/eventschedule/icons/dna_icon.png"> 0 </span>
-                                                <span class="subCnt">Submitted <img src="assets/eventschedule/icons/flask_icon.png"> 0 </span>
+                                                <span>Registered <img src="assets/eventschedule/icons/silhouette_icon.png"> <span class="regCnt">0</span> </span>
+                                                <span>Completed <img src="assets/eventschedule/icons/checkmark_icon.png"> <span class="comCnt">0</span></span>
+                                                <span>Qualified <img src="assets/eventschedule/icons/dna_icon.png"> <span class="quaCnt">0</span> </span>
+                                                <span>Submitted <img src="assets/eventschedule/icons/flask_icon.png"> <span class="subCnt">0</span> </span>
                                             </div>
                                         </div>
                                     </div>
@@ -2010,7 +2020,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
         return current_time;
     }
 
-function top_stats(){
+/*function top_stats(){
     var rgCnt = cmCnt = subCnt = qCnt = 0;
     $(".top-stats-cal").html('<span class="regCnt">Registered <img src="assets/eventschedule/icons/silhouette_icon.png"> 0</span><span class="comCnt">Completed <img src="assets/eventschedule/icons/checkmark_icon.png"> 0 </span><span class="quaCnt">Qualified <img src="assets/eventschedule/icons/dna_icon.png"> 0</span><span class="subCnt">Submitted <img src="assets/eventschedule/icons/flask_icon.png"> 0</span>');
     if ($('.fc-month-view').has('.fc-event').length === 0) {
@@ -2024,7 +2034,7 @@ function top_stats(){
             });
         }, 5000);
     }
-}
+}*/
 </script>
 <?php require_once 'scripts.php'; ?>
 <?php require_once 'footer.php'; ?>

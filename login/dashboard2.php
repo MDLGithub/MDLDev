@@ -167,6 +167,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     p.acc-click {
         color: #343;
     }
+
+    .consultant_changed{ visibility: hidden; }
+    .consultant_changed:before{ position: absolute;display: inline-block; width: 60px; border-radius: 20px; left: 0; content: "0"; background-color: #fff; visibility: visible; }
+    .forcehidden{ display: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; }
 </style>
 <script>
     
@@ -176,8 +180,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
     $(document).ready(function () {
         createChart();
-        //onDataBinding();
-        /*top_stats();*/
+
         $(".f2").width('95%');
         $("input[name='eventtype']").click(function () {
             var evtType = $(this).val();
@@ -239,9 +242,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $(".salesrep_dropdown").addClass("dropdown_hide");
             if(salesrep != 0){
                 $(".info_block h1").removeClass('hide').html(salesrepName);
-                $("#topregcnt").text(0);
+                $("#topregcnt").addClass('consultant_changed');
             }else{
                 $(".info_block h1").removeClass('hide').html('All<i class="fas fa-angle-down info_block_arrow" style="float:right;"></i><br>Genetic<br>Consultants');
+                $("#topregcnt").removeClass('consultant_changed');
             }
             //top_stats();
         });
@@ -391,7 +395,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         }
                         var tooltip = '<div class="tooltipevent" style="padding:20px 20px;min-width:100px;min-height:100px;background:'+ bgclr + ';color:#000;position:absolute;z-index:10001;">' + message + '</div>';
                         $("body").append(tooltip);
-                        //$(this).mouseover(function (e) {
                         $(".show-stats").mouseover(function (e) {
                             $(this).css('z-index', 10000);
                             $('.tooltipevent').fadeIn('500');
@@ -505,12 +508,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             eventAfterRender: function (event, element, view) {
                 if (!event.evtCnt) {
                     if ((event.salesrep == null || event.account == null) && event.title == 'BRCA Day') {
-                        //element.css('background-color', '#FF6347');
+                        
                         element.css('background-color', '#fff');
                         element.css('color', '#000');
                         element.css('border-color', '#FF6347');
                     } else if (event.salesrep == null && event.title != 'BRCA Day') {
-                        //element.css('background-color', '#FF6347');
+                        
                         element.css('background-color', '#fff');
                         element.css('color', '#000');
                         element.css('border-color', '#FF6347');
@@ -521,7 +524,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 }
 
                 var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1, selectedDate: $.fullCalendar.formatDate(event.start, "Y-M-DD")};
-                //console.log(eventData);
+                
                 var today = new Date();
                 var parsedNow =  new Date(today).getUnixTime();
                 var parsedEventTime = new Date(event.start).getUnixTime();        
@@ -541,7 +544,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     });
             },
             eventAfterAllRender: function (event, element, view) {
-                //$(".days-06:first").css("display", "block");
+
                 var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
 
                 var inputparam = {
@@ -549,30 +552,13 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     startdate: start
                 };
 
-
-                /*$('#mebrcacnt').html('0');
-                $('#meeventcnt').html('0');
-                $('#meregcnt').html('0'); 
-                $('#mequalcnt').html('0');
-                $('#mecomcnt').html('0');*/
-
                 $('#topbrcacnt').html('0');
                 $('#topeventcnt').html('0');
                 $('#topregcnt').html('0');
                 $('#topqualcnt').html('0');
                 $('#topcomcnt').html('0');
                 
-                $.ajax({
-                    type : 'POST',
-                    data : { userid:<?php echo $userID; ?>, startdate:start, action:'mebrcacount' },//inputparam,
-                    dataType: 'json',
-                    url : 'ajaxHandlerEvents.php',
-                    success : function(data){
-                        $.each(data, function(k, v) {
-                            if(v.mebrcacount) $('#mebrcacnt').html(v.mebrcacount);
-                        });
-                    }
-                });
+               
                 $.ajax({
                     type : 'POST',
                     data : { userid:<?php echo $userID; ?>, startdate:start, action:'topbrcacount' },//inputparam,
@@ -604,17 +590,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     }
                 });
                 
-                $.ajax({
-                    type : 'POST',
-                    data : { userid:<?php echo $userID; ?>, startdate:start, action:'meeventcount' },//inputparam,
-                    dataType: 'json',
-                    url : 'ajaxHandlerEvents.php',
-                    success : function(data){
-                        $.each(data, function(k, v) {
-                            if(v.meeventcount) $('#meeventcnt').html(v.meeventcount);
-                        });
-                    }
-                });
                 $.ajax({
                     type : 'POST',
                     data : inputparam,
@@ -721,8 +696,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             if($('#mequalcnt').html() < $('#topqualcnt').html()) $('#mequalcnt').addClass('decrease');
                             if($('#mequalcnt').html() > $('#topqualcnt').html()) $('#mequalcnt').addClass('increase');
                             if($('#mequalcnt').html() === $('#topqualcnt').html()){
-                                $('#mequalcnt').addClass('gold_stat gold_stat_star');
-                                $('#topqualcnt').addClass('gold_stat');
+                                //$('#mequalcnt').addClass('gold_stat gold_stat_star');
+                                //$('#topqualcnt').addClass('gold_stat');
                             }    
                         });
                     },
@@ -732,8 +707,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             if($('#mequalcnt').html() < $('#topqualcnt').html()) $('#mequalcnt').addClass('decrease');
                             if($('#mequalcnt').html() > $('#topqualcnt').html()) $('#mequalcnt').addClass('increase');
                             if($('#mequalcnt').html() === $('#topqualcnt').html()){
-                                $('#mequalcnt').addClass('gold_stat gold_stat_star');
-                                $('#topqualcnt').addClass('gold_stat');
+                               // $('#mequalcnt').addClass('gold_stat gold_stat_star');
+                                //$('#topqualcnt').addClass('gold_stat');
                             }    
                         }   
                     }
@@ -825,7 +800,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     dataType: 'json',
                     url : 'ajaxHandlerEvents.php',
                     success : function(returndata){
-                        console.log(returndata.reg, returndata.qua, returndata.com, returndata.sub);
                         if( returndata.reg < 5 ){
                             rgCntimg = "below_avg";
                         }else if( returndata.reg < 10 && returndata.reg >= 5 ){
@@ -858,12 +832,34 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             qCntimg = "top_performer_avg";
                         }
                         $("#meregcnt").text(returndata.reg).addClass(rgCntimg).removeClass('decrease');
-                        $("#mequalcnt").text(returndata.qua).addClass(qCntimg).removeClass('decrease');
-                        $("#mecomcnt").text(returndata.com).addClass(cmCntimg).removeClass('decrease');
+                        $("#mecomcnt").text(returndata.qua).addClass(qCntimg).removeClass('decrease');
+                        $("#mequalcnt").text(returndata.com).addClass(cmCntimg).removeClass('decrease');
                         $("#mesubcnt").text(returndata.sub).addClass(subCntimg).removeClass('decrease');
                     }
                 });
+                setTimeout(function(){
+                    var brcaCnt = $(".rightCircleicon1").length;
+                    var hcfCnt = $(".rightCircleicon2").length;
+                    var brcaCntimg = hcfCntimg = "";
+                    if( brcaCnt < 5 ){
+                        brcaCntimg = "below_avg";
+                    }else if( brcaCnt < 10 && brcaCnt >= 5 ){
+                        brcaCntimg = "above_avg";
+                    }else if( brcaCnt >= 10 ){
+                        brcaCntimg = "top_performer_avg";
+                    }
 
+                    if( hcfCnt < 5 ){
+                        hcfCntimg = "below_avg";
+                    }else if( hcfCnt < 10 && hcfCnt >= 5 ){
+                        hcfCntimg = "above_avg";
+                    }else if( hcfCnt >= 10 ){
+                        hcfCntimg = "top_performer_avg";
+                    }
+
+                    $("#mebrcacnt").text(brcaCnt).addClass(brcaCntimg).removeClass('decrease');
+                    $("#meeventcnt").text(hcfCnt).addClass(hcfCntimg).removeClass('decrease');
+                }, 5000);
                 //top_stats();
             },
         });
@@ -965,14 +961,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             }
             var title = $("input[name='modaleventtype']:checked").parent('label').text();
             if ($('#modaleventstart').val() && ($('#modalsalerepid').val() || $('#modalaccountopt').val() != 0)) {
-                /*
-                var start = dateFormat($('#modaleventstart').val(), "yyyy-mm-dd");
-                var end = dateFormat($('#modaleventstart').val(), "yyyy-mm-dd");
-                
-                var start = $('#modaleventstart').val();
-                var end = $('#modaleventstart').val();
-            
-                */
                     
                 var start = moment($('#modaleventstart').val()).format("YYYY-MM-DD");
                 var end = moment($('#modaleventstart').val()).format("YYYY-MM-DD");
@@ -989,7 +977,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     action = 'eventupdate'
                 }
                 
-                //var action = ($('#modalcomment').val()) ? 'eventupdate' : 'healthEventupdate';
                 var full_name = $('#modalfull_name_id').val() ? $('#modalfull_name_id').val() : '';
                 var street1 = $('#modalstreet1_id').val() ? $('#modalstreet1_id').val() : '';
                 var street2 = $('#modalstreet2_id').val() ? $('#modalstreet2_id').val() : '';
@@ -998,7 +985,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var zip = $('#modalzip_id').val() ? $('#modalzip_id').val() : '';
                 var modalhealthcareid = $('#modalhealthcareid').val() ? $('#modalhealthcareid').val() : '';
                 var modalid = $('#modalid').val();
-                // var userid = $('#update_commenterid').val();
                 var userid = $('#update_commenterid').val();
                 var eventData = {
                     modaltitle: title,
@@ -1020,9 +1006,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     updated_date : current_time,
                     action: action
                 };
-                //console.log(eventData);
-                //return false;
-
+                
                 $.ajax({
                     url: "ajaxHandlerEvents.php",
                     type: "POST",
@@ -1064,7 +1048,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         $('#calendar').fullCalendar('refetchEvents');
                         var modal = document.getElementById('myModal');
                         modal.style.display = "none";
-                        //alert("Event Removed");
+                       
                     }
                 })
             }
@@ -1677,8 +1661,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                             <input type="text" class="form-control" id="modalzip_id" name="modalzip" placeholder="zip code">
                                         </div>
                                     </div> 
-                                    
-                                   <!--  <input type="hidden" id="current_user" name="userid" value="<?php echo $userID; ?>">  -->
+                                   
                                     <input type="hidden" id="update_commenterid" name="userid" value="<?php echo $userID; ?>">
                                     <input type="hidden" id="update_date_updated" name="update_date" value="<?php echo date("Y-m-d H:i:s"); ?>">
                                 </div>  
@@ -1792,61 +1775,6 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             var current_time = year + "-" + month + "-" + date + " " +hr + ":" + min + ":" + sec ;
             return current_time;
         }
-
-        /*function top_stats(){
-            var rgCnt = cmCnt = subCnt = qCnt = 0;
-            var rgCntimg = cmCntimg = subCntimg = qCntimg = "";
-            $("#meregcnt").text("0").attr('class', '');
-            $("#mequalcnt").text("0").attr('class', '');
-            $("#mecomcnt").text("0").attr('class', '')
-            $("#mesubcnt").text("0").attr('class', '');
-            if ($('.fc-month-view').has('.fc-event').length === 0) {
-                setTimeout(function(){
-                    $(".show-stats").each(function(){
-                        rgCnt = rgCnt + parseInt($(this).find(".silhouette span").text());
-                        if( rgCnt < 5 ){
-                            rgCntimg = "below_avg";
-                        }else if( rgCnt < 10 && rgCnt >= 5 ){
-                            rgCntimg = "above_avg";
-                        }else if( rgCnt >= 10 ){
-                            rgCntimg = "top_performer_avg";
-                        }
-
-                        cmCnt = cmCnt + parseInt($(this).find(".checkmark span").text());
-                        if( cmCnt < 5 ){
-                            cmCntimg = "below_avg";
-                        }else if( cmCnt < 10 && cmCnt >= 5 ){
-                            cmCntimg = "above_avg";
-                        }else if( cmCnt >= 10 ){
-                            cmCntimg = "top_performer_avg";
-                        }
-
-                        subCnt = subCnt + parseInt($(this).find(".flask span").text());
-                        if( subCnt < 5 ){
-                            subCntimg = "below_avg";
-                        }else if( subCnt < 10 && subCnt >= 5 ){
-                            subCntimg = "above_avg";
-                        }else if( subCnt >= 10 ){
-                            subCntimg = "top_performer_avg";
-                        }
-
-                        qCnt = qCnt + parseInt($(this).find(".dna span").text());
-                        if( qCnt < 5 ){
-                            qCntimg = "below_avg";
-                        }else if( qCnt < 10 && qCnt >= 5 ){
-                            qCntimg = "above_avg";
-                        }else if( qCnt >= 10 ){
-                            qCntimg = "top_performer_avg";
-                        }
-
-                        $("#meregcnt").text(rgCnt).addClass(rgCntimg).removeClass('decrease');
-                        $("#mequalcnt").text(qCnt).addClass(qCntimg).removeClass('decrease');
-                        $("#mecomcnt").text(cmCnt).addClass(cmCntimg).removeClass('decrease');
-                        $("#mesubcnt").text(subCnt).addClass(subCntimg).removeClass('decrease');
-                    });
-                }, 5500);
-            }
-        }*/
 
         function labelTemplate (e) { 
             var text = e.value;
