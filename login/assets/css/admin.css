@@ -610,6 +610,7 @@ main {
     margin-right: 9%;
 }
 
+
 .button.export::before {
     content: "";
     background: url(../images/arrow-up.png) no-repeat center;
