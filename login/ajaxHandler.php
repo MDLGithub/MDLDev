@@ -2,6 +2,7 @@
 require_once('config.php');
 require_once('settings.php');
 use mikehaertl\pdftk\Pdf;
+use mikehaertl\tmp\File;
 
 if(isset($_POST['url_config']) && $_POST['url_config']=='1'){
     load_url_config($db, $_POST['id']);
@@ -955,60 +956,6 @@ function rangeYear () {
     }
 
     function fillPdf($db, $pdf, $patientInfo) {
-
-//         stdClass Object
-// (
-//     [Guid_qualify] => 783
-//     [Guid_user] => 798
-//     [insurance] => Other
-//     [other_insurance] => Umr
-//     [account_number] => 34805
-//     [qDate] => 2018-09-14 14:26:43
-//     [provider_id] => 
-//     [source] => In Office
-//     [provider] => 
-//     [Guid_patient] => 733
-//     [patientid] => 
-//     [clientid] => 
-//     [salutation] => 
-//     [firstname] => atul
-//     [lastname] => gokhale
-//     [dob] => 2018-09-17
-//     [gender] => 
-//     [address] => 
-//     [city] => 
-//     [state] => 
-//     [zip] => 
-//     [phone_number] => 
-//     [physician_name] => 
-//     [physician_address] => 
-//     [physician_city] => 
-//     [physician_state] => 
-//     [physician_zip] => 
-//     [Guid_race] => 
-//     [insurance_name] => 
-//     [insurance_address] => 
-//     [insurance_city] => 
-//     [insurance_state] => 
-//     [insurance_zip] => 
-//     [insurance_policy_number] => 
-//     [insurance_type] => 
-//     [file_front] => 
-//     [file_back] => 
-//     [personal_history_cancer] => 
-//     [family_history_cancer] => 
-//     [family_history_mutations] => 
-//     [specimen_collected] => Yes
-//     [Guid_reason] => 
-//     [total_deductible] => 
-//     [test_kit] => 0
-//     [Date_created] => 2018-09-17 15:56:19
-//     [Date_modified] => 
-//     [email] => 
-//     [marked_test] => 0
-// )
-
-
         $data = json_decode($patientInfo);
         $physician_info = $data->physician_name . ', ' . 
                             $data->physician_address . ', ' . 
@@ -1019,9 +966,6 @@ function rangeYear () {
 
         $directory = SITE_ROOT . '/forms/'; 
         $pdftk = new Pdf($directory . $pdf);
-        // $structure = $pdftk->getDataFields();
-        // print_r($structure);
-        // die;
 
         $pdftk->fillForm([
                 'untitled59' => $physician_info,
@@ -1036,17 +980,11 @@ function rangeYear () {
                 'untitled34' => $data->insurance_policy_number,
                 'untitled4' => $data->gender == 'Male' ? 1 : 0
             ])
-            ->needAppearances() 
-            ->saveAs($directory . 'filled.pdf');
+            ->execute();
+   
+        $content = file_get_contents( (string) $pdftk->getTmpFile() );
 
-        echo json_encode(array(
-            'file' => './forms/filled.pdf', 
-            'filename' => 'filled.pdf'
-        ));
-        exit();
-    }
-
-    function removeTmpPdf($db, $pdf) {
-        $directory = SITE_ROOT . '/forms/' . $pdf; 
-        unlink($directory);
+        header('Content-Type: application/pdf');
+    
+        die($content);
     }

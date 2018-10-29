@@ -145,30 +145,32 @@ $(document).ready(function(){
      });
 
   $('.openPdf').on('click', function() {
-    $.ajax('ajaxHandler.php', {
-      type: 'POST',
-      data: {
-        openPdf: 'ok',
-        pdf_name: $(this).attr('pdf_name'),
-        patientInfo: $('#post').val()
-      },
-      success: function (response) {
-          var result = JSON.parse(response);
+    var request = new XMLHttpRequest();
+    request.open('POST', 'ajaxHandler.php', true);
+    request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+    request.responseType = 'blob';
+    request.send('openPdf=ok&pdf_name=' + $(this).attr('pdf_name') + '&patientInfo=' + $('#post').val());
 
-          $('#form-option-table').append('<a href="'+ result.file +'" class="open_filled_pdf" type="hidden">open</a>');
-          window.location = $(".open_filled_pdf").attr("href");
+    request.onload = function() {
+      // Only handle status code 200
+      if(request.status === 200) {
+        var tabWindow = window.open('', '_blank');
+        var a = tabWindow.document.createElement('a');
+        var blob = new Blob([request.response], { type: 'application/pdf' });
 
-          // $.ajax('ajaxHandler.php', {
-          //   type: 'POST',
-          //   data: {
-          //     unlinkPdf: 'ok',
-          //     pdf_name: result.filename,
-          //     patient_id: $('#guid_patient').val()
-          //   },
-          //   success: function (response) {}
-          // });
+        if (window.navigator.msSaveOrOpenBlob) {
+          spinnerService.hide('html5spinner');
+          window.navigator.msSaveOrOpenBlob(blob, filename);
+        } else {
+          var url = a.href = window.URL.createObjectURL(blob);
+          a.click();
+          a.download = 'filled.pdf';
         }
-      });
-  });
 
+        setTimeout(function(){
+          window.URL.revokeObjectURL(url)
+        , 100})
+      }
+    };
+  });
 });
