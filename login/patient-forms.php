@@ -44,9 +44,20 @@ $isValid = TRUE;
             <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
         </section>
         <div class="scroller event-schedule">
+            <a href="#" class="patient_forms" style="margin:0">
+                    <img src="./images/icon_forms.png">
+                    <p>Forms</p>
+            </a>
+
+          <div id = "myModal">
+            
+            <div class = "modal-class">
+            <span class = "close">
+                <i class="fas fa-times"></i>
+            </span>
             <div class="container form-container" style="margin:auto"> 
 
-                <div>
+                <div class = "form-row">
                     <div id = "form-details">
                         <h2>Forms</h2>
                     </div>
@@ -415,6 +426,12 @@ $isValid = TRUE;
           </div>
                 </div>
             </div>
+        </div>
+        </div>
+
+
+
+
 
         </div>
     </div>

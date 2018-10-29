@@ -332,6 +332,7 @@ if(isset($_POST['mark_as_test'])){
 }
 
 $sqlTbl = "SELECT q.*, p.*, "
+        . "AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') as firstname, AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') as lastname, "
         . "a.name as account_name, a.Guid_account,"
         . "CONCAT (srep.first_name, ' ', srep.last_name) AS salesrep_name, srep.Guid_salesrep, "
         . "u.email, u.marked_test,  u.Guid_role, "
@@ -356,7 +357,8 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
     if (isset($_POST['meets_mn']) && strlen($_POST['meets_mn'])) {
         $whereTest = "";
         if($_POST['meets_mn']=='incomplete'){
-            $sqlTbl  = "SELECT q.*,p.*, a.name as account_name, a.Guid_account,
+            $sqlTbl  = "SELECT q.*, a.name as account_name, a.Guid_account,
+                        p.*, AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') as firstname, AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') as lastname,
                         CONCAT (srep.first_name, ' ', srep.last_name) AS salesrep_name, srep.Guid_salesrep, 
                         u.email, u.marked_test, u.Guid_role, q.Date_created AS `date`, 
                         '1' AS incomplete FROM tblqualify q  
@@ -396,12 +398,12 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
     //First Name
     if (isset($_POST['first_name']) && strlen(trim($_POST['first_name']))) {
         $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
-        $where .= " p.firstname LIKE '%" . $_POST['first_name'] . "%'";
+        $where .= " AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') LIKE '%" . $_POST['first_name'] . "%'";
     }
     //Last Name
     if (isset($_POST['last_name']) && strlen(trim($_POST['last_name']))) {
         $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
-        $where .= " p.lastname LIKE '%" . $_POST['last_name'] . "%'";
+        $where .= " AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') LIKE '%" . $_POST['last_name'] . "%'";
     }
     //Insurance
     if (isset($_POST['insurance']) && strlen($_POST['insurance'])) {
@@ -447,10 +449,10 @@ if($role == 'Physician'){
     $where .= " q.account_number IN (" . $account_id . ")";
 }
 
-$where  .= " AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%test%' "
-        . "AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Smith%' "
-        . "AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Doe%' "
-        . "AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%Jane Doe%'";
+$where  .= " AND CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) NOT LIKE '%test%' "
+        . "AND CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) NOT LIKE '%John Smith%' "
+        . "AND CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) NOT LIKE '%John Doe%' "
+        . "AND CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) NOT LIKE '%Jane Doe%'";
 if( !(isset($_POST['meets_mn']) && $_POST['meets_mn']=='incomplete')){
     $where .= "AND q.`Date_created` = (SELECT MAX(Date_created) FROM tbl_ss_qualify AS m2 WHERE q.Guid_qualify = m2.Guid_qualify)";
 }
@@ -719,7 +721,41 @@ $num_estimates = $qualify_requests;
 
 <button id="action_palette_toggle" class=""><i class="fa fa-2x fa-angle-left"></i></button>
 
+<?php 
+if(isset($_POST['dmdlUpdate'])){
+    
+    if(isset($_POST['dmdl']['selected'])){
+        foreach ($_POST['dmdl']['selected'] as $mdlNum=>$v){
+            $dmdlItem = $_POST["dmdl"]["$mdlNum"];
+            var_dump($dmdlItem);
+            //if we have exact match
+            if($dmdlItem['status']=='yes'){
+                
+            }
+            //if not exact match but we select Possible_Match
+            if($dmdlItem['status']=='no' || $dmdlItem['status']=='duplicate'){
+                if(isset($dmdlItem['Possible_Match']) && $dmdlItem['Possible_Match']!=''){
+                    $Guid_patient = $dmdlItem['Possible_Match']; //patient id from admin db
+                    //update patent table
+                    
+                    //update mdl number
+                    
+                    //update account
+                    
+                    //update provider
+                    
+                    //update status log table
+                }
+            }
+        }
+    }
+}
+    
+if(isset($_POST['dmdlCreateNew'])){
+    var_dump($_POST);
+}
 
+?>
 
 <?php if( (isset($_GET['refresh'])) && $_GET['refresh']=="1" ){ ?>
 <div id="manage-status-modal" class="modalBlock ">

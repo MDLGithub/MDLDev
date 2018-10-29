@@ -43,6 +43,7 @@ if(isset($_POST['mark_as_test'])){
 }
 
 $sqlTbl = "SELECT q.*, p.*, "
+        . "AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') as firstname, AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') as lastname, "
         . "a.name as account_name, "
         . "CONCAT (srep.first_name, ' ', srep.last_name) AS salesrep_name, srep.Guid_salesrep, "
         . "u.email, u.marked_test,  u.Guid_role, "
@@ -73,10 +74,10 @@ if($role == 'Physician'){
     $where .= " q.account_number IN (" . $account_id . ")";
 }
 
-$where  .= " AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%test%' "
-        . "AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Smith%' "
-        . "AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Doe%' "
-        . "AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%Jane Doe%'";
+$where  .= " AND CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) NOT LIKE '%test%' "
+        . "AND CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) NOT LIKE '%John Smith%' "
+        . "AND CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) NOT LIKE '%John Doe%' "
+        . "AND CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) NOT LIKE '%Jane Doe%'";
 if( !(isset($_POST['meets_mn']) && $_POST['meets_mn']=='incomplete')){
     $where .= "AND q.`Date_created` = (SELECT MAX(Date_created) FROM tbl_ss_qualify AS m2 WHERE q.Guid_qualify = m2.Guid_qualify)";
 }

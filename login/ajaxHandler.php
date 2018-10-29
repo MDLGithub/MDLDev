@@ -101,7 +101,7 @@ function salutationMessage($db, $role, $userID, $timezone){
         $salesrep = $db->row("SELECT first_name FROM `tblsalesrep` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
         $title = $salesrep['first_name'].'!';                     
     } elseif($role=='Patient' || $role=='MDL Patient'){ 
-        $salesrep = $db->row("SELECT firstname FROM `tblpatient` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
+        $salesrep = $db->row("SELECT AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') as firstname FROM `tblpatient` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
         $title = $salesrep['firstname'].'!';
     }    
     // 24-hour format of an hour without leading zeros (0 through 23)
@@ -714,7 +714,10 @@ function exportUsers($db) {
      ". ($_POST['to'] == '' ? " " : "AND q.Date_created <=:to") ." 
     AND mdl.mdl_number IS NOT NULL AND mdl.mdl_number != '' AND mdl.mdl_number != 0
     
-    AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%test%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Smith%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%John Doe%' AND CONCAT(p.firstname, ' ', p.lastname) NOT LIKE '%Jane Doe%'
+    AND CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) NOT LIKE '%test%' 
+    AND CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) NOT LIKE '%John Smith%' 
+    AND CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) NOT LIKE '%John Doe%' 
+    AND CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) NOT LIKE '%Jane Doe%'
     
     GROUP BY q.Guid_qualify ORDER BY sales ASC, account ASC, accessioned ASC";
 
