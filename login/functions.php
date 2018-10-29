@@ -272,7 +272,7 @@ function getUserFullInfo($db, $userID){
         }
     } else {
         
-        $query = "SELECT *, firstname AS first_name, lastname AS last_name FROM `tblpatient` WHERE Guid_user=:Guid_user";
+        $query = "SELECT *, aes_decrypt(firstname_enc, 'F1rstn@m3@_%') AS first_name, aes_decrypt(lastname_enc, 'L@stn@m3&%#') AS last_name FROM `tblpatient` WHERE Guid_user=:Guid_user";
         $patientInfo = $db->row($query, array("Guid_user"=>$userID));
         if(!empty($patientInfo)){
             $result = $patientInfo;
@@ -479,7 +479,7 @@ function getUserDetails($db, $userRole, $userID, $patientID=""){
     } elseif ($userRole == 'Physician') {
         $q = "SELECT first_name, last_name, photo_filename FROM tblprovider";    
     } elseif ($userRole == 'Patient' || $userRole == 'MDL Patient') {
-        $q = "SELECT firstname as first_name, lastname as last_name FROM tblpatient";
+        $q = "SELECT aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as first_name, aes_decrypt(lastname_enc, 'L@stn@m3&%#') as last_name FROM tblpatient";
     }  
     
     if($q!=""){        
@@ -487,7 +487,7 @@ function getUserDetails($db, $userRole, $userID, $patientID=""){
         $userDetail = $db->row($q, array("Guid_user"=>$userID));
     } else {//when patient is not exists on users table
         if($patientID!=""){
-            $q = "SELECT firstname as first_name, lastname as last_name FROM tblpatient  WHERE Guid_patient=:Guid_patient";
+            $q = "SELECT aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as first_name, aes_decrypt(lastname_enc, 'L@stn@m3&%#') as last_name FROM tblpatient  WHERE Guid_patient=:Guid_patient";
             $userDetail = $db->row($q, array("Guid_patient"=>$patientID));
         }
     }
@@ -519,7 +519,11 @@ function saveUserDetails($db, $Guid_user, $Guid_role, $userDetails){
         $userQ = "SELECT Guid_user FROM tblpatient WHERE Guid_user=:Guid_user";
         $isUserExists = $db->row($userQ, array('Guid_user'=>$Guid_user));
         if($isUserExists){
-            updateTable($db, 'tblpatient', $userDetails, array('Guid_user'=>$Guid_user));
+            $fname = $userDetails['firstname_enc'];
+            $lname = $userDetails['lastname_enc'];
+            
+            $query = "UPDATE `tblpatient` SET firstname_enc=AES_ENCRYPT('".$fname."','F1rstn@m3@_%'), lastname_enc=AES_ENCRYPT('".$lname."', 'L@stn@m3&%#') WHERE `Guid_user`=$Guid_user";
+            $update = $db->query($query);
         }else{
             $userDetails['Guid_user'] = $Guid_user;
             insertIntoTable($db, 'tblpatient', $userDetails);
@@ -1687,10 +1691,10 @@ function getMarkedTestUserIDs($db){
 
 function getTestUserIDs($db){
     $q = "SELECT p.Guid_user FROM tblpatient p 
-            WHERE CONCAT(p.firstname, ' ', p.lastname) LIKE '%test%' 
-            OR CONCAT(p.firstname, ' ', p.lastname) LIKE '%John Smith%' 
-            OR CONCAT(p.firstname, ' ', p.lastname) LIKE '%John Doe%' 
-            OR CONCAT(p.firstname, ' ', p.lastname) LIKE '%Jane Doe%' ";
+            WHERE CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) LIKE '%test%' 
+            OR CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) LIKE '%John Smith%' 
+            OR CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) LIKE '%John Doe%' 
+            OR CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) LIKE '%Jane Doe%' ";
     $getTestUsers = $db->query($q);
     $userIds = "";
     foreach ($getTestUsers as $k=>$v){
@@ -2177,7 +2181,18 @@ function get_stats_info_today($db, $statusID, $hasChildren=FALSE, $searchData=ar
     
     return $result;
 }
-
+/**
+ * API Date format month-day-year ex. 07-31-2017
+ * Converted date year-month-day ex. 2017-07-31
+ * @param type $date
+ * @return string
+ */
+function convertDmdlDate($date){
+    $dateExp  = explode("-", $date) ;            
+    $convertedDate = $dateExp['2']."-".$dateExp['0']."-".$dateExp['1'];
+    
+    return $convertedDate;
+}
 function dmdl_refresh($db){ 
     require_once 'classes/xmlToArrayParser.php';
     ini_set("soap.wsdl_cache_enabled", 0);
@@ -2195,16 +2210,21 @@ function dmdl_refresh($db){
         trigger_error("SOAP Fault: (faultcode: {$e->faultcode}, faultstring: {$e->faultstring})", E_USER_ERROR);
         return;
     }    
-
-    $dmdlResult = $db->query("SELECT * FROM tbl_mdl_dmdl WHERE ToUpdate='Y'");
+    //skip ToUpdate='N' 
+    //select [toupdate = Y] and [time of now - updatedatetime > 1 hour or is null
+    $dmdlResult = $db->query("SELECT * FROM tbl_mdl_dmdl "
+            . "WHERE ToUpdate='Y' "
+            . "AND UpdateDatetime IS NULL "
+            . "OR UpdateDatetime = '' "
+            . "OR UpdateDatetime > NOW() - INTERVAL 60 MINUTE ");
     
-    $content = "";
+    $content=""; $match=""; $possibleM ="";
     
     $content .= "<form action='' method='POST'>";
     
     $content .= "<div class='pB-15 text-right'>";
-    $content .= "<button name='' type='submit' class='botton btn-inline'>Update</button>";
-    $content .= "<button name='' type='submit' class='botton btn-inline'>Create New</button>";    
+    $content .= "<button name='dmdlUpdate' type='submit' class='botton btn-inline'>Update</button>";
+    $content .= "<button name='dmdlCreateNew' type='submit' class='botton btn-inline'>Create New</button>";    
     $content .= "</div>";
     $content .= "<table id='refresh-log-table' class='table'>";
     $content .= "<thead>";
@@ -2242,50 +2262,53 @@ function dmdl_refresh($db){
             echo $domObj->get_xml_error();            
         } else {        
             $res = $domArr['CombinedResults']['GeneticResults'];
+            //var_dump($res);
+            //admin db date format 1993-01-25           
             
-            $Guid_PatientId = $res['Guid_PatientId'];
-            $GUID_PhysicianID = $res['GUID_PhysicianID'];
             $Guid_MDLNumber = $res['Guid_MDLNumber'];
-            $Patient_Name = $res['Patient_Name'];
-            $Date_Of_Birth = $res['Date_Of_Birth']; //07-22-1962 => m/d/Y
-            $Date_Accessioned = $res['Date_Accessioned'];
-
-            $name = explode(" ", $Patient_Name);
-            $firstname = $name['0'];
-            $lastname = $name['1'];
+            $Date_Of_Birth = $res['Date_Of_Birth'];          
+            $firstname = $res['Patient_FirstName'];
+            $lastname = $res['Patient_LastName'];           
             
-            $bday  = explode("-", $Date_Of_Birth) ;
             $dob = str_replace('-','/',$Date_Of_Birth);
             
             $where = array(
                 'firstname' => $firstname,
                 'lastname' => $lastname,
-                'dob' => $Date_Of_Birth
+                'dob' => convertDmdlDate($Date_Of_Birth)
             );
-            $query = "SELECT Guid_patient,Guid_user,firstname,lastname,dob FROM tblpatient "
-                    . "WHERE firstname=:firstname "
-                    . "AND lastname=:lastname "
-                    . "AND dob=:dob";
+            $dobConverted = convertDmdlDate($Date_Of_Birth);
+            $query = "SELECT Guid_patient,Guid_user,dob,"
+                    . "aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname,"
+                    . "aes_decrypt(lastname_enc, 'L@stn@m3&%#') as lastname FROM tblpatient "
+                    . "WHERE LOWER(CONVERT(AES_DECRYPT(firstname_enc, 'F1rstn@m3@_%') USING 'utf8'))='".strtolower($firstname)."' "
+                    . "AND LOWER(CONVERT(AES_DECRYPT(lastname_enc, 'L@stn@m3&%#') USING 'utf8'))='".strtolower($lastname)."' "
+                    . "AND dob='$dobConverted'";
             $getPatient = $db->query($query, $where );
+         
             $content .= "<tr>";
-            if(empty($getPatient)){
-                //patient not match with dmdl data
-                $content .= "<td class='mn no'>No</td>";
-                $content .= "<td>$Guid_MDLNumber</td>";
-                $content .= "<td>$firstname</td>";
-                $content .= "<td>$lastname</td>";
-                $content .= "<td>$dob</td>";
-                $SQuery = "SELECT Guid_patient,Guid_user,firstname,lastname,dob FROM tblpatient "
-                    . "WHERE firstname LIKE '%".$firstname."%' "
-                    . "OR lastname LIKE '%".$lastname."%' "
-                    . "AND dob='".$Date_Of_Birth."'";
+            if(empty($getPatient)){ //patient not match with dmdl data => ststus=no
+                $match = "<td class='mn no'>"
+                        . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][status]' value='no' />"
+                        . "No</td>";    
+                
+                $SQuery = "SELECT Guid_patient,Guid_user,dob,"
+                    . "AES_DECRYPT(firstname_enc, 'F1rstn@m3@_%') as firstname,"
+                    . "AES_DECRYPT(lastname_enc, 'L@stn@m3&%#') as lastname "
+                    . "FROM tblpatient "
+                    . "WHERE LOWER(CONVERT(AES_DECRYPT(firstname_enc, 'F1rstn@m3@_%') USING 'utf8')) LIKE '%".strtolower($firstname)."%' "
+                    . "OR LOWER(CONVERT(AES_DECRYPT(lastname_enc, 'L@stn@m3&%#') USING 'utf8')) LIKE '%".strtolower($lastname)."%' "
+                    . "OR dob='".convertDmdlDate($Date_Of_Birth)."'";
+       
                 $SGetPatient = $db->query($SQuery);
+                
                 $sContent = "";
                 if(!empty($SGetPatient)){
-                    $sContent .= "<select name=''>";
+                    $sContent .= "<select name='dmdl[".$Guid_MDLNumber."][Possible_Match]'>";
                     $sContent .= "<option value=''>Select From Possible Match</option>";
                     foreach ($SGetPatient as $k=>$v){
                         $sContent .= "<option value='".$v['Guid_patient']."'>";
+                        $sContent .= "ID: ".$v['Guid_patient'].", ";
                         $sContent .= "First name: ".$v['firstname'].", ";
                         $sContent .= "Last name: ".$v['lastname'].", ";
                         $sContent .= "DOB:".$v['dob'];
@@ -2293,43 +2316,138 @@ function dmdl_refresh($db){
                     }
                     $sContent .= "</select>";
                 }
-                $content .= "<td>".$sContent."</td>";
+                $possibleM = "<td>".$sContent."</td>";
             } else {                
-                if(count($getPatient)>1){
-                    //duplicate records                    
-                    $content .= "<td class='hasDuplicate'>Duplicate</td>";
-                    $content .= "<td>$Guid_MDLNumber</td>";
-                    $content .= "<td>$firstname</td>";
-                    $content .= "<td>$lastname</td>";
-                    $content .= "<td>$dob</td>";
-                    $content .= "<td>";
-                    $content .= "<select name=''>";
-                    $content .= "<option value=''>Select From Possible Match</option>";
-                    foreach ($getPatient as $k=>$v){
-                        $content .= "<option value='".$v['Guid_patient']."'>";
-                        $content .= "First name: ".$v['firstname'].", ";
-                        $content .= "Last name: ".$v['lastname'].", ";
-                        $content .= "DOB: ".$v['dob'];
-                        $content .= "</p>";
+                if(count($getPatient)>1){ //duplicate records => status=duplicate                  
+                    $match = "<td class='hasDuplicate'>"
+                            . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][status]' value='duplicate' />"
+                            . "Duplicate</td>";
+                    $SQuery = "SELECT Guid_patient,Guid_user,dob,"
+                        . "AES_DECRYPT(firstname_enc, 'F1rstn@m3@_%') as firstname,"
+                        . "AES_DECRYPT(lastname_enc, 'L@stn@m3&%#') as lastname "
+                        . "FROM tblpatient "
+                    . "WHERE LOWER(CONVERT(AES_DECRYPT(firstname_enc, 'F1rstn@m3@_%') USING 'utf8')) LIKE '%".strtolower($firstname)."%' "
+                    . "OR LOWER(CONVERT(AES_DECRYPT(lastname_enc, 'L@stn@m3&%#') USING 'utf8')) LIKE '%".strtolower($lastname)."%' "
+                    . "OR dob='".convertDmdlDate($Date_Of_Birth)."'";
+            
+                    $SGetPatient = $db->query($SQuery);
+
+                    $sContent = "";
+                    if(!empty($SGetPatient)){
+                        $sContent .= "<select name='dmdl[".$Guid_MDLNumber."][Possible_Match]'>";
+                        $sContent .= "<option value=''>Select From Possible Match</option>";
+                        foreach ($SGetPatient as $k=>$v){
+                            $sContent .= "<option value='".$v['Guid_patient']."'>";
+                            $sContent .= "ID: ".$v['Guid_patient'].", ";
+                            $sContent .= "First name: ".$v['firstname'].", ";
+                            $sContent .= "Last name: ".$v['lastname'].", ";
+                            $sContent .= "DOB:".$v['dob'];
+                            $sContent .= "</option>";
+                        }
+                        $sContent .= "</select>";
                     }
-                    $content .= "</select>";
-                    $content .= "</td>";
-                }else{
-                    //update mdl# for this perfect match
-                    $Guid_user = $getPatient['0']['Guid_user'];
-                    $Guid_patient = $getPatient['0']['Guid_patient'];
-                                       
-                    $content .= "<td class='mn yes'>Yes</td>";
-                    $content .= "<td>$Guid_MDLNumber</td>";
-                    $content .= "<td>$firstname</td>";
-                    $content .= "<td>$lastname</td>";
-                    $content .= "<td>$dob</td>";
-                    $content .= "<td></td>";
+                    $possibleM = "<td>".$sContent."</td>";
+                }else{ //update mdl# for this perfect match => status=yes                  
+                    $match = "<td class='mn yes'>"
+                            . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][status]' value='yes' />"
+                            . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Guid_patient]' value='".$getPatient['0']['Guid_patient']."' />"
+                            . "Yes</td>";  
+                    $possibleM = "<td></td>";
                 }
             }
-            $content .= "<td class='text-center'><input name='selectAll' type='checkbox'  class='checkboxSelect' /></td>";
+            
+            $content .= $match; //match status=>yes,no,duplicate 
+            $content .= "<td>$Guid_MDLNumber</td>";
+            $content .= "<td>$firstname</td>";
+            $content .= "<td>$lastname</td>";
+            $content .= "<td>$dob</td>";            
+            $content .= $possibleM;
+            
+            $content.= "<td class='text-center'>"
+                    . "<input name='dmdl[selected][".$Guid_MDLNumber."]' type='checkbox' class='checkboxSelect' />"
+                    . "</td>";
+            
+            //hidden inputs            
+            if(isset($res['Guid_MDLNumber']) && !empty($res['Guid_MDLNumber'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][mdlnumber]' value='". $res['Guid_MDLNumber']."' />";
+            }
+            if(isset($res['Patient_FirstName']) && !empty($res['Patient_FirstName'])){
+                $content .=  "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][firstname]' value='".$res['Patient_FirstName']."' />";
+            }
+            if(isset($res['Patient_LastName']) && !empty($res['Patient_LastName'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][lastname]' value='".$res['Patient_LastName']."' />";
+            }
+            if(isset($res['Date_Of_Birth'])&&!empty($res['Date_Of_Birth'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][dob]' value='".convertDmdlDate($Date_Of_Birth)."' />";
+            }
+            if(isset($res['Guid_PatientId']) && !empty($res['Guid_PatientId'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Guid_PatientId]' value='".$res['Guid_PatientId']."' />";
+            }
+            if(isset($res['Physician_FirstName'])&&!empty($res['Physician_FirstName'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Physician][FirstName]' value='".$res['Physician_FirstName']."' />";
+            }
+            if(isset($res['Physician_LastName'])&&!empty($res['Physician_LastName'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Physician][LastName]' value='".$res['Physician_LastName']."' />";
+            }
+            if(isset($res['ClientID']) && !empty($res['ClientID'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][number]' value='".$res['ClientID']."' />";
+            }
+            if(isset($res['ClientName']) && !empty($res['ClientName'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][name]' value='".$res['ClientName']."' />";
+            }
+            if(isset($res['ClientAddress1'])&&!empty($res['ClientAddress1'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][addr1]' value='".$res['ClientAddress1']."' />";
+            }
+            if(isset($res['ClientAddress2']) && !empty($res['ClientAddress2'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][addr2]' value='".$res['ClientAddress2']."' />";
+            }
+            if(isset($res['ClientCity']) && !empty($res['ClientCity'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][city]' value='".$res['ClientCity']."' />";
+            }
+            if(isset($res['ClientState']) && !empty($res['ClientState'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][state]' value='".$res['ClientState']."' />";
+            }
+            if(isset($res['ClientZip'])&&!empty($res['ClientZip'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][zip]' value='".$res['ClientZip']."' />";
+            }
+            if(isset($res['Insurance_Company']) && !empty($res['Insurance_Company'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][insurance_full]' value='".$res['Insurance_Company']."' />";
+            }
+            //statuses
+            if(isset($res['DOS']) && !empty($res['DOS'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenCollected]' value='".convertDmdlDate($res['DOS'])."' />";
+            }
+            if(isset($res['TestCode']) && !empty($res['TestCode'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenCollectedTestCode]' value='".$res['TestCode']."' />";
+            }
+            if(isset($res['Date_Accessioned']) && !empty($res['Date_Accessioned'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenAccessioned]' value='".convertDmdlDate($res['Date_Accessioned'])."' />";
+            }            
+            if(isset($res['Genetic_Counseling_Status']) && !empty($res['Genetic_Counseling_Status'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][Genetic_Counseling_Status]' value='".$res['Genetic_Counseling_Status']."' />";
+            }
+            if(isset($res['Genetic_Counseling_Status_Date']) && !empty($res['Genetic_Counseling_Status_Date'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][Genetic_Counseling_Status_Date]' value='".convertDmdlDate($res['Genetic_Counseling_Status_Date'])."' />";
+            }
+            if(isset($res['Testing_Status']) && !empty($res['Testing_Status'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][Laboratory_Testing_Status_Pending]' value='".$res['Testing_Status']."' />";
+            }
+            if(isset($res['Testing_Status_Date']) && !empty($res['Testing_Status_Date'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][Laboratory_Testing_Status_Pending_Date]' value='".convertDmdlDate($res['Testing_Status_Date'])."' />";
+            }
+            if(isset($res['DateTime_ResultStatus']) && !empty($res['DateTime_ResultStatus'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][Laboratory_Testing_Status_Complete_Date]' value='".convertDmdlDate($res['DateTime_ResultStatus'])."' />";
+            }
+            //Revenue section on the screen
+            if(isset($res['Payor']) && !empty($res['Payor'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][revenue][Payor]' value='".$res['Payor']."' />";
+            }
+            if(isset($res['Patient_Responsibility']) && !empty($res['Patient_Responsibility'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][revenue][PatientAmount]' value='".$res['Patient_Responsibility']."' />";
+            }
+            
             $content .= "</tr>";
-        };        
+        }    
     }
     $content .= "</tbody>";
     $content .= "</table>";

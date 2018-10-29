@@ -41,7 +41,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     $sqlQualify = "SELECT q.Guid_qualify,q.Guid_user,q.insurance,
                     q.other_insurance,q.account_number,q.Date_created as qDate,q.provider_id, q.source, 
                     CONCAT(prov.first_name,' ',prov.last_name) provider,
-                    p.*, u.email, u.marked_test ";
+                    p.*, aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname, aes_decrypt(lastname_enc, 'L@stn@m3&%#') as lastname, 
+                    u.email, u.marked_test ";
     
     if(isset($_GET['incomplete'])){
         $sqlQualify .= "FROM tblqualify q ";
@@ -355,12 +356,10 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 
                             <div id="statusLogs"  class="col-md-12 clearfix padd-0">
                                 <h5 class="pT-30">
-                                    Notes: 
-                                    <?php if($role=='Admin'){ ?>
+                                    Notes:                                    
                                     <a title="Add Note" class="pull-right" href="<?php echo $patientInfoUrl."&note_log=add";?>">
                                         <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
-                                    </a> 
-                                    <?php } ?>
+                                    </a>                                     
                                 </h5>
                                 <table class="table valignTop">
                                     <thead>
@@ -381,7 +380,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                     </thead>
                                     <tbody>
                                         <?php //note_id
-                                            $nQ =  "SELECT DISTINCT n.*, p.firstname, p.lastname, cat.name AS category 
+                                            $nQ =  "SELECT DISTINCT n.*, AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') as firstname, aes_decrypt(p.lastname_enc, 'L@stn@m3&%#') as lastname, cat.name AS category 
                                                     FROM `tbl_mdl_note` n
                                                     LEFT JOIN `tblpatient` p ON n.Guid_user=p.Guid_user
                                                     LEFT JOIN `tbl_mdl_note_category` cat ON n.Guid_note_category=cat.Guid_note_category
@@ -1825,7 +1824,7 @@ if(isset($_POST['edit_categories'])){
     } 
 ?>
 <?php 
-    if(isset($_GET['note_log']) && $role=='Admin') { 
+    if(isset($_GET['note_log'])) { 
         $title= ($_GET['note_log']=='add')?"Add Note":"Update Note";
         if(isset($_GET['note_id'])&&$_GET['note_id']!=""){
             $catLogRow = $db->row("SELECT * FROM tbl_mdl_note WHERE Guid_note=:Guid_note", array('Guid_note'=>$_GET['note_id']));

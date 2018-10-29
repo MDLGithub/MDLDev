@@ -21,9 +21,9 @@ if($role!="Admin"){
 $users = getUsersAndRoles($db);
 $thisMessage="";
 
-$query = 'SELECT sl.Guid_status_log, p.firstname, p.lastname, s.status, sl.date FROM tbl_mdl_status_log sl
+$query = "SELECT sl.Guid_status_log, aes_decrypt(p.firstname_enc, 'F1rstn@m3@_%') as firstname, aes_decrypt(p.lastname_enc, 'L@stn@m3&%#') as lastname, s.status, sl.date FROM tbl_mdl_status_log sl
         LEFT JOIN tbl_mdl_status s ON sl.Guid_status=s.Guid_status
-        LEFT JOIN tblpatient p ON sl.Guid_user=p.Guid_user';
+        LEFT JOIN tblpatient p ON sl.Guid_user=p.Guid_user";
 
 $result = $db->query($query);
 
