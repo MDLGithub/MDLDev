@@ -186,9 +186,10 @@ if( isset($_POST['action']) && $_POST['action'] == 'piechart' ){
 
     $datecreated = isset($_POST['startdate'])? $_POST['startdate'] : 0;
     $piedata = [];
+    $accIds = explode(',', $_POST['acc']);
     $colors = array('#00713D','#89CB46','#3065B1','#00B7D0','#7C55A5', '#89BD46', '#00D7D0', '#30DDB1', '#7B11A5', '#01CB46', '#89ADD6', '#222B46', '#89CCCC', '#6035B1', '#306BBB');
     $i=0;
-    foreach ($_POST['acc'] as $acc) {
+    foreach ($accIds as $acc) {
         $query = "SELECT COUNT(*) AS count, "
         . "(SELECT acc.name FROM tblaccount acc WHERE acc.account = l.account ) as accname "
         . "FROM `tbl_mdl_status_log` l "
@@ -213,11 +214,12 @@ if( isset($_POST['action']) && $_POST['action'] == 'piechart' ){
     foreach ($piedata as $item) {
         $total_submitted += $item['value'];
     }
-   for($i=0; $i<5;$i++) {
+
+    for($i=0; $i<5;$i++) {
         $els2 = $piedata;
         foreach ($els2 as &$el) {
             $el['color'] = $colors[$i];
-            $el['value'] = round(($el['value']/$total_submitted) * 100 , 2);
+            $el['value'] = round(($el['value']/$total_submitted) * 100);
             $i++;
         }
         unset($el);
@@ -257,19 +259,58 @@ if(isset($_POST['action']) && $_POST['action'] == 'mebrcacount'){
 if(isset($_POST['action']) && $_POST['action'] == 'topbrcacount'){
     $startdate = isset($_POST['startdate'])? $_POST['startdate'] : 0;
 
-    $query = "SELECT count(*) as cnt, evt.* FROM tblevents evt "
+    $query1 = "SELECT count(*) as cnt, evt.* FROM tblevents evt "
             . "INNER JOIN tblsalesrep sp "
             . "ON evt.salesrepid = sp.Guid_salesrep "
             . "WHERE evt.title = 'BRCA Day' AND YEARWEEK(evt.start_event)=YEARWEEK(:datecreated) "
             . "GROUP BY evt.salesrepid ORDER  BY cnt DESC LIMIT 1";
-
-    $result = $db->query($query, array("datecreated"=>$startdate));
-
-    foreach($result as $row){
-        $data[] = array(
-                    'topbrcacount' => $row['cnt']
-                );
+    $result1 = $db->query($query1, array("datecreated"=>$startdate));
+    foreach($result1 as $row){
+        $data['topbrcacount'] =  $row['cnt'];
+                
     }
+
+    $query2 = "SELECT count(*) as cnt FROM tblevents evt "
+            . "INNER JOIN tblsalesrep sp "
+            . "ON evt.salesrepid = sp.Guid_salesrep "
+            . "WHERE YEARWEEK(evt.start_event)=YEARWEEK(:datecreated) "
+            . "GROUP BY evt.salesrepid ORDER  BY cnt DESC LIMIT 1";
+    $result2 = $db->query($query2, array("datecreated"=>$startdate));
+    foreach($result2 as $row){
+        $data['topeventcount'] = $row['cnt'];
+    }
+
+    $query3 = "SELECT count(*) as cnt FROM tblqualify "
+            . "WHERE account_number <> 'NULL' AND YEARWEEK(Date_created)=YEARWEEK(:datecreated) "
+            . "GROUP BY account_number "
+            . "ORDER BY cnt DESC LIMIT 1"; 
+    $result3 = $db->query($query3, array("datecreated"=>$startdate));
+    foreach($result3 as $row){
+        $data['topregisteredcount'] =  $row['cnt'];
+    }
+
+    $query4 = "SELECT count(*) as cnt FROM tbl_ss_qualify tblqfss "
+            . "LEFT JOIN tblqualify tblqf ON tblqfss.Guid_qualify = tblqf.Guid_qualify "
+            . "WHERE "
+            . "tblqf.account_number <> 'NULL' AND YEARWEEK(tblqf.Date_created)=YEARWEEK(:datecreated) "
+            . "AND tblqfss.qualified = 'Yes' "
+            . "GROUP BY tblqf.account_number ORDER BY cnt DESC LIMIT 1";
+    $result4 = $db->query($query4, array("datecreated"=>$startdate));
+    foreach($result4 as $row){
+        $data['topqualifiedcount'] = $row['cnt'];
+    }
+
+    $query5 = "SELECT count(*) as cnt FROM tbl_ss_qualify tblqfss "
+            . "LEFT JOIN tblqualify tblqf ON tblqfss.Guid_qualify = tblqf.Guid_qualify "
+            . "WHERE "
+            . "tblqf.account_number <> 'NULL' AND YEARWEEK(tblqf.Date_created)=YEARWEEK(:datecreated) "
+            . "AND tblqfss.qualified IN ('Yes','No','Unknown') "
+            . "GROUP BY tblqf.account_number ORDER BY cnt DESC LIMIT 1";
+    $result5 = $db->query($query5, array("datecreated"=>$startdate));
+    foreach($result5 as $row){
+        $data['topcompletedcount'] = $row['cnt'];
+    }
+
     echo json_encode($data);
 }
 
@@ -328,23 +369,25 @@ if(isset($_POST['action']) && $_POST['action'] == "getLogo")
 
 if(isset($_POST['action']) && $_POST['action'] == 'getBarChart'){
     $count = 1;
-    $salereps = $submitted = array();
-    foreach ($_POST['ids'] as $id) {
-       
-        $query = "select CONCAT(t.salesrep_fname, ' ', t.salesrep_lname) as names,
-                   (select count(*) from tbl_mdl_status_log t1 where t1.Guid_status = '1' and t1.Guid_salesrep = t.Guid_salesrep and DATE(Date) BETWEEN DATE(:startdate)  AND DATE(:enddate)) as submittedCnt
-            from tbl_mdl_status_log t
-            LEFT JOIN tbluser u ON t.Guid_user = u.Guid_user
-            INNER JOIN tblevents e ON t.Guid_salesrep = e.salesrepid 
-            WHERE e.salesrepid =:salesrepid and u.marked_test = '0' GROUP By Guid_salesrep ORDER BY submittedCnt DESC LIMIT 5";
-
-        $result = $db->query($query, array("salesrepid"=>$id, 'startdate'=>$_POST['startdate'], 'enddate'=>$_POST['enddate']));
-
-        foreach($result as $row){
-            $submitted[] = (int)$row['submittedCnt'];
-            $salereps[] = $row['names'];
-        }
-    } 
+    $submitted = $regSalereps = array();
+    //$salesrepids = explode(',', $_POST['ids']);
+    $salesrepids = $_POST['ids'];
+    $sDate = $_POST['startdate'];
+    $eDate = $_POST['enddate'];
+    $query = "SELECT count(*) as submittedCnt, CONCAT(l.salesrep_fname,' ', l.salesrep_lname) as srepNames "
+            . " FROM tbl_mdl_status_log l "
+            . " LEFT JOIN tblevents evt ON evt.salesrepid = l.Guid_salesrep and DATE(l.Date) = DATE(evt.start_event)"
+            . " LEFT JOIN tbluser u ON u.Guid_user = l.Guid_user "
+            . " where l.Guid_status = 1 and u.marked_test = '0' "
+            . " and DATE(l.Date) between '$sDate' and '$eDate' "
+            . " and l.Guid_salesrep IN ($salesrepids) group by l.Guid_salesrep ORDER BY submittedCnt DESC LIMIT 5";
+    
+    $result = $db->query($query);
+    foreach($result as $row){
+        $submitted[] = (int)$row['submittedCnt'];
+        $regSalereps[] = $row['srepNames'];
+    }
+    //print_r($result);
     $data = array(
             'series' => array ([
                     'name'=> 'Submitted',
@@ -352,7 +395,7 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart'){
                     'color'=> "#bce273"
                 ]
             ),
-            'categories' => $salereps 
+            'categories' => $regSalereps 
     );
     echo json_encode($data);
 }
@@ -361,8 +404,9 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart'){
 
 if(isset($_POST['action']) && $_POST['action'] == 'tableStats'){
     $count = 1;
+    $acc_ids = explode(',', $_POST['acc']);
     $registered = $completed = $qualified = $submitted = 0;
-    foreach ($_POST['acc'] as $acc) {
+    foreach ($acc_ids as $acc) {
        
         $regQuery = "SELECT COUNT(*) AS regCount "
         . "FROM `tbl_mdl_status_log` l "
@@ -412,3 +456,18 @@ if(isset($_POST['action']) && $_POST['action'] == 'tableStats'){
         'sub' => $submitted
     ));
 }
+
+
+/* Get Dynamic Consultant List */
+if(isset($_GET['action']) && $_GET['action'] == 'getconsultant'){
+    $ids = $_GET['srepids'];
+    //print_r($ids);
+    $q = "SELECT t.Guid_salesrep, CONCAT(t.first_name,' ',t.last_name) as sNames FROM tblsalesrep t WHERE t.Guid_salesrep IN ($ids)  ";
+    $result = $db->query($q);
+    foreach($result as $row){
+        $names[] = $row['sNames'];
+        $sIds[] = $row['Guid_salesrep'];
+    }
+    echo json_encode(array('names' => $names, 'ids' => $sIds));
+}
+

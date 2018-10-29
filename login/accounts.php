@@ -218,7 +218,8 @@ $optionVal = unserialize($configOptions['value']);
 $testUserIds = getTestUserIDs($db);
 $markedTestUserIds = getMarkedTestUserIDs($db);
 $initQ = 'SELECT s.Guid_status, s.Guid_user, s.Date, s.Date_created, p.Guid_patient, 
-        p.firstname, p.lastname, 
+        AES_DECRYPT(p.firstname_enc, "F1rstn@m3@_%") as firstname, 
+        AES_DECRYPT(p.lastname_enc, "L@stn@m3&%#") as lastname, 
         a.Guid_account, a.account AS account_number, a.name AS account_name, a.address AS location,  
         num.mdl_number,
         CONCAT(srep.`first_name`, " " ,srep.`last_name`) AS salesrep  

@@ -133,17 +133,15 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px; pointer-events: visible;}
     .rightCircleicon2{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_health_fair.png"); background-repeat: no-repeat;background-size: 20px 20px;}
     
-    
     select#sidebar_select { border: 1px solid #ccc; border-radius: 20px; width: 100%; padding: 5px 8px;   margin-bottom: 8px;}
     .modalaccounttype.hide { display: none; }
-    .salesrep_dropdown.hide { visibility: visible; }
     .below_avg, .above_avg, .top_performer_avg {
         position: relative;
     }
     .below_avg:before, .above_avg:before, .top_performer_avg:before {
         content: "";
         background-repeat: no-repeat;
-        left: 43px;
+        left: 39px;
         position: absolute;
         width: 18px;
         height: 23px;
@@ -164,10 +162,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     #piechart svg > g > g:nth-child(4) > g text, #chart svg > g > g:nth-child(4) > g text {
         font-weight: 800 !important;
     }
-    p.acc-click {
-        color: #343;
-    }
-
+    .salesrep_dropdown.hide { visibility: visible; }
+    p.acc-click { color: #343; }
     .consultant_changed{ visibility: hidden; }
     .consultant_changed:before{ position: absolute;display: inline-block; width: 60px; border-radius: 20px; left: 0; content: "0"; background-color: #fff; visibility: visible; }
     .forcehidden{ display: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; }
@@ -206,7 +202,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             }
         });
         var cursource = 'eventload.php';
-        $('.salesrep_list li a').click(function () {
+        $(document).delegate('.salesrep_list a', 'click', function(){
+            
             var salesrep = $(this).attr('data-value');
             var salesrepName = $(this).text();
 
@@ -216,7 +213,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             for(var i =0; i < salesrepName.length; i++){
                 salesrepNameArray.push(salesrepName[i]);
                 if(i == 0){
-                    salesrepNameArray.push('<i class="fas fa-angle-down info_block_arrow" style="float:right;"></i>');
+                    salesrepNameArray.push('<i class="fas fa-angle-down info_block_arrow arrow1" style="float:right;"></i>');
                 }
                 if(i != salesrepName.length-1){
                     salesrepNameArray.push("<br>");
@@ -286,6 +283,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             
         });
         var state_count1 = 0, count1 = 0;
+        //var salesrepIDList = salesrepNameList = [];
         var calendar = $('#calendar').fullCalendar({
             header: {
                 left: 'prev,next today',
@@ -310,6 +308,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var beginOfWeek = currentDate.startOf('week');
                 $("#calendarmonth").html($.fullCalendar.formatDate(beginOfWeek,"MMMM DD"));
                 $("#calendaryear").html($.fullCalendar.formatDate(beginOfWeek,"YYYY"));
+                $(".salesrep_list").html("<ul><li><a data-value='0'>Reset</a></li></ul>");
                 //top_stats();
             },
             dayRender: function (date, cell) {
@@ -421,6 +420,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 $('.tooltipevent').remove();
             },
             eventRender: function (event, element, view) {
+
                 var today = new Date();
                 var currentDate = today.getDate();
                 var eventDate = $.fullCalendar.formatDate(event.start, "DD");
@@ -516,6 +516,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 }
             },
             eventAfterRender: function (event, element, view) {
+                //salesrepIDList.push(event.salesrepid);
+                //salesrepNameList.push(event.salesrep);
+                
                 if (!event.evtCnt) {
                     if ((event.salesrep == null || event.account == null) && event.title == 'BRCA Day') {
                         
@@ -554,7 +557,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     });
             },
             eventAfterAllRender: function (event, element, view) {
-
+                
                 var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
 
                 var inputparam = {
@@ -575,195 +578,30 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     dataType: 'json',
                     url : 'ajaxHandlerEvents.php',
                     success : function(data){
-                        $.each(data, function(k, v) {
-                            if(v.topbrcacount) $('#topbrcacnt').html(v.topbrcacount);
-                            //$('#mebrcacnt').removeClass('increase decrease gold_stat gold_stat_star');
-                            
-                            if($('#mebrcacnt').html() < $('#topbrcacnt').html()) $('#mebrcacnt').addClass('decrease');
-                            if($('#mebrcacnt').html() > $('#topbrcacnt').html()) $('#mebrcacnt').addClass('increase');
-                            if($('#mebrcacnt').html() === $('#topbrcacnt').html()){
-                                /*$('#mebrcacnt').addClass('gold_stat gold_stat_star');
-                                $('#topbrcacnt').addClass('gold_stat');*/
-                            }    
-                        });
-                    },
-                    error: function(){
-                        $('#mebrcacnt').removeClass('increase decrease gold_stat gold_stat_star');
-                        if($('#mebrcacnt').html() != 0 && $('#topbrcacnt').html() != 0){
-                            if($('#mebrcacnt').html() < $('#topbrcacnt').html()) $('#mebrcacnt').addClass('decrease');
-                            if($('#mebrcacnt').html() > $('#topbrcacnt').html()) $('#mebrcacnt').addClass('increase');
-                            if($('#mebrcacnt').html() === $('#topbrcacnt').html()){
-                                /*$('#mebrcacnt').addClass('gold_stat gold_stat_star');
-                                $('#topbrcacnt').addClass('gold_stat');*/
-                            }
-                        }    
+                        //console.log(data);
+                        (data['topbrcacount'] != 0 ) ? $('#topbrcacnt').html(data['topbrcacount']) : 0;
+                        (data['topeventcount'] != 0 ) ? $('#topeventcnt').html(data['topeventcount']) : 0;
+                        (data['topqualifiedcount'] != 0 ) ? $('#topqualcnt').html(data['topqualifiedcount']) : 0;
+                        (data['topregisteredcount'] != 0 ) ? $('#topregcnt').html(data['topregisteredcount']) : 0;
+                        (data['topcompletedcount'] != 0 ) ? $('#topcomcnt').html(data['topcompletedcount']) : 0;
+  
                     }
                 });
                 
-                $.ajax({
-                    type : 'POST',
-                    data : inputparam,
-                    dataType: 'json',
-                    url : 'topeventcount.php',
-                    success : function(data){
-                        $.each(data, function(k, v) {
-                            if(v.topeventcount) $('#topeventcnt').html(v.topeventcount);
-                            
-                            $('#meeventcnt').removeClass('increase decrease gold_stat gold_stat_star');
-                            if($('#meeventcnt').html() < $('#topeventcnt').html()) $('#meeventcnt').addClass('decrease');
-                            if($('#meeventcnt').html() > $('#topeventcnt').html()) $('#meeventcnt').addClass('increase');
-                            if($('#meeventcnt').html() === $('#topeventcnt').html()){
-                                /*$('#meeventcnt').addClass('gold_stat gold_stat_star');
-                                $('#topeventcnt').addClass('gold_stat');*/
-                            }    
-                        });
-                    },
-                    error: function(){
-                        $('#meeventcnt').removeClass('increase decrease gold_stat gold_stat_star');
-                        if($('#meeventcnt').html() != 0 && $('#topeventcnt').html() != 0){
-                            if($('#meeventcnt').html() < $('#topeventcnt').html()) $('#meeventcnt').addClass('decrease');
-                            if($('#meeventcnt').html() > $('#topeventcnt').html()) $('#meeventcnt').addClass('increase');
-                            if($('#meeventcnt').html() === $('#topeventcnt').html()){
-                                /*$('#meeventcnt').addClass('gold_stat gold_stat_star');
-                                $('#topeventcnt').addClass('gold_stat');*/
-                            }
-                        }    
-                    }
-                });
-                
-                $.ajax({
-                    type : 'POST',
-                    data : inputparam,
-                    dataType: 'json',
-                    url : 'meregisteredcount.php',
-                    success : function(data){
-                        $.each(data, function(k, v) {
-                            if(v.meregisteredcount) $('#meregcnt').html(v.meregisteredcount);
-                        });
-                    }
-                });
-                /*$.ajax({
-                    type : 'POST',
-                    data : inputparam,
-                    dataType: 'json',
-                    url : 'mequalifiedcount.php',
-                    success : function(data){
-                        $.each(data, function(k, v) {
-                            if(v.mequalifiedcount) $('#mequalcnt').html(v.mequalifiedcount);
-                        });
-                    }
-                });
-                $.ajax({
-                    type : 'POST',
-                    data : inputparam,
-                    dataType: 'json',
-                    url : 'mecompletedcount.php',
-                    success : function(data){
-                        $.each(data, function(k, v) {
-                            if(v.mecompletedcount) $('#mecomcnt').html(v.mecompletedcount);
-                        });
-                    }
-                });*/
-                $.ajax({
-                    type : 'POST',
-                    data : inputparam,
-                    dataType: 'json',
-                    url : 'topregisteredcount.php',
-                    success : function(data){
-                        $.each(data, function(k, v) {
-                            if(v.topregisteredcount) $('#topregcnt').html(v.topregisteredcount);
-                            $('#meregcnt').removeClass('increase decrease gold_star');
-                            if($('#meregcnt').html() < $('#topregcnt').html()) $('#meregcnt').addClass('decrease');
-                            if($('#meregcnt').html() > $('#topregcnt').html()) $('#meregcnt').addClass('increase');
-                            if($('#meregcnt').html() === $('#topregcnt').html()){
-                                /*$('#meregcnt').addClass('gold_stat gold_stat_star');
-                                $('#topregcnt').addClass('gold_stat');*/
-                            }    
-                        });
-                    },
-                    error: function(){ 
-                        $('#meregcnt').removeClass('increase decrease gold_star');
-                        if($('#meregcnt').html() != 0 && $('#topregcnt').html() != 0){
-                            if($('#meregcnt').html() < $('#topregcnt').html()) $('#meregcnt').addClass('decrease');
-                            if($('#meregcnt').html() > $('#topregcnt').html()) $('#meregcnt').addClass('increase');
-                            if($('#meregcnt').html() === $('#topregcnt').html()){
-                                /*$('#meregcnt').addClass('gold_stat gold_stat_star');
-                                $('#topregcnt').addClass('gold_stat');*/
-                            }    
-                        }   
-                    }
-                });
-                $.ajax({
-                    type : 'POST',
-                    data : inputparam,
-                    dataType: 'json',
-                    url : 'topqualifiedcount.php',
-                    success : function(data){
-                        $.each(data, function(k, v) {
-                            if(v.topqualifiedcount) $('#topqualcnt').html(v.topqualifiedcount);
-                            
-                            $('#mequalcnt').removeClass('increase decrease gold_stat gold_stat_star');
-                            if($('#mequalcnt').html() < $('#topqualcnt').html()) $('#mequalcnt').addClass('decrease');
-                            if($('#mequalcnt').html() > $('#topqualcnt').html()) $('#mequalcnt').addClass('increase');
-                            if($('#mequalcnt').html() === $('#topqualcnt').html()){
-                                //$('#mequalcnt').addClass('gold_stat gold_stat_star');
-                                //$('#topqualcnt').addClass('gold_stat');
-                            }    
-                        });
-                    },
-                    error: function(){ 
-                        $('#mequalcnt').removeClass('increase decrease gold_star');
-                        if($('#mequalcnt').html() != 0 && $('#topqualcnt').html() != 0){
-                            if($('#mequalcnt').html() < $('#topqualcnt').html()) $('#mequalcnt').addClass('decrease');
-                            if($('#mequalcnt').html() > $('#topqualcnt').html()) $('#mequalcnt').addClass('increase');
-                            if($('#mequalcnt').html() === $('#topqualcnt').html()){
-                               // $('#mequalcnt').addClass('gold_stat gold_stat_star');
-                                //$('#topqualcnt').addClass('gold_stat');
-                            }    
-                        }   
-                    }
-                });
-                $.ajax({
-                    type : 'POST',
-                    data : inputparam,
-                    dataType: 'json',
-                    url : 'topcompletedcount.php',
-                    success : function(data){
-                        $.each(data, function(k, v) {
-                            if(v.topcompletedcount) $('#topcomcnt').html(v.topcompletedcount);
-                            
-                            $('#mecomcnt').removeClass('increase decrease gold_star');
-                            if($('#mecomcnt').html() < $('#topcomcnt').html()) $('#mecomcnt').addClass('decrease');
-                            if($('#mecomcnt').html() > $('#topcomcnt').html()) $('#mecomcnt').addClass('increase');
-                            if($('#mecomcnt').html() === $('#topcomcnt').html()){
-                                $('#mecomcnt').addClass('gold_stat gold_stat_star');
-                                $('#topcomcnt').addClass('gold_stat');
-                            }    
-                        });
-                    },
-                    error: function(){ 
-                        $('#mecomcnt').removeClass('increase decrease gold_star');
-                        if($('#mecomcnt').html() != 0 && $('#topcomcnt').html() != 0){
-                            if($('#mecomcnt').html() < $('#topcomcnt').html()) $('#mecomcnt').addClass('decrease');
-                            if($('#mecomcnt').html() > $('#topcomcnt').html()) $('#mecomcnt').addClass('increase');
-                            if($('#mecomcnt').html() === $('#topcomcnt').html()){
-                                $('#mecomcnt').addClass('gold_stat gold_stat_star');
-                                $('#topcomcnt').addClass('gold_stat');
-                            }    
-                        }   
-                    }
-                });
-                
+
                 var startdate = moment(event.start._d).format('YYYY-MM-DD');
                 var enddate = moment(event.end._d).format('YYYY-MM-DD');
 
                 var events = $('#calendar').fullCalendar('getView');
                 var ele_events = events._props.currentEvents;
                 var categories = salesrepIds = [];
+
+                //Bar chart
                 $.each(ele_events,function(k, v){
                     salesrepIds.push(v.salesrepid);
                 });
-                var uniqueIds = salesrepIds.filter( onlyUnique );
+                var uniqueIds = salesrepIds.filter(onlyUnique);
+                uniqueIds = uniqueIds.toString();
                 $.ajax({
                     type: 'POST',
                     url: 'ajaxHandlerEvents.php',
@@ -782,34 +620,42 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             }
                         });
                         chart.refresh();
-                    }
+                    },
+                    /*error: function(res){
+                        console.log(res);
+                    }*/
                 });
+
+                //Piechart
                 var accounts = [];
                 $.each(ele_events,function(k, v){
                     accounts.push(v.account)
                 });
-                var uniqueAcc = accounts.filter( onlyUnique );
+                var uniqueAcc = accounts.filter(onlyUnique);
+                uniqueAcc = uniqueAcc.toString();
                 $.ajax({
                     type : 'POST',
                     data : { acc: uniqueAcc, startdate: startdate, enddate:enddate, action:'piechart' },
                     dataType: 'json',
                     url : 'ajaxHandlerEvents.php',
                     success : function(returndata){
-                        console.log(returndata);
-                    var chart = $("#piechart").data("kendoChart");
-                    chart.setOptions({
-                        series: [returndata],
-                    });
-                    chart.refresh();
+                        //console.log(returndata);
+                        var chart = $("#piechart").data("kendoChart");
+                        chart.setOptions({
+                            series: [returndata],
+                        });
+                        chart.refresh();
                     }
                 });
 
+                //Table Stats
                 $.ajax({
                     type : 'POST',
                     data : { acc: uniqueAcc, startdate: startdate, enddate:enddate, action:'tableStats' },
                     dataType: 'json',
                     url : 'ajaxHandlerEvents.php',
                     success : function(returndata){
+                        //console.log(returndata);
                         if( returndata.reg < 5 ){
                             rgCntimg = "below_avg";
                         }else if( returndata.reg < 10 && returndata.reg >= 5 ){
@@ -850,6 +696,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 setTimeout(function(){
                     var brcaCnt = $(".rightCircleicon1").length;
                     var hcfCnt = $(".rightCircleicon2").length;
+                    $("#mebrcacnt").removeClass();
+                    $("#meeventcnt").removeClass();
                     var brcaCntimg = hcfCntimg = "";
                     if( brcaCnt < 5 ){
                         brcaCntimg = "below_avg";
@@ -870,7 +718,21 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     $("#mebrcacnt").text(brcaCnt).addClass(brcaCntimg).removeClass('decrease');
                     $("#meeventcnt").text(hcfCnt).addClass(hcfCntimg).removeClass('decrease');
                 }, 5000);
-                //top_stats();
+
+                
+                $.get({ 
+                    url:'ajaxHandlerEvents.php', 
+                    data:{ srepids:uniqueIds, action:'getconsultant' }, 
+                    success: function(res){ 
+                        var result = JSON.parse(res);
+                        var arrlen = result['names'].length;
+                        var i=0;
+                        for(i=0; i<arrlen;i++){
+                            $('.salesrep_list ul').append('<li><a data-value='+result['ids'][i]+'>'+result['names'][i]+'</a></li>')
+                        }
+                    } 
+                });
+
             },
         });
         
@@ -1347,33 +1209,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         $("#popup-accounts").hide();
     });
 
-    $(document).delegate('.account-click', 'click', function(e){
-        e.preventDefault();
-        var acc_id = $(this).attr('id').substring(4);
-        $("#updateEvent").addClass('hide');
-        
-        $.ajax({
-            url: 'ajaxHandlerEvents.php',
-            type: 'POST',
-            data: { action: "getAccountSetup", id: acc_id },
-            success: function(res){
-                var result = JSON.parse(res);
-                //console.log(result);
-                $('#selectAccount').html(result.options);
-                var siteiurl = $('#siteurl').val();
-                $('a#edit-selected-account').prop('href', siteiurl+'/account-config.php?action=edit&id='+acc_id);
-                $('a#add-account-provider').prop('href', siteiurl+'/accounts.php?account_id='+acc_id);
-            }
-        });
-        $("#popup-accounts").show();
-        return false;
-    });
+    
 
     $(document).delegate('a.acc-click', 'click', function(e){
         $("#myModal").addClass("forcehidden");
     });
 
-    $(document).delegate('.info_block_arrow', 'click', function(){
+    $(document).delegate('.info_block_arrow.arrow1', 'click', function(){
+        //alert($(this).parent().parent().text());
         var ele = $('.info_block_arrow');
         $(".salesrep_dropdown").removeClass('hide');
         if($(".salesrep_dropdown").hasClass("dropdown_hide"))
@@ -1386,8 +1229,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $(".salesrep_dropdown").addClass("dropdown_hide").removeClass('hide'); 
             $(ele).parent().removeClass('hide');
         }
-        $("#topregcnt").text(0);
-    })
+    });
+
+    /*$(document).delegate('.salesrep_list a', 'click', function(){
+        alert($(this).attr('data-value'));
+    })*/
     
 </script>
 <?php
@@ -1451,19 +1297,19 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                 <i class="fas fa-angle-down info_block_arrow" style = "float:right;"></i>
                                 <div class = "salesrep_list">
                                     <?php
-                                        $clause = "  ORDER BY first_name, last_name";
-                                        $salesrep = $db->selectAll('tblsalesrep', $clause);
+                                        /*$clause = "  ORDER BY first_name, last_name";
+                                        $salesrep = $db->selectAll('tblsalesrep', $clause);*/
                                     ?>
                                     <ul>
                                         <li><a data-value="0">Reset</a></li>
                                         <?php 
-                                            foreach ($salesrep as $srole) {
+                                            /*foreach ($salesrep as $srole) {
                                                 if ($srole['first_name']) {
                                                     ?>
                                                     <li><?php echo "<a data-value='".$srole['Guid_salesrep']."'>".$srole['first_name'] . " " . $srole['last_name']."</a>"; ?></li>
                                                     <?php
                                                 }
-                                            }
+                                            }*/
                                         ?>
                                     </ul>
                                 </div>
@@ -1734,7 +1580,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     template: "#= series.name #: #= value #"
                 },
                 chartArea: {
-                    width: 600,
+                    width: 550,
                     height: 230
                 },
             });
@@ -1744,8 +1590,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     text: "Top Submitting Accounts"
                 },
                 chartArea: {
-                    width: 600,
-                    height: 250
+                    width: 650,
+                    height: 350
                 },
                 legend: {
                     position: "left",

@@ -47,7 +47,9 @@ foreach ($userTables as $k=>$v){
     
     $selectQ = "SELECT u.Guid_user, u.status, u.Guid_role, u.marked_test, uInfo.first_name, uInfo.last_name, u.email, r.role ";
     if($k=='patient' || $k=='mdlpatient'){
-        $selectQ = "SELECT u.Guid_user, u.status, u.Guid_role, u.marked_test, uInfo.Guid_patient, uInfo.firstname AS first_name, uInfo.lastname AS last_name, u.email, r.role ";
+        $selectQ = "SELECT u.Guid_user, u.status, u.Guid_role, u.marked_test, uInfo.Guid_patient, "
+                . "aes_decrypt(uInfo.firstname_enc, 'F1rstn@m3@_%') AS first_name, "
+                . "aes_decrypt(uInfo.lastname_enc, 'L@stn@m3&%#') AS last_name, u.email, r.role ";
     }
     $selectQ .= "FROM tbluser u ";
     $selectQ .= "LEFT JOIN `tblrole` r ON u.Guid_role=r.Guid_role ";
@@ -58,14 +60,14 @@ foreach ($userTables as $k=>$v){
     if(isset($_POST['search'])){
         if(isset($_POST['first_name']) && $_POST['first_name']!=""){
             if($k=='patient' || $k=='mdlpatient'){
-                $selectQ .= " AND uInfo.firstname LIKE '%".escape($_POST['first_name'])."%'";
+                $selectQ .= " AND aes_decrypt(uInfo.firstname_enc, 'F1rstn@m3@_%') LIKE '%".escape($_POST['first_name'])."%'";
             }else{
                 $selectQ .= " AND uInfo.first_name LIKE '".escape($_POST['first_name'])."%'";
             }
         }
         if(isset($_POST['last_name']) && $_POST['last_name']!=""){
             if($k=='patient' || $k=='mdlpatient'){
-                $selectQ .= " AND uInfo.lastname LIKE '%".escape($_POST['last_name'])."%'";
+                $selectQ .= " AND aes_decrypt(uInfo.lastname_enc, 'L@stn@m3&%#') LIKE '%".escape($_POST['last_name'])."%'";
             }else{
                 $selectQ .= " AND uInfo.last_name LIKE '%".escape($_POST['last_name'])."%'";
             }
@@ -417,7 +419,7 @@ require_once ('navbar.php');
         $fName = isset($_POST['first_name']) ? $_POST['first_name'] : "";
         $lName = isset($_POST['last_name']) ? $_POST['last_name'] : "";
         if($Guid_role=='3' || $Guid_role=='6'){
-            $userDetails = array('firstname'=>$fName, 'lastname'=>$lName);                    
+            $userDetails = array('firstname_enc'=>$fName, 'lastname_enc'=>$lName);                    
         } else {
             $userDetails = array('first_name'=>$fName, 'last_name'=>$lName);
             if($_FILES["photo_filename"]["name"] != ""){
