@@ -537,6 +537,18 @@ th.zip input{
     border: 1px solid #eee;
     box-shadow: 3px 2px 10px #0000008a;
 }
+
+
+.modalBlock .contentBlock.patientForms-open{
+    width:50%;
+    left:25%;
+}
+
+.modalBlock .contentBlock.formdetails-open{
+    width:60%;
+    left: 24%;
+}
+
 .modalBlock .close{
     display: block;
     position: absolute;
@@ -1151,6 +1163,16 @@ and (orientation : landscape) {
         float:initial !important;
     }
 
+    .modalBlock .contentBlock.patientForms-open{
+        width:90%;
+        left:5%;
+    }
+
+    .modalBlock .contentBlock.formdetails-open{
+        width:90%;
+        left: 5%;
+    }
+
 
 }
 
@@ -1243,10 +1265,21 @@ and (orientation : portrait) {
     }
 
     #geneveda-export-modal .contentBlock {
-        width: 50%;
-        left: 25%;
+        width: 85%;
+        left: 8%;
     }
 
+
+    .modalBlock .contentBlock.patientForms-open{
+        width:85%;
+        left:8%;
+    }
+
+
+    .modalBlock .contentBlock.formdetails-open{
+        width:85%;
+        left: 8%;
+    }
 
 }
 
@@ -1289,6 +1322,10 @@ and (-webkit-min-device-pixel-ratio: 2) {
         float:initial !important;
     }
 
+    .modalBlock .contentBlock.formdetails-open {
+        width: 90%;
+        left: 5%;
+    }
 
 }
 
@@ -1724,7 +1761,8 @@ table.valignTop td{
     max-width: 450px;
     margin: 0 auto;
 }
-.modalBlock .contentBlock.patientInfo{
+
+/*.modalBlock .contentBlock.patientInfo{
     width: 40%;
     left: 30%;
 }
@@ -1732,6 +1770,9 @@ table.valignTop td{
     width: 60%;
     left: 24%;
 }
+*/
+
+
 .modalBlock .patientInfo label{
     min-width: 200px;
 }
