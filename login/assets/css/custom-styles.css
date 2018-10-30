@@ -1289,7 +1289,7 @@ and (orientation : portrait) {
     }
 
     .bottom{
-        width:165%;
+        margin-bottom:40px;
     }
 
     #app_data .url_config_box input[type='radio'], input[type='radio']:checked{
@@ -1331,7 +1331,13 @@ and (orientation : portrait) {
         margin-left:-6px;
     }
 
-
+    #palette_top > h4{
+        font-size: 0.9em;
+        width: 50px;
+        margin-top: -6px;
+        line-height: 17px;
+        white-space:normal;
+    }
 
 }
 
@@ -1438,11 +1444,11 @@ and (-webkit-min-device-pixel-ratio: 2) {
     }
 
     .dmdlForm form{
-        margin-left:20px;
+        margin-left:22px;
     }
 
     .dmdlCsvUpload{
-        width: 52%;
+        width: 50%;
         margin-left: 75px;
         font-size: 14px;
         margin-right: 5px !important;
