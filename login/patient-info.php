@@ -1103,7 +1103,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" value="prior_authorization" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="<?php echo SITE_URL . '/forms/Prior Authorization and Cancer GC Form.pdf' ?>" target="_blank">Prior Authorization</a>
+                                <a href="<?php echo SITE_URL . '/forms/Prior Authorization Reqest form.pdf' ?>" target="_blank">Prior Authorization</a>
                             </td>
                         </tr>
                         <tr class="t_row">
@@ -1135,15 +1135,15 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" value="aim" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="<?php echo SITE_URL . "/forms/AIMS.pdf" ?>" target="_blank">AIMs Precertification</a>
+                                <a href="" target="_blank">AIMs Precertification</a>
                             </td>
                         </tr>
                         <tr class="t_row">
                             <td class="printSelectBlock text-center">
-                                <input name="forms" value="beacon" type="checkbox" class="print1 report1" data-prinatble="0" />
+                                <input name="forms" disabled value="beacon" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="<?php echo SITE_URL . "/forms/Beacon LBS.pdf" ?>" target="_blank">Beacon LBS</a>
+                                <a href="" target="_blank">Beacon LBS</a>
                             </td>
                         </tr>
                     </tbody>
