@@ -1196,6 +1196,21 @@ and (orientation : landscape) {
         text-indent: 17px;
     }
 
+    .dmdlCsvUpload{
+        width: 51%;
+        margin-left: 89px;
+        margin-right: 5px !important;
+    }
+
+    .dmdlCsvUpload input[type="file"] {
+        width: 100%;
+        font-size: 15px;
+    }
+
+    .dmdlRefresh{
+        margin-right:0px !important;
+    }
+
 }
 
 /*iPad portrait*/
@@ -1303,6 +1318,21 @@ and (orientation : portrait) {
         left: 8%;
     }
 
+    .dmdlForm{
+        /*margin-left:315px;*/
+        display:inline-block;
+    }
+
+    .dmdlCsvUpload{
+        width:63%;
+    }
+
+    .dmdlForm form button.upload{
+        margin-left:-6px;
+    }
+
+
+
 }
 
 /* iPad Pro Landscape */
@@ -1405,6 +1435,25 @@ and (-webkit-min-device-pixel-ratio: 2) {
     #geneveda-export-modal .contentBlock {
         width: 50%;
         left: 25%;
+    }
+
+    .dmdlForm form{
+        margin-left:20px;
+    }
+
+    .dmdlCsvUpload{
+        width: 52%;
+        margin-left: 75px;
+        font-size: 14px;
+        margin-right: 5px !important;
+    }
+
+    .dmdlForm input[type="file"] {
+        width: 100%;
+    }
+
+    .dmdlRefresh{
+        margin-right:4px !important;
     }
 
 }
