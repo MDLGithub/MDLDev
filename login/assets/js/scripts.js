@@ -43,7 +43,7 @@ $(document).ready(function () {
    // $('.h-filters .date').mask("00/00/0000", {placeholder: "__/__/____"});
     $('.h-filters .stat_mdl_number').mask("0000000");
     
-    $('#file.accountLogoInput').inputFileText( {
+    /*$('#file.accountLogoInput').inputFileText( {
         text: 'Account Logo',  
         buttonCLass: 'cooseFileBtn',
         textClass: 'chooseFileTxt' 
@@ -52,7 +52,7 @@ $(document).ready(function () {
         text: 'Upload User\'s Photo',  
         buttonCLass: 'cooseFileBtn',
         textClass: 'chooseFileTxt' 
-    });
+    });*/
     
     /**
      * Dashboard Calendar Date Dropdown filter
@@ -249,6 +249,9 @@ $(document).ready(function () {
         }
     });
     
+    $('.dmdlRefresh').on('click', function(){
+        $('.preloader').removeClass('hidden');
+    });
         
     /**
      * Home page toggle for search sidebar
@@ -277,6 +280,8 @@ $(document).ready(function () {
             $("#action_palette_toggle i").removeClass('fa-angle-right').addClass('fa-angle-left');
         }            
     });    
+
+
     /**
      *  Homepage Print All toggle 
      *  check or uncheck all checkboxes on click to #selectAllPrintOptions
@@ -292,6 +297,16 @@ $(document).ready(function () {
             $('#switchLabel').text('Select All');
         }
     });
+
+    $(".selectAllCheckboxes").change(function() {
+        if(this.checked) {
+            $('.checkboxSelect').prop('checked', true);
+            $('.switchLabel').text('Remove All');
+        }else{
+            $('.checkboxSelect').prop('checked', false);
+            $('.switchLabel').text('Select All');
+        }
+    });  
     /**
      * Check all checkboxes on click to select All checkbox
      * by given data-id
