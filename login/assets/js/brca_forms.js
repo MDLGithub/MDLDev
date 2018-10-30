@@ -34,6 +34,7 @@ function showFields(forms) {
 }
 
 $(document).ready(function(){
+  tabCounter = 0;
   firsttab = $("#form-option-table");
   firsttab.show();
   secondtab = $("#accordion");
@@ -98,9 +99,7 @@ $(document).ready(function(){
    $(activeItem).addClass('active');
 
    $("#accordion #form-bar").click(function(){
-    /*$(activeItem).animate({width: "50px"}, {duration:300, queue:false});
-    $(this).parent().animate({width: "80%"}, {duration:300, queue:false});*/
-
+    tabCounter = $( "#accordion #form-bar" ).index( this );
     $(activeItem).css('width', '50px');
     $(this).parent().css('width', '80%');
 
@@ -108,23 +107,59 @@ $(document).ready(function(){
 });
 
  $(".next-button").click(function(){
-   $(activeItem).css('width', '50px');
-   $(activeItem).next().css('width', '80%');
-   activeItem = $(activeItem).next();
+      if(tabCounter != ($('ul#accordion li').length-1)){
+        tabCounter ++;
+        $(activeItem).css('width', '50px');
+        $(activeItem).next().css('width', '80%');
+        activeItem = $(activeItem).next();
+      }
  });
 
 
  $(".prev-button").click(function(){
-   $(activeItem).css('width', '50px');
-   $(activeItem).prev().css('width', '80%');
-   activeItem = $(activeItem).prev();
+      if(tabCounter > 0){
+        tabCounter--;
+       $(activeItem).css('width', '50px');
+       $(activeItem).prev().css('width', '80%');
+       activeItem = $(activeItem).prev();
+     }
  });
+
+       var onKeyDown = function ( event ) {
+        switch ( event.keyCode ) {
+          case 39:
+              if(tabCounter != ($('ul#accordion li').length-1)){
+                tabCounter ++;
+                $(activeItem).css('width', '50px');
+                $(activeItem).next().css('width', '80%');
+                activeItem = $(activeItem).next();
+              }
+            break;
+          case 37:
+          if(tabCounter > 0){
+                tabCounter--;
+                $(activeItem).css('width', '50px');
+                $(activeItem).prev().css('width', '80%');
+                activeItem = $(activeItem).prev();
+              }
+            break;
+        }
+      };
+      document.addEventListener( 'keydown', onKeyDown, false );
+
 
      $(".patient_forms").on('click', function() {
        $('#patient_brca_forms').css('display', 'block');
-         $(".contentBlock.patientForms").addClass("patientForms-open");
-         $(".contentBlock.patientForms").removeClass("formdetails-open");
+         if($("#form-details").hasClass("active-tab")){
+
+            $(".contentBlock.patientForms").addClass("formdetails-open");
+            $(".contentBlock.patientForms").removeClass("patientForms-open");
+         }else{
+            $(".contentBlock.patientForms").addClass("patientForms-open");
+            $(".contentBlock.patientForms").removeClass("formdetails-open");
+         }
      });
+
 
      // When the user clicks on <span> (x), close the modal
      $('.close').on('click', function () {

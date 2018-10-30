@@ -1473,6 +1473,11 @@ and (-webkit-min-device-pixel-ratio: 2) {
         margin-right:4px !important;
     }
 
+    .modalBlock .contentBlock.formdetails-open {
+        width: 90%;
+        left: 5%;
+    }
+
 }
 
 #accounts .actions h2{
@@ -1867,7 +1872,7 @@ table.valignTop td{
 .modalBlock .patientInfo input[type='text'],
 .modalBlock .patientInfo input[type='email'],
 .modalBlock .patientInfo select{
-    width: 430px;
+    width: 100%;
     border: 1px solid #5d7ea7;
     padding: 3px 10px;
     margin-bottom: 5px;
