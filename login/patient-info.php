@@ -39,7 +39,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     }
     
     $sqlQualify = "SELECT q.Guid_qualify,q.Guid_user,q.insurance,
-                    q.other_insurance,q.account_number,q.Date_created as qDate,q.provider_id, q.source, 
+                    q.other_insurance,q.account_number,q.Date_created as qDate,
+                    q.provider_id, q.deviceid, q.source, 
                     CONCAT(prov.first_name,' ',prov.last_name) provider,
                     p.*, aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname, aes_decrypt(lastname_enc, 'L@stn@m3&%#') as lastname, 
                     u.email, u.marked_test ";
@@ -281,6 +282,9 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <p>
                                     <label>Event: </label><?php echo $qualifyResult['source']; ?> 
                                 </p>
+                                
+                                <input type="hidden" value="<?php echo $qualifyResult['provider_id']; ?>" />
+                                <input type="hidden" value="<?php echo $qualifyResult['deviceid']; ?>" />
                             </div>
                         
                             <div class="col-md-1">
@@ -304,7 +308,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             <div id="specimenRadioBox" class="<?php echo ($qualifyResult['specimen_collected']=='Yes')?'hidden':"";?>" >
                                 <h5>Specimen collected?</h5>
                                 <div class="col-md-4 pL-0">
-                                    <div id="specimen">
+                                    <div class="specimen-collected">
+                                        <a class="yes" href="<?php echo $patientInfoUrl.'&status_log=add&specimen=yes'?>"><i class="fas fa-tint"></i> Yes</a> &nbsp;&nbsp;
+                                        <a class="no" href="<?php echo $patientInfoUrl.'&status_log=add&specimen=no'?>"><i class="fas fa-tint-slash"></i> No</a>
+                                    </div>
+<!--                                    <div id="specimen">
                                         <input id="<?php echo ($qualifyResult['specimen_collected']=='Yes')?"":"specimen-collected-cbox";?>" <?php echo ($qualifyResult['specimen_collected']=='Yes')?"checked":"";?> type="radio" name="specimen_collected" value="Yes" /> Yes &nbsp;&nbsp;
                                         <?php if($qualifyResult['specimen_collected'] !== 'Yes'){ ?>
                                         <input id="<?php echo ($qualifyResult['specimen_collected']=='No')?"":"specimen-notcollected-cbox";?>" <?php echo ($qualifyResult['specimen_collected']=='No')?"checked":"";?> type="radio" name="specimen_collected" value="No" /> No
@@ -334,7 +342,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                                 <a href="<?php echo $patientInfoUrl; ?>" class="btn btn-specimen btn-inline">Cancel</a>
                                             </form>
                                         </div>                                                
-                                    </div>
+                                    </div>-->
                                 </div>
                             </div>
                             <?php if( isset($qualifyResult['specimen_collected']) && $qualifyResult['specimen_collected']!=NULL && $qualifyResult['specimen_collected']!='0' ){ ?>
@@ -1701,6 +1709,7 @@ if(isset($_POST['edit_categories'])){
 <?php } ?>
 
 <?php
+   
     if(isset($_POST['manage_status_log'])){ 
         $statusIDs = $_POST['status'];
         $date=($_POST['date']!="")?date('Y-m-d h:i:s',strtotime($_POST['date'])):"";
@@ -1714,7 +1723,9 @@ if(isset($_POST['edit_categories'])){
             'Guid_salesrep' => $accountInfo['Guid_salesrep'],
             'salesrep_fname' => $accountInfo['salesrep_fname'],
             'salesrep_lname' => $accountInfo['salesrep_lname'],
-            'Recorded_by' => $_SESSION['user']['id'],                
+            'Recorded_by' => $_SESSION['user']['id'],  
+            'provider_id' => $qualifyResult['provider_id'],
+            'deviceid' => $qualifyResult['deviceid'],
             'Date'=>$date,
             'Date_created'=>date('Y-m-d h:i:s')
         );
@@ -1731,10 +1742,10 @@ if(isset($_POST['edit_categories'])){
             updateCurrentStatusID($db, $Guid_patient);
             Leave($patientInfoUrl);
         } else {//insert log		
-            if($_POST['manage_status_log']=='specimenNotCollected'){
+            if(isset($_POST['specimenCollected']) && $_POST['specimenCollected']=='no'){
                 updateTable($db, 'tblpatient', array('specimen_collected'=>'No'), array('Guid_patient'=>$Guid_patient));
             }
-            if($_POST['manage_status_log']=='specimenCollected'){
+            if(isset($_POST['specimenCollected']) && $_POST['specimenCollected']=='yes'){
                 updateTable($db, 'tblpatient', array('specimen_collected'=>'Yes'), array('Guid_patient'=>$Guid_patient));
             }
             saveStatusLog($db, $statusIDs, $statusLogData);
@@ -1742,9 +1753,6 @@ if(isset($_POST['edit_categories'])){
             Leave($patientInfoUrl);
         }  
     } 
-	
-
-	
 	
 ?>
 <?php 
@@ -1780,7 +1788,17 @@ if(isset($_POST['edit_categories'])){
                         if(isset($_GET['log_id']) && $_GET['log_id']!="" ){
                             echo get_selected_log_dropdown($db, $logRow['Log_group']); 
                         }else{
-                            echo get_status_dropdown($db, $parent_id='0'); 
+                            if(isset($_GET['specimen'])){
+                                if($_GET['specimen']=='yes'){
+                                    echo "<input type='hidden' name='specimenCollected' value='yes'>";
+                                    echo get_status_dropdown($db, $parent_id='0', $Guid_status='1');
+                                }else{
+                                    echo "<input type='hidden' name='specimenCollected' value='no'>";
+                                    echo get_status_dropdown($db, $parent_id='0', $Guid_status='37');
+                                }
+                            }else{
+                                echo get_status_dropdown($db, $parent_id='0'); 
+                            }
                         }
                     ?>                            
                 </div>             
