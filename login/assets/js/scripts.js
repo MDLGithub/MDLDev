@@ -43,7 +43,7 @@ $(document).ready(function () {
    // $('.h-filters .date').mask("00/00/0000", {placeholder: "__/__/____"});
     $('.h-filters .stat_mdl_number').mask("0000000");
     
-    /*$('#file.accountLogoInput').inputFileText( {
+    $('#file.accountLogoInput').inputFileText( {
         text: 'Account Logo',  
         buttonCLass: 'cooseFileBtn',
         textClass: 'chooseFileTxt' 
@@ -52,7 +52,7 @@ $(document).ready(function () {
         text: 'Upload User\'s Photo',  
         buttonCLass: 'cooseFileBtn',
         textClass: 'chooseFileTxt' 
-    });*/
+    });
     
     /**
      * Dashboard Calendar Date Dropdown filter
