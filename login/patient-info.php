@@ -802,6 +802,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 <div id = "form-details">
                     <h2>Details</h2>
                 </div>
+                <button class = "print_button button" id = "form-print"><i class="fas fa-print"></i> Print</button>
             <ul id="accordion">
               <li>
                 <div id = "form-bar">
@@ -1149,8 +1150,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     </tbody>
                 </table>
               	<div class = "buttons">
-              		<button id = "info_button" class = "button"><i class="fas fa-info"></i> Info</button>
-              		<button class = "print_button button"><i class="fas fa-print"></i> Print</button>
+              		<!--<button id = "info_button" class = "button"><i class="fas fa-info"></i> Info</button>
+              		<button class = "print_button button"><i class="fas fa-print"></i> Print</button>-->
               	</div>
               </div>
           </div>

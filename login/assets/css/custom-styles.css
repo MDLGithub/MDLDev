@@ -1339,6 +1339,17 @@ and (orientation : portrait) {
         white-space:normal;
     }
 
+    #form-option-table thead{
+        position:relative;
+        display:table;       
+        width:100%;
+        top:62px;
+    }
+
+    #form-option-table tbody{
+        width:100%;
+    }
+
 }
 
 /* iPad Pro Landscape */
