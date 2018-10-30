@@ -280,9 +280,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $('#calendar').fullCalendar('removeEventSources');
             $('#calendar').fullCalendar('refetchEvents');
             $('#calendar').fullCalendar('addEventSource', summarycursource);
-            /*$('#calendar').fullCalendar('refetchEvents');
+            $('#calendar').fullCalendar('refetchEvents');
             $("#detail").removeClass('activeButton')
-            $("#summary").addClass('activeButton')*/
+            $("#summary").addClass('activeButton')
             
         });
 
@@ -703,21 +703,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         $("#mebrcacnt").removeClass();
                         $("#meeventcnt").removeClass();
                         var brcaCntimg = hcfCntimg = "";
-                        if( brcaCnt < 5 ){
-                            brcaCntimg = "below_avg";
-                        }else if( brcaCnt < 10 && brcaCnt >= 5 ){
-                            brcaCntimg = "above_avg";
-                        }else if( brcaCnt >= 10 ){
-                            brcaCntimg = "top_performer_avg";
-                        }
 
-                        if( hcfCnt < 5 ){
-                            hcfCntimg = "below_avg";
-                        }else if( hcfCnt < 10 && hcfCnt >= 5 ){
-                            hcfCntimg = "above_avg";
-                        }else if( hcfCnt >= 10 ){
-                            hcfCntimg = "top_performer_avg";
-                        }
+                        brcaCntimg = statImage(brcaCnt);
+                        hcfCntimg = statImage(hcfCnt);
+
                         $("#mebrcacnt").text(brcaCnt).addClass(brcaCntimg).removeClass('decrease');
                         $("#meeventcnt").text(hcfCnt).addClass(hcfCntimg).removeClass('decrease');
                     }, 5000);
