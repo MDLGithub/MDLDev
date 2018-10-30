@@ -242,7 +242,7 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart'){
 
     foreach ($salesrepids as $s) {
         $q = "SELECT count(*) as submittedCnt, CONCAT(salesrep_fname,' ',salesrep_lname) as SNames "
-            . "FROM test.tbl_mdl_status_log "
+            . "FROM tbl_mdl_status_log "
             . "WHERE DATE(Date) >= :sDate AND DATE(Date) < :eDate "
             . "AND Guid_status = 1 AND Guid_salesrep = :ids GROUP BY Guid_salesrep ORDER BY submittedCnt LIMIT 5";
         $result = $db->query($q, array('ids'=>$s, 'sDate'=>$sDate, 'eDate'=>$eDate)); 
@@ -491,8 +491,20 @@ if(isset($_GET['action']) && $_GET['action'] == 'getconsultant'){
 
 /* Summary Stats */
 if(isset($_GET['_']) && isset($_GET['start'])){
-    $number = $_GET['_'];
-    $start = $_GET['start'];
-    $end = $_GET['end'];
     
+    $result = getSummaryEvents($db);
+
+    foreach($result as $row)
+    {
+     $data[] = array(
+      'evtCnt'   => $row['evtCnt'],
+      'start'   => $row['start_event'],
+      'registeredCnt' => $row['registeredCnt'],
+      'qualifiedCnt' => $row['qualifiedCnt'],
+      'completedCnt' => $row['completedCnt']   
+      );
+    }
+
+    echo json_encode($data);
+
 }
