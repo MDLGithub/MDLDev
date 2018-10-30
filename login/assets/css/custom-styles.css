@@ -239,6 +239,21 @@ main.full-width{
     margin-right: 8%;
 }
 
+#geneveda-export-modal .contentBlock::before {
+    content: '';
+    position: absolute;
+    height: 20px;
+    width: 100%;
+    top: 0px;
+    left: 0px;
+    background: #2b4d77;
+    border-radius: 5px 5px 0px 0px;
+}
+
+#geneveda-export-modal .contentBlock {
+    padding-top: 50px;
+}
+
 .mdlLogo .image{
     background: url(../images/logo_mdl.png) 0 0 no-repeat;
     background-size: contain;
@@ -537,6 +552,18 @@ th.zip input{
     border: 1px solid #eee;
     box-shadow: 3px 2px 10px #0000008a;
 }
+
+
+.modalBlock .contentBlock.patientForms-open{
+    width:50%;
+    left:25%;
+}
+
+.modalBlock .contentBlock.formdetails-open{
+    width:60%;
+    left: 24%;
+}
+
 .modalBlock .close{
     display: block;
     position: absolute;
@@ -1151,6 +1178,38 @@ and (orientation : landscape) {
         float:initial !important;
     }
 
+    .modalBlock .contentBlock.patientForms-open{
+        width:90%;
+        left:5%;
+    }
+
+    .modalBlock .contentBlock.formdetails-open{
+        width:90%;
+        left: 5%;
+    }
+
+    #matrix_parameters .button.export > strong {
+        text-indent: 22px;
+    }
+
+    #matrix_parameters .cancel > strong {
+        text-indent: 17px;
+    }
+
+    .dmdlCsvUpload{
+        width: 51%;
+        margin-left: 89px;
+        margin-right: 5px !important;
+    }
+
+    .dmdlCsvUpload input[type="file"] {
+        width: 100%;
+        font-size: 15px;
+    }
+
+    .dmdlRefresh{
+        margin-right:0px !important;
+    }
 
 }
 
@@ -1230,7 +1289,7 @@ and (orientation : portrait) {
     }
 
     .bottom{
-        width:165%;
+        margin-bottom:40px;
     }
 
     #app_data .url_config_box input[type='radio'], input[type='radio']:checked{
@@ -1243,10 +1302,53 @@ and (orientation : portrait) {
     }
 
     #geneveda-export-modal .contentBlock {
-        width: 50%;
-        left: 25%;
+        width: 85%;
+        left: 8%;
     }
 
+
+    .modalBlock .contentBlock.patientForms-open{
+        width:85%;
+        left:8%;
+    }
+
+
+    .modalBlock .contentBlock.formdetails-open{
+        width:85%;
+        left: 8%;
+    }
+
+    .dmdlForm{
+        /*margin-left:315px;*/
+        display:inline-block;
+    }
+
+    .dmdlCsvUpload{
+        width:63%;
+    }
+
+    .dmdlForm form button.upload{
+        margin-left:-6px;
+    }
+
+    #palette_top > h4{
+        font-size: 0.9em;
+        width: 50px;
+        margin-top: -6px;
+        line-height: 17px;
+        white-space:normal;
+    }
+
+    #form-option-table thead{
+        position:relative;
+        display:table;       
+        width:100%;
+        top:62px;
+    }
+
+    #form-option-table tbody{
+        width:100%;
+    }
 
 }
 
@@ -1289,6 +1391,10 @@ and (-webkit-min-device-pixel-ratio: 2) {
         float:initial !important;
     }
 
+    .modalBlock .contentBlock.formdetails-open {
+        width: 90%;
+        left: 5%;
+    }
 
 }
 
@@ -1346,6 +1452,30 @@ and (-webkit-min-device-pixel-ratio: 2) {
     #geneveda-export-modal .contentBlock {
         width: 50%;
         left: 25%;
+    }
+
+    .dmdlForm form{
+        margin-left:22px;
+    }
+
+    .dmdlCsvUpload{
+        width: 50%;
+        margin-left: 75px;
+        font-size: 14px;
+        margin-right: 5px !important;
+    }
+
+    .dmdlForm input[type="file"] {
+        width: 100%;
+    }
+
+    .dmdlRefresh{
+        margin-right:4px !important;
+    }
+
+    .modalBlock .contentBlock.formdetails-open {
+        width: 90%;
+        left: 5%;
     }
 
 }
@@ -1724,7 +1854,8 @@ table.valignTop td{
     max-width: 450px;
     margin: 0 auto;
 }
-.modalBlock .contentBlock.patientInfo{
+
+/*.modalBlock .contentBlock.patientInfo{
     width: 40%;
     left: 30%;
 }
@@ -1732,13 +1863,16 @@ table.valignTop td{
     width: 60%;
     left: 24%;
 }
+*/
+
+
 .modalBlock .patientInfo label{
     min-width: 200px;
 }
 .modalBlock .patientInfo input[type='text'],
 .modalBlock .patientInfo input[type='email'],
 .modalBlock .patientInfo select{
-    width: 430px;
+    width: 100%;
     border: 1px solid #5d7ea7;
     padding: 3px 10px;
     margin-bottom: 5px;

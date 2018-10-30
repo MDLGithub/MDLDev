@@ -34,6 +34,7 @@ function showFields(forms) {
 }
 
 $(document).ready(function(){
+  tabCounter = 0;
   firsttab = $("#form-option-table");
   firsttab.show();
   secondtab = $("#accordion");
@@ -49,10 +50,8 @@ $(document).ready(function(){
     $(this).addClass("active-tab");
     $("#form-details").removeClass("active-tab");
 
-    $(".contentBlock.patientForms").css({
-      width:"50%",
-      left: "25%"
-    });
+    $(".contentBlock.patientForms").addClass("patientForms-open");
+    $(".contentBlock.patientForms").removeClass("formdetails-open");
   });
 
    $("#info_button").click(function(){
@@ -91,19 +90,16 @@ $(document).ready(function(){
       $("#forms").removeClass("active-tab");
       $(this).addClass("active-tab");
 
-      $(".contentBlock.patientForms").css({
-        width:"60%",
-        left: "24%"
-      });
+      $(".contentBlock.patientForms").addClass("formdetails-open");
+      $(".contentBlock.patientForms").removeClass("patientForms-open");
+
   });
 
    activeItem = $("#accordion li:first");
    $(activeItem).addClass('active');
 
    $("#accordion #form-bar").click(function(){
-    /*$(activeItem).animate({width: "50px"}, {duration:300, queue:false});
-    $(this).parent().animate({width: "80%"}, {duration:300, queue:false});*/
-
+    tabCounter = $( "#accordion #form-bar" ).index( this );
     $(activeItem).css('width', '50px');
     $(this).parent().css('width', '80%');
 
@@ -111,25 +107,59 @@ $(document).ready(function(){
 });
 
  $(".next-button").click(function(){
-   $(activeItem).css('width', '50px');
-   $(activeItem).next().css('width', '80%');
-   activeItem = $(activeItem).next();
+      if(tabCounter != ($('ul#accordion li').length-1)){
+        tabCounter ++;
+        $(activeItem).css('width', '50px');
+        $(activeItem).next().css('width', '80%');
+        activeItem = $(activeItem).next();
+      }
  });
 
 
  $(".prev-button").click(function(){
-   $(activeItem).css('width', '50px');
-   $(activeItem).prev().css('width', '80%');
-   activeItem = $(activeItem).prev();
+      if(tabCounter > 0){
+        tabCounter--;
+       $(activeItem).css('width', '50px');
+       $(activeItem).prev().css('width', '80%');
+       activeItem = $(activeItem).prev();
+     }
  });
+
+       var onKeyDown = function ( event ) {
+        switch ( event.keyCode ) {
+          case 39:
+              if(tabCounter != ($('ul#accordion li').length-1)){
+                tabCounter ++;
+                $(activeItem).css('width', '50px');
+                $(activeItem).next().css('width', '80%');
+                activeItem = $(activeItem).next();
+              }
+            break;
+          case 37:
+          if(tabCounter > 0){
+                tabCounter--;
+                $(activeItem).css('width', '50px');
+                $(activeItem).prev().css('width', '80%');
+                activeItem = $(activeItem).prev();
+              }
+            break;
+        }
+      };
+      document.addEventListener( 'keydown', onKeyDown, false );
+
 
      $(".patient_forms").on('click', function() {
        $('#patient_brca_forms').css('display', 'block');
-         $(".contentBlock.patientForms").css({
-           width:"50%",
-           left: "25%"
-         }); 
+         if($("#form-details").hasClass("active-tab")){
+
+            $(".contentBlock.patientForms").addClass("formdetails-open");
+            $(".contentBlock.patientForms").removeClass("patientForms-open");
+         }else{
+            $(".contentBlock.patientForms").addClass("patientForms-open");
+            $(".contentBlock.patientForms").removeClass("formdetails-open");
+         }
      });
+
 
      // When the user clicks on <span> (x), close the modal
      $('.close').on('click', function () {
@@ -145,30 +175,30 @@ $(document).ready(function(){
      });
 
   $('.openPdf').on('click', function() {
-    $.ajax('ajaxHandler.php', {
-      type: 'POST',
-      data: {
-        openPdf: 'ok',
-        pdf_name: $(this).attr('pdf_name'),
-        patientInfo: $('#post').val()
-      },
-      success: function (response) {
-          var result = JSON.parse(response);
+    var request = new XMLHttpRequest();
+    request.open('POST', 'ajaxHandler.php', true);
+    request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+    request.responseType = 'blob';
+    request.send('openPdf=ok&pdf_name=' + $(this).attr('pdf_name') + '&patientInfo=' + $('#post').val());
+    
 
-          $('#form-option-table').append('<a href="'+ result.file +'" class="open_filled_pdf" type="hidden">open</a>');
-          window.location = $(".open_filled_pdf").attr("href");
+    request.onload = function() {
+      // Only handle status code 200
+      if(request.status === 200) {
+        var tabWindow = window.open('', '_blank');
+        var a = tabWindow.document.createElement('a');
+        tabWindow.document.body.appendChild(a);
+        var blob = new Blob([request.response], { type: 'application/pdf' });
 
-          // $.ajax('ajaxHandler.php', {
-          //   type: 'POST',
-          //   data: {
-          //     unlinkPdf: 'ok',
-          //     pdf_name: result.filename,
-          //     patient_id: $('#guid_patient').val()
-          //   },
-          //   success: function (response) {}
-          // });
+        if (window.navigator.msSaveOrOpenBlob) {
+          spinnerService.hide('html5spinner');
+          window.navigator.msSaveOrOpenBlob(blob, filename);
+        } else {
+          a.href = window.URL.createObjectURL(blob);
+          a.click();
+          a.download = 'filled.pdf';
         }
-      });
+      }
+    };
   });
-
 });
