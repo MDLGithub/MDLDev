@@ -405,7 +405,7 @@ if(isset($_POST['action']) && $_POST['action'] == "getLogo")
 if(isset($_POST['action']) && $_POST['action'] == 'tableStats'){
     $count = 1;
     $acc_ids = explode(',', $_POST['acc']);
-    $registered = $completed = $qualified = $submitted = 0;
+    $registered = $completed = $qualified = $submitted = $brcaCnt = $hcfCnt = 0;
     foreach ($acc_ids as $acc) {
        
         $regQuery = "SELECT COUNT(*) AS regCount "
@@ -435,7 +435,7 @@ if(isset($_POST['action']) && $_POST['action'] == 'tableStats'){
         . "LEFT JOIN tblevents e ON e.accountid = l.Guid_account AND DATE(e.start_event) = DATE(l.Date) "
         . "WHERE l.Guid_status=1 AND l.account=:account AND u.marked_test='0' AND DATE(e.start_event) BETWEEN DATE(:startdate)  AND DATE(:enddate) GROUP BY l.account";
         $subResult = $db->query($subQuery,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate'], "account" => $acc));
-        
+
         foreach($regResult as $reg){
             $registered += $reg['regCount'];  
         }
@@ -447,13 +447,28 @@ if(isset($_POST['action']) && $_POST['action'] == 'tableStats'){
         }
         foreach($subResult as $sub){
             $submitted += $sub['subCount'];  
-        }   
+        } 
     }
+    if(isset($_POST['salesreps']) && $_POST['salesreps'] != '' || $_POST['salesreps']!=null):
+        $brcaQuery = "SELECT COUNT(*) as brcaCount FROM test.tblevents WHERE title='BRCA DAY' AND salesrepid =:salesreps AND DATE(start_event) between DATE(:startdate) AND DATE(:enddate) GROUP BY title";
+        $brcaResult = $db->query($brcaQuery,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate'], 'salesreps'=>$_POST['salesreps']));
+        foreach($brcaResult as $row){
+            $brcaCnt += $row['brcaCount'];  
+        }
+        $hcfQuery = "SELECT COUNT(*) as hcfCount FROM test.tblevents WHERE title<>'BRCA DAY' AND salesrepid =:salesreps AND DATE(start_event) between DATE(:startdate) AND DATE(:enddate) GROUP BY title";
+        $hcfResult = $db->query($hcfQuery,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate'], 'salesreps'=>$_POST['salesreps']));
+        foreach($hcfResult as $row){
+            $hcfCnt += $row['hcfCount'];  
+        }
+    endif;
+    
     echo json_encode(array(
         'reg' => $registered,
         'com' => $completed,
         'qua' => $qualified,
-        'sub' => $submitted
+        'sub' => $submitted,
+        'brca'=> $brcaCnt,
+        'hcf' => $hcfCnt
     ));
 }
 
@@ -468,6 +483,16 @@ if(isset($_GET['action']) && $_GET['action'] == 'getconsultant'){
         $names[] = $row['sNames'];
         $sIds[] = $row['Guid_salesrep'];
     }
+
+    
     echo json_encode(array('names' => $names, 'ids' => $sIds));
 }
 
+
+/* Summary Stats */
+if(isset($_GET['_']) && isset($_GET['start'])){
+    $number = $_GET['_'];
+    $start = $_GET['start'];
+    $end = $_GET['end'];
+    
+}
