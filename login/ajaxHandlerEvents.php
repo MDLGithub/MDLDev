@@ -450,12 +450,12 @@ if(isset($_POST['action']) && $_POST['action'] == 'tableStats'){
         } 
     }
     if(isset($_POST['salesreps']) && $_POST['salesreps'] != '' || $_POST['salesreps']!=null):
-        $brcaQuery = "SELECT COUNT(*) as brcaCount FROM test.tblevents WHERE title='BRCA DAY' AND salesrepid =:salesreps AND DATE(start_event) between DATE(:startdate) AND DATE(:enddate) GROUP BY title";
+        $brcaQuery = "SELECT COUNT(*) as brcaCount FROM tblevents WHERE title='BRCA DAY' AND salesrepid =:salesreps AND DATE(start_event) between DATE(:startdate) AND DATE(:enddate) GROUP BY title";
         $brcaResult = $db->query($brcaQuery,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate'], 'salesreps'=>$_POST['salesreps']));
         foreach($brcaResult as $row){
             $brcaCnt += $row['brcaCount'];  
         }
-        $hcfQuery = "SELECT COUNT(*) as hcfCount FROM test.tblevents WHERE title<>'BRCA DAY' AND salesrepid =:salesreps AND DATE(start_event) between DATE(:startdate) AND DATE(:enddate) GROUP BY title";
+        $hcfQuery = "SELECT COUNT(*) as hcfCount FROM tblevents WHERE title<>'BRCA DAY' AND salesrepid =:salesreps AND DATE(start_event) between DATE(:startdate) AND DATE(:enddate) GROUP BY title";
         $hcfResult = $db->query($hcfQuery,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate'], 'salesreps'=>$_POST['salesreps']));
         foreach($hcfResult as $row){
             $hcfCnt += $row['hcfCount'];  
