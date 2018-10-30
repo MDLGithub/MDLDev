@@ -145,26 +145,24 @@ $(document).ready(function(){
     request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
     request.responseType = 'blob';
     request.send('openPdf=ok&pdf_name=' + $(this).attr('pdf_name') + '&patientInfo=' + $('#post').val());
+    
 
     request.onload = function() {
       // Only handle status code 200
       if(request.status === 200) {
         var tabWindow = window.open('', '_blank');
         var a = tabWindow.document.createElement('a');
+        tabWindow.document.body.appendChild(a);
         var blob = new Blob([request.response], { type: 'application/pdf' });
 
         if (window.navigator.msSaveOrOpenBlob) {
           spinnerService.hide('html5spinner');
           window.navigator.msSaveOrOpenBlob(blob, filename);
         } else {
-          var url = a.href = window.URL.createObjectURL(blob);
+          a.href = window.URL.createObjectURL(blob);
           a.click();
           a.download = 'filled.pdf';
         }
-
-        setTimeout(function(){
-          window.URL.revokeObjectURL(url)
-        , 100})
       }
     };
   });

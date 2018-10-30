@@ -1132,7 +1132,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         </tr>
                         <tr class="t_row">
                             <td class="printSelectBlock text-center">
-                                <input name="forms" value="aim" type="checkbox" class="print1 report1" data-prinatble="0" />
+                                <input name="forms" disabled value="aim" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
                                 <a href="" target="_blank">AIMs Precertification</a>
