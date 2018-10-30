@@ -21,8 +21,10 @@ require_once ('functions_event.php');
 $roles = array('Admin', 'Sales Rep', 'Sales Manager');
 
 $userID = $_SESSION['user']["id"];
+
 $roleInfo = getRole($db, $userID);
 $role = $roleInfo['role'];
+
 if (!in_array($role, $roles)) {
     Leave(SITE_URL . "/no-permission.php");
 }
@@ -37,12 +39,14 @@ $thisMessage = "";
 $error = array();
 
 $roleID = $roleInfo['Guid_role'];
+if($role == 'Sales Rep'): 
+    $where = array('Guid_user'=>$userID);
+    $salesrepRow = getTableRow($db, 'tblsalesrep', $where);
+    extract($salesrepRow);
+    $photo = $photo_filename;
+endif;
 
 $default_account = "";
-/*
-$accessRole = getAccessRoleByKey('home');
-$roleIDs = unserialize($accessRole['role_ids']);
-$dataViewAccess = isUserHasAnyAccess($roleIDs, $roleID, 'view');*/
 
 if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to_date']))) {
     verify_input($error);
@@ -167,6 +171,18 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .consultant_changed{ visibility: hidden; }
     .consultant_changed:before{ position: absolute;display: inline-block; width: 60px; border-radius: 20px; left: 0; content: "0"; background-color: #fff; visibility: visible; }
     .forcehidden{ display: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; }
+
+    #detail, #summary{ width: 48%; padding: 2px; background: #90bcf7; font-size: 15px;}
+    .sales-photo img { max-width: 100px; }
+    @media only screen and (min-device-width : 768px) and (max-width : 1024px) 
+    and (orientation : portrait) { 
+        .top-buttons { width: 65%; }
+        #detail, #summary{ width: 30%;}
+        .top-buttons a.button.submit{ width: 38%; }
+        .dropdown_hide{ display: none; }
+        .info_block h1{ width: 155px; line-height: 26px; }
+        .sales-photo img { max-width: 55px; text-align: center; margin-left: 20px; padding: 6px 0px; }
+    }
 </style>
 <script>
     
@@ -213,7 +229,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             for(var i =0; i < salesrepName.length; i++){
                 salesrepNameArray.push(salesrepName[i]);
                 if(i == 0){
-                    salesrepNameArray.push('<i class="fas fa-angle-down info_block_arrow arrow1" style="float:right;"></i>');
+                    salesrepNameArray.push('<i class="fas fa-angle-down info_block_arrow arrow1" style="float:right;" onclick="test()"></i>');
                 }
                 if(i != salesrepName.length-1){
                     salesrepNameArray.push("<br>");
@@ -246,7 +262,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 $("#topbrcacnt").addClass('consultant_changed');
                 $("#topeventcnt").addClass('consultant_changed');
             }else{
-                $(".info_block h1").removeClass('hide').html('All<i class="fas fa-angle-down info_block_arrow" style="float:right;"></i><br>Genetic<br>Consultants');
+                $(".info_block h1").removeClass('hide').html('All <i class="fas fa-angle-down info_block_arrow" style="float:right;"  onclick="test()"></i><br>Genetic <br>Consultants');
                 $("#topregcnt").removeClass('consultant_changed');
                 $("#topqualcnt").addClass('consultant_changed');
                 $("#topcomcnt").addClass('consultant_changed');
@@ -259,7 +275,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
         // when summary button is clicked
         $('#summary').on('click touchstart', function () {
-            var summarycursource = 'summaryeventload.php';
+            var summarycursource = 'ajaxHandlerEvents.php';
 
             $('#calendar').fullCalendar('removeEventSources');
             $('#calendar').fullCalendar('refetchEvents');
@@ -608,7 +624,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     data: {ids: uniqueIds, startdate: startdate, enddate: enddate, action: 'getBarChart'},
                     dataType: 'json',
                     success: function(returndata){
-                        console.log(returndata);
                         var chart = $("#chart").data("kendoChart");
                         var catr = returndata.categories;
                         chart.setOptions({
@@ -621,9 +636,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         });
                         chart.refresh();
                     },
-                    /*error: function(res){
-                        console.log(res);
-                    }*/
                 });
 
                 //Piechart
@@ -632,14 +644,13 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     accounts.push(v.account)
                 });
                 var uniqueAcc = accounts.filter(onlyUnique);
-                uniqueAcc = uniqueAcc.toString();
+                uniqueAccString = uniqueAcc.toString();
                 $.ajax({
                     type : 'POST',
-                    data : { acc: uniqueAcc, startdate: startdate, enddate:enddate, action:'piechart' },
+                    data : { acc: uniqueAccString, startdate: startdate, enddate:enddate, action:'piechart' },
                     dataType: 'json',
                     url : 'ajaxHandlerEvents.php',
                     success : function(returndata){
-                        //console.log(returndata);
                         var chart = $("#piechart").data("kendoChart");
                         chart.setOptions({
                             series: [returndata],
@@ -649,96 +660,88 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 });
 
                 //Table Stats
+                <?php if($role == "Sales Rep"):  
+                    $record = getSalesRepAccount($db, $Guid_salesrep);
+                ?>
+                    var string = "<?php echo $record; ?>";
+                    var arrayAcc = string.split(',')
+                    var z = arrayAcc.filter(function(val) {
+                      return uniqueAcc.indexOf(val) != -1;
+                    });
+                    accIds = z.toString();
+                    var params = { acc: accIds, salesreps: <?php echo $Guid_salesrep; ?>, startdate: startdate, enddate:enddate, action:'tableStats' };
+                <?php else: ?>
+                    accIds = uniqueAccString;
+                    var params = { acc: accIds, salesreps: '', startdate: startdate, enddate:enddate, action:'tableStats' };
+                <?php endif; ?>
                 $.ajax({
                     type : 'POST',
-                    data : { acc: uniqueAcc, startdate: startdate, enddate:enddate, action:'tableStats' },
+                    data : params,
                     dataType: 'json',
                     url : 'ajaxHandlerEvents.php',
                     success : function(returndata){
                         //console.log(returndata);
-                        if( returndata.reg < 5 ){
-                            rgCntimg = "below_avg";
-                        }else if( returndata.reg < 10 && returndata.reg >= 5 ){
-                            rgCntimg = "above_avg";
-                        }else if( returndata.reg >= 10 ){
-                            rgCntimg = "top_performer_avg";
-                        }
+                        rgCntimg = statImage(returndata.reg);
+                        cmCntimg = statImage(returndata.com);
+                        subCntimg = statImage(returndata.sub);
+                        qCntimg = statImage(returndata.qua);
+                        bCntimg = statImage(returndata.brca);
+                        hcfCntimg = statImage(returndata.hcf);
 
-                        if( returndata.com < 5 ){
-                            cmCntimg = "below_avg";
-                        }else if( returndata.com < 10 && returndata.com >= 5 ){
-                            cmCntimg = "above_avg";
-                        }else if( returndata.com >= 10 ){
-                            cmCntimg = "top_performer_avg";
-                        }
-
-                        if( returndata.sub < 5 ){
-                            subCntimg = "below_avg";
-                        }else if( returndata.sub < 10 && returndata.sub >= 5 ){
-                            subCntimg = "above_avg";
-                        }else if( returndata.sub >= 10 ){
-                            subCntimg = "top_performer_avg";
-                        }
-
-                        if( returndata.qua < 5 ){
-                            qCntimg = "below_avg";
-                        }else if( returndata.qua < 10 && returndata.qua >= 5 ){
-                            qCntimg = "above_avg";
-                        }else if( returndata.qua >= 10 ){
-                            qCntimg = "top_performer_avg";
-                        }
                         $("#meregcnt").text(returndata.reg).addClass(rgCntimg).removeClass('decrease');
                         $("#mecomcnt").text(returndata.qua).addClass(qCntimg).removeClass('decrease');
                         $("#mequalcnt").text(returndata.com).addClass(cmCntimg).removeClass('decrease');
                         $("#mesubcnt").text(returndata.sub).addClass(subCntimg).removeClass('decrease');
+                        $("#mebrcacnt").text(returndata.brca).addClass(bCntimg).removeClass('decrease');
+                        $("#meeventcnt").text(returndata.hcf).addClass(hcfCntimg).removeClass('decrease');
                     }
                 });
-                setTimeout(function(){
-                    var brcaCnt = $(".rightCircleicon1").length;
-                    var hcfCnt = $(".rightCircleicon2").length;
-                    $("#mebrcacnt").removeClass();
-                    $("#meeventcnt").removeClass();
-                    var brcaCntimg = hcfCntimg = "";
-                    if( brcaCnt < 5 ){
-                        brcaCntimg = "below_avg";
-                    }else if( brcaCnt < 10 && brcaCnt >= 5 ){
-                        brcaCntimg = "above_avg";
-                    }else if( brcaCnt >= 10 ){
-                        brcaCntimg = "top_performer_avg";
-                    }
+                <?php if($role != "Sales Rep"):  ?>
+                    setTimeout(function(){
+                        var brcaCnt = $(".rightCircleicon1").length;
+                        var hcfCnt = $(".rightCircleicon2").length;
+                        $("#mebrcacnt").removeClass();
+                        $("#meeventcnt").removeClass();
+                        var brcaCntimg = hcfCntimg = "";
 
-                    if( hcfCnt < 5 ){
-                        hcfCntimg = "below_avg";
-                    }else if( hcfCnt < 10 && hcfCnt >= 5 ){
-                        hcfCntimg = "above_avg";
-                    }else if( hcfCnt >= 10 ){
-                        hcfCntimg = "top_performer_avg";
-                    }
+                        brcaCntimg = statImage(brcaCnt);
+                        hcfCntimg = statImage(hcfCnt);
 
-                    $("#mebrcacnt").text(brcaCnt).addClass(brcaCntimg).removeClass('decrease');
-                    $("#meeventcnt").text(hcfCnt).addClass(hcfCntimg).removeClass('decrease');
-                }, 5000);
-
+                        $("#mebrcacnt").text(brcaCnt).addClass(brcaCntimg).removeClass('decrease');
+                        $("#meeventcnt").text(hcfCnt).addClass(hcfCntimg).removeClass('decrease');
+                    }, 5000);
+                <?php endif; ?>
                 
-                $.get({ 
+                $.get({
                     url:'ajaxHandlerEvents.php', 
                     data:{ srepids:uniqueIds, action:'getconsultant' }, 
                     success: function(res){ 
+                        //console.log(res);
                         var result = JSON.parse(res);
                         var arrlen = result['names'].length;
                         var i=0;
                         for(i=0; i<arrlen;i++){
-                            $('.salesrep_list ul').append('<li><a data-value='+result['ids'][i]+'>'+result['names'][i]+'</a></li>')
+                            //console.log(result['ids'][i]);    
+                            $('.salesrep_list ul').append('<li><a data-value='+result['ids'][i]+'>'+result['names'][i]+'</a></li>');
                         }
                     } 
                 });
 
             },
         });
-        
        
         function onlyUnique(value, index, self) { 
             return self.indexOf(value) === index;
+        }
+        function statImage(value){
+            if( value < 5 ){
+                img = "below_avg";
+            }else if( value < 10 && value >= 5 ){
+                img = "above_avg";
+            }else if( value >= 10 ){
+                img = "top_performer_avg";
+            }
+            return img;
         }
 
         // Whenever the user clicks on the "save" button
@@ -1215,26 +1218,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         $("#myModal").addClass("forcehidden");
     });
 
-    $(document).delegate('.info_block_arrow.arrow1', 'click', function(){
-        //alert($(this).parent().parent().text());
-        var ele = $('.info_block_arrow');
-        $(".salesrep_dropdown").removeClass('hide');
-        if($(".salesrep_dropdown").hasClass("dropdown_hide"))
-        {
-            $(ele).addClass('info_block_arrow_show');
-            $(".salesrep_dropdown").removeClass("dropdown_hide").removeClass('hide'); 
-            $(ele).parent().addClass('hide');    
-        }else{
-            $(ele).removeClass('info_block_arrow_show');
-            $(".salesrep_dropdown").addClass("dropdown_hide").removeClass('hide'); 
-            $(ele).parent().removeClass('hide');
-        }
-    });
 
-    /*$(document).delegate('.salesrep_list a', 'click', function(){
-        alert($(this).attr('data-value'));
-    })*/
-    
 </script>
 <?php
 // Salesrep table
@@ -1266,7 +1250,12 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 <div class="header week_stats" style="font-weight:bold;">    
                     <p>This Week's Stats</p>
                     <p class="top_performer">&#9726; Top Performer</p>
-                    <p class = "genetic_consultant">&#9726; Genetic Consultant</p>
+                    <?php if($role == 'Sales Rep'): ?>
+                        <p class = "genetic_consultant">&#9726; Me</p>
+                    <?php else: ?>
+                        <p class = "genetic_consultant">&#9726; Genetic Consultant</p>
+                    <?php endif; ?>
+                    
                 </div>
                 <div id="performance_chart">
                 <div class="row">
@@ -1289,12 +1278,26 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
              </div>
                 <div class="row info_block_row">
                         <div class = "info_block" style="min-width: 340px;">
+                            <?php if($role == 'Sales Rep'): ?>
+                                <div class="sales-photo">
+                                    <?php 
+                                        if($photo != ""){
+                                            $photo = SITE_URL."/images/users/".$photo;
+                                        } else {
+                                            $photo =  SITE_URL."/assets/images/default.png";
+                                        }
+                                    ?>
+                                    <img src="<?php echo $photo ?>">
+                                </div>
+                            <?php else: ?>
                             <h1>
-                            All<i class="fas fa-angle-down info_block_arrow" style = "float:right;"></i>
+                            All<i class="fas fa-angle-down info_block_arrow" onclick="test()" style = "float:right;"></i>
                             <br>Genetic
                             <br>Consultants</h1> 
+                        <?php endif; ?>
+
                             <div class = "salesrep_dropdown dropdown_hide">
-                                <i class="fas fa-angle-down info_block_arrow" style = "float:right;"></i>
+                                <i class="fas fa-angle-down info_block_arrow" onclick="test()" style = "float:right;"></i>
                                 <div class = "salesrep_list">
                                     <?php
                                         /*$clause = "  ORDER BY first_name, last_name";
@@ -1314,9 +1317,9 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                     </ul>
                                 </div>
                             </div>
-                        <div class="col-lg-7 col-md-5 top-buttons">
-                        <button type="button" name="Detail" id="detail" class="info-button activeButton" style="width: 48%; padding: 2px;">Details</button>
-                        <button type="button" name="Summary" id="summary" class="info-button" style="width: 48%; padding: 2px;">Summary</button>
+                        <div class="col-lg-7 col-md-8 top-buttons">
+                        <button type="button" name="Detail" id="detail" class="info-button activeButton" style="">Details</button>
+                        <button type="button" name="Summary" id="summary" class="info-button" style="">Summary</button>
                         <a href="eventschedule.php" class="button submit"><strong>Full Calendar</strong></a>   
                         </div>    
                     </div>
@@ -1334,7 +1337,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                             <a href="mdl-stats.php" target="_blank" class="button submit smaller_button"><strong>View All Stats</strong></a>
 
                     </div>
-                    <div id="piechart"  class="col-md-6 col-sm-12" ></div>
+                    <div id="piechart"  class="col-md-6 col-sm-12" style="padding:0;"></div>
                     <div id="chart" class="col-md-6 col-sm-12" style="padding:0;"></div>
                     <!-- <div class="overlay"><div>No data available</div></div> -->
                     
@@ -1580,8 +1583,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     template: "#= series.name #: #= value #"
                 },
                 chartArea: {
-                    width: 550,
-                    height: 230
+                    width: 590,
+                    height: 300
                 },
             });
 
@@ -1590,8 +1593,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     text: "Top Submitting Accounts"
                 },
                 chartArea: {
-                    width: 650,
-                    height: 350
+                    width: 610,
+                    height: 300
                 },
                 legend: {
                     position: "left",
@@ -1641,6 +1644,12 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 first = e.value.split(" ").join("\n");
             return first;
         };
+
+        function test(){
+            $(".salesrep_dropdown").toggleClass("dropdown_hide");
+            $(".info_block h1").toggleClass("hide");
+            $(".info_block_arrow").toggleClass("info_block_arrow_show");
+        }
     </script>
 <?php require_once 'scripts.php'; ?>
 <?php require_once 'footer.php'; ?>

@@ -49,10 +49,8 @@ $(document).ready(function(){
     $(this).addClass("active-tab");
     $("#form-details").removeClass("active-tab");
 
-    $(".contentBlock.patientForms").css({
-      width:"50%",
-      left: "25%"
-    });
+    $(".contentBlock.patientForms").addClass("patientForms-open");
+    $(".contentBlock.patientForms").removeClass("formdetails-open");
   });
 
    $("#info_button").click(function(){
@@ -91,10 +89,9 @@ $(document).ready(function(){
       $("#forms").removeClass("active-tab");
       $(this).addClass("active-tab");
 
-      $(".contentBlock.patientForms").css({
-        width:"60%",
-        left: "24%"
-      });
+      $(".contentBlock.patientForms").addClass("formdetails-open");
+      $(".contentBlock.patientForms").removeClass("patientForms-open");
+
   });
 
    activeItem = $("#accordion li:first");
@@ -125,10 +122,8 @@ $(document).ready(function(){
 
      $(".patient_forms").on('click', function() {
        $('#patient_brca_forms').css('display', 'block');
-         $(".contentBlock.patientForms").css({
-           width:"50%",
-           left: "25%"
-         }); 
+         $(".contentBlock.patientForms").addClass("patientForms-open");
+         $(".contentBlock.patientForms").removeClass("formdetails-open");
      });
 
      // When the user clicks on <span> (x), close the modal

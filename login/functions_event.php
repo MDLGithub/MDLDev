@@ -105,6 +105,17 @@ function getEventSchedule($db,$salesRepId,$accountId,$reqdashboard){
     return $result;
 }
 
+function getSalesRepAccount($db, $Guid_salesrep){
+    $q = "SELECT account FROM tbl_mdl_status_log WHERE Guid_salesrep = :salesrepid GROUP BY account ";
+    $result = $db->query($q, array('salesrepid' => $Guid_salesrep));
+    $account = array();
+    foreach ($result as $row) {
+        array_push($account, $row['account']);
+    }
+
+    return implode(',', $account);
+}
+
 function getSummaryEvents($db){
     $query = "SELECT count(*) as evtCnt, DATE(evt.start_event) as start_event, "
             . "(SELECT  count(*) FROM tblqualify tblqf "
