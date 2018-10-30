@@ -1517,8 +1517,13 @@ function updateCurrentStatusID($db, $Guid_patient){
     return $result['Guid_status_log'];
 }
 
-function get_status_dropdown($db, $parent='0') {
-    $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." AND visibility='1' ORDER BY order_by ASC, Guid_status ASC");
+function get_status_dropdown($db, $parent='0', $Guid_status=FALSE) {
+    if($Guid_status){
+        $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `Guid_status` = ".$Guid_status);
+        
+    }else{
+        $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." AND visibility='1' ORDER BY order_by ASC, Guid_status ASC");
+    }
     
     $content = '<div class="f2  ">
                     <div class="group">
@@ -2224,7 +2229,7 @@ function dmdl_refresh($db){
     
     $content .= "<div class='pB-15 text-right'>";
     $content .= "<button name='dmdlUpdate' type='submit' class='botton btn-inline'>Update</button>";
-    $content .= "<button name='dmdlCreateNew' type='submit' class='botton btn-inline'>Create New</button>";    
+    //$content .= "<button name='dmdlCreateNew' type='submit' class='botton btn-inline'>Create New</button>";    
     $content .= "</div>";
     $content .= "<table id='refresh-log-table' class='table'>";
     $content .= "<thead>";
@@ -2347,7 +2352,8 @@ function dmdl_refresh($db){
                         $sContent .= "</select>";
                     }
                     $possibleM = "<td>".$sContent."</td>";
-                }else{ //update mdl# for this perfect match => status=yes                  
+                }else{ 
+                    //update mdl# for this perfect match => status=yes                  
                     $match = "<td class='mn yes'>"
                             . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][status]' value='yes' />"
                             . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Guid_patient]' value='".$getPatient['0']['Guid_patient']."' />"
