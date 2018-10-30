@@ -239,6 +239,21 @@ main.full-width{
     margin-right: 8%;
 }
 
+#geneveda-export-modal .contentBlock::before {
+    content: '';
+    position: absolute;
+    height: 20px;
+    width: 100%;
+    top: 0px;
+    left: 0px;
+    background: #2b4d77;
+    border-radius: 5px 5px 0px 0px;
+}
+
+#geneveda-export-modal .contentBlock {
+    padding-top: 50px;
+}
+
 .mdlLogo .image{
     background: url(../images/logo_mdl.png) 0 0 no-repeat;
     background-size: contain;
@@ -1173,6 +1188,13 @@ and (orientation : landscape) {
         left: 5%;
     }
 
+    #matrix_parameters .button.export > strong {
+        text-indent: 22px;
+    }
+
+    #matrix_parameters .cancel > strong {
+        text-indent: 17px;
+    }
 
 }
 

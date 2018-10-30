@@ -1095,7 +1095,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" value="informed_consent" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="http://www.mdlab.com/forms/Other/BRCA_test_Consent.pdf">Informed consent</a>
+                                <a href="<?php echo SITE_URL . '/forms/BRCA_test_Consent.pdf' ?>" target="_blank">Informed consent</a>
                             </td>
                         </tr>
                         <tr class="t_row">
@@ -1103,7 +1103,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" value="prior_authorization" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="">Prior Authorization</a>
+                                <a href="<?php echo SITE_URL . '/forms/Prior Authorization Reqest form.pdf' ?>" target="_blank">Prior Authorization</a>
                             </td>
                         </tr>
                         <tr class="t_row">
@@ -1111,7 +1111,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" value="genetic_counseling" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="http://mdlab.com/forms/Other/BRCA_Genetic_Counseling_Referral.pdf">Genetic Counseling Referral</a>
+                                <a href="<?php echo SITE_URL . '/forms/BRCA_Genetic_Counseling_Referral.pdf' ?>" target="_blank">Genetic Counseling Referral</a>
                             </td>
                         </tr>
                         <tr class="t_row">
@@ -1119,7 +1119,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" value="cancer_genetic_counseling" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="https://2n3md83q9tf13jkpbi242zaw-wpengine.netdna-ssl.com/wp-content/uploads/2018/10/Cancer-Referral-Form_9.2018.pdf">Cancer Genetic Counseling Referral</a>
+                                <a href="<?php echo SITE_URL . "/forms/Cancer-Referral-Form_9.2018" ?>" target="_blank">Cancer Genetic Counseling Referral</a>
                             </td>
                         </tr>
                         <tr class="t_row">
@@ -1127,7 +1127,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" value="aetna_precertification" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="http://www.aetna.com/pharmacy-insurance/healthcare-professional/documents/BRCA-precertification-request-form.pdf">Aetna Precertification Information Request</a>
+                                <a href="<?php echo SITE_URL . "/forms/BRCA-precertification-request-form.pdf" ?>" target="_blank">Aetna Precertification Information Request</a>
                             </td>
                         </tr>
                         <tr class="t_row">
@@ -1135,15 +1135,15 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" value="aim" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="">AIMs Precertification</a>
+                                <a href="" target="_blank">AIMs Precertification</a>
                             </td>
                         </tr>
                         <tr class="t_row">
                             <td class="printSelectBlock text-center">
-                                <input name="forms" value="beacon" type="checkbox" class="print1 report1" data-prinatble="0" />
+                                <input name="forms" disabled value="beacon" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="">Beacon LBS</a>
+                                <a href="" target="_blank">Beacon LBS</a>
                             </td>
                         </tr>
                     </tbody>
