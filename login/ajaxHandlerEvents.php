@@ -231,6 +231,40 @@ if( isset($_POST['action']) && $_POST['action'] == 'piechart' ){
     echo json_encode($data);
 }
 
+/* --------------------- Dashboard Bar Chart ------------------------- */
+
+if(isset($_POST['action']) && $_POST['action'] == 'getBarChart'){
+    $count = 1;
+    $submitted = $regSalereps = array();
+    $salesrepids = explode(',', $_POST['ids']);
+    $sDate = $_POST['startdate'];
+    $eDate = $_POST['enddate'];
+
+    foreach ($salesrepids as $s) {
+        $q = "SELECT count(*) as submittedCnt, CONCAT(salesrep_fname,' ',salesrep_lname) as SNames "
+            . "FROM test.tbl_mdl_status_log "
+            . "WHERE DATE(Date) >= :sDate AND DATE(Date) < :eDate "
+            . "AND Guid_status = 1 AND Guid_salesrep = :ids GROUP BY Guid_salesrep ORDER BY submittedCnt LIMIT 5";
+        $result = $db->query($q, array('ids'=>$s, 'sDate'=>$sDate, 'eDate'=>$eDate)); 
+
+        foreach($result as $row){
+            $submitted[] = (int)$row['submittedCnt'];
+            $regSalereps[] = $row['SNames'];
+        }
+    }
+    $data = array(
+            'series' => array ([
+                    'name'=> 'Submitted',
+                    'data'=> $submitted,
+                    'color'=> "#3a8a5f",
+                    'labels'=> array('visible' => true),
+                ]
+            ),
+            'categories' => $regSalereps 
+    );
+    echo json_encode($data);
+}
+
 /* --------------------- BRCA Days Member Account  ------------------------- */
 
 if(isset($_POST['action']) && $_POST['action'] == 'mebrcacount'){
@@ -365,42 +399,8 @@ if(isset($_POST['action']) && $_POST['action'] == "getLogo")
     echo json_encode($result);
 }
 
-/* --------------------- Dashboard Bar Chart ------------------------- */
 
-if(isset($_POST['action']) && $_POST['action'] == 'getBarChart'){
-    $count = 1;
-    $submitted = $regSalereps = array();
-    //$salesrepids = explode(',', $_POST['ids']);
-    $salesrepids = $_POST['ids'];
-    $sDate = $_POST['startdate'];
-    $eDate = $_POST['enddate'];
-    $query = "SELECT count(*) as submittedCnt, CONCAT(l.salesrep_fname,' ', l.salesrep_lname) as srepNames "
-            . " FROM tbl_mdl_status_log l "
-            . " LEFT JOIN tblevents evt ON evt.salesrepid = l.Guid_salesrep and DATE(l.Date) = DATE(evt.start_event)"
-            . " LEFT JOIN tbluser u ON u.Guid_user = l.Guid_user "
-            . " where l.Guid_status = 1 and u.marked_test = '0' "
-            . " and DATE(l.Date) between '$sDate' and '$eDate' "
-            . " and l.Guid_salesrep IN ($salesrepids) group by l.Guid_salesrep ORDER BY submittedCnt DESC LIMIT 5";
-    
-    $result = $db->query($query);
-    foreach($result as $row){
-        $submitted[] = (int)$row['submittedCnt'];
-        $regSalereps[] = $row['srepNames'];
-    }
-    //print_r($result);
-    $data = array(
-            'series' => array ([
-                    'name'=> 'Submitted',
-                    'data'=> $submitted,
-                    'color'=> "#bce273"
-                ]
-            ),
-            'categories' => $regSalereps 
-    );
-    echo json_encode($data);
-}
-
-/* --------------------- Dashboard Bar Chart ------------------------- */
+/* --------------------- Dashboard Table Stats ------------------------- */
 
 if(isset($_POST['action']) && $_POST['action'] == 'tableStats'){
     $count = 1;

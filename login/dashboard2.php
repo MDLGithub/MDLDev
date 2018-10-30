@@ -608,7 +608,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     data: {ids: uniqueIds, startdate: startdate, enddate: enddate, action: 'getBarChart'},
                     dataType: 'json',
                     success: function(returndata){
-                        console.log(returndata);
                         var chart = $("#chart").data("kendoChart");
                         var catr = returndata.categories;
                         chart.setOptions({
@@ -621,9 +620,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         });
                         chart.refresh();
                     },
-                    /*error: function(res){
-                        console.log(res);
-                    }*/
                 });
 
                 //Piechart
@@ -720,7 +716,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 }, 5000);
 
                 
-                $.get({ 
+                $.get({
                     url:'ajaxHandlerEvents.php', 
                     data:{ srepids:uniqueIds, action:'getconsultant' }, 
                     success: function(res){ 
@@ -1334,7 +1330,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                             <a href="mdl-stats.php" target="_blank" class="button submit smaller_button"><strong>View All Stats</strong></a>
 
                     </div>
-                    <div id="piechart"  class="col-md-6 col-sm-12" ></div>
+                    <div id="piechart"  class="col-md-6 col-sm-12" style="padding:0;"></div>
                     <div id="chart" class="col-md-6 col-sm-12" style="padding:0;"></div>
                     <!-- <div class="overlay"><div>No data available</div></div> -->
                     
@@ -1580,8 +1576,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     template: "#= series.name #: #= value #"
                 },
                 chartArea: {
-                    width: 550,
-                    height: 230
+                    width: 590,
+                    height: 300
                 },
             });
 
@@ -1590,8 +1586,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     text: "Top Submitting Accounts"
                 },
                 chartArea: {
-                    width: 650,
-                    height: 350
+                    width: 610,
+                    height: 300
                 },
                 legend: {
                     position: "left",
