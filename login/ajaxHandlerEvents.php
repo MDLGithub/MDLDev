@@ -241,10 +241,11 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart'){
     $eDate = $_POST['enddate'];
 
     foreach ($salesrepids as $s) {
-        $q = "SELECT count(*) as submittedCnt, CONCAT(salesrep_fname,' ',salesrep_lname) as SNames "
-            . "FROM tbl_mdl_status_log "
-            . "WHERE DATE(Date) >= :sDate AND DATE(Date) < :eDate "
-            . "AND Guid_status = 1 AND Guid_salesrep = :ids GROUP BY Guid_salesrep ORDER BY submittedCnt LIMIT 5";
+        $q = "SELECT count(*) as submittedCnt, CONCAT(l.salesrep_fname,' ',l.salesrep_lname) as SNames "
+                . "FROM tbl_mdl_status_log l "
+                . "LEFT JOIN tblevents e ON DATE(e.start_event) = DATE(l.Date) AND l.Guid_salesrep = e.salesrepid "
+                . "AND l.Guid_account = e.accountid WHERE DATE(e.start_event) >= :sDate AND DATE(e.start_event) < :eDate "
+                . "AND l.Guid_status = 1 AND l.Guid_salesrep =:ids GROUP BY l.Guid_salesrep ";
         $result = $db->query($q, array('ids'=>$s, 'sDate'=>$sDate, 'eDate'=>$eDate)); 
 
         foreach($result as $row){
@@ -497,12 +498,13 @@ if(isset($_GET['_']) && isset($_GET['start'])){
     foreach($result as $row)
     {
      $data[] = array(
-      'evtCnt'   => $row['evtCnt'],
-      'start'   => $row['start_event'],
-      'registeredCnt' => $row['registeredCnt'],
-      'qualifiedCnt' => $row['qualifiedCnt'],
-      'completedCnt' => $row['completedCnt']   
-      );
+          'evtCnt'   => $row['evtCnt'],
+          'start'   => $row['start_event'],
+          'registeredCnt' => $row['registeredCnt'],
+          'qualifiedCnt' => $row['qualifiedCnt'],
+          'completedCnt' => $row['completedCnt'],
+          'submittedCnt'   => $row['submittedCnt'],  
+          );
     }
 
     echo json_encode($data);

@@ -408,8 +408,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     if (calEvent.account == null && calEvent.title == 'BRCA Day')
                         message += 'Account Number is missing';
                     var mouseOver = "Registered: " + $(this).find('.silhouette span').html() + "<br />";
-                    mouseOver += "Completed: " + $(this).find('.checkmark span').html() + "<br />";
-                    mouseOver += "Qualified: " + $(this).find('.dna span').html() + "<br />";
+                    mouseOver += "Completed: " + $(this).find('.dna span').html() + "<br />";
+                    mouseOver += "Qualified: " + $(this).find('.checkmark span').html() + "<br />";
                     mouseOver += "Submitted: " + $(this).find('.flask span').html();
                     
                     if (mouseOver != '') {
@@ -632,7 +632,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                                 categories: catr},
                             valueAxis:{
                                 max:returndata.yaxis
-                            }
+                            },
                         });
                         chart.refresh();
                     },
@@ -680,17 +680,17 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     dataType: 'json',
                     url : 'ajaxHandlerEvents.php',
                     success : function(returndata){
-                        //console.log(returndata);
+                        //console.log(cmCntimg );
                         rgCntimg = statImage(returndata.reg);
                         cmCntimg = statImage(returndata.com);
                         subCntimg = statImage(returndata.sub);
                         qCntimg = statImage(returndata.qua);
                         bCntimg = statImage(returndata.brca);
                         hcfCntimg = statImage(returndata.hcf);
-
+                        console.log(cmCntimg);
                         $("#meregcnt").text(returndata.reg).addClass(rgCntimg).removeClass('decrease');
-                        $("#mecomcnt").text(returndata.qua).addClass(qCntimg).removeClass('decrease');
-                        $("#mequalcnt").text(returndata.com).addClass(cmCntimg).removeClass('decrease');
+                        $("#mecomcnt").text(returndata.com).addClass(cmCntimg).removeClass('decrease');
+                        $("#mequalcnt").text(returndata.qua).addClass(qCntimg).removeClass('decrease');
                         $("#mesubcnt").text(returndata.sub).addClass(subCntimg).removeClass('decrease');
                         $("#mebrcacnt").text(returndata.brca).addClass(bCntimg).removeClass('decrease');
                         $("#meeventcnt").text(returndata.hcf).addClass(hcfCntimg).removeClass('decrease');
@@ -734,6 +734,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             return self.indexOf(value) === index;
         }
         function statImage(value){
+            var img = "";
             if( value < 5 ){
                 img = "below_avg";
             }else if( value < 10 && value >= 5 ){
@@ -1557,6 +1558,10 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             $("#chart").kendoChart({
                 title: {
                     text: "Top Submitting Genetic Consultants"
+                },
+                sort:{       
+                    field :"data",
+                    dir:"desc"
                 },
                 legend: {
                 },

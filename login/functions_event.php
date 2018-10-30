@@ -117,29 +117,21 @@ function getSalesRepAccount($db, $Guid_salesrep){
 }
 
 function getSummaryEvents($db){
-    $query = "SELECT count(*) as evtCnt, DATE(evt.start_event) as start_event, "
-            . "(SELECT  count(*) FROM tblqualify tblqf "
-                        . "INNER JOIN tblaccount tblacc ON tblqf.account_number = tblacc.account "
-                        . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
-                        . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
-                        . "WHERE DATE(tblqf.Date_created) = evt.start_event) as registeredCnt, "
-                . "(SELECT count(*) FROM tbl_ss_qualify tblqfss "
-                        . "LEFT JOIN tblqualify tblqf ON tblqfss.Guid_qualify = tblqf.Guid_qualify "
-                        . "INNER JOIN tblaccount tblacc ON tblqf.account_number = tblacc.account "
-                        . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
-                        . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
-                        . "WHERE DATE(tblqf.Date_created) = evt.start_event "
-                        . "AND tblqfss.qualified = 'Yes') as qualifiedCnt, "
-                . "(SELECT count(*) FROM tbl_ss_qualify tblqfss "
-                        . "LEFT JOIN tblqualify tblqf ON tblqfss.Guid_qualify = tblqf.Guid_qualify "
-                        . "INNER JOIN tblaccount tblacc ON tblqf.account_number = tblacc.account "
-                        . "INNER JOIN tblaccountrep tblaccrep ON tblacc.Guid_account = tblaccrep.Guid_account "
-                        . "INNER JOIN tblsalesrep tblsrep ON tblsrep.Guid_salesrep = tblaccrep.Guid_salesrep "
-                        . "WHERE DATE(tblqf.Date_created) = evt.start_event "
-                        . "AND tblqfss.qualified IN ('Yes','No','Unknown')) as completedCnt "
-            . "FROM tblevents evt "
-            . "GROUP BY DATE(evt.start_event)";
+       
+    $query = "SELECT e.start_event
+             ,(SELECT count(*) FROM test.tblevents t1 WHERE t1.start_event = e.start_event) AS evtCnt
+             ,SUM(IF(l.Guid_status=28, 1, 0)) AS registeredCnt
+             ,SUM(IF(l.Guid_status=36, 1, 0)) AS completedCnt
+             ,SUM(IF(l.Guid_status=29, 1, 0)) AS qualifiedCnt
+             ,SUM(IF(l.Guid_status=1, 1, 0)) AS submittedCnt
+            FROM tbl_mdl_status_log l
+            LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user
+            LEFT JOIN tblevents e ON e.accountid = l.Guid_account 
+            AND DATE(e.start_event) = DATE(l.Date)
+            WHERE u.marked_test='0' AND DATE(e.start_event) BETWEEN '".$_GET['start']."' AND '".$_GET['end']."' 
+            GROUP BY DATE(l.Date)";
     $result = $db->query($query);
+           
     return $result;    
 }
 
