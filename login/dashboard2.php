@@ -167,6 +167,17 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .consultant_changed{ visibility: hidden; }
     .consultant_changed:before{ position: absolute;display: inline-block; width: 60px; border-radius: 20px; left: 0; content: "0"; background-color: #fff; visibility: visible; }
     .forcehidden{ display: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; }
+
+    #detail, #summary{ width: 48%; padding: 2px; }
+
+@media only screen and (min-device-width : 768px) and (max-width : 1024px) 
+and (orientation : portrait) { 
+    .top-buttons { width: 65%; }
+    #detail, #summary{ width: 30%;}
+    .top-buttons a.button.submit{ width: 38%; }
+    .dropdown_hide{ display: none; }
+    .info_block h1{ width: 155px; line-height: 26px; }
+}
 </style>
 <script>
     
@@ -213,7 +224,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             for(var i =0; i < salesrepName.length; i++){
                 salesrepNameArray.push(salesrepName[i]);
                 if(i == 0){
-                    salesrepNameArray.push('<i class="fas fa-angle-down info_block_arrow arrow1" style="float:right;"></i>');
+                    salesrepNameArray.push('<i class="fas fa-angle-down info_block_arrow arrow1" style="float:right;" onclick="test()"></i>');
                 }
                 if(i != salesrepName.length-1){
                     salesrepNameArray.push("<br>");
@@ -246,7 +257,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 $("#topbrcacnt").addClass('consultant_changed');
                 $("#topeventcnt").addClass('consultant_changed');
             }else{
-                $(".info_block h1").removeClass('hide').html('All<i class="fas fa-angle-down info_block_arrow" style="float:right;"></i><br>Genetic<br>Consultants');
+                $(".info_block h1").removeClass('hide').html('All <i class="fas fa-angle-down info_block_arrow" style="float:right;"  onclick="test()"></i><br>Genetic <br>Consultants');
                 $("#topregcnt").removeClass('consultant_changed');
                 $("#topqualcnt").addClass('consultant_changed');
                 $("#topcomcnt").addClass('consultant_changed');
@@ -1211,7 +1222,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         $("#myModal").addClass("forcehidden");
     });
 
-    $(document).delegate('.info_block_arrow.arrow1', 'click', function(){
+    /*$(document).delegate('.info_block_arrow.arrow1', 'click', function(){
         //alert($(this).parent().parent().text());
         var ele = $('.info_block_arrow');
         $(".salesrep_dropdown").removeClass('hide');
@@ -1225,12 +1236,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $(".salesrep_dropdown").addClass("dropdown_hide").removeClass('hide'); 
             $(ele).parent().removeClass('hide');
         }
-    });
+    });*/
 
-    /*$(document).delegate('.salesrep_list a', 'click', function(){
-        alert($(this).attr('data-value'));
-    })*/
-    
 </script>
 <?php
 // Salesrep table
@@ -1286,11 +1293,11 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 <div class="row info_block_row">
                         <div class = "info_block" style="min-width: 340px;">
                             <h1>
-                            All<i class="fas fa-angle-down info_block_arrow" style = "float:right;"></i>
+                            All<i class="fas fa-angle-down info_block_arrow" onclick="test()" style = "float:right;"></i>
                             <br>Genetic
                             <br>Consultants</h1> 
                             <div class = "salesrep_dropdown dropdown_hide">
-                                <i class="fas fa-angle-down info_block_arrow" style = "float:right;"></i>
+                                <i class="fas fa-angle-down info_block_arrow" onclick="test()" style = "float:right;"></i>
                                 <div class = "salesrep_list">
                                     <?php
                                         /*$clause = "  ORDER BY first_name, last_name";
@@ -1310,9 +1317,9 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                     </ul>
                                 </div>
                             </div>
-                        <div class="col-lg-7 col-md-5 top-buttons">
-                        <button type="button" name="Detail" id="detail" class="info-button activeButton" style="width: 48%; padding: 2px;">Details</button>
-                        <button type="button" name="Summary" id="summary" class="info-button" style="width: 48%; padding: 2px;">Summary</button>
+                        <div class="col-lg-7 col-md-8 top-buttons">
+                        <button type="button" name="Detail" id="detail" class="info-button activeButton" style="">Details</button>
+                        <button type="button" name="Summary" id="summary" class="info-button" style="">Summary</button>
                         <a href="eventschedule.php" class="button submit"><strong>Full Calendar</strong></a>   
                         </div>    
                     </div>
@@ -1637,6 +1644,12 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 first = e.value.split(" ").join("\n");
             return first;
         };
+
+        function test(){
+            $(".salesrep_dropdown").toggleClass("dropdown_hide");
+            $(".info_block h1").toggleClass("hide");
+            $(".info_block_arrow").toggleClass("info_block_arrow_show");
+        }
     </script>
 <?php require_once 'scripts.php'; ?>
 <?php require_once 'footer.php'; ?>
