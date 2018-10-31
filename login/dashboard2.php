@@ -547,7 +547,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 $('#topregcnt').html('0');
                 $('#topqualcnt').html('0');
                 $('#topcomcnt').html('0');
-                
+                $('#topsubcnt').html('0');
                
                 $.ajax({
                     type : 'POST',
@@ -592,7 +592,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         success: function(res){
                             var result = JSON.parse(res);
                             $.each(result, function(k,v){
-                                $('.salesrep_list ul').append('<li><a href="http://localhost:8890/MDLDev/questionnaire/login/dashboard2.php?salerepId='+v.salesrepid+'">'+v.snames+'</a></li>');
+                                $('.salesrep_list ul').append('<li><a href="<?php echo SITE_URL; ?>/dashboard2.php?salerepId='+v.salesrepid+'">'+v.snames+'</a></li>');
                             });
                         }
 
