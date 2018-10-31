@@ -51,6 +51,7 @@ $default_account = "";
 if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to_date']))) {
     verify_input($error);
 }
+
 ?>
 <link href="assets/eventschedule/kendoUI/styles/kendo.common.min.css" rel="stylesheet">
 <link href="assets/eventschedule/kendoUI/styles/kendo.rtl.min.css" rel="stylesheet">
@@ -217,61 +218,13 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 $("div.modalhealthcare").hide();
             }
         });
+        var salesrep = <?php echo isset($_GET['salerepId']) ? $_GET['salerepId'] : 0; ?>;
         var cursource = 'eventload.php';
-        $(document).delegate('.salesrep_list a', 'click', function(){
-            
-            var salesrep = $(this).attr('data-value');
-            var salesrepName = $(this).text();
-
-            var salesrepName = $(this).text();
-                salesrepName = salesrepName.split(" ");
-            var salesrepNameArray = new Array();
-            for(var i =0; i < salesrepName.length; i++){
-                salesrepNameArray.push(salesrepName[i]);
-                if(i == 0){
-                    salesrepNameArray.push('<i class="fas fa-angle-down info_block_arrow arrow1" style="float:right;" onclick="test()"></i>');
-                }
-                if(i != salesrepName.length-1){
-                    salesrepNameArray.push("<br>");
-                }
-            }
-            salesrepName = salesrepNameArray.toString().replace(/\,/g," ");
-
-            //salesrepName = salesrepName.split(" ").join("<br>");
-            var reqdashboard = 1;
-            var allcursource = 'eventload.php';
-            if (salesrep != 0) {
-                cursource = 'eventload.php?salerepId=' + salesrep + '&reqdashboard=' + reqdashboard;
-            }
-            $('#calendar').fullCalendar('removeEventSources');
-            $('#calendar').fullCalendar('refetchEvents');
-            if (salesrep == 0) {
-                $('#calendar').fullCalendar('addEventSource', allcursource);
-            } else {
-                $('#calendar').fullCalendar('addEventSource', cursource);
-            }
-            $('#calendar').fullCalendar('refetchEvents');
-            $('.info_block_arrow').removeClass('info_block_arrow_show');
-            $(".salesrep_dropdown").addClass("dropdown_hide");
-            if(salesrep != 0){
-                $(".info_block h1").removeClass('hide').html(salesrepName);
-                $("#topregcnt").addClass('consultant_changed');
-                $("#topqualcnt").addClass('consultant_changed');
-                $("#topcomcnt").addClass('consultant_changed');
-                $("#topsubcnt").addClass('consultant_changed');
-                $("#topbrcacnt").addClass('consultant_changed');
-                $("#topeventcnt").addClass('consultant_changed');
-            }else{
-                $(".info_block h1").removeClass('hide').html('All <i class="fas fa-angle-down info_block_arrow" style="float:right;"  onclick="test()"></i><br>Genetic <br>Consultants');
-                $("#topregcnt").removeClass('consultant_changed');
-                $("#topqualcnt").addClass('consultant_changed');
-                $("#topcomcnt").addClass('consultant_changed');
-                $("#topsubcnt").addClass('consultant_changed');
-                $("#topbrcacnt").addClass('consultant_changed');
-                $("#topeventcnt").addClass('consultant_changed');
-            }
-            //top_stats();
-        });
+        if(salesrep == 0){
+            cursource = 'eventload.php';
+        }else{
+            cursource = 'eventload.php?salerepId='+salesrep;
+        }
 
         // when summary button is clicked
         $('#summary').on('click touchstart', function () {
@@ -324,7 +277,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var beginOfWeek = currentDate.startOf('week');
                 $("#calendarmonth").html($.fullCalendar.formatDate(beginOfWeek,"MMMM DD"));
                 $("#calendaryear").html($.fullCalendar.formatDate(beginOfWeek,"YYYY"));
-                $(".salesrep_list").html("<ul><li><a data-value='0'>Reset</a></li></ul>");
+                $(".salesrep_list").html("<ul><li><a href='<?php echo SITE_URL; ?>/dashboard2.php'>Select All</a></li></ul>");
                 //top_stats();
             },
             dayRender: function (date, cell) {
@@ -600,6 +553,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         (data['topqualifiedcount'] != 0 ) ? $('#topqualcnt').html(data['topqualifiedcount']) : 0;
                         (data['topregisteredcount'] != 0 ) ? $('#topregcnt').html(data['topregisteredcount']) : 0;
                         (data['topcompletedcount'] != 0 ) ? $('#topcomcnt').html(data['topcompletedcount']) : 0;
+                        (data['topsubmittedcount'] != 0 ) ? $('#topsubcnt').html(data['topsubmittedcount']) : 0;
   
                     }
                 });
@@ -612,6 +566,22 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var ele_events = events._props.currentEvents;
                 var categories = salesrepIds = [];
 
+                <?php if(isset($_GET['salerepId'])): ?>
+                    var genid = <?php echo $_GET['salerepId']; ?> 
+                    $('.salesrep_list ul').html('<li><a href="<?php echo SITE_URL; ?>/dashboard2.php">Select All</a></li>')
+                    $.ajax({
+                        url: 'ajaxHandlerEvents.php',
+                        type: 'POST',
+                        data: { id: genid, startdate: startdate, enddate: enddate, action:'genconValues' },
+                        success: function(res){
+                            var result = JSON.parse(res);
+                            $.each(result, function(k,v){
+                                $('.salesrep_list ul').append('<li><a href="http://localhost:8890/MDLDev/questionnaire/login/dashboard2.php?salerepId='+v.salesrepid+'">'+v.snames+'</a></li>');
+                            })
+                        }
+
+                    })
+                <?php endif; ?>
                 //Bar chart
                 $.each(ele_events,function(k, v){
                     salesrepIds.push(v.salesrepid);
@@ -722,7 +692,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         var i=0;
                         for(i=0; i<arrlen;i++){
                             //console.log(result['ids'][i]);    
-                            $('.salesrep_list ul').append('<li><a data-value='+result['ids'][i]+'>'+result['names'][i]+'</a></li>');
+                            /*$('.salesrep_list ul').append('<li><a data-value='+result['ids'][i]+'>'+result['names'][i]+'</a></li>');*/
+                            $('.salesrep_list ul').append('<li><a href="<?php echo SITE_URL ?>/dashboard2.php?salerepId='+result['ids'][i]+'">'+result['names'][i]+'</a></li>');
                         }
                     } 
                 });
@@ -1305,7 +1276,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                         $salesrep = $db->selectAll('tblsalesrep', $clause);*/
                                     ?>
                                     <ul>
-                                        <li><a data-value="0">Reset</a></li>
+                                        <li><a href='<?php echo SITE_URL; ?>/dashboard2.php'>Select All</a></li>
                                         <?php 
                                             /*foreach ($salesrep as $srole) {
                                                 if ($srole['first_name']) {

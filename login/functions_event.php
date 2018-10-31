@@ -119,7 +119,7 @@ function getSalesRepAccount($db, $Guid_salesrep){
 function getSummaryEvents($db){
        
     $query = "SELECT e.start_event
-             ,(SELECT count(*) FROM test.tblevents t1 WHERE t1.start_event = e.start_event) AS evtCnt
+             ,(SELECT count(*) FROM tblevents t1 WHERE t1.start_event = e.start_event) AS evtCnt
              ,SUM(IF(l.Guid_status=28, 1, 0)) AS registeredCnt
              ,SUM(IF(l.Guid_status=36, 1, 0)) AS completedCnt
              ,SUM(IF(l.Guid_status=29, 1, 0)) AS qualifiedCnt
