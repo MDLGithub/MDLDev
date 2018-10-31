@@ -686,13 +686,13 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         qCntimg = statImage(returndata.qua);
                         bCntimg = statImage(returndata.brca);
                         hcfCntimg = statImage(returndata.hcf);
-                        console.log(cmCntimg);
-                        $("#meregcnt").text(returndata.reg).addClass(rgCntimg).removeClass('decrease');
-                        $("#mecomcnt").text(returndata.com).addClass(cmCntimg).removeClass('decrease');
-                        $("#mequalcnt").text(returndata.qua).addClass(qCntimg).removeClass('decrease');
-                        $("#mesubcnt").text(returndata.sub).addClass(subCntimg).removeClass('decrease');
-                        $("#mebrcacnt").text(returndata.brca).addClass(bCntimg).removeClass('decrease');
-                        $("#meeventcnt").text(returndata.hcf).addClass(hcfCntimg).removeClass('decrease');
+                        //console.log(cmCntimg);
+                        $("#meregcnt").text(returndata.reg).removeClass().addClass(rgCntimg).removeClass('decrease');
+                        $("#mecomcnt").text(returndata.com).removeClass().addClass(cmCntimg).removeClass('decrease');
+                        $("#mequalcnt").text(returndata.qua).removeClass().addClass(qCntimg).removeClass('decrease');
+                        $("#mesubcnt").text(returndata.sub).removeClass().addClass(subCntimg).removeClass('decrease');
+                        $("#mebrcacnt").text(returndata.brca).removeClass().addClass(bCntimg).removeClass('decrease');
+                        $("#meeventcnt").text(returndata.hcf).removeClass().addClass(hcfCntimg).removeClass('decrease');
                     }
                 });
                 <?php if($role != "Sales Rep"):  ?>
