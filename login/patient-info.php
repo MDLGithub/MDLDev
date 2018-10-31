@@ -799,9 +799,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     <div id="admin_print"></div>
     <div id="patient_brca_forms" class="modalBlock" style="display: none;">
         <div class="contentBlock patientForms">
-        <span class = "close">
-            <i class="fas fa-times"></i>
-        </span>
+        <span class = "close"></span>
         <div class="container form-container" style="margin:auto"> 
             <div class = "form-row">
                 <div id = "forms">
