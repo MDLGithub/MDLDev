@@ -67,7 +67,7 @@ function login($email, $password, $db) {
        
     } else {
         //User is not found
-        $message = "User is not found. Pleas check your login name and try again";
+        $message = "User is not found. Please check your login name and try again.";
         $returnData = array('status'=>false, $showMsg=>true, 'message'=>$message);
         return $returnData;
     }
