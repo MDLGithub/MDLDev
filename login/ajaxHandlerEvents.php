@@ -526,8 +526,8 @@ if(isset($_POST['action']) && $_POST['action'] = 'genconValues' && isset($_POST[
     $query = "SELECT e.salesrepid, CONCAT(l.salesrep_fname, ' ' ,l.salesrep_lname) as snames "
             . "FROM tblevents e "
             . "left join tbl_mdl_status_log l on l.Guid_salesrep = e.salesrepid "
-            . "WHERE DATE(e.start_event) between '".$_POST['sDate']."' and '".$_POST['eDate']."' "
+            . "WHERE DATE(e.start_event) between DATE(:sDate) and DATE(:eDate) "
             . "group by e.salesrepid ";
-    $result = $db->query($query);
+    $result = $db->query($query, array('sDate' => $_POST['sDate'], 'eDate'=>$_POST['eDate']));
     echo json_encode($result);
 }
