@@ -244,8 +244,10 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart'){
         $q = "SELECT count(*) as submittedCnt, CONCAT(l.salesrep_fname,' ',l.salesrep_lname) as SNames "
                 . "FROM tbl_mdl_status_log l "
                 . "LEFT JOIN tblevents e ON DATE(e.start_event) = DATE(l.Date) AND l.Guid_salesrep = e.salesrepid "
-                . "AND l.Guid_account = e.accountid WHERE DATE(e.start_event) >= :sDate AND DATE(e.start_event) < :eDate "
-                . "AND l.Guid_status = 1 AND l.Guid_salesrep in (".$_POST['ids'].") GROUP BY l.Guid_salesrep order by submittedCnt desc limit 5";
+                . "AND l.Guid_account = e.accountid "
+                . "LEFT JOIN tbluser u on u.Guid_user = l.Guid_user "
+                . "WHERE DATE(e.start_event) >= :sDate AND DATE(e.start_event) < :eDate "
+                . "AND l.Guid_status = 1 AND l.Guid_salesrep in (".$_POST['ids'].") AND u.marked_test = '0' GROUP BY l.Guid_salesrep order by submittedCnt desc limit 5";
         $result = $db->query($q, array('sDate'=>$sDate, 'eDate'=>$eDate));
 
         foreach($result as $row){

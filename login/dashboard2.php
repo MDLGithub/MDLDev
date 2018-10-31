@@ -162,7 +162,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         background-size: 15px;
         top: 5px;
     }
-    .activeButton{ background: #1c487b !important; color: #fff !important; width: 45%; padding: 0; box-shadow: none !important; float: left;}
+    .activeButton{ background: #3f628a !important; color: #fff !important; width: 45%; padding: 0; box-shadow: none !important; float: left;}
     tr:first-child > td > .fc-day-grid-event{ min-height: 50px; }
     #piechart svg > g > g:nth-child(4) > g text, #chart svg > g > g:nth-child(4) > g text {
         font-weight: 800 !important;
@@ -173,7 +173,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .consultant_changed:before{ position: absolute;display: inline-block; width: 60px; border-radius: 20px; left: 0; content: "0"; background-color: #fff; visibility: visible; }
     .forcehidden{ display: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; }
 
-    #detail, #summary{ width: 48%; padding: 2px; background: #90bcf7; font-size: 15px;}
+    #detail, #summary{ width: 48%; padding: 2px; /*background: #90bcf7;*/ font-size: 15px;}
+    .top-buttons button.info-button { background: linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%); }
     .sales-photo img { max-width: 100px; }
     @media only screen and (min-device-width : 768px) and (max-width : 1024px) 
     and (orientation : portrait) { 
@@ -636,6 +637,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                                 max:returndata.yaxis
                             },
                         });
+                        chart.options.legend.offsetX = $('#chart').width() - 100;
                         chart.refresh();
                     },
                 });
@@ -1230,12 +1232,13 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             <a href="<?php echo SITE_URL; ?>/dashboard2.php" class="button homeIcon"></a>
             <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
         </section>
-        <?php if(isset($_GET['salerepId'])):
-            $titleArr = $db->row("SELECT CONCAT(`first_name`,' ',`last_name`) AS genName FROM `tblsalesrep` WHERE `Guid_salesrep`=:id", array('id'=>$_GET['salerepId']));
-         ?>
-            <div class="title>" style="text-align: center; font-weight: 800; font-size: 20px; line-height: 21px; margin-bottom: 15px;"><h2><?php echo $titleArr['genName']; ?></h2></div>
-        <?php endif; ?>
+        
         <div class="scroller event-schedule">
+            <?php if(isset($_GET['salerepId'])):
+                $titleArr = $db->row("SELECT CONCAT(`first_name`,' ',`last_name`) AS genName FROM `tblsalesrep` WHERE `Guid_salesrep`=:id", array('id'=>$_GET['salerepId']));
+             ?>
+                <div class="title>" style="text-align: center; font-weight: 800; font-size: 20px; line-height: 21px; margin-bottom: 15px;"><h2><?php echo $titleArr['genName']; ?></h2></div>
+            <?php endif; ?>
             <div class="container"> 
                 <div id="stats_header"> 
                 <div id="performance_section">
@@ -1543,6 +1546,9 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     dir:"desc"
                 },
                 legend: {
+                    position: "custom",
+                    orientation: "vertical",
+                    height: 50    
                 },
                 seriesDefaults: {
                     type: "column",
@@ -1567,8 +1573,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     template: "#= series.name #: #= value #"
                 },
                 chartArea: {
-                    width: 590,
-                    height: 300
+                    width: 570,
+                    height: 350
                 },
             });
 
@@ -1577,8 +1583,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     text: "Top Submitting Accounts"
                 },
                 chartArea: {
-                    width: 610,
-                    height: 300
+                    width: 630,
+                    height: 350
                 },
                 legend: {
                     position: "left",
