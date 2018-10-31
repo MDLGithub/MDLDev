@@ -252,7 +252,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             
         });
         var state_count1 = 0, count1 = 0;
-        var evtsDate = evteDate = '';
+        var d = new Date();
+        var evtsDate = d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate();
+        evtsDate = evtsDate.toString();
         if (localStorage.evtsDate) {
             evtsDate = (localStorage.evtsDate).toString();
         }
