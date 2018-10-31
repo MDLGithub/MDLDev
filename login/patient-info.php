@@ -1785,7 +1785,11 @@ if(isset($_POST['edit_categories'])){
                 <div class="col-md-12 clearfix" id="status-dropdowns-box">                                            
                     <?php 
                         if(isset($_GET['log_id']) && $_GET['log_id']!="" ){
-                            echo get_selected_log_dropdown($db, $logRow['Log_group']); 
+                            if(!empty($logRow)){
+                                echo get_selected_log_dropdown($db, $logRow['Log_group']);
+                            } else {
+                                Leave($patientInfoUrl);
+                            }
                         }else{
                             if(isset($_GET['specimen'])){
                                 if($_GET['specimen']=='yes'){
