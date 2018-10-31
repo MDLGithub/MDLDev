@@ -522,7 +522,7 @@ if(isset($_GET['_']) && isset($_GET['start'])){
 }
 
 
-if(isset($_POST['action']) && $_POST['action'] = 'genconValues'){
+if(isset($_POST['action']) && $_POST['action'] = 'genconValues' && isset($_POST['enddate'])){
     $query = "SELECT e.salesrepid, concat(l.salesrep_fname, ' ' ,l.salesrep_lname) as snames
             FROM tblevents e 
             left join tbl_mdl_status_log l on l.Guid_salesrep = e.salesrepid
@@ -530,8 +530,4 @@ if(isset($_POST['action']) && $_POST['action'] = 'genconValues'){
             group by e.salesrepid ";
     $result = $db->query($query);
     echo json_encode($result);
-    /*foreach ($result as $row) {
-        $data[] = $row['']
-    }*/
-
 }
