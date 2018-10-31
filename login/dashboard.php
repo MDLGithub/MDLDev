@@ -293,7 +293,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
 
 <?php  
-//upload and save dmdl data 
+//upload .csv and save dmdl data 
 $uploadMessage = "";
 if(isset($_POST['dmdlUpload'])){        
     $tmpName = $_FILES['dmdlCsvUpload']['tmp_name'];
@@ -398,12 +398,12 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
     //First Name
     if (isset($_POST['first_name']) && strlen(trim($_POST['first_name']))) {
         $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
-        $where .= " AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') LIKE '%" . $_POST['first_name'] . "%'";
+        $where .= " LOWER(CONVERT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') USING 'utf8')) LIKE '%" . strtolower($_POST['first_name']) . "%'";
     }
     //Last Name
     if (isset($_POST['last_name']) && strlen(trim($_POST['last_name']))) {
         $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
-        $where .= " AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') LIKE '%" . $_POST['last_name'] . "%'";
+        $where .= " LOWER(CONVERT(AES_DECRYPT(lastname_enc, 'L@stn@m3&%#') USING 'utf8')) LIKE '%" . strtolower($_POST['last_name']) . "%'";
     }
     //Insurance
     if (isset($_POST['insurance']) && strlen($_POST['insurance'])) {
