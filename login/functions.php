@@ -1008,15 +1008,15 @@ function get_value($db, $table, $extractFieldValue, $where=array()){
 }
 
 
-function validateProviderId($db, $data, $provider_id){
+function validateProviderId($db, $data, $npi){
     extract($data);    
     $providers = array();
     $query = "";
     if($action=='update'){
-        $query = "SELECT `provider_id` FROM tblprovider WHERE `provider_id`=$provider_id AND Guid_provider<>$Guid_provider";
+        $query = "SELECT `npi` FROM tblprovider WHERE `npi`=$npi AND Guid_provider<>$Guid_provider";
     } else {
-        if($provider_id!=""){
-            $query = "SELECT `provider_id` FROM tblprovider WHERE `provider_id`=$provider_id ";
+        if($npi!=""){
+            $query = "SELECT `npi` FROM tblprovider WHERE `npi`=$npi ";
         }
     }
     if($query){
@@ -1026,9 +1026,9 @@ function validateProviderId($db, $data, $provider_id){
     }
 
     if(!$providers){
-        return array('status'=>1, 'msg'=>'Provider ID Valid.');
+        return array('status'=>1, 'msg'=>'NPI Valid.');
     } else {
-        return array('status'=>0, 'msg'=>'Provider ID already exists.');
+        return array('status'=>0, 'msg'=>'NPI already exists.');
     }
        
     

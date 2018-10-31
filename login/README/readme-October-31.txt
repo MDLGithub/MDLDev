@@ -4,6 +4,9 @@ ALTER TABLE `tbluser` ADD COLUMN Loaded ENUM('Yes','No') DEFAULT 'No' AFTER Guid
 ALTER TABLE `tblaccount` ADD COLUMN address2 VARCHAR(128) AFTER address
 ALTER TABLE `tblpatient` ADD COLUMN Guid_dmdl_physician INT(32) AFTER Guid_dmdl_patient
 
+ALTER TABLE `tblpatient` MODIFY COLUMN `salutation` VARCHAR(8) NULL
+ALTER TABLE `tblprovider` CHANGE `provider_id` `npi`  VARCHAR(32)
+
 - dashboard2.php
 - ajaxHandlerEvents.php
 - functions_event.php
