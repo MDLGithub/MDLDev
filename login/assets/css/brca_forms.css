@@ -47,7 +47,7 @@
 #patient_brca_forms .contentBlock::before {
     content: 'Forms';
     position: absolute;
-    background: rgb(28, 72, 123);
+    background: #2b4d77;
     width: 100%;
     top: 0px;
     left: 0px;
