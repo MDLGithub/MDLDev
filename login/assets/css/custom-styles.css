@@ -547,7 +547,7 @@ th.zip input{
     top: 15%;
     position: relative;
     background: #fff;
-    padding: 30px;
+    padding: 50px 30px 30px 30px;
     border-radius: 5px;
     border: 1px solid #eee;
     box-shadow: 3px 2px 10px #0000008a;
@@ -1476,6 +1476,11 @@ and (-webkit-min-device-pixel-ratio: 2) {
     .modalBlock .contentBlock.formdetails-open {
         width: 90%;
         left: 5%;
+    }
+
+    .modalBlock .contentBlock.patientForms-open {
+        width: 60%;
+        left: 20%;
     }
 
 }

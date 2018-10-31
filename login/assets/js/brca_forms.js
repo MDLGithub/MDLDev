@@ -37,6 +37,7 @@ $(document).ready(function(){
   tabCounter = 0;
   firsttab = $("#form-option-table");
   firsttab.show();
+  $("#forms").addClass("active-tab");
   secondtab = $("#accordion");
   secondtab.hide();
   if ($('input[name=forms]:checked').length == 0) { 
