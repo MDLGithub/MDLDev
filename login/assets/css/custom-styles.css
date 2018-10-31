@@ -206,6 +206,14 @@ main.full-width{
     background-size: cover;
     height: 100vh;
 }
+#admin_login .boxtent .warning strong{
+    display: block;
+    text-align: center;
+    color: #f00;
+}
+#admin_login .boxtent .warning{
+   text-align: left;
+}
 .genevedaLogo,
 .mdlLogo{
     display: inline-block!important;
@@ -2230,14 +2238,14 @@ a.button.cancel.half{
     width: 100%;
 }
 #refresh-log-table tr.tableTopInfo{}
-#refresh-log-table tr.tableTopInfo .dmdl{
+#refresh-log-table tr.tableTopInfo .dmdl,
+#refresh-log-table tr.tableTopInfo .braca{
     background: #002060;
     color: #fff;
     text-align: center;
 }
 #refresh-log-table tr.tableTopInfo .braca{
     background: #00B050;
-    color: #fff;
 }
 #refresh-log-table tr.tableHeader{}
 .preloader {
