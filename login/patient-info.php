@@ -805,11 +805,12 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         <div class="container form-container" style="margin:auto"> 
             <div class = "form-row">
                 <div id = "forms">
-                    <h2>Forms</h2>
+                    <h2>Options</h2>
                 </div>
                 <div id = "form-details">
                     <h2>Details</h2>
                 </div>
+                <div class = "patient_name">John Smith</div>
                 <button class = "print_button button" id = "form-print"><i class="fas fa-print"></i> Print</button>
             <ul id="accordion">
               <li>
