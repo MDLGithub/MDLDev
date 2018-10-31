@@ -207,6 +207,7 @@ main.full-width{
     height: 100vh;
 }
 
+
 #admin_login .boxtent .warning strong{
     display: block;
     text-align: center;
@@ -1125,18 +1126,7 @@ table.dataTable thead .sorting {
 #manage-status-modal .contentBlock .content{
     padding: 10px 20px;
 }
-/*
-#manage-status-modal .close {
-    top: 0;
-    right: 0;
-    width: 40px;
-    height: 45px;
-    background: #071221;
-    border-radius: 0;
-    padding-top: 10px;
-    color: #f00;
-}
-*/
+
 
 @media (min-width: 1200px){
     .container {
@@ -2264,6 +2254,7 @@ a.button.cancel.half{
     width: 100%;
 }
 #refresh-log-table tr.tableTopInfo{}
+
 
 #refresh-log-table tr.tableTopInfo .dmdl,
 #refresh-log-table tr.tableTopInfo .braca{

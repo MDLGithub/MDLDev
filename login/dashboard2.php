@@ -252,7 +252,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             
         });
         var state_count1 = 0, count1 = 0;
-        //var salesrepIDList = salesrepNameList = [];
+        var evtsDate = evteDate = '';
+        if (localStorage.evtsDate) {
+            evtsDate = (localStorage.evtsDate).toString();
+        }
+
         var calendar = $('#calendar').fullCalendar({
             header: {
                 left: 'prev,next today',
@@ -272,6 +276,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             selectable: true,
             selectHelper: true,
             editable: false, 
+            defaultDate: evtsDate,
             viewRender: function(view, element) {
                 var currentDate = $('#calendar').fullCalendar('getDate');
                 var beginOfWeek = currentDate.startOf('week');
@@ -483,6 +488,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         return $(content);
                     }
                 }
+                
             },
             eventAfterRender: function (event, element, view) {
                 //salesrepIDList.push(event.salesrepid);
@@ -561,10 +567,18 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
                 var startdate = moment(event.start._d).format('YYYY-MM-DD');
                 var enddate = moment(event.end._d).format('YYYY-MM-DD');
+                
+                localStorage.setItem('evtsDate', startdate );
+                localStorage.setItem('evteDate', enddate );
 
                 var events = $('#calendar').fullCalendar('getView');
                 var ele_events = events._props.currentEvents;
                 var categories = salesrepIds = [];
+                $.each(ele_events,function(k, v){
+                    salesrepIds.push(v.salesrepid);
+                });
+                var uniqueIds = salesrepIds.filter(onlyUnique);
+                uniqueIds = uniqueIds.toString();
 
                 <?php if(isset($_GET['salerepId'])): ?>
                     var genid = <?php echo $_GET['salerepId']; ?> 
@@ -572,15 +586,29 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     $.ajax({
                         url: 'ajaxHandlerEvents.php',
                         type: 'POST',
-                        data: { id: genid, startdate: startdate, enddate: enddate, action:'genconValues' },
+                        data: { id: genid, sDate: startdate, eDate: enddate, action:'genconValues' },
                         success: function(res){
                             var result = JSON.parse(res);
                             $.each(result, function(k,v){
                                 $('.salesrep_list ul').append('<li><a href="http://localhost:8890/MDLDev/questionnaire/login/dashboard2.php?salerepId='+v.salesrepid+'">'+v.snames+'</a></li>');
-                            })
+                            });
                         }
 
-                    })
+                    });
+                <?php else: ?>
+                    $.get({
+                        url:'ajaxHandlerEvents.php', 
+                        data:{ srepids:uniqueIds, action:'getconsultant' }, 
+                        success: function(res){ 
+                            //console.log(res);
+                            var result = JSON.parse(res);
+                            var arrlen = result['names'].length;
+                            var i=0;
+                            for(i=0; i<arrlen;i++){
+                                $('.salesrep_list ul').append('<li><a href="<?php echo SITE_URL ?>/dashboard2.php?salerepId='+result['ids'][i]+'">'+result['names'][i]+'</a></li>');
+                            }
+                        } 
+                    });
                 <?php endif; ?>
                 //Bar chart
                 $.each(ele_events,function(k, v){
@@ -594,6 +622,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     data: {ids: uniqueIds, startdate: startdate, enddate: enddate, action: 'getBarChart'},
                     dataType: 'json',
                     success: function(returndata){
+                        //returndata = JSON.parse(returndata);
+                        console.log(returndata);
                         var chart = $("#chart").data("kendoChart");
                         var catr = returndata.categories;
                         chart.setOptions({
@@ -650,20 +680,19 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     dataType: 'json',
                     url : 'ajaxHandlerEvents.php',
                     success : function(returndata){
-                        //console.log(cmCntimg );
                         rgCntimg = statImage(returndata.reg);
                         cmCntimg = statImage(returndata.com);
                         subCntimg = statImage(returndata.sub);
                         qCntimg = statImage(returndata.qua);
                         bCntimg = statImage(returndata.brca);
                         hcfCntimg = statImage(returndata.hcf);
-                        console.log(cmCntimg);
-                        $("#meregcnt").text(returndata.reg).addClass(rgCntimg).removeClass('decrease');
-                        $("#mecomcnt").text(returndata.com).addClass(cmCntimg).removeClass('decrease');
-                        $("#mequalcnt").text(returndata.qua).addClass(qCntimg).removeClass('decrease');
-                        $("#mesubcnt").text(returndata.sub).addClass(subCntimg).removeClass('decrease');
-                        $("#mebrcacnt").text(returndata.brca).addClass(bCntimg).removeClass('decrease');
-                        $("#meeventcnt").text(returndata.hcf).addClass(hcfCntimg).removeClass('decrease');
+                        //console.log(cmCntimg);
+                        $("#meregcnt").text(returndata.reg).removeClass().addClass(rgCntimg).removeClass('decrease');
+                        $("#mecomcnt").text(returndata.com).removeClass().addClass(cmCntimg).removeClass('decrease');
+                        $("#mequalcnt").text(returndata.qua).removeClass().addClass(qCntimg).removeClass('decrease');
+                        $("#mesubcnt").text(returndata.sub).removeClass().addClass(subCntimg).removeClass('decrease');
+                        $("#mebrcacnt").text(returndata.brca).removeClass().addClass(bCntimg).removeClass('decrease');
+                        $("#meeventcnt").text(returndata.hcf).removeClass().addClass(hcfCntimg).removeClass('decrease');
                     }
                 });
                 <?php if($role != "Sales Rep"):  ?>
@@ -682,22 +711,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     }, 5000);
                 <?php endif; ?>
                 
-                $.get({
-                    url:'ajaxHandlerEvents.php', 
-                    data:{ srepids:uniqueIds, action:'getconsultant' }, 
-                    success: function(res){ 
-                        //console.log(res);
-                        var result = JSON.parse(res);
-                        var arrlen = result['names'].length;
-                        var i=0;
-                        for(i=0; i<arrlen;i++){
-                            //console.log(result['ids'][i]);    
-                            /*$('.salesrep_list ul').append('<li><a data-value='+result['ids'][i]+'>'+result['names'][i]+'</a></li>');*/
-                            $('.salesrep_list ul').append('<li><a href="<?php echo SITE_URL ?>/dashboard2.php?salerepId='+result['ids'][i]+'">'+result['names'][i]+'</a></li>');
-                        }
-                    } 
-                });
-
             },
         });
        
@@ -1215,6 +1228,11 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             <a href="<?php echo SITE_URL; ?>/dashboard2.php" class="button homeIcon"></a>
             <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
         </section>
+        <?php if(isset($_GET['salerepId'])):
+            $titleArr = $db->row("SELECT CONCAT(`first_name`,' ',`last_name`) AS genName FROM `tblsalesrep` WHERE `Guid_salesrep`=:id", array('id'=>$_GET['salerepId']));
+         ?>
+            <div class="title>" style="text-align: center; font-weight: 800; font-size: 20px; line-height: 21px; margin-bottom: 15px;"><h2><?php echo $titleArr['genName']; ?></h2></div>
+        <?php endif; ?>
         <div class="scroller event-schedule">
             <div class="container"> 
                 <div id="stats_header"> 
@@ -1271,21 +1289,9 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                             <div class = "salesrep_dropdown dropdown_hide">
                                 <i class="fas fa-angle-down info_block_arrow" onclick="test()" style = "float:right;"></i>
                                 <div class = "salesrep_list">
-                                    <?php
-                                        /*$clause = "  ORDER BY first_name, last_name";
-                                        $salesrep = $db->selectAll('tblsalesrep', $clause);*/
-                                    ?>
                                     <ul>
                                         <li><a href='<?php echo SITE_URL; ?>/dashboard2.php'>Select All</a></li>
-                                        <?php 
-                                            /*foreach ($salesrep as $srole) {
-                                                if ($srole['first_name']) {
-                                                    ?>
-                                                    <li><?php echo "<a data-value='".$srole['Guid_salesrep']."'>".$srole['first_name'] . " " . $srole['last_name']."</a>"; ?></li>
-                                                    <?php
-                                                }
-                                            }*/
-                                        ?>
+                                        
                                     </ul>
                                 </div>
                             </div>

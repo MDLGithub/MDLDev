@@ -522,12 +522,12 @@ if(isset($_GET['_']) && isset($_GET['start'])){
 }
 
 
-if(isset($_POST['action']) && $_POST['action'] = 'genconValues' && isset($_POST['enddate'])){
-    $query = "SELECT e.salesrepid, concat(l.salesrep_fname, ' ' ,l.salesrep_lname) as snames
-            FROM tblevents e 
-            left join tbl_mdl_status_log l on l.Guid_salesrep = e.salesrepid
-            WHERE DATE(e.start_event) between '".$_POST['startdate']."' and '".$_POST['enddate']."' 
-            group by e.salesrepid ";
+if(isset($_POST['action']) && $_POST['action'] = 'genconValues' && isset($_POST['eDate']) && isset($_POST['sDate'])){
+    $query = "SELECT e.salesrepid, CONCAT(l.salesrep_fname, ' ' ,l.salesrep_lname) as snames "
+            . "FROM tblevents e "
+            . "left join tbl_mdl_status_log l on l.Guid_salesrep = e.salesrepid "
+            . "WHERE DATE(e.start_event) between '".$_POST['sDate']."' and '".$_POST['eDate']."' "
+            . "group by e.salesrepid ";
     $result = $db->query($query);
     echo json_encode($result);
 }

@@ -727,7 +727,7 @@ if(isset($_POST['dmdlUpdate'])){
     if(isset($_POST['dmdl']['selected'])){
         foreach ($_POST['dmdl']['selected'] as $mdlNum=>$v){
             $dmdlItem = $_POST["dmdl"]["$mdlNum"];
-            var_dump($dmdlItem);
+            
             //if we have exact match
             if($dmdlItem['status']=='yes'){
                 
@@ -752,7 +752,97 @@ if(isset($_POST['dmdlUpdate'])){
 }
     
 if(isset($_POST['dmdlCreateNew'])){
-    var_dump($_POST);
+    $selectedMdl = $_POST['dmdlCreateNew'];
+    $mdlNum = key($selectedMdl);
+    $data = $_POST['dmdl'][$mdlNum];
+    
+    //check if checkbox is checked
+    if( isset($_POST["dmdl"]["selected"][$mdlNum])) {
+    
+        //insert into users
+        $userData = array(
+            'user_type'=>'patient',
+            'status'=>'1',
+            'Guid_role'=>'3',
+            'Loaded'=>'Yes',
+            'Date_created'=>date('Y-m-d h:i:s')
+        );
+        $insertUser = insertIntoTable($db, 'tbluser', $userData);
+        if($insertUser['insertID'] && $insertUser['insertID']!=''){
+            $Guid_user = $insertUser['insertID'];
+            //insert into patients
+            $Guid_dmdl_patient=$data['Guid_PatientId'];
+            $firstname_enc = $data['firstname'];
+            $lastname_enc = $data['lastname'];
+            $dob = $data['dob'];
+            $physician_name = $data['Physician']['FirstName']." ".$data['Physician']['LastName'];
+            $insurance_name = $data['insurance_full'];
+
+            $insertPatient = $db->query("INSERT INTO `tblpatient` (Guid_dmdl_patient,Guid_user,firstname_enc,lastname_enc,dob,physician_name,insurance_name,Date_created) "
+                    . "VALUES ('$Guid_dmdl_patient','$Guid_user', "
+                    . "AES_ENCRYPT('$firstname_enc', 'F1rstn@m3@_%'), "
+                    . "AES_ENCRYPT('$lastname_enc', 'L@stn@m3&%#'), "
+                    . "'$dob', '$physician_name','$insurance_name', NOW())");
+
+            $Guid_patient = $db->lastInsertId();
+            //update mdl number
+            $mdlData = array(
+                'Guid_user'=>$insertUser['insertID'],
+                'mdl_number'=>$data['mdlnumber']
+            );
+            $insertMDLNum = insertIntoTable($db, 'tbl_mdl_number', $mdlData);
+
+            //add/update account
+            //check if account exists with the same account number 
+            $accountData = array(
+                'account' => $data['account']['number'],
+                'name' => $data['account']['name'],
+                'address' => $data['account']['addr1'],
+                'address2' => $data['account']['addr2'],
+                'address2' => $data['account']['addr2'],
+                'city' => $data['account']['city'],
+                'state' => $data['account']['state'],
+                'zip' => $data['account']['zip']
+            );
+            $checkAccount = $db->query("SELECT * FROM tblaccount WHERE account=:account", array('account'=>$data['account']['number']));
+            if(empty($checkAccount)){ //insert new account
+                $insertAccount = insertIntoTable($db, 'tblaccount', $accountData);
+
+                if($insertAccount['insertID']&&$insertAccount['insertID']!=''){
+                    $Guid_account = $insertAccount['insertID'];
+                    //insert provider
+                    $accountNum = $db->row('SELECT account FROM tblaccount WHERE Guid_account=:Guid_account', array('Guid_account'=>$insertAccount['insertID']));
+                    $providerData = array(
+                        'Guid_user'=>$insertUser['insertID'],
+                        'Guid_account'=>$insertAccount['insertID'],
+                        'account_id'=>$accountNum['account'],
+                        'first_name'=>$data['Physician']['FirstName'],
+                        'last_name'=>$data['Physician']['LastName']
+                    );
+                    $insertProvider = insertIntoTable($db, 'tblprovider', $providerData);
+                    $Guid_provider = $insertProvider['insertID'];
+                }
+            }else{ //update account
+
+            }
+
+            //update status log table
+            $statusLogData = array(
+                'Guid_user' => $insertUser['insertID'],
+                'Guid_patient' => $Guid_patient,
+                'Guid_account' => $Guid_account,
+                'account' => $accountNum['account'],
+                'provider_id' => $Guid_provider
+            );
+
+        } //if user inserted and insertID is not empty  
+    } //check if checkbox for add new is checked
+
+    
+
+   
+
+    
 }
 
 ?>
@@ -784,10 +874,13 @@ if(isset($_POST['dmdlCreateNew'])){
             "paging":   false,
             "info":     false,
             "bSortCellsTop": false,
+            "language": {
+                "emptyTable": "No match found."
+            },
             "aoColumnDefs": [
               { 
                   "bSortable": false, 
-                  "aTargets": [ 5,6 ] } 
+                  "aTargets": [ 5,6,7 ] } 
             ]
         });  
     }
