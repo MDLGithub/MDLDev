@@ -100,14 +100,14 @@ if (empty($_POST)) {
 	$func($error);
 } elseif (isset($_POST['start'])) {
 	generate_email($error);
-} else {	
+} else {
 	verify_input($error, $not_qualified, $type);
 
 	if (isset($_POST['account_login'])) {
 		 if (count($error)) {			 
 			 generate_email($error);
 		 } elseif (!isset($_POST['returning_user'])) {
-			perform_login($error);			
+			perform_login($error);
 		 }
 	} 
 
@@ -116,7 +116,7 @@ if (empty($_POST)) {
 	$qualify = $result->fetch_assoc();
 	
 	$_SESSION["id"] = $qualify['Guid_qualify'];
-	
+		
 	if (isset($_POST['change_pin_to_pass'])) {
 		update_password($error);
 		
@@ -186,8 +186,31 @@ if (empty($_POST)) {
 		array_push($qualification_text, "BRCA-Related Breast and/or Ovarian Cancer Syndrome");
 			
 		display_qualification($qualification_text, "1");
-	} else {	
+	} else {		
 		save_input();
+		
+		if (isset($_POST['next_step']) && ($_POST['next_step'] == "additional_summary")) {
+			$qualification_text=array();
+		
+			determine_qualification($qualification_text);
+			
+			$func = "generate_" . $_POST['next_step'];
+			$func($error, $not_qualified, $qualification_text);
+			exit;
+		}
+		 
+		if (isset($_POST['additional_relatives']) && ($_POST['additional_relatives'] == "Yes")) {
+			verify_additional_info($error);
+			
+			$func = "generate_additional_screen";
+			$func($error, $_POST['not_qualified'], $_POST['qualification_text']);
+			exit;			 
+		}
+		
+		if (isset($_POST['additional_relatives'])) {			
+			display_qualification($_POST['qualification_text'], $_POST['not_qualified']);
+			exit;
+		}
 		
 		$qualification_text=array();
 		
@@ -269,7 +292,8 @@ function get_profile(){
 	global $conn;
 	global $qualify;
 	
-	$patientTable = $conn->query("SELECT * FROM tblpatient WHERE Guid_user = " . $qualify['Guid_user']);
+	$patientTable = $conn->query("SELECT AES_DECRYPT(firstname_enc, 'F1rstn@m3@_%') as firstname FROM tblpatient WHERE Guid_user = " . $qualify['Guid_user']);
+
     $profile = $patientTable->fetch_assoc();
 	
 	return $profile['firstname'];
@@ -1498,6 +1522,7 @@ function generate_cancer_detail($error=array(), $field_name=array()) {
 	if ($type == "family") {
 ?>
 				<input type="hidden" name="prev_step" value="cancer_list_family">
+				<input type="hidden" name="next_step" value="additional_summary">
 <?php
 	} else {
 ?>		
@@ -2239,7 +2264,7 @@ function determine_qualification(&$qualification_text) {
 				}
 		}
 	}
-	if ((isset($_POST['yes_continue_same_rel'])) || (isset($_POST['qualify']))) {
+	if ((isset($_POST['yes_continue_same_rel'])) || (isset($_POST['qualify'])) || ($_POST['current_step'] == "additional_screen")) {
 		if (($qualify["insurance"] == "Aetna") || ($qualify["insurance"] == "Medicare")) {
 			$cancer_found_brca = 1;
 		} else {
@@ -2431,7 +2456,7 @@ function verify_input(&$error, &$not_qualified, &$type) {
 	} elseif (($_POST['current_step'] == "cancer_list") && ($_POST['type'] == "family") && ((!isset($_POST['family_cancer'])))) {
 		$error['cancer_list'] = 1;
 	} 
-	if ((isset($_POST['yes_continue_same_rel'])) || (isset($_POST['qualify']))) {		
+if ((isset($_POST['yes_continue_same_rel'])) || (isset($_POST['qualify'])) || (isset($_POST['additional_relatives']))) {	
 		$result = $conn->query("SELECT * FROM tblqualify WHERE Guid_qualify = " . $_SESSION['id']);
 			
 		$qualify = $result->fetch_assoc();	
@@ -2477,7 +2502,7 @@ function verify_input(&$error, &$not_qualified, &$type) {
 		foreach($selected_cancers as $selected_cancer) {
 			if (in_array($selected_cancer['cancer_type'], array("Breast", "Ovarian", "Prostate", "Pancreatic", "Colorectal/Endometrial (Uterine)"))) {				
 				array_push($cancer_type, $selected_cancer['cancer_type']);
-			} elseif ((in_array($selected_cancer['cancer_type'], array("Gastric", "Ureter", "Renal", "Pelvic", "Small Intestinal", "Sebaceous Adenoma", "Sebaceous Carcinomas", "Brain", "Keratoacanthomas"))) && (!in_array("Lynch", $cancer_type))) {
+			} elseif ((in_array($selected_cancer['cancer_type'], array("Gastric", "Ureter", "Renal", "Pelvic", "Small Intestinal", "Sebaceous Adenoma", "Sebaceous Carcinomas", "Brain", "Keratoacanthomas"))) && (!in_array("Lynch Syndrome", $cancer_type))) {
 				array_unshift($cancer_type, "Lynch Syndrome"); 
 			}
 		}
@@ -2723,7 +2748,7 @@ function verify_input(&$error, &$not_qualified, &$type) {
 						
 						if (($question['relation_needed']) && ($question['cancer_needed']) && ($question['relation_age_needed'])) {						
 							for ($j=0; $j < count($_POST[$relation]); $j++) {							
-								if ((strlen($question['relation_needed'])) && (strlen($question['cancer_needed'])) && (strlen($question['relation_age_needed']))) {									
+								if ((strlen($question['relation_needed'])) && (strlen($question['cancer_needed'])) && (strlen($question['relation_age_needed']))) {
 									$same_rel[$cancer_type[$i] . ":" . $_POST[$relation][$j] . ":" . $_POST[$cancer][$j] . ":" . $_POST[$age_relative][$j]] ++;
 								}							
 							}
@@ -2797,7 +2822,7 @@ function verify_input(&$error, &$not_qualified, &$type) {
 			} elseif ($num_total_paternal_mainq && ($num_total_paternal < $num_total_paternal_mainq)) {
 				$qualification[$cancer_type[$i]] = "not qualified";
 			}			
-		}
+		}		
 		
 		if (!isset($_POST['yes_continue_same_rel'])) {
 			foreach ($same_rel as $key => $value) {		
@@ -2811,10 +2836,10 @@ function verify_input(&$error, &$not_qualified, &$type) {
 		$count_values = (array_count_values($qualification));
 	
 		$not_qualified = 0;
-	 
+	
 		if (count($qualification) == $count_values["not qualified"]) {
 			$not_qualified = 1;
-		}
+		}		
 	}
 	
 	require ("db/dbdisconnect.php");		
@@ -2843,7 +2868,15 @@ function display_qualification($qualification_text, $not_qualified) {
 			array_push($first_deg_rel, $relative['relative']);
 		}
 	}
-
+	
+	$relatives = $conn->query("SELECT a.relative FROM tblfirstdegrel tr LEFT JOIN tbl_additional_info a ON a.relative = tr.value WHERE Guid_qualify=" . $_SESSION['id']);
+		
+	if (mysqli_num_rows($relatives)) {
+		foreach($relatives as $relative) {
+			array_push($first_deg_rel, $relative['relative']);
+		}
+	}
+	
 	$count_first_deg_rel = array_count_values($first_deg_rel);	
 	
 	//gather all second degree relatives entered
@@ -2863,7 +2896,21 @@ function display_qualification($qualification_text, $not_qualified) {
 			}
 		}
 	}
-
+	
+	$relatives = $conn->query("SELECT a.relative FROM tblseconddegrel tr LEFT JOIN tbl_additional_info a ON a.relative = tr.value WHERE Guid_qualify=" . $_SESSION['id']);
+		
+	if (mysqli_num_rows($relatives)) {
+		foreach($relatives as $relative) {
+			if (($relative['relative'] == "Maternal Grandfather") || ($relative['relative'] == "Maternal Grandmother") || ($relative['relative'] == "Paternal Grandfather") || ($relative['relative'] == "Paternal Grandmother")) {
+				if (!in_array($relative['relative'], $second_deg_rel)) {
+					array_push($second_deg_rel, $relative['relative']);
+				}
+			} else {
+				array_push($second_deg_rel, $relative['relative']);
+			}
+		}
+	}
+	
 	$count_second_deg_rel = array_count_values($second_deg_rel);
 
 	//gather all third degree relatives entered
@@ -2883,7 +2930,21 @@ function display_qualification($qualification_text, $not_qualified) {
 			}
 		}	
 	}
-
+	
+	$relatives = $conn->query("SELECT a.relative FROM tblthirddegrel tr LEFT JOIN tbl_additional_info a ON a.relative = tr.value WHERE Guid_qualify=" . $_SESSION['id']);
+	
+	if (mysqli_num_rows($relatives)) {
+		foreach($relatives as $relative) {
+			if (($relative['relative'] == "Maternal Great-Grandfather") || ($relative['relative'] == "Maternal Great-Grandmother") || ($relative['relative'] == "Paternal Great-Grandfather") || ($relative['relative'] == "Paternal Great-Grandmother")) {
+				if (!in_array($relative['relative'], $third_deg_rel)) {	
+					array_push($third_deg_rel, $relative['relative']);	
+				}
+			} else {
+				array_push($third_deg_rel, $relative['relative']);		
+			}
+		}	
+	}
+	
 	$count_third_deg_rel = array_count_values($third_deg_rel);
 
 	$result = $conn->query("SELECT * FROM tblqualify WHERE Guid_qualify = " . $_SESSION['id']);
@@ -2910,7 +2971,14 @@ function display_qualification($qualification_text, $not_qualified) {
 	<input type="hidden" name="prev_step" value="<?php echo $_POST['current_step']; ?>">
 	<input type="hidden" name="fieldname" value="<?php echo $_POST['fieldname']; ?>">
 	<input type="hidden" name="type" value="<?php echo $_POST['type']; ?>">	
-
+	<input type="hidden" name="not_qualified" value="<?php echo $not_qualified; ?>">
+<?php
+	for ($i=0; $i < count($qualification_text); $i++) {
+?>
+	<input type="hidden" name="qualification_text[]" value="<?php echo $qualification_text[$i]; ?>">
+<?php
+	}
+?>
 	<section class="q_result <?php echo $yesorno ?> wrapper">		
 <?php			
 	if ($not_qualified) {
@@ -3296,6 +3364,96 @@ function display_qualification($qualification_text, $not_qualified) {
 				
 		}
 	}
+	
+	$relatives = $conn->query("SELECT age_relative, cancer_type, relative, deceased FROM tbl_additional_info WHERE Guid_qualify=" . $_SESSION['id']);
+	
+	$deceased_relative = array();
+	
+	$relation=array();
+	$gdmet=array();
+	$cancer_detail=array();
+	
+	if (mysqli_num_rows($relatives)) {
+		foreach($relatives as $relative) {			
+			if (($relative['relative'] == "Mother") || ($relative['relative'] == "Father") || ($relative['relative'] == "Maternal Grandfather") || ($relative['relative'] == "Maternal Grandmother") || ($relative['relative'] == "Paternal Grandfather") || ($relative['relative'] == "Paternal Grandmother") || ($relative['relative'] == "Maternal Great-Grandfather") || ($relative['relative'] == "Maternal Great-Grandmother") || ($relative['relative'] == "Paternal Great-Grandfather") || ($relative['relative'] == "Paternal Great-Grandmother")) {		
+				$count[$relative['relative']] = 1; 
+			} else {
+				$count[$relative['relative']] += 1; 
+			}
+			$id = strtolower(str_replace(" ", "_", $relative['relative'])) . $count[$relative['relative']];
+			if (!isset($relation[$id])) {								
+				$relation[$id] = $relative['relative'];
+			}
+			if ($relative['deceased']) {
+				array_push($deceased_relative, $id);
+			}			
+			if (strlen($relative['cancer_type'])) {
+				if (isset($cancer_detail[$id])) {
+					$c_type=$cancer_detail[$id];
+				} else {
+					$c_type=array();
+				}
+				
+				$display_text = $relative['cancer_type'];
+				if (strlen($relative['age_relative'])) {
+					$display_text .= " at age " . $relative['age_relative'];
+				}
+				
+				array_push($c_type, $display_text);
+				$cancer_detail[$id] = $c_type;
+			}				
+		}
+		
+		foreach ($relation as $rel_id => $rel) {
+?>
+							<li id="<?php echo $rel_id; ?>">
+								<h3>My <span class="maincol"><?php echo $rel; ?></span></h3>
+								<div class="pInfo_type">
+									<strong>Cancer Diagnosis</strong>
+										<ul class="cancer_history">
+<?php
+				foreach ($cancer_detail[$rel_id] as $key => $cancer_det) {
+?>
+											<li><?php echo $cancer_det; ?></li>
+<?php
+				}				
+?>
+										</ul>
+								</div>
+<?php				
+				if (strlen($additional_cancer)) {
+?>
+								<div class="pInfo_type">
+									<strong>Additional Cancer Diagnosis</strong>
+									<p><?php echo $additional_cancer; ?> 
+<?php
+					if (strlen($additional_age)) {
+?>
+									at age <?php echo $additional_age; ?>
+<?php
+					}
+?>
+									</p>
+								</div>
+<?php
+				}				
+?>
+								<div class="pInfo_type">
+									<strong>Guideline Met</strong>
+<?php
+				foreach ($guideline_met[$rel_id] as $key => $guide) {
+?>
+									<p><?php echo $guide; ?></p>
+<?php
+				}
+?>
+								</div>
+							</li>
+<?php			
+				
+		}
+	}
+	
 	$count = array();
 	
 	$outliers = $conn->query("SELECT * FROM  tbloutlier WHERE field_name IS NULL");
@@ -3644,7 +3802,7 @@ function display_qualification($qualification_text, $not_qualified) {
 							</li>
 <?php
 	}
-	$result = $conn->query("SELECT * FROM tblpatient WHERE Guid_user = " . $qualify['Guid_user']);
+	$result = $conn->query("SELECT AES_DECRYPT(firstname_enc, 'F1rstn@m3@_%') as firstname, AES_DECRYPT(lastname_enc, 'L@stn@m3&%#') as lastname FROM tblpatient WHERE Guid_user = " . $qualify['Guid_user']);
 				
 	$patient = $result->fetch_assoc();	
 ?>
@@ -4113,7 +4271,7 @@ function generate_grandparent_html($count, $relation, $gender, $data_qs, $cancer
 <?php
 	}
 }
-function save_input() {	
+function save_input() {
 	require ("db/dbconnect.php");
 		
 	$date = new DateTime("now", new DateTimeZone('America/New_York'));
@@ -4359,9 +4517,48 @@ function save_input() {
 		$conn->query($sql);
 	}
 	
+	if (($_POST['current_step'] == "additional_screen") && 
+			strlen($_POST['additional_relative']) && 
+			strlen($_POST['additional_cancer']) && 
+			strlen($_POST['additional_age'])) {
+		if (($_POST['additional_cancer'] == "Breast") && (!strlen($_POST['additional_info_breast']))) {
+		} elseif (($_POST['additional_cancer'] == "Prostate") && (!strlen($_POST['additional_info_prostate']))) {
+		} else {			
+			$sql = "INSERT INTO tbl_additional_info (Guid_qualify, relative , cancer_type, age_relative, cancer_info, deceased, ashkenazi, date_created) VALUES(" . $_SESSION['id'] . ", '" . $conn->real_escape_string($_POST['additional_relative']) . "', '" . $conn->real_escape_string($_POST['additional_cancer']) . "', '" . $conn->real_escape_string($_POST['additional_age']) . "'";
+			
+			if (strlen($_POST['additional_info_breast'])) {
+				$sql .= ", '" . $conn->real_escape_string($_POST['additional_info_breast']) . "'";
+			} elseif (strlen($_POST['additional_info_prostate'])) {
+				$sql .= ", '" . $conn->real_escape_string($_POST['additional_info_prostate']) . "'";
+			} else {
+				$sql .= ", NULL";
+			}
+			
+			if (strlen($_POST['additional_deceased'])) {
+				$sql .= ", '" . $conn->real_escape_string($_POST['additional_deceased']) . "'";
+			} else {
+				$sql .= ", '0'";
+			}
+			
+			if (strlen($_POST['additional_ashkenazi'])) {
+				$sql .= ", '" . $conn->real_escape_string($_POST['additional_ashkenazi']) . "'";
+			} else {
+				$sql .= ", '0'";
+			}
+			
+			$sql .= ", '" . $date->format('Y-m-d H:i:s') . "')";
+					
+			$conn->query($sql);
+			$sql="";
+		}
+	}
+	
+	if (isset($_POST['additional_relatives']) && ($_POST['additional_relatives'] == "No")) {
+		$conn->query("DELETE FROM tbl_additional_info WHERE Guid_qualify = " . $_SESSION['id']);
+	}
 	require ("db/dbdisconnect.php");
 }
-function save_snap_shot($not_qualified) {	
+function save_snap_shot($not_qualified) {
 	require ("db/dbconnect.php");
 	
 	$date = new DateTime("now", new DateTimeZone('America/New_York'));
@@ -4435,7 +4632,7 @@ function save_snap_shot($not_qualified) {
 				$account = $result->fetch_assoc();
 			}
 
-			$sql = "INSERT INTO tbl_mdl_status_log(currentstatus, Guid_patient, Guid_status, Guid_user, Guid_account, account, Guid_salesrep, salesrep_fname, salesrep_lname, deviceid, Recorded_by, Date, Date_created) VALUES ('Y'," . $patient['Guid_patient'] . ", " . $mdl_status['Guid_status']  . ", " . $qualify['Guid_user'] . ", '" . $account['Guid_account'] . "', '" . $qualify['account_number'] . "', '" . $account['Guid_salesrep'] . "', '" . $account['first_name']  . "', '" . $account['last_name']  . "', '" . $qualify['deviceid']  . "', " . $qualify['Guid_user'] . ", '" . $date->format('Y-m-d H:i:s') . "', '" . $date->format('Y-m-d H:i:s') . "')";
+			$sql = "INSERT INTO tbl_mdl_status_log(currentstatus, Guid_patient, Guid_status, Guid_user, Guid_account, account, Guid_salesrep, provider_id, salesrep_fname, salesrep_lname, deviceid, Recorded_by, Date, Date_created) VALUES ('Y'," . $patient['Guid_patient'] . ", " . $mdl_status['Guid_status']  . ", " . $qualify['Guid_user'] . ", '" . $account['Guid_account'] . "', '" . $qualify['account_number'] . "', '" . $account['Guid_salesrep'] . "', '" . $qualify['provider_id'] . "', '" . $account['first_name']  . "', '" . $account['last_name']  . "', '" . $qualify['deviceid']  . "', " . $qualify['Guid_user'] . ", '" . $date->format('Y-m-d H:i:s') . "', '" . $date->format('Y-m-d H:i:s') . "')";
 
 			$conn->query($sql);
 			
@@ -4447,7 +4644,7 @@ function save_snap_shot($not_qualified) {
 			$conn->query($sql);
 		}
 	}
-	$sql = "INSERT INTO tbl_mdl_status_log(Guid_patient, Guid_account, account, Guid_salesrep, Guid_user, salesrep_fname, salesrep_lname, deviceid, Recorded_by, Date) select Guid_patient, Guid_account, account, Guid_salesrep, Guid_user, salesrep_fname, salesrep_lname, deviceid, Recorded_by, Date FROM tbl_mdl_status_log WHERE Guid_status_log = " . $logid;
+	$sql = "INSERT INTO tbl_mdl_status_log(Guid_patient, Guid_account, account, Guid_salesrep, provider_id, Guid_user, salesrep_fname, salesrep_lname, deviceid, Recorded_by, Date) select Guid_patient, Guid_account, account, Guid_salesrep, provider_id, Guid_user, salesrep_fname, salesrep_lname, deviceid, Recorded_by, Date FROM tbl_mdl_status_log WHERE Guid_status_log = " . $logid;
 
 	$conn->query($sql);
 	
@@ -4461,7 +4658,7 @@ function save_snap_shot($not_qualified) {
 	
 	$conn->query($sql);	
 	
-	$sql = "INSERT INTO tbl_mdl_status_log(Guid_patient, Guid_account, account, Guid_salesrep, Guid_user, salesrep_fname, salesrep_lname, deviceid, Recorded_by, Date) select Guid_patient, Guid_account, account, Guid_salesrep, Guid_user, salesrep_fname, salesrep_lname, deviceid, Recorded_by, Date FROM tbl_mdl_status_log WHERE Guid_status_log = " . $logid;
+	$sql = "INSERT INTO tbl_mdl_status_log(Guid_patient, Guid_account, account, Guid_salesrep, provider_id, Guid_user, salesrep_fname, salesrep_lname, deviceid, Recorded_by, Date) select Guid_patient, Guid_account, account, Guid_salesrep, provider_id, Guid_user, salesrep_fname, salesrep_lname, deviceid, Recorded_by, Date FROM tbl_mdl_status_log WHERE Guid_status_log = " . $logid;
 
 	$conn->query($sql);
 	
@@ -4492,7 +4689,9 @@ function perform_login(&$error) {
 		$password = md5($conn->real_escape_string($_POST['account_password']));
 	}
 	
-	$sql = "INSERT INTO tbluser (email, password, user_type, Date_created) VALUES ('" . $conn->real_escape_string($_POST['account_email']) .  "', '" . $password .  "', 'patient', '" . $date->format('Y-m-d H:i:s') . "')";
+	$Guid_role = $conn->query("SELECT Guid_role FROM tblrole WHERE role = 'Patient'")->fetch_object()->Guid_role;  
+	
+	$sql = "INSERT INTO tbluser (email, password, user_type, Guid_role, Date_created) VALUES ('" . $conn->real_escape_string($_POST['account_email']) .  "', '" . $password .  "', 'patient', '" . $Guid_role . "', '" . $date->format('Y-m-d H:i:s') . "')";
 	
 	$conn->query($sql);
 	
@@ -4504,7 +4703,7 @@ function perform_login(&$error) {
 		$conn->query($sql);
 	}
 	
-	$sql = "INSERT INTO tblpatient (Guid_user, salutation, firstname, lastname, firstname_enc, lastname_enc, DOB, Date_created) VALUES (" . $Guid_user .  ", '" . $conn->real_escape_string($_POST['salutation']) .  "', '" . $conn->real_escape_string($_POST['first_name']) . "', '" . $conn->real_escape_string($_POST['last_name']) . "', AES_ENCRYPT('" . $conn->real_escape_string($_POST['first_name']) . "', 'F1rstn@m3@_%'), AES_ENCRYPT('" . $conn->real_escape_string($_POST['last_name']) . "', 'L@stn@m3&%#'),";
+	$sql = "INSERT INTO tblpatient (Guid_user, salutation, firstname_enc, lastname_enc, DOB, Date_created) VALUES (" . $Guid_user .  ", '" . $conn->real_escape_string($_POST['salutation']) .  "', AES_ENCRYPT('" . $conn->real_escape_string($_POST['first_name']) . "', 'F1rstn@m3@_%'), AES_ENCRYPT('" . $conn->real_escape_string($_POST['last_name']) . "', 'L@stn@m3&%#'),";
 	
 	if (strlen($_POST['dob'])) {
 		$sql .= "'" . $conn->real_escape_string($_POST['dob']) . "'";
@@ -4517,9 +4716,6 @@ function perform_login(&$error) {
 	$conn->query($sql);	
 	
 	$Guid_patient = $conn->insert_id;
-	
-	$sql = "INSERT INTO tbluserrole (Guid_user, Guid_role) VALUES (" . $Guid_user .  ", 3)";
-	$conn->query($sql);	
 	
 	if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
       $ip=$_SERVER['HTTP_CLIENT_IP'];
@@ -4588,9 +4784,9 @@ function perform_login(&$error) {
 	$conn->query($sql);
 
 	$Guid_qualify = $conn->insert_id;
-	
+
 	$_SESSION["id"] = $Guid_qualify;
-	
+
 	$result = $conn->query("SELECT Guid_status FROM tbl_mdl_status WHERE status = 'Registered'");
 	
     $mdl_status = $result->fetch_assoc();
@@ -4605,7 +4801,7 @@ function perform_login(&$error) {
 		$Guid_salesrep = $salesrep['Guid_salesrep'];
 	}
 	
-	$sql = "INSERT INTO tbl_mdl_status_log(currentstatus, Guid_patient, Guid_account, account, Guid_salesrep, Guid_status, Guid_user, salesrep_fname, salesrep_lname, deviceid, Date, Date_created) VALUES ('Y'," . $Guid_patient . ", " . $Guid_account  . ", " . $account_number . ", ";
+	$sql = "INSERT INTO tbl_mdl_status_log(currentstatus, Guid_patient, Guid_account, account, Guid_salesrep, provider_id, Guid_status, Guid_user, salesrep_fname, salesrep_lname, deviceid, Date, Date_created) VALUES ('Y'," . $Guid_patient . ", " . $Guid_account  . ", " . $account_number . ", ";
 	
 	if (isset($Guid_salesrep))  {
 		$sql .= $Guid_salesrep;
@@ -4613,7 +4809,7 @@ function perform_login(&$error) {
 		$sql .= "NULL";
 	}
 	
-	$sql .= ", " . $mdl_status['Guid_status'] . ", " . $Guid_user . ", ";
+	$sql .= ", '" . $_POST['provider'] . "', " . $mdl_status['Guid_status'] . ", " . $Guid_user . ", ";
 	
 	if (isset($Guid_salesrep))  {
 		$sql .= "'" . $salesrep_fname . "', '" . $salesrep_lname . "'";
@@ -4697,10 +4893,11 @@ function send_email($content, $title, $email="", $additional="", $not_qualified=
 			$account_name = ", " . $account['first_name'] . " " . $account['last_name'];
 		}
 		if ($not_qualified) {
-			$subject = "BRCA Questionnaire (Not Qualified" . $account_name . ")";
+		$subject = "BRCA Questionnaire (Not Qualified" . $account_name . ")";
 		} else {
 			$subject = "BRCA Questionnaire (Qualified" . $account_name . ")";
 		}
+		
 		mail($email, $subject, $message, $headers);
 	} else {
 		mail($user['email'], "BRCAcare Questionnaire" . $additional, $message, $headers);
@@ -5214,7 +5411,7 @@ function patient_consent($firstname, $lastname) {
 function perform_dup_search() {
 	require ("db/dbconnect.php");
 
-	$result = $conn->query("select p.Guid_user FROM tblpatient p LEFT JOIN tblqualify q on p.Guid_user = q.Guid_user Where p.firstname = '" . $_POST['first_name'] . "' AND p.lastname = '" . $_POST['last_name'] . "' AND p.dob = '" . $_POST['dob'] . "' AND DATE(p.Date_created) = '" . date("Y-m-d") . "' AND q.account_number = '" . $_GET['an'] . "'");
+	$result = $conn->query("select p.Guid_user FROM tblpatient p LEFT JOIN tblqualify q on p.Guid_user = q.Guid_user Where p.firstname_enc = AES_ENCRYPT('" . $conn->real_escape_string($_POST['first_name']) . "', 'F1rstn@m3@_%') AND p.lastname_enc = AES_ENCRYPT('" . $conn->real_escape_string($_POST['last_name']) . "', 'L@stn@m3&%#') AND p.dob = '" . $_POST['dob'] . "' AND DATE(p.Date_created) = '" . date("Y-m-d") . "' AND q.account_number = '" . $_GET['an'] . "'");
 	
 	while ($row = $result->fetch_row()) {
 		$conn->query("DELETE FROM tbl_deductable_log where Guid_user IN (" . $row[0]." )");
@@ -5244,6 +5441,280 @@ function perform_dup_search() {
 		$conn->query("DELETE FROM tbl_ss_qualify WHERE Guid_user IN  (" . $row[0].")");
 		$conn->query("DELETE FROM tbluser WHERE Guid_user IN (" . $row[0].")");
 		$conn->query("DELETE FROM tblpatient WHERE Guid_user IN (" . $row[0].")");
+	}
+}
+function generate_additional_summary($error, $not_qualified, $qualification_text) {
+	require ("db/dbconnect.php");
+	generate_header("You provided us with the following family cancer history:");
+	
+	$type = "personal";
+		
+	if (isset($_POST['type']) && ($_POST['type'] == "family")) {			
+		$type = "family";
+	}
+?>
+	<input type="hidden" name="prev_step" value="cancer_list_family">
+	<input type="hidden" name="current_step" value="additional_summary">
+	<input type="hidden" name="not_qualified" value="<?php echo $not_qualified; ?>">
+	<input type="hidden" name="type" value="<?php echo $type; ?>">	
+<?php
+	for ($i=0; $i < count($qualification_text); $i++) {
+?>
+	<input type="hidden" name="qualification_text[]" value="<?php echo $qualification_text[$i]; ?>">
+<?php
+	}
+	
+	generate_relative_list();
+?>
+	<section class="questitle">
+		<h2>Do you have any additional relatives with cancer?</h2>
+		
+		<fieldset class="answers">
+			<legend></legend>
+			
+			<div class="input">
+				<span class="radio">
+					<input type="radio" name="additional_relatives" value="No" id="additional_relatives_no">
+				</span>
+				<label for="additional_relatives_no">No</label>
+			</div>
+
+			<div class="input">
+				<span class="radio">
+					<input type="radio" name="additional_relatives" value="Yes" id="additional_relatives_yes">
+				</span>
+				<label for="additional_relatives_yes">Yes</label>
+			</div>
+		</fieldset>
+	</section>							
+<?php
+	require ("db/dbdisconnect.php");
+
+	if (isset($_GET['lc']) && ($_GET['lc'] == "O")) {
+		$buttons = array("Back"=>"back", "Next"=>"next");	
+		$class = array("Back"=>" back neutral sm", "Next"=>"");
+	} else {
+		$buttons = array("Back"=>"back", "Finish Later"=>"save", "Next"=>"next");	
+		$class = array("Back"=>" back neutral sm", "Finish Later"=>" gold save", "Next"=>"");
+	}
+
+	generate_outer_bottom($error, $buttons, $class);
+
+}
+function generate_additional_screen($error, $not_qualified, $qualification_text) {
+	require ("db/dbconnect.php");
+	generate_header("Please add additional relatives.");
+	
+	$type = "personal";
+		
+	if (isset($_POST['type']) && ($_POST['type'] == "family")) {			
+		$type = "family";
+	}
+?>
+	<input type="hidden" name="prev_step" value="additional_summary">
+	<input type="hidden" name="current_step" value="additional_screen">
+	<input type="hidden" name="additional_relatives" id="additional_relatives" value="">
+	<input type="hidden" name="type" value="<?php echo $type; ?>">
+	<input type="hidden" name="not_qualified" value="<?php echo $not_qualified; ?>">
+<?php
+	for ($i=0; $i < count($qualification_text); $i++) {
+?>
+	<input type="hidden" name="qualification_text[]" value="<?php echo $qualification_text[$i]; ?>">
+<?php
+	}
+
+	generate_relative_list();
+	
+	if (isset($_POST['additional_relatives']) && (count($error))) {
+		$additional_relative = $_POST['additional_relative'];
+		$additional_cancer = $_POST['additional_cancer'];
+		$additional_age = $_POST['additional_age'];
+		$additional_info_breast = $_POST['additional_info_breast'];
+		$additional_info_prostate = $_POST['additional_info_prostate'];
+		$additional_ashkenazi = $_POST['additional_ashkenazi'];
+		$additional_deceased = $_POST['additional_deceased'];		
+	} else {
+		$additional_relative = "";
+		$additional_cancer = "";
+		$additional_age = "";
+		$additional_info_breast = "";
+		$additional_info_prostate = "";
+		$additional_ashkenazi = "";
+		$additional_deceased = "";
+	}
+?>
+				<ul class="ps_info">
+					<li class="ts_wrap show">
+						<div class="field sm<?php echo ((!isset($_POST['additional_relative'])) ? "" : (isset($error['additional_relative']) ? " error" : " valid")) ?>">
+							<div class="iwrap">
+								<label for="additional_relation">Relative</label>
+								<select id="additional_relation" name="additional_relative" class="if">
+									<option value=""></option>
+<?php
+	$relations = $conn->query("SELECT value FROM (SELECT * FROM tblfirstdegrel UNION ALL SELECT * FROM tblseconddegrel UNION ALL SELECT * FROM tblthirddegrel) raw");
+	foreach($relations as $relation) {
+?>
+							<option value="<?php echo $relation['value']; ?>"<?php echo (($additional_relative == $relation['value']) ? " selected" : "");?>><?php echo $relation['value']; ?></option>
+<?php 
+	}
+?>
+								</select>
+								<icon class="icon istatus"><span class="required"></span></icon>
+							</div>
+						</div>
+
+						<div class="field sm<?php echo ((!isset($_POST['additional_cancer'])) ? "" : (isset($error['additional_cancer']) ? " error" : " valid")) ?>">
+							<div class="iwrap">
+								<label for="additional_cancer">Cancer</label>
+								<select id="additional_cancer" name="additional_cancer" class="if toggleShow">
+									<option></option>
+<?php
+	$cancers = $conn->query("SELECT value FROM tblqcancertype WHERE value <> 'No Cancer/None of the Above' ORDER BY value");
+		
+	foreach ($cancers as $cancer) {
+		$data_show = "";
+		if ($cancer['value'] == "Breast") {
+			$data_show = ' data-show=".show-1, .show-3"';
+		} elseif ($cancer['value'] == "Prostate") {
+			$data_show = ' data-show=".show-2, .show-3"';
+		}
+?>
+									<option value="<?php echo $cancer['value']; ?>"<?php echo $data_show; ?><?php echo (($additional_cancer == $cancer['value']) ? " selected" : "");?>><?php echo $cancer['value']; ?></option>							
+<?php
+	}
+?>
+								</select>
+								<icon class="icon istatus"><span class="required"></span></icon>
+							</div>
+						</div>
+
+						<div class="field sm toggleShow show-1<?php echo ((!isset($additional_info_breast)) ? "" : (isset($error['additional_info_breast']) ? " error" : " valid")) ?><?php echo (($additional_cancer == "Breast") ? " active" : "") ?>">
+							<div class="iwrap">
+								<label for="additional_info_breast">Cancer Type</label>
+								<select id="additional_info_breast" name="additional_info_breast" class="if">
+									<option></option>
+									<option value="Triple-Negative"<?php echo (($additional_info_breast == "Triple-Negative") ? " selected" : "");?>>Triple-Negative</option>
+									<option value="Bilateral (cancer in both breasts at the same time)"<?php echo (($additional_info_breast == "Bilateral (cancer in both breasts at the same time)") ? " selected" : "");?>>Bilateral (cancer in both breasts at the same time)</option>
+									<option value="Contralateral (cancer in both breasts at different times)"<?php echo (($additional_info_breast == "Contralateral (cancer in both breasts at different times)") ? " selected" : "");?>>Contralateral (cancer in both breasts at different times)</option>
+									<option value="Unknown/None Of These"<?php echo (($additional_info_breast == "Unknown/None Of These") ? " selected" : "");?>>Unknown/None Of These</option>
+								</select>
+								<icon class="icon istatus"><span class="required"></span></icon>
+							</div>
+						</div>
+
+						<div class="field sm toggleShow show-2<?php echo ((!isset($additional_info_prostate)) ? "" : (isset($error['additional_info_prostate']) ? " error" : " valid")) ?><?php echo (($additional_cancer == "Prostate") ? " active" : "") ?>">
+							<div class="iwrap">
+								<label for="additional_info_prostate">Cancer Type</label>
+								<select id="additional_info_prostate" name="additional_info_prostate" class="if">
+									<option></option>
+									<option value="Metastatic (cancer spread to other body parts)"<?php echo (($additional_info_prostate == "Metastatic (cancer spread to other body parts)") ? " selected" : "");?>>Metastatic (cancer spread to other body parts)</option>
+									<option value="High-Grade (Gleason score 7 or greater)"<?php echo (($additional_info_prostate == "High-Grade (Gleason score 7 or greater)") ? " selected" : "");?>>High-Grade (Gleason score 7 or greater)</option>				
+									<option value="Unknown/None Of These"<?php echo (($additional_info_prostate == "Unknown/None Of These") ? " selected" : "");?>>Unknown/None Of These</option>
+								</select>
+								<icon class="icon istatus"><span class="required"></span></icon>
+							</div>
+						</div>
+
+						<div class="field sm age<?php echo ((!isset($_POST['additional_age'])) ? "" : (isset($error['additional_age']) ? " error" : " valid")) ?>">
+							<div class="iwrap">
+								<label for="additional_age">Age Diag.</label>
+								<input type="number" max="" id="additional_age" name="additional_age" class="if" value="<?php echo $additional_age; ?>">
+								<icon class="icon istatus"><span class="required"></span></icon>
+							</div>
+						</div>
+
+						<div class="dec_box field toggleShow show-3<?php echo ((($additional_cancer == "Breast") || ($additional_cancer == "Prostate"))? " active" : "") ?>">
+							<input type="checkbox" name="additional_ashkenazi" id="additional_ashkenazi" class="if" value="1"<?php echo (strlen($additional_ashkenazi) ? " checked='checked'" : "") ?>>
+							<label for="additional_ashkenazi">Ashkenazi Jewish</label>
+						</div>
+
+						<div class="dec_box">
+							<input type="checkbox" name="additional_deceased" id="additional_deceased" class="if" value="1"<?php echo (strlen($additional_deceased) ? " checked='checked'" : "") ?>>
+							<label for="additional_deceased">Deceased</label>
+						</div>
+						
+						<button type="button" class="add_field">
+							<strong>Add Relative</strong>
+						</button>
+					</li>
+                </ul>				
+<?php
+	require ("db/dbdisconnect.php");
+
+	if (isset($_GET['lc']) && ($_GET['lc'] == "O")) {
+		$buttons = array("Back"=>"back", "Next"=>"next");	
+		$class = array("Back"=>" back neutral sm", "Next"=>"");
+	} else {
+		$buttons = array("Back"=>"back", "Finish Later"=>"save", "Next"=>"next");	
+		$class = array("Back"=>" back neutral sm", "Finish Later"=>" gold save", "Next"=>"");
+	}
+
+	generate_outer_bottom($error, $buttons, $class);
+}
+function generate_relative_list() {
+	require ("db/dbconnect.php");
+	
+	$result_ans = $conn->query("SELECT * FROM tblqualifyans WHERE Guid_qualify=" . $_SESSION['id'] . " AND relative IS NOT NULL");
+	
+	$result_additional = $conn->query("SELECT * FROM tbl_additional_info WHERE Guid_qualify=" . $_SESSION['id']);
+	
+	if (mysqli_num_rows($result_ans) || mysqli_num_rows($result_additional)) {		
+?>
+			<table class="tbl_summary">
+				<thead>
+					<tr>
+						<th>Relative</th>
+						<th>Cancer</th>
+						<th>Age Diagnosed</th>
+					</tr>
+				</thead>
+				<tbody>
+<?php
+		foreach ($result_ans as $relative) {
+?>
+					<tr>
+						<td><?php echo $relative['relative'] ?></td>
+						<td><?php echo $relative['cancer_type'] ?></td>
+						<td><?php echo $relative['age_relative'] ?></td>
+					</tr>
+<?php
+		}
+?>
+<?php
+		foreach ($result_additional as $relative) {
+?>
+					<tr>
+						<td><?php echo $relative['relative'] ?></td>
+						<td><?php echo $relative['cancer_type'] ?><?php echo (strlen($relative['cancer_info']) ? "(" . $relative['cancer_info'] . ")" : "") ?></td>
+						<td><?php echo $relative['age_relative']; ?></td>
+					</tr>
+<?php
+		}
+?>
+				</tbody>
+			</table>
+<?php
+	}
+	
+	require ("db/dbdisconnect.php");
+	
+	return $html;
+}
+function verify_additional_info(&$error) {
+	if (strlen($_POST['additional_relative']) || strlen($_POST['additional_cancer']) || strlen($_POST['additional_age'])) {		
+		if (!strlen($_POST['additional_relative'])) {
+			$error['additional_relative'] = 1;
+		}
+		if (!strlen($_POST['additional_cancer'])) {
+			$error['additional_cancer'] = 1;
+		} elseif (($_POST['additional_cancer'] == "Breast") && (!strlen($_POST['additional_info_breast']))) {
+			$error['additional_info_breast'] = 1;
+		} elseif (($_POST['additional_cancer'] == "Prostate") && (!strlen($_POST['additional_info_prostate']))) {
+			$error['additional_info_prostate'] = 1;
+		}
+		if (!strlen($_POST['additional_age'])) {
+			$error['additional_age'] = 1;
+		}
 	}
 }
 ?>
