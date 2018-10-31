@@ -7,7 +7,7 @@ function sec_session_start() {
     $httponly = true;
     // Forces sessions to only use cookies.
     if (ini_set('session.use_only_cookies', 1) === FALSE) {
-        header("Location: error.php?err=Could not initiate a safe session (ini_set)");
+        header("Location: ".SITE_URL."/error.php?err=Could not initiate a safe session (ini_set)");
         exit();
     }
     // Gets current cookies params.
@@ -23,6 +23,7 @@ function sec_session_start() {
 function login($email, $password, $db) {
     $db->bind("email",$email);
     $user = $db->row("SELECT * FROM `".DB_PREFIX."user` WHERE email = :email"); 
+    $showMsg = true;
     if ($user) { 
         if (checkbrute($user['email'], $db) == true) {
             // Account is locked 
@@ -55,7 +56,7 @@ function login($email, $password, $db) {
                 $now = time();                
                 $ipAddr = get_client_ip();                
                 if (!$db->query("INSERT INTO tbluser_login_attempts (email, ip, time) VALUES ('$email', '$ipAddr', '$now')")) {
-                    header("Location: ../error.php?err=Database error: tbluser_login_attempts");
+                    header("Location: ".SITE_URL."/error.php?err=Database error: tbluser_login_attempts");
                     exit();
                 }
                 $message = "Username or password is not correct.";
@@ -65,9 +66,10 @@ function login($email, $password, $db) {
         }
        
     } else {
-        // Could not create a prepared statement
-        header("Location: ../error.php?err=Database error: cannot prepare statement");
-        exit();
+        //User is not found
+        $message = "User is not found. Pleas check your login name and try again";
+        $returnData = array('status'=>false, $showMsg=>true, 'message'=>$message);
+        return $returnData;
     }
 }
 function checkbrute($email, $db) {
