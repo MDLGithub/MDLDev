@@ -369,8 +369,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     if (calEvent.account == null && calEvent.title == 'BRCA Day')
                         message += 'Account Number is missing';
                     var mouseOver = "Registered: " + $(this).find('.silhouette span').html() + "<br />";
-                    mouseOver += "Completed: " + $(this).find('.dna span').html() + "<br />";
-                    mouseOver += "Qualified: " + $(this).find('.checkmark span').html() + "<br />";
+                    mouseOver += "Completed: " + $(this).find('.checkmark span').html() + "<br />";
+                    mouseOver += "Qualified: " + $(this).find('.dna span').html() + "<br />";
                     mouseOver += "Submitted: " + $(this).find('.flask span').html();
                     
                     if (mouseOver != '') {
@@ -529,7 +529,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         {
                             var res = JSON.parse(res);
                             //console.log(res); 
-                            var html = '<div class="show-stats"><span class="silhouette"><span>' + res.reg + '</span> <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"><span> '+ res.qua + '</span> <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna"><span>'+ res.com + '</span> <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask"><span>'+ res.sub +'</span> <img src="assets/eventschedule/icons/flask_icon.png"></span></div>';
+                            var html = '<div class="show-stats"><span class="silhouette"><span>' + res.reg + '</span> <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"><span> '+ res.com + '</span> <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna"><span>'+ res.qua + '</span> <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask"><span>'+ res.sub +'</span> <img src="assets/eventschedule/icons/flask_icon.png"></span></div>';
                             if(view.name != 'basicDay' && parsedEventTime < parsedNow){
                                 element[0].childNodes[0].childNodes[2].innerHTML = html;
                             }
@@ -619,7 +619,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 //Piechart
                 var accounts = [];
                 $.each(ele_events,function(k, v){
-                    accounts.push(v.account)
+                    if(v.account!=null)
+                        accounts.push(v.account)
                 });
                 var uniqueAcc = accounts.filter(onlyUnique);
                 uniqueAccString = uniqueAcc.toString();
@@ -1225,22 +1226,25 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
         </section>
         
         <div class="scroller event-schedule">
-            <?php if(isset($_GET['salerepId'])):
+            <?php if(isset($_GET['salerepId']))
                 $titleArr = $db->row("SELECT CONCAT(`first_name`,' ',`last_name`) AS genName FROM `tblsalesrep` WHERE `Guid_salesrep`=:id", array('id'=>$_GET['salerepId']));
              ?>
-                <div class="title>" style="text-align: center; font-weight: 800; font-size: 20px; line-height: 21px; margin-bottom: 15px;"><h2><?php echo $titleArr['genName']; ?></h2></div>
-            <?php endif; ?>
+                
             <div class="container"> 
                 <div id="stats_header"> 
                 <div id="performance_section">
                 <div class="header week_stats" style="font-weight:bold;">    
                     <p>This Week's Stats</p>
                     <p class="top_performer">&#9726; Top Performer</p>
-                    <?php if($role == 'Sales Rep'): ?>
-                        <p class = "genetic_consultant">&#9726; Me</p>
-                    <?php else: ?>
-                        <p class = "genetic_consultant">&#9726; Genetic Consultant</p>
-                    <?php endif; ?>
+                    <?php 
+                        if($role == 'Sales Rep'):
+                            echo "<p class = 'genetic_consultant'>&#9726; Me</p>";
+                        elseif(isset($_GET['salerepId'])): 
+                            echo "<p class = 'genetic_consultant'>&#9726; ".$titleArr['genName']."</p>";
+                        else:
+                            echo "<p class = 'genetic_consultant'>&#9726; Genetic Consultant</p>";
+                        endif; 
+                    ?>
                     
                 </div>
                 <div id="performance_chart">
@@ -1276,11 +1280,20 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                     <img src="<?php echo $photo ?>">
                                 </div>
                             <?php else: ?>
-                            <h1>
-                            All<i class="fas fa-angle-down info_block_arrow" onclick="test()" style = "float:right;"></i>
-                            <br>Genetic
-                            <br>Consultants</h1> 
-                        <?php endif; ?>
+                                <?php 
+                                    if(isset($_GET['salerepId'])) :
+                                        $sTitle = explode(' ', $titleArr['genName']);
+                                        
+                                        array_splice( $sTitle, 1, 0, array('<i class="fas fa-angle-down info_block_arrow" onclick="test()" style = "float:right;"></i>') );
+                                        //print_r();
+                                        $sTitle = implode("<br>",$sTitle);
+                                        echo '<h1>'.$sTitle.'</h1>';
+                                    else:
+                                        echo '<h1>  All<i class="fas fa-angle-down info_block_arrow" onclick="test()" style = "float:right;"></i> <br>Genetic <br>Consultants</h1>';
+                                    endif;
+
+                                ?>
+                            <?php endif; ?>
 
                             <div class = "salesrep_dropdown dropdown_hide">
                                 <i class="fas fa-angle-down info_block_arrow" onclick="test()" style = "float:right;"></i>
