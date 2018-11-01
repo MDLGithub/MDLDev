@@ -803,7 +803,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         <div class="container form-container" style="margin:auto"> 
             <div class = "form-row">
                 <div id = "forms">
-                    <h2>Options</h2>
+                    <h2>Forms</h2>
                 </div>
                 <div id = "form-details">
                     <h2>Details</h2>
