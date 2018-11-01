@@ -578,7 +578,7 @@ th.zip input{
 
 .modalBlock .contentBlock.formdetails-open{
     width:60%;
-    left: 24%;
+    left: 20%;
 }
 
 .modalBlock .close {
@@ -595,6 +595,7 @@ th.zip input{
     background-image: url(../images/x_times.png);
     background-size: 80% 80%;
     background-position: center;
+    z-index:10;
 }
 
 
