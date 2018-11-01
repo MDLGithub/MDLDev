@@ -1256,14 +1256,17 @@ and (orientation : landscape) {
     }
 
     .dmdlCsvUpload{
-        width: 51%;
-        margin-left: 89px;
+        width: 47%;
+        margin-left: 99px;
         margin-right: 5px !important;
     }
 
     .dmdlCsvUpload input[type="file"] {
         width: 100%;
-        font-size: 15px;
+        font-size: 13px;
+    }
+    .dmdlForm form button.upload{
+    	font-size:13px;
     }
 
     .dmdlRefresh{
