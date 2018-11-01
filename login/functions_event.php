@@ -118,7 +118,7 @@ function getSalesRepAccount($db, $Guid_salesrep){
 
 function getSummaryEvents($db){
        
-    $query = "SELECT date(e.start_event) as start, count(e.title) as evtCnt "
+    $query = "SELECT date(e.start_event) as start, count(e.title) as evtCnt, GROUP_CONCAT(salesrepid) as salesrepid "
             . ",(Select count(*) FROM tbl_mdl_status_log l "
             . "left join tbluser u on u.Guid_user = l.Guid_user "
             . "left join tblevents evt on date(evt.start_event) = date(l.Date) "

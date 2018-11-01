@@ -506,7 +506,8 @@ if(isset($_GET['_']) && isset($_GET['start'])){
           'registeredCnt' => $row['registeredCnt'],
           'qualifiedCnt' => $row['qualifiedCnt'],
           'completedCnt' => $row['completedCnt'],
-          'submittedCnt'   => $row['submittedCnt'],  
+          'submittedCnt'   => $row['submittedCnt'], 
+          'salesrepid' => $row['salesrepid'] 
           );
     }
 
