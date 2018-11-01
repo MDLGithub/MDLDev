@@ -1016,6 +1016,36 @@ table.dataTable thead .sorting {
     background-image: url(images/sort_both.png);
 }
 
+
+
+#patient-info-box .pInfo .bordered {
+    padding: 20px 0;
+    border: 1px solid #d6dce2;
+    box-shadow: 0px 4px 4px 0px rgba(78, 112, 150, 0.26);
+    background-image: -moz-linear-gradient( 144deg, rgb(233,233,233) 0%, rgb(246,246,246) 49%, rgb(228,228,228) 98%);
+    background-image: -webkit-linear-gradient( 144deg, rgb(233,233,233) 0%, rgb(246,246,246) 49%, rgb(228,228,228) 98%);
+    background-image: -ms-linear-gradient( 144deg, rgb(233,233,233) 0%, rgb(246,246,246) 49%, rgb(228,228,228) 98%);
+}
+
+#patient-info-box .pInfo .bordered::before {
+    content: 'Patient Info';
+    position: relative;
+    width: 100%;
+    top: -20px;
+    left: 0;
+    border-width: 1px;
+    border-color: rgb(28, 72, 123);
+    border-style: solid;
+    background-image: -moz-linear-gradient( 90deg, rgb(28,72,123) 0%, rgb(81,112,147) 50%, rgb(28,72,123) 100%);
+    background-image: -webkit-linear-gradient( 90deg, rgb(28,72,123) 0%, rgb(81,112,147) 50%, rgb(28,72,123) 100%);
+    background-image: -ms-linear-gradient( 90deg, rgb(28,72,123) 0%, rgb(81,112,147) 50%, rgb(28,72,123) 100%);
+    color: white;
+    font-weight: 600;
+    text-indent: 10px;
+    box-shadow: 0px 4px 4px 0px #b7b7b796;
+}
+
+
 #patient-info-box .contentBlock {
     width: 60%;
     left: 20%;
