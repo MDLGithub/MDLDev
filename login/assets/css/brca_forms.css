@@ -325,6 +325,11 @@ width:100%;
 text-indent: 20px;
 }
 
+#form-option-table table tbody span{
+  width: 100%;
+  margin-left: 20px;
+}
+
 #form-option-table table tr td:nth-child(2){
 background: linear-gradient( 0deg, rgb(226,226,226) 0%, rgb(241,241,241) 100%);
 

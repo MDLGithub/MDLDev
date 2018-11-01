@@ -1119,7 +1119,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" value="cancer_genetic_counseling" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="<?php echo SITE_URL . "/forms/Cancer-Referral-Form_9.2018" ?>" target="_blank">Cancer Genetic Counseling Referral</a>
+                                <a href="<?php echo SITE_URL . "/forms/Cancer-Referral-Form_9.2018.pdf" ?>" target="_blank">Cancer Genetic Counseling Referral</a>
                             </td>
                         </tr>
                         <tr class="t_row">
@@ -1135,7 +1135,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" disabled value="aim" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="" target="_blank">AIMs Precertification</a>
+                                <span>AIMs Precertification</span>
                             </td>
                         </tr>
                         <tr class="t_row">
@@ -1143,7 +1143,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" disabled value="beacon" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="" target="_blank">Beacon LBS</a>
+                                <span>Beacon LBS</span>
                             </td>
                         </tr>
                     </tbody>
