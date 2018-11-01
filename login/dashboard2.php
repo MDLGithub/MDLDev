@@ -552,7 +552,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 $('#topcomcnt').html('0');
                 $('#topsubcnt').html('0');
 
-               <?php if(!isset($_GET['salerepId'])): ?>
+               <?php //if(!isset($_GET['salerepId'])): ?>
                 $.ajax({
                     type : 'POST',
                     data : { userid:<?php echo $userID; ?>, startdate:start, action:'topbrcacount' },//inputparam,
@@ -569,7 +569,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
   
                     }
                 });
-                <?php endif; ?>
+                <?php //endif; ?>
 
                 var startdate = moment(event.start._d).format('YYYY-MM-DD');
                 var enddate = moment(event.end._d).format('YYYY-MM-DD');
