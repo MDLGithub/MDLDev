@@ -1594,7 +1594,7 @@ table.dataTable thead .sorting {
 #patient-info-box h5 {
     margin-bottom: 7px;
     display: inline-block;
-    width: 100%;
+    /*width: 100%;*/
 }
 #patient-info-box .pInfo .bordered{
     padding: 20px 0;
@@ -1806,6 +1806,12 @@ button[name="search"] > strong{
 .stats-table tr.show{
     display: table-row;
 }
+
+#specimenRadioBox{
+	margin-bottom:10px;
+	text-align:center;
+}
+
 #specimenRadioBox #specimen{
     position: relative;
 }
@@ -1820,6 +1826,15 @@ button[name="search"] > strong{
     z-index: 100;
 
 }
+
+#specimenRadioBox h5{
+	padding-right:10px;
+}
+
+#specimenRadioBox > div{
+	display:inline-block;
+}
+
 #specimenRadioBox .specimenCollected{
     display: none;
 }
