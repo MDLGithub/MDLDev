@@ -118,19 +118,33 @@ function getSalesRepAccount($db, $Guid_salesrep){
 
 function getSummaryEvents($db){
        
-    $query = "SELECT e.start_event
-             ,(SELECT count(*) FROM tblevents t1 WHERE t1.start_event = e.start_event) AS evtCnt
-             ,SUM(IF(l.Guid_status=28, 1, 0)) AS registeredCnt
-             ,SUM(IF(l.Guid_status=36, 1, 0)) AS completedCnt
-             ,SUM(IF(l.Guid_status=29, 1, 0)) AS qualifiedCnt
-             ,SUM(IF(l.Guid_status=1, 1, 0)) AS submittedCnt
-            FROM tbl_mdl_status_log l
-            LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user
-            LEFT JOIN tblevents e ON e.accountid = l.Guid_account 
-            AND DATE(e.start_event) = DATE(l.Date)
-            WHERE u.marked_test='0' AND DATE(e.start_event) BETWEEN '".$_GET['start']."' AND '".$_GET['end']."' 
-            GROUP BY DATE(l.Date)";
-    $result = $db->query($query);
+    $query = "SELECT date(e.start_event) as start, count(e.title) as evtCnt "
+            . ",(Select count(*) FROM tbl_mdl_status_log l "
+            . "left join tbluser u on u.Guid_user = l.Guid_user "
+            . "left join tblevents evt on date(evt.start_event) = date(l.Date) "
+            . "Where date(evt.start_event) = DATE(e.start_event) and u.marked_test = '0' and l.Guid_status=28 "
+            . "and evt.accountid = l.Guid_account )AS registeredCnt "
+              
+            . ",(Select count(*) FROM tbl_mdl_status_log l "
+            . "left join tbluser u on u.Guid_user = l.Guid_user "
+            . "left join tblevents evt on date(evt.start_event) = date(l.Date) "
+            . "Where date(evt.start_event) = DATE(e.start_event) and u.marked_test = '0' and l.Guid_status=29 "
+            . "and evt.accountid = l.Guid_account )AS qualifiedCnt "
+            
+            . ",(Select count(*) FROM tbl_mdl_status_log l "
+            . "left join tbluser u on u.Guid_user = l.Guid_user "
+            . "left join tblevents evt on date(evt.start_event) = date(l.Date) "
+            . "Where date(evt.start_event) = DATE(e.start_event) and u.marked_test = '0' and l.Guid_status=36 "
+            . "and evt.accountid = l.Guid_account )AS completedCnt "
+            . ",(Select count(*) FROM tbl_mdl_status_log l "
+            . "left join tbluser u on u.Guid_user = l.Guid_user "
+            . "left join tblevents evt on date(evt.start_event) = date(l.Date) "
+            . "Where date(evt.start_event) = DATE(e.start_event) and u.marked_test = '0' and l.Guid_status=1 "
+            . "and evt.accountid = l.Guid_account )AS submittedCnt "
+              
+        . "FROM tblevents e "
+        . "WHERE DATE(e.start_event) between DATE(:sDate) and DATE(:eDate) group by start";
+    $result = $db->query($query, array('sDate' => $_GET['start'], 'eDate' => $_GET['end']));
            
     return $result;    
 }

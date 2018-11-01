@@ -182,26 +182,25 @@ if(isset($_POST['account']) && isset($_POST['action']) && $_POST['action'] == "g
 
 /* --------------------- Render Piechart Data ------------------------- */
 
-if( isset($_POST['action']) && $_POST['action'] == 'piechart' ){
+if( isset($_POST['action']) && $_POST['action'] == 'piechart' && isset($_POST['acc'])){
 
     $datecreated = isset($_POST['startdate'])? $_POST['startdate'] : 0;
     $piedata = [];
-    $accIds = explode(',', $_POST['acc']);
+    //$accIds = explode(',', $_POST['acc']);
+    $accIds = $_POST['acc'];
     $colors = array('#00713D','#89CB46','#3065B1','#00B7D0','#7C55A5', '#89BD46', '#00D7D0', '#30DDB1', '#7B11A5', '#01CB46', '#89ADD6', '#222B46', '#89CCCC', '#6035B1', '#306BBB');
     $i=0;
-    foreach ($accIds as $acc) {
-        $query = "SELECT COUNT(*) AS count, "
+    $query = "SELECT COUNT(*) AS count, "
         . "(SELECT acc.name FROM tblaccount acc WHERE acc.account = l.account ) as accname "
         . "FROM `tbl_mdl_status_log` l "
         . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
-        . "WHERE l.Guid_status ='1' AND l.account=:account AND u.marked_test='0' AND DATE(l.Date) BETWEEN DATE(:startdate)  AND DATE(:enddate) GROUP BY l.account";
-        $result = $db->query($query,array("startdate"=>$datecreated, 'enddate'=>$_POST['enddate'], "account" => $acc));
+        . "WHERE l.Guid_status ='1' AND l.account IN (".$accIds.") AND u.marked_test='0' AND DATE(l.Date) BETWEEN DATE(:startdate)  AND DATE(:enddate) GROUP BY l.account";
+    $result = $db->query($query,array("startdate"=>$datecreated, 'enddate'=>$_POST['enddate']));
         
-        foreach($result as $row){
-            if($row['accname'] != null){
-                $acc = wordwrap(ucwords(strtolower($row['accname'])), 40, "\n");
-                $piedata[] = array('category' => $acc, 'value' => (int)$row['count']);
-            }
+    foreach($result as $row){
+        if($row['accname'] != null){
+            $acc = wordwrap(ucwords(strtolower($row['accname'])), 40, "\n");
+            $piedata[] = array('category' => $acc, 'value' => (int)$row['count']);
         }
     }
 
@@ -233,12 +232,13 @@ if( isset($_POST['action']) && $_POST['action'] == 'piechart' ){
 
 /* --------------------- Dashboard Bar Chart ------------------------- */
 
-if(isset($_POST['action']) && $_POST['action'] == 'getBarChart'){
+if(isset($_POST['action']) && $_POST['action'] == 'getBarChart' && isset($_POST['ids'])){
     $count = 1;
     $submitted = $regSalereps = array();
     $salesrepids = explode(',', $_POST['ids']);
     $sDate = $_POST['startdate'];
     $eDate = $_POST['enddate'];
+    $ids = $_POST['ids'];
 
     //foreach ($salesrepids as $s) {
         $q = "SELECT count(*) as submittedCnt, CONCAT(l.salesrep_fname,' ',l.salesrep_lname) as SNames "
@@ -247,7 +247,7 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart'){
                 . "AND l.Guid_account = e.accountid "
                 . "LEFT JOIN tbluser u on u.Guid_user = l.Guid_user "
                 . "WHERE DATE(e.start_event) >= :sDate AND DATE(e.start_event) < :eDate "
-                . "AND l.Guid_status = 1 AND l.Guid_salesrep in (".$_POST['ids'].") AND u.marked_test = '0' GROUP BY l.Guid_salesrep order by submittedCnt desc limit 5";
+                . "AND l.Guid_status = 1 AND l.Guid_salesrep in (".$ids.") AND u.marked_test = '0' GROUP BY l.Guid_salesrep order by submittedCnt desc limit 5";
         $result = $db->query($q, array('sDate'=>$sDate, 'eDate'=>$eDate));
 
         foreach($result as $row){
@@ -417,64 +417,55 @@ if(isset($_POST['action']) && $_POST['action'] == "getLogo")
 
 if(isset($_POST['action']) && $_POST['action'] == 'tableStats'){
     $count = 1;
-    $acc_ids = explode(',', $_POST['acc']);
+    $acc_ids = isset($_POST['acc']) ? $_POST['acc'] : "" ;
     $registered = $completed = $qualified = $submitted = $brcaCnt = $hcfCnt = 0;
-    foreach ($acc_ids as $acc) {
-       
-        $regQuery = "SELECT COUNT(*) AS regCount "
-        . "FROM `tbl_mdl_status_log` l "
-        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
-        . "LEFT JOIN tblevents e ON e.accountid = l.Guid_account AND DATE(e.start_event) = DATE(l.Date) "
-        . "WHERE l.Guid_status=28 AND l.account=:account AND u.marked_test='0' AND DATE(l.Date) >= :startdate AND DATE(e.start_event) < :enddate GROUP BY l.account";
-        $regResult = $db->query($regQuery,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate'], "account" => $acc));
-        
-        $comQuery = "SELECT COUNT(*) AS comCount "
-        . "FROM `tbl_mdl_status_log` l "
-        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
-        . "LEFT JOIN tblevents e ON e.accountid = l.Guid_account AND DATE(e.start_event) = DATE(l.Date) "
-        . "WHERE l.Guid_status=36 AND l.account=:account AND u.marked_test='0' AND DATE(e.start_event) BETWEEN DATE(:startdate)  AND DATE(:enddate) GROUP BY l.account";
-        $comResult = $db->query($comQuery,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate'], "account" => $acc));
 
-        $quaQuery = "SELECT COUNT(*) AS quaCount "
-        . "FROM `tbl_mdl_status_log` l "
-        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
-        . "LEFT JOIN tblevents e ON e.accountid = l.Guid_account AND DATE(e.start_event) = DATE(l.Date) "
-        . "WHERE l.Guid_status=29 AND l.account=:account AND u.marked_test='0' AND DATE(e.start_event) BETWEEN DATE(:startdate)  AND DATE(:enddate) GROUP BY l.account";
-        $quaResult = $db->query($quaQuery,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate'], "account" => $acc));
+    if(isset($_POST['salesreps']) && $_POST['salesreps'] != '' || $_POST['salesreps']!=null){
+        $query = "SELECT (select count(*) from tblevents t1 "
+            . "where t1.title = 'BRCA Day' AND t1.salesrepid = :salesrepid "
+            . "AND DATE(t1.start_event) between DATE(:startdate) and DATE(:enddate)) as brcaCount "
+            . ",(select count(*) from tblevents t1 where t1.title = 'Health Care Fair' "
+            . "AND salesrepid = :salesrepid and DATE(t1.start_event) between DATE(:startdate) and DATE(:enddate)) as hcfCount "
+            . ",SUM(IF(l.Guid_status=28, 1, 0)) as regCount "
+            . ",SUM(IF(l.Guid_status=29, 1, 0)) as quaCount "
+            . ",SUM(IF(l.Guid_status=36, 1, 0)) as comCount "
+            . ",SUM(IF(l.Guid_status=1, 1, 0)) as subCount "
+            . "FROM tbl_mdl_status_log l "
+            . "INNER JOIN tblevents e on e.accountid = l.Guid_account and DATE(l.Date) = DATE(e.start_event) "
+            . "INNER JOIN tbluser u ON l.Guid_user = u.Guid_user "
+            . "WHERE DATE(l.Date) between DATE(:startdate) and DATE(:enddate) and u.marked_test='0' "
+            . "AND l.account IN (".$acc_ids.") AND l.Guid_salesrep = :salesrepid";
+        $result = $db->query($query,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate'], 'salesrepid' => $_POST['salesreps']));
 
-        $subQuery = "SELECT COUNT(*) AS subCount "
-        . "FROM `tbl_mdl_status_log` l "
-        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
-        . "LEFT JOIN tblevents e ON e.accountid = l.Guid_account AND DATE(e.start_event) = DATE(l.Date) "
-        . "WHERE l.Guid_status=1 AND l.account=:account AND u.marked_test='0' AND DATE(e.start_event) BETWEEN DATE(:startdate)  AND DATE(:enddate) GROUP BY l.account";
-        $subResult = $db->query($subQuery,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate'], "account" => $acc));
+    }else{
+        $query = "SELECT (select count(*) from tblevents t1 where t1.title = 'BRCA Day' AND DATE(t1.start_event) between DATE(:startdate) and DATE(:enddate)) as brcaCount "
+        . ",(select count(*) from tblevents t1 where t1.title = 'Health Care Fair' and DATE(t1.start_event) between DATE(:startdate) and DATE(:enddate)) as hcfCount
+                ,SUM(IF(l.Guid_status=28, 1, 0)) as regCount
+                ,SUM(IF(l.Guid_status=29, 1, 0)) as quaCount
+                ,SUM(IF(l.Guid_status=36, 1, 0)) as comCount
+                ,SUM(IF(l.Guid_status=1, 1, 0)) as subCount
+                FROM tbl_mdl_status_log l
+                inner join tblevents e on e.accountid = l.Guid_account and DATE(l.Date) = DATE(e.start_event)
+                inner JOIN tbluser u ON l.Guid_user = u.Guid_user
+                WHERE DATE(l.Date) between DATE(:startdate) and DATE(:enddate) and u.marked_test='0' ";
 
-        foreach($regResult as $reg){
-            $registered += $reg['regCount'];  
+        if(isset($_GET['salerepId'])){
+            $query .= "AND l.Guid_salesrep = :sid";
+            $result = $db->query($query,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate'], 'sid'=>$_GET['salerepId']));
+        }else{
+            $result = $db->query($query,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate']));
         }
-        foreach($comResult as $com){
-            $completed += $com['comCount'];  
-        }
-        foreach($quaResult as $qua){
-            $qualified += $qua['quaCount'];  
-        }
-        foreach($subResult as $sub){
-            $submitted += $sub['subCount'];  
-        } 
     }
-    if(isset($_POST['salesreps']) && $_POST['salesreps'] != '' || $_POST['salesreps']!=null):
-        $brcaQuery = "SELECT COUNT(*) as brcaCount FROM tblevents WHERE title='BRCA DAY' AND salesrepid =:salesreps AND DATE(start_event) between DATE(:startdate) AND DATE(:enddate) GROUP BY title";
-        $brcaResult = $db->query($brcaQuery,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate'], 'salesreps'=>$_POST['salesreps']));
-        foreach($brcaResult as $row){
-            $brcaCnt += $row['brcaCount'];  
-        }
-        $hcfQuery = "SELECT COUNT(*) as hcfCount FROM tblevents WHERE title<>'BRCA DAY' AND salesrepid =:salesreps AND DATE(start_event) between DATE(:startdate) AND DATE(:enddate) GROUP BY title";
-        $hcfResult = $db->query($hcfQuery,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate'], 'salesreps'=>$_POST['salesreps']));
-        foreach($hcfResult as $row){
-            $hcfCnt += $row['hcfCount'];  
-        }
-    endif;
+
     
+    foreach($result as $reg){
+        $registered += $reg['regCount'];
+        $completed += $reg['comCount'];
+        $qualified += $reg['quaCount'];
+        $submitted += $reg['subCount'];
+        $brcaCnt += $reg['brcaCount'];
+        $hcfCnt += $reg['hcfCount'];
+    }
     echo json_encode(array(
         'reg' => $registered,
         'com' => $completed,
@@ -511,7 +502,7 @@ if(isset($_GET['_']) && isset($_GET['start'])){
     {
      $data[] = array(
           'evtCnt'   => $row['evtCnt'],
-          'start'   => $row['start_event'],
+          'start'   => $row['start'],
           'registeredCnt' => $row['registeredCnt'],
           'qualifiedCnt' => $row['qualifiedCnt'],
           'completedCnt' => $row['completedCnt'],
