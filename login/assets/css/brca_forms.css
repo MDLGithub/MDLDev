@@ -44,6 +44,26 @@
   height:100%;
 }
 
+
+#patient_brca_forms .patient_name{
+    background: #2b4d77;
+    width: 100%;
+    height: 45px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    padding: 10px;
+    font-size: 18px;
+
+}
+
+#patient_brca_forms .contentBlock {
+    padding: 70px 2px 2px 2px;
+}
+
 #accordion {
   list-style: none;
   margin: 0;
@@ -51,6 +71,10 @@
   height: 500px;
   overflow: hidden;
 
+}
+
+#accordion .f_status{
+    max-height:2.3em;
 }
 
 #accordion::after {
@@ -161,7 +185,7 @@ cursor:pointer;
   width: 80px;
   position: absolute;
   right: 50px;
-  top: 30px;
+  top: 68px;
   background: rgb(255,255,255);
   background: linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%);
   border: 0;
@@ -186,6 +210,7 @@ cursor:pointer;
 
 .active-tab{
   background:white !important;
+  color: rgb(28, 72, 123) !important;
 }
 
 #form-details{
@@ -197,12 +222,12 @@ cursor:pointer;
   display: inline-block;
   position: relative;
   cursor: pointer;
+  color: rgb(102, 102, 102);
 }
 
 #form-details h2{
   font-size: 24px;
   font-family: 'Open Sans', sans-serif;
-  color: rgb(71, 71, 71);
   font-weight: bold;
   line-height: 1.2;
   text-align: center;
@@ -217,12 +242,12 @@ cursor:pointer;
   display:inline-block;
   position: relative;
   cursor: pointer;
+  color: rgb(102, 102, 102);
 }
 
 #forms h2{
   font-size: 24px;
   font-family: 'Open Sans', sans-serif;
-  color: rgb(28, 72, 123);
   font-weight: bold;
   line-height: 1.2;
   text-align: center;
@@ -383,7 +408,7 @@ and (orientation: landscape){
   }
 
   #accordion{
-    width:95%;
+    width:100%;
   }
 
   #form-option-table thead{

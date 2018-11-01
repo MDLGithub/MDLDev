@@ -60,7 +60,7 @@ if( isset($_POST['manage_provider'])){
         'title' => $title,
         'first_name' => $first_name,
         'last_name' => $last_name,
-        'provider_id'=>$provider_id,
+        'npi'=>$npi,
         'Guid_account'=>$Guid_account
     );
     
@@ -87,10 +87,10 @@ if( isset($_POST['manage_provider'])){
                         'account_id'=>$_POST['account_id'], 
                         'Guid_provider'=>$_POST['Guid_provider']
             );
-        $provider_id=$_POST['provider_id'];
+        $npi=$_POST['npi'];
         $isProviderValid = array();
-        if(isset($provider_id) && $provider_id!=""){
-            $isProviderValid = validateProviderId($db, $providerDataArray, $provider_id);
+        if(isset($npi) && $npi!=""){
+            $isProviderValid = validateProviderId($db, $providerDataArray, $npi);
         } else{
             $isProviderValid['status']=1;
             $isProviderValid['msg'] = "";
@@ -129,10 +129,10 @@ if( isset($_POST['manage_provider'])){
             $data['Guid_user'] = $inserUser['insertID'];
 
             $providerDataArray['action'] = 'insert';
-            $providerDataArray['provider_id']=$_POST['provider_id'];
-            $provider_id= $_POST['provider_id'];
+            $providerDataArray['npi']=$_POST['npi'];
+            $npi= $_POST['npi'];
            
-            $isProviderValid = validateProviderId($db, $providerDataArray, $provider_id);        
+            $isProviderValid = validateProviderId($db, $providerDataArray, $npi);        
             if($isProviderValid['status']==1){
                 $insert = insertIntoTable($db, 'tblprovider', $data, $msg); 
                 Leave(SITE_URL.'/accounts.php?account_id='.$_GET['account_id']);
@@ -151,7 +151,7 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
     
     $Guid_provider = $providerInfo["Guid_provider"];
     $Guid_user = $providerInfo["Guid_user"];
-    $provider_id = $providerInfo["provider_id"];
+    $npi = $providerInfo["npi"];
     $provider_account_id = $providerInfo["account_id"];
     $provider_first_name = $providerInfo["first_name"];
     $provider_last_name = $providerInfo["last_name"];    
@@ -166,7 +166,7 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
     $providerBoxClass = "hide";
     $Guid_provider = "";
     $Guid_user = "";
-    $provider_id = "";
+    $npi = "";
     $provider_account_id = "";
     $provider_first_name = "";
     $provider_last_name = "";
@@ -180,7 +180,7 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
     $providerBoxClass = "show";
     $Guid_provider = "";
     $Guid_user = "";
-    $provider_id = "";
+    $npi = "";
     $provider_account_id = "";
     $provider_first_name = "";
     $provider_last_name = "";
@@ -283,11 +283,11 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
             <div id="accounts">
                 <div class="row">
                     <div class="col-md-8">
-                        <?php if($role=='Physician') { ?>
+                       
                         <div id = "physician-header">
                             <h2><?php echo $accountActive['account']." - ". strtoupper($accountActive['name']); ?></h2>
                         </div>
-                        <?php } ?>
+                        
                         <div class="status_chart">
                             <div class="row">
                                 <div class="col-md-12">
@@ -405,7 +405,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                         <table class="table providersTable">
                             <thead>
                                 <tr>                        
-                                    <th>UPIN</th>
+                                    <th>NPI</th>
                                     <th>Title</th>
                                     <th>Name</th>
                                     <th class="">Registered</th>           
@@ -428,7 +428,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                                         $providerGuid=$v['Guid_provider'];
                                 ?>
                                 <tr>                            
-                                    <td><?php echo $v['provider_id']; ?></td>
+                                    <td><?php echo $v['npi']; ?></td>
                                     <td><?php echo $v['title']; ?></td>
                                     <td><?php echo $v['first_name']." ". $v['last_name']; ?></td>                                    
                                     <td>
@@ -457,7 +457,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                                         <a href="<?php echo SITE_URL."/accounts.php?account_id=$Guid_account&provider_guid=$providerGuid"; ?>">
                                             <span class="fas fa-pencil-alt" aria-hidden="true"></span>
                                         </a>
-                                        <a class="color-red" onclick="javascript:confirmationDeleteProvider($(this));return false;" href="?delete=<?php echo $providerGuid ?>&provider-id=<?php echo $v['provider_id']; ?>&account-id=<?php echo $Guid_account; ?>&user-id=<?php echo $v['Guid_user']; ?>">
+                                        <a class="color-red" onclick="javascript:confirmationDeleteProvider($(this));return false;" href="?delete=<?php echo $providerGuid ?>&npi=<?php echo $v['npi']; ?>&account-id=<?php echo $Guid_account; ?>&user-id=<?php echo $v['Guid_user']; ?>">
                                             <span class="far fa-trash-alt" aria-hidden="true"></span> 
                                         </a>
                                     </td>
@@ -734,14 +734,14 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
 
             <input type="hidden" value="<?php echo $accountActive['Guid_account']; ?>" name="Guid_account" />
             <input type="hidden" value="<?php echo $Guid_provider; ?>" name="Guid_provider" />
-            <input type="hidden" value="<?php echo $provider_id; ?>"  name="provider_id" />
+            <input type="hidden" value="<?php echo $npi; ?>"  name="npi" />
             <input type="hidden" value="<?php echo $provider_account_id; ?>" name="account_id" />
             <input type="hidden" value="<?php echo $Guid_user; ?>" name="Guid_user" />
 
-            <div class="f2 <?php echo ($provider_id!="")?"valid":"";?>">
-                <label class="dynamic" for="provider_id"><span>UPIN</span></label>
+            <div class="f2 <?php echo ($npi!="")?"valid":"";?>">
+                <label class="dynamic" for="npi"><span>NPI</span></label>
                 <div class="group">
-                    <input autocomplete="off" id="provider_id" name="provider_id" type="text" value="<?php echo $provider_id; ?>" placeholder="UPIN">
+                    <input autocomplete="off" id="npi" name="npi" type="text" value="<?php echo $npi; ?>" placeholder="NPI">
                     <p class="f_status">
                         <span class="status_icons"><strong></strong></span>
                     </p>

@@ -206,6 +206,18 @@ main.full-width{
     background-size: cover;
     height: 100vh;
 }
+
+
+#admin_login .boxtent .warning strong{
+    display: block;
+    text-align: center;
+    color: #f00;
+}
+#admin_login .boxtent .warning{
+   text-align: left;
+}
+
+
 .genevedaLogo,
 .mdlLogo{
     display: inline-block!important;
@@ -240,14 +252,19 @@ main.full-width{
 }
 
 #geneveda-export-modal .contentBlock::before {
-    content: '';
+    content: 'Geneveda Export';
     position: absolute;
-    height: 20px;
     width: 100%;
     top: 0px;
     left: 0px;
     background: #2b4d77;
     border-radius: 5px 5px 0px 0px;
+    color: white;
+    font-weight: bold;
+    text-indent: 10px;
+    font-size: 15px;
+    padding-top: 2px;
+    padding-bottom: 2px;
 }
 
 #geneveda-export-modal .contentBlock {
@@ -547,9 +564,9 @@ th.zip input{
     top: 15%;
     position: relative;
     background: #fff;
-    padding: 30px;
+    padding: 50px 30px 30px 30px;
     border-radius: 5px;
-    border: 1px solid #eee;
+    /*border: 1px solid #eee;*/
     box-shadow: 3px 2px 10px #0000008a;
 }
 
@@ -561,10 +578,10 @@ th.zip input{
 
 .modalBlock .contentBlock.formdetails-open{
     width:60%;
-    left: 24%;
+    left: 20%;
 }
 
-.modalBlock .close{
+.modalBlock .close {
     display: block;
     position: absolute;
     top: -10px;
@@ -575,7 +592,13 @@ th.zip input{
     background: #f15050;
     text-align: center;
     border-radius: 50%;
+    background-image: url(../images/x_times.png);
+    background-size: 80% 80%;
+    background-position: center;
+    z-index:10;
 }
+
+
 /* The switch - the box around the slider */
 .switch {
     position: relative;
@@ -994,11 +1017,58 @@ table.dataTable thead .sorting {
     background-image: url(images/sort_both.png);
 }
 
+
+
+#patient-info-box .pInfo .bordered {
+    padding: 20px 0;
+    border: 1px solid #d6dce2;
+    box-shadow: 0px 4px 4px 0px rgba(78, 112, 150, 0.26);
+    background-image: -moz-linear-gradient( 144deg, rgb(233,233,233) 0%, rgb(246,246,246) 49%, rgb(228,228,228) 98%);
+    background-image: -webkit-linear-gradient( 144deg, rgb(233,233,233) 0%, rgb(246,246,246) 49%, rgb(228,228,228) 98%);
+    background-image: -ms-linear-gradient( 144deg, rgb(233,233,233) 0%, rgb(246,246,246) 49%, rgb(228,228,228) 98%);
+}
+
+#patient-info-box .pInfo .bordered::before {
+    content: 'Patient Info';
+    position: relative;
+    width: 100%;
+    top: -20px;
+    left: 0;
+    border-width: 1px;
+    border-color: rgb(28, 72, 123);
+    border-style: solid;
+    background-image: -moz-linear-gradient( 90deg, rgb(28,72,123) 0%, rgb(81,112,147) 50%, rgb(28,72,123) 100%);
+    background-image: -webkit-linear-gradient( 90deg, rgb(28,72,123) 0%, rgb(81,112,147) 50%, rgb(28,72,123) 100%);
+    background-image: -ms-linear-gradient( 90deg, rgb(28,72,123) 0%, rgb(81,112,147) 50%, rgb(28,72,123) 100%);
+    color: white;
+    font-weight: 600;
+    text-indent: 10px;
+    box-shadow: 0px 4px 4px 0px #b7b7b796;
+}
+
+
 #patient-info-box .contentBlock {
     width: 60%;
     left: 20%;
     top: 10%;
 }
+
+#patient-info-box .contentBlock::before {
+    content: 'Update User';
+    position: absolute;
+    width: 100%;
+    top: 0px;
+    left: 0px;
+    background: #2b4d77;
+    border-radius: 5px 5px 0px 0px;
+    color:#2b4d77;
+    font-weight: bold;
+    text-indent: 10px;
+    font-size: 15px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
 .button, form button[type="submit"]{
     padding-left: 10px;
     padding-right: 10px; 
@@ -1086,16 +1156,6 @@ table.dataTable thead .sorting {
 }
 #manage-status-modal .contentBlock .content{
     padding: 10px 20px;
-}
-#manage-status-modal .close {
-    top: 0;
-    right: 0;
-    width: 40px;
-    height: 45px;
-    background: #071221;
-    border-radius: 0;
-    padding-top: 10px;
-    color: #f00;
 }
 
 
@@ -1197,14 +1257,17 @@ and (orientation : landscape) {
     }
 
     .dmdlCsvUpload{
-        width: 51%;
-        margin-left: 89px;
+        width: 47%;
+        margin-left: 99px;
         margin-right: 5px !important;
     }
 
     .dmdlCsvUpload input[type="file"] {
         width: 100%;
-        font-size: 15px;
+        font-size: 13px;
+    }
+    .dmdlForm form button.upload{
+    	font-size:13px;
     }
 
     .dmdlRefresh{
@@ -1289,7 +1352,7 @@ and (orientation : portrait) {
     }
 
     .bottom{
-        width:165%;
+        margin-bottom:40px;
     }
 
     #app_data .url_config_box input[type='radio'], input[type='radio']:checked{
@@ -1331,7 +1394,24 @@ and (orientation : portrait) {
         margin-left:-6px;
     }
 
+    #palette_top > h4{
+        font-size: 0.9em;
+        width: 50px;
+        margin-top: -6px;
+        line-height: 17px;
+        white-space:normal;
+    }
 
+    #form-option-table thead{
+        position:relative;
+        display:table;       
+        width:100%;
+        top:62px;
+    }
+
+    #form-option-table tbody{
+        width:100%;
+    }
 
 }
 
@@ -1438,11 +1518,11 @@ and (-webkit-min-device-pixel-ratio: 2) {
     }
 
     .dmdlForm form{
-        margin-left:20px;
+        margin-left:22px;
     }
 
     .dmdlCsvUpload{
-        width: 52%;
+        width: 50%;
         margin-left: 75px;
         font-size: 14px;
         margin-right: 5px !important;
@@ -1454,6 +1534,16 @@ and (-webkit-min-device-pixel-ratio: 2) {
 
     .dmdlRefresh{
         margin-right:4px !important;
+    }
+
+    .modalBlock .contentBlock.formdetails-open {
+        width: 90%;
+        left: 5%;
+    }
+
+    .modalBlock .contentBlock.patientForms-open {
+        width: 60%;
+        left: 20%;
     }
 
 }
@@ -1850,7 +1940,7 @@ table.valignTop td{
 .modalBlock .patientInfo input[type='text'],
 .modalBlock .patientInfo input[type='email'],
 .modalBlock .patientInfo select{
-    width: 430px;
+    width: 100%;
     border: 1px solid #5d7ea7;
     padding: 3px 10px;
     margin-bottom: 5px;
@@ -2198,15 +2288,20 @@ a.button.cancel.half{
     width: 100%;
 }
 #refresh-log-table tr.tableTopInfo{}
-#refresh-log-table tr.tableTopInfo .dmdl{
+
+
+#refresh-log-table tr.tableTopInfo .dmdl,
+#refresh-log-table tr.tableTopInfo .braca{
     background: #002060;
     color: #fff;
     text-align: center;
+
 }
+
 #refresh-log-table tr.tableTopInfo .braca{
     background: #00B050;
-    color: #fff;
 }
+
 #refresh-log-table tr.tableHeader{}
 .preloader {
     position: absolute;

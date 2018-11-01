@@ -1,5 +1,4 @@
 <?php
-
 /**
 *  Redirect url
 */
@@ -1009,15 +1008,15 @@ function get_value($db, $table, $extractFieldValue, $where=array()){
 }
 
 
-function validateProviderId($db, $data, $provider_id){
+function validateProviderId($db, $data, $npi){
     extract($data);    
     $providers = array();
     $query = "";
     if($action=='update'){
-        $query = "SELECT `provider_id` FROM tblprovider WHERE `provider_id`=$provider_id AND Guid_provider<>$Guid_provider";
+        $query = "SELECT `npi` FROM tblprovider WHERE `npi`=$npi AND Guid_provider<>$Guid_provider";
     } else {
-        if($provider_id!=""){
-            $query = "SELECT `provider_id` FROM tblprovider WHERE `provider_id`=$provider_id ";
+        if($npi!=""){
+            $query = "SELECT `npi` FROM tblprovider WHERE `npi`=$npi ";
         }
     }
     if($query){
@@ -1027,9 +1026,9 @@ function validateProviderId($db, $data, $provider_id){
     }
 
     if(!$providers){
-        return array('status'=>1, 'msg'=>'Provider ID Valid.');
+        return array('status'=>1, 'msg'=>'NPI Valid.');
     } else {
-        return array('status'=>0, 'msg'=>'Provider ID already exists.');
+        return array('status'=>0, 'msg'=>'NPI already exists.');
     }
        
     
@@ -1517,13 +1516,18 @@ function updateCurrentStatusID($db, $Guid_patient){
     return $result['Guid_status_log'];
 }
 
-function get_status_dropdown($db, $parent='0') {
-    $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." AND visibility='1' ORDER BY order_by ASC, Guid_status ASC");
+function get_status_dropdown($db, $parent='0', $Guid_status=FALSE) {
+    if($Guid_status){
+        $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `Guid_status` = ".$Guid_status);
+        
+    }else{
+        $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." AND visibility='1' ORDER BY order_by ASC, Guid_status ASC");
+    }
     
     $content = '<div class="f2  ">
                     <div class="group">
                         <select data-parent="'.$parent.'" required class="status-dropdown" name="status[]" id="">
-                            <option value="0">Select Status</option>';    
+                            <option value="">Select Status</option>';    
     if ( $statuses ) {
         foreach ( $statuses as $status ) {  
             $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
@@ -2224,20 +2228,21 @@ function dmdl_refresh($db){
     
     $content .= "<div class='pB-15 text-right'>";
     $content .= "<button name='dmdlUpdate' type='submit' class='botton btn-inline'>Update</button>";
-    $content .= "<button name='dmdlCreateNew' type='submit' class='botton btn-inline'>Create New</button>";    
+    //$content .= "<button name='dmdlCreateNew' type='submit' class='botton btn-inline'>Create New</button>";    
     $content .= "</div>";
     $content .= "<table id='refresh-log-table' class='table'>";
     $content .= "<thead>";
     $content .= "<tr class='tableTopInfo'>";
-    $content .= "<th colspan='5' class='dmdl'>dMDL</th>";
-    $content .= "<th colspan='2' class='braca'>BRCA Admin</th>";
+    $content .= "<th colspan='6' class='dmdl'>dMDL</th>";
+    $content .= "<th colspan='3' class='braca'>BRCA Admin</th>";
     $content .= "</tr>";
     $content .= "<tr class='tableHeader'>";
-    $content .= "<th>Matched</th>";
-    $content .= "<th>MDL#</th>";
+    $content .= "<th>Matched</th>";    
     $content .= "<th>Patient F Name</th>";
     $content .= "<th>Patient L Name</th>";
     $content .= "<th>DOB</th>";
+    $content .= "<th>MDL#</th>";
+    $content .= "<th>Account#</th>";
     $content .= "<th>Possible Match</th>";
     $content .= "<th>
                     <label class='switch'>
@@ -2247,6 +2252,7 @@ function dmdl_refresh($db){
                         </span>
                     </label>
                 </th>";
+    $content .= "<th></th>"; //create New
     $content .= "</tr></thead>";
     $content .= "<tbody>";
     foreach ( $dmdlResult as $k=>$v ){
@@ -2260,7 +2266,7 @@ function dmdl_refresh($db){
         $domArr = $domObj->array; 
         if($domObj->parse_error){ 
             echo $domObj->get_xml_error();            
-        } else {        
+        } else {             
             $res = $domArr['CombinedResults']['GeneticResults'];
             //var_dump($res);
             //admin db date format 1993-01-25           
@@ -2269,6 +2275,7 @@ function dmdl_refresh($db){
             $Date_Of_Birth = $res['Date_Of_Birth'];          
             $firstname = $res['Patient_FirstName'];
             $lastname = $res['Patient_LastName'];           
+            $accountNumber = $res['ClientID'];           
             
             $dob = str_replace('-','/',$Date_Of_Birth);
             
@@ -2301,8 +2308,8 @@ function dmdl_refresh($db){
                     . "OR dob='".convertDmdlDate($Date_Of_Birth)."'";
        
                 $SGetPatient = $db->query($SQuery);
-                
-                $sContent = "";
+              
+                $sContent = ""; 
                 if(!empty($SGetPatient)){
                     $sContent .= "<select name='dmdl[".$Guid_MDLNumber."][Possible_Match]'>";
                     $sContent .= "<option value=''>Select From Possible Match</option>";
@@ -2317,6 +2324,8 @@ function dmdl_refresh($db){
                     $sContent .= "</select>";
                 }
                 $possibleM = "<td>".$sContent."</td>";
+                $createNew = "<td><input class='button' type='submit' name='dmdlCreateNew[".$Guid_MDLNumber."]' value='Create New'/></td>";
+                
             } else {                
                 if(count($getPatient)>1){ //duplicate records => status=duplicate                  
                     $match = "<td class='hasDuplicate'>"
@@ -2332,7 +2341,7 @@ function dmdl_refresh($db){
             
                     $SGetPatient = $db->query($SQuery);
 
-                    $sContent = "";
+                    $sContent=""; 
                     if(!empty($SGetPatient)){
                         $sContent .= "<select name='dmdl[".$Guid_MDLNumber."][Possible_Match]'>";
                         $sContent .= "<option value=''>Select From Possible Match</option>";
@@ -2347,25 +2356,34 @@ function dmdl_refresh($db){
                         $sContent .= "</select>";
                     }
                     $possibleM = "<td>".$sContent."</td>";
-                }else{ //update mdl# for this perfect match => status=yes                  
+                    $createNew = "<td><input class='button' type='submit' name='dmdlCreateNew[".$Guid_MDLNumber."]' value='Create New'/></td>";
+                }else{ 
+                    //update mdl# for this perfect match => status=yes 
+                    $matchedPatient = $getPatient['0'];
+                    //update the Physician MDL ID Guid_dmdl_patient
+                    $update_dmdl_patient = updateTable($db, 'tblpatient', array('Guid_dmdl_patient'=>$res['Guid_PatientId'], 'Guid_dmdl_physician'=>$res['GUID_PhysicianID']), array('Guid_patient'=>$matchedPatient['Guid_patient']));
+                    
                     $match = "<td class='mn yes'>"
                             . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][status]' value='yes' />"
                             . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Guid_patient]' value='".$getPatient['0']['Guid_patient']."' />"
                             . "Yes</td>";  
                     $possibleM = "<td></td>";
+                    $createNew = "<td></td>";
                 }
             }
             
-            $content .= $match; //match status=>yes,no,duplicate 
-            $content .= "<td>$Guid_MDLNumber</td>";
+            $content .= $match; //match status=>yes,no,duplicate             
             $content .= "<td>$firstname</td>";
             $content .= "<td>$lastname</td>";
-            $content .= "<td>$dob</td>";            
+            $content .= "<td>$dob</td>"; 
+            $content .= "<td>$Guid_MDLNumber</td>";
+            $content .= "<td>$accountNumber</td>";            
             $content .= $possibleM;
             
             $content.= "<td class='text-center'>"
                     . "<input name='dmdl[selected][".$Guid_MDLNumber."]' type='checkbox' class='checkboxSelect' />"
                     . "</td>";
+            $content .= $createNew;
             
             //hidden inputs            
             if(isset($res['Guid_MDLNumber']) && !empty($res['Guid_MDLNumber'])){
@@ -2383,16 +2401,19 @@ function dmdl_refresh($db){
             if(isset($res['Guid_PatientId']) && !empty($res['Guid_PatientId'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Guid_PatientId]' value='".$res['Guid_PatientId']."' />";
             }
+            if(isset($res['GUID_PhysicianID'])&&!empty($res['GUID_PhysicianID'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Physician][GUID_PhysicianID]' value='".$res['GUID_PhysicianID']."' />";
+            }
             if(isset($res['Physician_FirstName'])&&!empty($res['Physician_FirstName'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Physician][FirstName]' value='".$res['Physician_FirstName']."' />";
             }
             if(isset($res['Physician_LastName'])&&!empty($res['Physician_LastName'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Physician][LastName]' value='".$res['Physician_LastName']."' />";
             }
-            if(isset($res['ClientID']) && !empty($res['ClientID'])){
+            if(isset($res['ClientID']) && !empty($res['ClientID'])){ //account number
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][number]' value='".$res['ClientID']."' />";
             }
-            if(isset($res['ClientName']) && !empty($res['ClientName'])){
+            if(isset($res['ClientName']) && !empty($res['ClientName'])){ //account name
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][name]' value='".$res['ClientName']."' />";
             }
             if(isset($res['ClientAddress1'])&&!empty($res['ClientAddress1'])){
@@ -2415,14 +2436,17 @@ function dmdl_refresh($db){
             }
             //statuses
             if(isset($res['DOS']) && !empty($res['DOS'])){
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenCollected]' value='".convertDmdlDate($res['DOS'])."' />";
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenCollected][date]' value='".convertDmdlDate($res['DOS'])."' />";
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenCollected][Guid_status]' value='1' />";
+            }
+            if(isset($res['Date_Accessioned']) && !empty($res['Date_Accessioned'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenAccessioned]['date]' value='".convertDmdlDate($res['Date_Accessioned'])."' />";
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenAccessioned]['Guid_status]' value='2' />";
             }
             if(isset($res['TestCode']) && !empty($res['TestCode'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenCollectedTestCode]' value='".$res['TestCode']."' />";
             }
-            if(isset($res['Date_Accessioned']) && !empty($res['Date_Accessioned'])){
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenAccessioned]' value='".convertDmdlDate($res['Date_Accessioned'])."' />";
-            }            
+                        
             if(isset($res['Genetic_Counseling_Status']) && !empty($res['Genetic_Counseling_Status'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][Genetic_Counseling_Status]' value='".$res['Genetic_Counseling_Status']."' />";
             }
@@ -2452,6 +2476,6 @@ function dmdl_refresh($db){
     $content .= "</tbody>";
     $content .= "</table>";
     $content .= "</form>";
-    
+  
     return $content;       
 }

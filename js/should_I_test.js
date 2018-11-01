@@ -382,7 +382,13 @@ $(function() {
 	$('.accordion > .acc_btn:first-child').addClass('show');
 	$('.acc_con').not('.acc_con.first').hide();
 	
-	$('.answers').on('click touchstart tap', '.add_field', function(){
+	$('.add_field').click(function(e){	
+		$('#additional_relatives').val("Yes");
+		
+		$('#app_wrap').submit();
+	});
+	
+	$('.answers,.ps_info').on('click touchstart tap', '.add_field', function(){
 		var $ul = $('.extra_input'),
 			$li = $ul.find('li:first-child'),
 			$remove = "<button type=\"button\" class=\"remove_field iconP\">X</button>";
