@@ -399,14 +399,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
         // when summary button is clicked
         $('#summary').on('click touchstart', function () {
-            var summarycursource = 'summaryeventload.php';
+            var summarycursource = 'ajaxHandlerEvents.php';
 
             $('#calendar').fullCalendar('removeEventSources');
             $('#calendar').fullCalendar('refetchEvents');
             $('#calendar').fullCalendar('addEventSource', summarycursource);
             $('#calendar').fullCalendar('refetchEvents');
-            $("#detail").css("background", "#90bcf7").css("color","#000").css("box-shadow", "inset 0 0 30px rgba(255,255,255,.8), 0 1px 6px rgba(0,0,0,.31)");
-            $("#summary").css("background", "#1c487b").css("color","#fff").css("box-shadow", "none");
+            $("#detail").css("background", "linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)").css("color","#000");
+            $("#summary").css("background", "#3f628a").css("color","#fff").css("box-shadow", "none");
         });
 
         // when detail button is clicked
@@ -417,8 +417,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $('#calendar').fullCalendar('refetchEvents');
             $('#calendar').fullCalendar('addEventSource', detailcursource);
             $('#calendar').fullCalendar('refetchEvents');
-            $("#summary").css("background", "#90bcf7").css("color","#000").css("box-shadow", "inset 0 0 30px rgba(255,255,255,.8), 0 1px 6px rgba(0,0,0,.31)");
-            $("#detail").css("background", "#1c487b").css("color","#fff").css("box-shadow", "none");
+            $("#summary").css("background", "linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)").css("color","#000");
+            $("#detail").css("background", "#3f628a").css("color","#fff").css("box-shadow", "none");
           
         });
 
@@ -598,7 +598,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
                 var view = $('#calendar').fullCalendar('getView');
                 if(view.name == 'basicDay'){
-                   
+                   console.log(event);
                     cmts = '<div class="fc-number"><span>Account Number: </span>' + event.account + '</div>';
                     cmts += '<div class = "day_stats">';
                     cmts += '<div class="show-stats"><span class="silhouette"><span>0</span> <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"><span>0</span> <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna"><span>0</span> <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask"><span>0</span> <img src="assets/eventschedule/icons/flask_icon.png"></span></div>' +
@@ -609,7 +609,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                           cmts += event.comments;
                     cmts += '</div></div>'
                     
-                    cmts += '<div class="fc-logo" id="fc-logo-'+state_count+'"></div>';
+                    cmts += '<div class="fc-logo" id="fc-logo-'+state_count+'">';
+                    if(event.logo != '' || event.logo != null)
+                        cmts += '<img src="<?php echo SITE_URL; ?>/assets/images/'+event.logo+'" /></div>';
+                    else
+                        cmts += '<img src="<?php echo SITE_URL; ?>/assets/images/default.png" /></div>';
                     
                     state_count = state_count+1;
                 }
@@ -760,12 +764,13 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     accounts.push(v.account)
                 });
                 var uniqueAcc = accounts.filter( onlyUnique );
+                uniqueAcc = uniqueAcc.toString();
                 var startdate = moment(view.start._d).format('YYYY-MM-DD');
                 var enddate = moment(view.end._d).format('YYYY-MM-DD');
                 
                 $.ajax({
                     type : 'POST',
-                    data : { acc: uniqueAcc, startdate: startdate, enddate:enddate, action:'tableStats' },
+                    data : { salesreps:null, acc: uniqueAcc, startdate: startdate, enddate:enddate, action:'tableStats' },
                     dataType: 'json',
                     url : 'ajaxHandlerEvents.php',
                     success : function(returndata){
@@ -1676,7 +1681,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                     </div>
                                     <div class="col-md-4">
                                         <button type="button" name="Detail" id="detail" class="info-button" style="float:left; margin-right: 20px; background: #1c487b; color: #fff;">Detail</button>
-                                        <button type="button" name="Summary" id="summary" class="info-button" style="background: #90bcf7;box-shadow: inset 0 0 30px rgba(255,255,255,.8), 0 1px 6px rgba(0,0,0,.31)">Summary</button>
+                                        <button type="button" name="Summary" id="summary" class="info-button" style="background: linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%);">Summary</button>
                                     </div>
                                 </div>
                             </div>
@@ -2008,33 +2013,13 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             min = "0" + min;
         }
         var sec = d.getSeconds();
-        /*var ampm = "am";
-        if( hr > 12 ) {
-            hr -= 12;
-            ampm = "pm";
-        }*/
+        
         var date = d.getDate();
         var month = d.getMonth()+1;
         var year = d.getFullYear();
         var current_time = year + "-" + month + "-" + date + " " +hr + ":" + min + ":" + sec ;
         return current_time;
     }
-
-/*function top_stats(){
-    var rgCnt = cmCnt = subCnt = qCnt = 0;
-    $(".top-stats-cal").html('<span class="regCnt">Registered <img src="assets/eventschedule/icons/silhouette_icon.png"> 0</span><span class="comCnt">Completed <img src="assets/eventschedule/icons/checkmark_icon.png"> 0 </span><span class="quaCnt">Qualified <img src="assets/eventschedule/icons/dna_icon.png"> 0</span><span class="subCnt">Submitted <img src="assets/eventschedule/icons/flask_icon.png"> 0</span>');
-    if ($('.fc-month-view').has('.fc-event').length === 0) {
-        setTimeout(function(){
-            $(".show-stats").each(function(){
-                rgCnt = rgCnt + parseInt($(this).find(".silhouette span").text());
-                cmCnt = cmCnt + parseInt($(this).find(".checkmark span").text());
-                subCnt = subCnt + parseInt($(this).find(".flask span").text());
-                qCnt = qCnt + parseInt($(this).find(".dna span").text());
-                $(".top-stats-cal").html('<span class="regCnt">Registered <img src="assets/eventschedule/icons/silhouette_icon.png"> '+rgCnt+'</span><span class="comCnt">Completed <img src="assets/eventschedule/icons/checkmark_icon.png"> '+cmCnt+'</span><span class="quaCnt">Qualified <img src="assets/eventschedule/icons/dna_icon.png"> '+qCnt+'</span><span class="subCnt">Submitted <img src="assets/eventschedule/icons/flask_icon.png"> '+subCnt+'</span>');
-            });
-        }, 5000);
-    }
-}*/
 </script>
 <?php require_once 'scripts.php'; ?>
 <?php require_once 'footer.php'; ?>

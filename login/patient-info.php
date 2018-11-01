@@ -799,9 +799,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     <div id="admin_print"></div>
     <div id="patient_brca_forms" class="modalBlock" style="display: none;">
         <div class="contentBlock patientForms">
-        <span class = "close">
-            <i class="fas fa-times"></i>
-        </span>
+        <span class = "close"></span>
         <div class="container form-container" style="margin:auto"> 
             <div class = "form-row">
                 <div id = "forms">
@@ -810,6 +808,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 <div id = "form-details">
                     <h2>Details</h2>
                 </div>
+                <div class = "patient_name">John Smith</div>
                 <button class = "print_button button" id = "form-print"><i class="fas fa-print"></i> Print</button>
             <ul id="accordion">
               <li>
@@ -1128,7 +1127,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" value="cancer_genetic_counseling" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="<?php echo SITE_URL . "/forms/Cancer-Referral-Form_9.2018" ?>" target="_blank">Cancer Genetic Counseling Referral</a>
+                                <a href="<?php echo SITE_URL . "/forms/Cancer-Referral-Form_9.2018.pdf" ?>" target="_blank">Cancer Genetic Counseling Referral</a>
                             </td>
                         </tr>
                         <tr class="t_row">
@@ -1144,7 +1143,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" disabled value="aim" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="" target="_blank">AIMs Precertification</a>
+                                <span>AIMs Precertification</span>
                             </td>
                         </tr>
                         <tr class="t_row">
@@ -1152,7 +1151,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" disabled value="beacon" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="" target="_blank">Beacon LBS</a>
+                                <span>Beacon LBS</span>
                             </td>
                         </tr>
                     </tbody>
@@ -1786,7 +1785,11 @@ if(isset($_POST['edit_categories'])){
                 <div class="col-md-12 clearfix" id="status-dropdowns-box">                                            
                     <?php 
                         if(isset($_GET['log_id']) && $_GET['log_id']!="" ){
-                            echo get_selected_log_dropdown($db, $logRow['Log_group']); 
+                            if(!empty($logRow)){
+                                echo get_selected_log_dropdown($db, $logRow['Log_group']);
+                            } else {
+                                Leave($patientInfoUrl);
+                            }
                         }else{
                             if(isset($_GET['specimen'])){
                                 if($_GET['specimen']=='yes'){
