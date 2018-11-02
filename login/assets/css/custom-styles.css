@@ -1627,6 +1627,10 @@ table.dataTable thead .sorting {
 #patient-info-box h5.inline{
     display: inline-block;
 }
+#patient-info-box h5.notes{
+    line-height: 13px;
+    margin-bottom: 13px;
+}
 #patient-info-box .pInfo .bordered{
     padding: 20px 0;
     border: 1px solid #d6dce2;
