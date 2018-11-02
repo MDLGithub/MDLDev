@@ -808,7 +808,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 <div id = "form-details">
                     <h2>Details</h2>
                 </div>
-                <div class = "patient_name">John Smith</div>
+                <div class = "patient_name"><?= ucfirst(strtolower($qualifyResult['firstname']))." ".ucfirst(strtolower($qualifyResult['lastname'])) ?></div>
                 <button class = "print_button button" id = "form-print"><i class="fas fa-print"></i> Print</button>
             <ul id="accordion">
               <li>
@@ -1095,7 +1095,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" value="test_req_form" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a class="openPdf" pdf_name="BRCA_Genetic_Req_IH0119_10_2018.pdf">Test Req</a>
+                                <a href="<?php echo SITE_URL . '/forms/BRCA_Genetic_Req_IH0119_10_2018.pdf' ?>" target="_blank">BRCA Test Requisition</a>
                             </td>
                         </tr>
                         <tr class="t_row">
