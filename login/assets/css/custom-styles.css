@@ -947,6 +947,10 @@ thead th{
     table-layout:fixed;
 }
 
+.dataTables_wrapper.no-footer#dataTableHome_wrapper {
+    width: 100%;
+}
+
 #dataTableHome_wrapper,
 #tableHeaderFixed_wrapper{
     display:flex;
