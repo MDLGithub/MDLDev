@@ -1066,7 +1066,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" value="test_req_form" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="/forms/BRCA_Genetic_Req_IH0119_10_2018.pdf" target="_blank">BRCA Test Requisition</a>
+                                <a href="/questionnaire/login/forms/BRCA_Genetic_Req_IH0119_10_2018.pdf" target="_blank">BRCA Test Requisition</a>
                             </td>
                         </tr>
                         <tr class="t_row">
@@ -1074,7 +1074,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" value="informed_consent" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="/forms/BRCA_test_Consent.pdf" target="_blank">Informed consent</a>
+                                <a href="/questionnaire/login/forms/BRCA_test_Consent.pdf" target="_blank">Informed consent</a>
                             </td>
                         </tr>
                         <tr class="t_row">
@@ -1082,7 +1082,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" value="prior_authorization" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="/forms/Prior Authorization Reqest form.pdf" target="_blank">Prior Authorization</a>
+                                <a href="/questionnaire/login/forms/Prior Authorization Reqest form.pdf" target="_blank">Prior Authorization</a>
                             </td>
                         </tr>
                         <tr class="t_row">
@@ -1090,7 +1090,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" value="genetic_counseling" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="/forms/BRCA_Genetic_Counseling_Referral.pdf" target="_blank">Genetic Counseling Referral</a>
+                                <a href="/questionnaire/login/forms/BRCA_Genetic_Counseling_Referral.pdf" target="_blank">Genetic Counseling Referral</a>
                             </td>
                         </tr>
                         <tr class="t_row">
@@ -1098,7 +1098,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" value="cancer_genetic_counseling" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="/forms/Cancer-Referral-Form_9.2018.pdf" target="_blank">Cancer Genetic Counseling Referral</a>
+                                <a href="/questionnaire/login/forms/Cancer-Referral-Form_9.2018.pdf" target="_blank">Cancer Genetic Counseling Referral</a>
                             </td>
                         </tr>
                         <tr class="t_row">
@@ -1106,7 +1106,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <input name="forms" value="aetna_precertification" type="checkbox" class="print1 report1" data-prinatble="0" />
                             </td>
                             <td class="left-td">
-                                <a href="/forms/BRCA-precertification-request-form.pdf" target="_blank">Aetna Precertification Information Request</a>
+                                <a href="/questionnaire/login/forms/BRCA-precertification-request-form.pdf" target="_blank">Aetna Precertification Information Request</a>
                             </td>
                         </tr>
                         <tr class="t_row">
