@@ -789,9 +789,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var startdate = moment(view.start._d).format('YYYY-MM-DD');
                 var enddate = moment(view.end._d).format('YYYY-MM-DD');
                 if(view.name == 'basicDay'){
-                    evtdata = { salesreps:uniqueIdsString, acc: uniqueAccString, startdate: startdate, enddate:startdate, action:'tableStats' };
+                    evtdata = { salesreps:null, acc: uniqueAccString, startdate: startdate, enddate:startdate, action:'tableStats' };
                 }else{
-                    evtdata = {salesreps:uniqueIdsString, acc: uniqueAccString, startdate: startdate, enddate:enddate, action:'tableStats'};
+                    evtdata = {salesreps:null, acc: uniqueAccString, startdate: startdate, enddate:enddate, action:'tableStats'};
                 }
                 $.ajax({
                     type : 'POST',
