@@ -727,6 +727,7 @@ if(isset($_POST['dmdlUpdate'])){
     if(isset($_POST['dmdl']['selected'])){
         foreach ($_POST['dmdl']['selected'] as $mdlNum=>$v){
             $dmdlItem = $_POST["dmdl"]["$mdlNum"];
+            $data = $_POST['dmdl'][$mdlNum];
             //var_dump($_POST["dmdl"]["selected"]);
             //check if checkbox is checked
             if( isset($_POST["dmdl"]["selected"][$mdlNum])) {
@@ -740,14 +741,148 @@ if(isset($_POST['dmdlUpdate'])){
                     if(isset($dmdlItem['Possible_Match']) && $dmdlItem['Possible_Match']!=''){
                         $Guid_patient = $dmdlItem['Possible_Match']; //patient id from admin db
                         $thisPatient = $db->row("SELECT * FROM `tblpatient` WHERE Guid_patient=:Guid_patient", array('Guid_patient'=>$Guid_patient));
+                        $Guid_user = $thisPatient['Guid_user'];                        
                         //update patent table
                         $patientData = array();
-
+                        if($thisPatient['Guid_dmdl_patient']==''){
+                            $patientData['Guid_dmdl_patient'] = $data['Guid_PatientId'];
+                        }
+                        if($thisPatient['Guid_dmdl_physician']==''){
+                            $patientData['Guid_dmdl_physician'] = $data['Guid_PatientId'];
+                        }
+                        if($thisPatient['firstname_enc']==''){
+                            $patientData['firstname_enc'] = $data['firstname'];
+                        }
+                        if($thisPatient['lastname_enc']==''){
+                            $patientData['lastname_enc'] = $data['lastname'];
+                        }
+                        if($thisPatient['dob']==''){
+                            $patientData['dob'] = $data['dob'];
+                        }
+                        if($thisPatient['physician_name']==''){
+                            $patientData['physician_name'] = $data['Physician']['FirstName']." ".$data['Physician']['LastName'];
+                        }
+                        if($thisPatient['insurance_name']==''){
+                            $patientData['insurance_name'] = $data['insurance_full'];
+                        }
+                        if(!empty($thisPatient)){
+                            $wherePatient = array('Guid_patient'=>$Guid_patient);
+                            $updatePatient = updatePatientData($db,$patientData,$wherePatient); 
+                        }
+                        
                         //update mdl number
-
+                        $wherUserIs = array('Guid_user'=>$Guid_user);
+                        $thisMdl = $db->row("SELECT * FROM tbl_mdl_number WHERE Guid_user=:Guid_user", $wherUserIs);
+                        $mdlData['mdl_number']=$data['mdlnumber'];
+                        if(isset($thisMdl['mdl_number']) && $thisMdl['mdl_number'] ==''){
+                            $updateMDLNum = updateTable($db, 'tbl_mdl_number', $mdlData, $wherUserIs);
+                        } else {
+                            $mdlData['Guid_user']=$Guid_user;
+                            $insertMDLNum = insertIntoTable($db, 'tbl_mdl_number', $mdlData);
+                        }
+                        
                         //update account
-
+                        $accountNum = $data['account']['number'];
+                        $checkAccount = $db->row("SELECT * FROM tblaccount WHERE account=:account", array('account'=>$accountNum));
+                        $accountData = array();
+                        if(!empty($checkAccount)){ //update
+                            $Guid_account = $checkAccount['Guid_account'];
+                            $whereAccount = array('Guid_account'=>$Guid_account);
+                            if(isset($checkAccount['account']) &&$checkAccount['account']==''){
+                                if(isset($accountNum)){
+                                    $accountData['account'] = $accountNum;
+                                }
+                            }
+                            if(isset($checkAccount['name']) &&$checkAccount['name']==''){
+                                if(isset($data['account']['name'])){
+                                    $accountData['account'] = $data['account']['name'];
+                                }
+                            }
+                            if(isset($checkAccount['address']) &&$checkAccount['address']==''){
+                                 if(isset($data['account']['addr1'])){
+                                    $accountData['address'] = $data['account']['addr1'];
+                                }  
+                            }
+                            if(isset($checkAccount['address2']) &&$checkAccount['address2']==''){
+                                if(isset($data['account']['addr2'])){
+                                    $accountData['address2'] = $data['account']['addr2'];
+                                }
+                            }
+                            if(isset($checkAccount['city']) &&$checkAccount['city']==''){
+                                if(isset($data['account']['city'])){
+                                    $accountData['city'] = $data['account']['city'];
+                                }
+                            }
+                            if(isset($checkAccount['state']) &&$checkAccount['state']==''){
+                                if(isset($data['account']['state'])){
+                                    $accountData['state'] = $data['account']['state'];
+                                }
+                            }
+                            if(isset($checkAccount['zip']) &&$checkAccount['zip']==''){
+                                if(isset($data['account']['zip'])){
+                                    $accountData['zip'] = $data['account']['zip'];
+                                }
+                            }
+                            $updateAccount = updateTable($db, 'tblaccount', $accountData, $whereAccount);
+                        } else { //insert                            
+                            $accountData = array();
+                            if(isset($accountNum)){
+                                $accountData['account'] = $accountNum;
+                            }
+                            if(isset($data['account']['name'])){
+                                $accountData['account'] = $data['account']['name'];
+                            }
+                            if(isset($data['account']['addr1'])){
+                                $accountData['address'] = $data['account']['addr1'];
+                            }   
+                            if(isset($data['account']['addr2'])){
+                                $accountData['address2'] = $data['account']['addr2'];
+                            }   
+                            if(isset($data['account']['city'])){
+                                $accountData['city'] = $data['account']['city'];
+                            }   
+                            if(isset($data['account']['state'])){
+                                $accountData['state'] = $data['account']['state'];
+                            }   
+                            if(isset($data['account']['zip'])){
+                                $accountData['zip'] = $data['account']['zip'];
+                            }   
+                            
+                            $Guid_account = insertIntoTable($db, 'tblaccount', $accountData);
+                        }
+                        
                         //update provider
+                        if(isset($Guid_account)&&$Guid_account!=''){
+                            //check provider   
+                            $checkProvider = $db->row("SELECT * FROM tblprovider WHERE account_id=:account_id", array('account_id'=>$accountNum)); 
+                            $Guid_provider = $checkProvider['Guid_provider'];
+                            //insert provider
+                            if(!empty($checkProvider)){ //update fields which are empty
+                                if(isset($checkProvider['first_name']) && $checkProvider['first_name']==''){
+                                    $providerData['first_name'] = $data['Physician']['FirstName'];
+                                }
+                                if(isset($checkProvider['last_name']) && $checkProvider['last_name']==''){
+                                    $providerData['last_name'] = $data['Physician']['LastName'];
+                                }
+                                if(!empty($providerData)){
+                                    $updateProvider = updateTable($db, 'tblprovider', $providerData, array('Guid_provider'=>$Guid_provider));
+                                }                                
+                            } else { //insert
+                                $providerData = array(
+                                    'Guid_user'=>$Guid_user,
+                                    'Guid_account'=>$Guid_account,
+                                    'account_id'=>$accountNum,
+                                    'first_name'=>$data['Physician']['FirstName'],
+                                    'last_name'=>$data['Physician']['LastName']
+                                );
+                                $insertProvider = insertIntoTable($db, 'tblprovider', $providerData);
+                                $Guid_provider = $insertProvider['insertID'];
+                            }
+                        }
+                        
+                        
+
+                        
 
                         //update status log table
                     }
@@ -804,7 +939,6 @@ if(isset($_POST['dmdlCreateNew'])){
                 'account' => $data['account']['number'],
                 'name' => $data['account']['name'],
                 'address' => $data['account']['addr1'],
-                'address2' => $data['account']['addr2'],
                 'address2' => $data['account']['addr2'],
                 'city' => $data['account']['city'],
                 'state' => $data['account']['state'],

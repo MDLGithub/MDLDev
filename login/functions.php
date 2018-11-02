@@ -2480,3 +2480,32 @@ function dmdl_refresh($db){
   
     return $content;       
 }
+
+
+function updatePatientData($db,$data,$where){   
+    $updateFields = "";
+    $whereStr = "";
+    $executeArray = array();
+    foreach ($data as $key => $val) {
+        if($key=='firstname_enc'){           
+            $updateFields .= "`$key`=AES_ENCRYPT('$val', 'F1rstn@m3@_%'), ";
+        } elseif ($key=='lastname_enc') {            
+            $updateFields .= "`$key`=AES_ENCRYPT('$val', 'L@stn@m3&%#'), ";
+        } else {
+            $updateFields .= "`$key`='$val', ";
+        }
+    }
+    $updateFields = rtrim($updateFields,", ");   
+    
+    foreach ($where as $key => $val) {
+        $whereStr = " WHERE `$key`=:$key";
+        $executeArray["$key"] = $val;
+    }   
+    if($updateFields!=''){
+        $query = "UPDATE `tblpatient` SET $updateFields $whereStr";
+        $update = $db->query($query, $executeArray);
+
+        return $update;  
+    }
+    return FALSE;
+}

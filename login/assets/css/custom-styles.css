@@ -1597,12 +1597,14 @@ table.dataTable thead .sorting {
 }
 #patient-info-box h2 {
     font-size: 30px;
-    margin: 20px 0 35px 0;
+    margin: 20px 0 25px 0;
 }
 #patient-info-box h5 {
     margin-bottom: 7px;
+    
+}
+#patient-info-box h5.inline{
     display: inline-block;
-    /*width: 100%;*/
 }
 #patient-info-box .pInfo .bordered{
     padding: 20px 0;
@@ -1643,8 +1645,18 @@ table.dataTable thead .sorting {
     text-align: right;
     font-weight: normal;
 }
+#mdlInfoBox.pInfo p{
+    width: 300px;
+    margin: 0 auto;
+    text-align: center;
+    margin-bottom: 20px;
+}
+#mdlInfoBox.pInfo p input{
+    text-align: center;
+}
 #mdlInfoBox.pInfo label {
-    min-width: 70px;
+    min-width: auto;
+    
 }
 .add-status-form .datepicker,
 .add-status-form .order_by{
