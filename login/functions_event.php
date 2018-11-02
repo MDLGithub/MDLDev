@@ -118,32 +118,52 @@ function getSalesRepAccount($db, $Guid_salesrep){
 
 function getSummaryEvents($db){
        
-    $query = "SELECT date(e.start_event) as start, count(e.title) as evtCnt, GROUP_CONCAT(salesrepid) as salesrepid "
+    $query = "SELECT date(e.start_event) as start, count(e.title) as evtCnt , GROUP_CONCAT(salesrepid) as salesrepid,GROUP_CONCAT(acc.account) as account"
             . ",(Select count(*) FROM tbl_mdl_status_log l "
             . "left join tbluser u on u.Guid_user = l.Guid_user "
             . "left join tblevents evt on date(evt.start_event) = date(l.Date) "
-            . "Where date(evt.start_event) = DATE(e.start_event) and u.marked_test = '0' and l.Guid_status=28 "
-            . "and evt.accountid = l.Guid_account )AS registeredCnt "
+            . "Where date(evt.start_event) = DATE(e.start_event) and u.marked_test = '0' and l.Guid_status=28 ";
+    if(isset($_GET['salerepId']))
+    $query  .= "and l.Guid_salesrep = ".$_GET['salerepId']." ";
+    if(isset($_GET['accountId']) && $_GET['accountId'] != 0)
+    $query  .= "and l.Guid_account = ".$_GET['accountId']." ";
+    $query  .= "and evt.accountid = l.Guid_account )AS registeredCnt "
               
             . ",(Select count(*) FROM tbl_mdl_status_log l "
             . "left join tbluser u on u.Guid_user = l.Guid_user "
             . "left join tblevents evt on date(evt.start_event) = date(l.Date) "
-            . "Where date(evt.start_event) = DATE(e.start_event) and u.marked_test = '0' and l.Guid_status=29 "
-            . "and evt.accountid = l.Guid_account )AS qualifiedCnt "
+            . "Where date(evt.start_event) = DATE(e.start_event) and u.marked_test = '0' and l.Guid_status=29 ";
+    if(isset($_GET['salerepId']))
+    $query  .= "and l.Guid_salesrep = ".$_GET['salerepId']." ";
+    if(isset($_GET['accountId']) && $_GET['accountId'] != 0)
+    $query  .= "and l.Guid_account = ".$_GET['accountId']." ";
+    $query  .= "and evt.accountid = l.Guid_account )AS qualifiedCnt "
             
             . ",(Select count(*) FROM tbl_mdl_status_log l "
             . "left join tbluser u on u.Guid_user = l.Guid_user "
             . "left join tblevents evt on date(evt.start_event) = date(l.Date) "
-            . "Where date(evt.start_event) = DATE(e.start_event) and u.marked_test = '0' and l.Guid_status=36 "
-            . "and evt.accountid = l.Guid_account )AS completedCnt "
+            . "Where date(evt.start_event) = DATE(e.start_event) and u.marked_test = '0' and l.Guid_status=36 ";
+    if(isset($_GET['salerepId']))
+    $query  .= "and l.Guid_salesrep = ".$_GET['salerepId']." ";
+    if(isset($_GET['accountId']) && $_GET['accountId'] != 0)
+    $query  .= "and l.Guid_account = ".$_GET['accountId']." ";
+    $query  .= "and evt.accountid = l.Guid_account )AS completedCnt "
             . ",(Select count(*) FROM tbl_mdl_status_log l "
             . "left join tbluser u on u.Guid_user = l.Guid_user "
             . "left join tblevents evt on date(evt.start_event) = date(l.Date) "
-            . "Where date(evt.start_event) = DATE(e.start_event) and u.marked_test = '0' and l.Guid_status=1 "
-            . "and evt.accountid = l.Guid_account )AS submittedCnt "
-              
-        . "FROM tblevents e "
-        . "WHERE DATE(e.start_event) between DATE(:sDate) and DATE(:eDate) group by start";
+            . "Where date(evt.start_event) = DATE(e.start_event) and u.marked_test = '0' and l.Guid_status=1 ";
+    if(isset($_GET['salerepId']))
+    $query  .= "and l.Guid_salesrep = ".$_GET['salerepId']." ";
+    if(isset($_GET['accountId']) && $_GET['accountId'] != 0)
+    $query  .= "and l.Guid_account = ".$_GET['accountId']." ";
+    $query  .= "and evt.accountid = l.Guid_account )AS submittedCnt "
+
+            . "FROM tblevents e left join tblaccount acc on e.accountid = acc.Guid_account WHERE ";
+    if(isset($_GET['salerepId']))
+    $query .= "e.salesrepid = ".$_GET['salerepId']." and ";
+    if(isset($_GET['accountId']) && $_GET['accountId'] != 0)
+    $query  .= "e.accountid = ".$_GET['accountId']." and ";
+    $query .= "DATE(e.start_event) between DATE(:sDate) and DATE(:eDate) group by start";
     $result = $db->query($query, array('sDate' => $_GET['start'], 'eDate' => $_GET['end']));
            
     return $result;    
