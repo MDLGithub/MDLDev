@@ -334,7 +334,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             
 
                             <div id="statusLogs"  class="col-md-12 clearfix padd-0">
-                                <h5 class="">
+                                <h5 class="notes">
                                     Notes:                                    
                                     <a title="Add Note" class="pull-right" href="<?php echo $patientInfoUrl."&note_log=add";?>">
                                         <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add

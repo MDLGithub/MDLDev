@@ -1635,6 +1635,7 @@ table.dataTable thead .sorting {
     padding: 20px 0;
     border: 1px solid #d6dce2;
     box-shadow: 0px 4px 4px 0px rgba(78, 112, 150, 0.26);
+    margin-top: 20px;
 }
 #patient-info-box .pInfo label {
     min-width: 210px;
