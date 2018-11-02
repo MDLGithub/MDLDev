@@ -965,11 +965,13 @@ thead th{
 
 #dataTableHome thead,
 #tableHeaderFixed thead{
-    position: -webkit-sticky;
+    /*position: -webkit-sticky;
     position: -moz-sticky;
     position: -ms-sticky;
     position: -o-sticky;
-    position:sticky;
+    position:sticky;*/
+    position:absolute;
+    margin-top:36px;
     transition:width 0.6s 0.2s;
     top:0;
     z-index:5;
@@ -997,6 +999,7 @@ thead th{
     overflow-x:hidden;
     display:block;
     width:calc(100% - 18px);
+    margin-top:61px;
 }
 #dataTableHome tbody .t_row,
 #tableHeaderFixed tbody .t_row {
@@ -1194,15 +1197,14 @@ and (orientation : landscape) {
     }
 
     #dataTableHome thead{
-        top:220px;
         position: absolute;
-        display: table-row;
-        width: 97%;
-        top: 33px;
+        width: calc(100% - 18px);
+        top: 0px;
+        margin-top:23px;
     }
 
     #dataTableHome tbody{
-        margin-top:70px;
+        margin-top:61px;
     }
 
     #dataTableHome tbody td {
@@ -1224,8 +1226,8 @@ and (orientation : landscape) {
     }
 
     .wider-bar{
-        width: 98% !important;
-        display:table !important;
+        width: calc(100% - 18px) !important;
+
     }
 
     .pseudo_t{
@@ -1302,17 +1304,17 @@ and (orientation : portrait) {
     }
 
     #dataTableHome thead{
-        top:25px;
+        top:0px;
         position:absolute;
-        display:table-row;
         width:165%;
+        margin-top: 25px;
     }
 
 
     #dataTableHome tbody{
         overflow-x: scroll;
         width:165%;
-        margin-top: 60px;
+        margin-top: 64px;
     }
 
     #dataTableHome tbody td{
@@ -1340,7 +1342,7 @@ and (orientation : portrait) {
 
     .wider-bar{
         width:calc(103% - 18px) !important;
-        display:table !important;
+
     }
 
     .wider-tbody{
@@ -1427,13 +1429,14 @@ and (orientation: landscape)
 and (-webkit-min-device-pixel-ratio: 2) {
 
     #dataTableHome thead{
-        top:233px;
-        position:fixed;
-        width:70%;
+        top:0px;
+        position:absolute;
+        width:calc(100% - 18px);
+        margin-top:25px;
     }
 
     #dataTableHome tbody{
-        margin-top: 70px;
+        margin-top: 62px;
     }
 
     #dataTableHome_info{
@@ -1446,7 +1449,7 @@ and (-webkit-min-device-pixel-ratio: 2) {
     }
 
     .wider-bar{
-        width: 93% !important;
+        width: calc(100% - 18px) !important;
     }
 
     #app_data .url_config_box input[type='radio'], input[type='radio']:checked{
@@ -1477,14 +1480,15 @@ and (orientation: portrait)
 and (-webkit-min-device-pixel-ratio: 2) {
 
     #dataTableHome thead{
-        top:230px;
-        position:fixed;
-        width:63%;
+        top:0px;
+        position:absolute;
+        width:calc(100% - 18px);
+        margin-top: 25px;
     }
 
     #dataTableHome tbody{
 
-        margin-top: 70px;
+        margin-top: 65px;
 
     }
 
@@ -1498,7 +1502,7 @@ and (-webkit-min-device-pixel-ratio: 2) {
     }
 
     .wider-bar{
-        width: 93%!important;
+        width: calc(100% - 18px) !important;
     }
 
     #app_data .url_config_box  div.col-md-7 .col-md-6:nth-child(1){
