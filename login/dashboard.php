@@ -534,20 +534,20 @@ $num_estimates = $qualify_requests;
             <div class="row">
                 <div class="col-md-4"></div>
                 <div class="col-md-8 dmdlForm">
-                    <form action="" method="POST" enctype="multipart/form-data">
-                        <?php if($role=='Admin'){ ?>                                    
+                    <?php if($role=='Admin'){ ?> 
+                    <form action="" method="POST" enctype="multipart/form-data">                                                           
                         <span class="dmdlCsvUpload">  
                             <input type="file" name="dmdlCsvUpload" />
                         </span> 
-                        <button class="upload" type="submit" name="dmdlUpload">Upload</button>
-                        <?php } ?>
+                        <button class="upload" type="submit" name="dmdlUpload">Upload</button>                        
                         <span class="dmdlRefresh">  
                             <a href="<?php echo SITE_URL.'/dashboard.php?refresh=1'; ?>" class="refresh" type="submit" name="dmdlRefresh"><i class="fas fa-sync-alt"></i></a>
-                        </span>
+                        </span>                        
                     </form>
                     <div class="uploadMsg">
                     <?php if($uploadMessage!=""){ echo $uploadMessage; }?>
                     </div>
+                    <?php } ?>
                 </div>
             </div>
             
@@ -727,26 +727,32 @@ if(isset($_POST['dmdlUpdate'])){
     if(isset($_POST['dmdl']['selected'])){
         foreach ($_POST['dmdl']['selected'] as $mdlNum=>$v){
             $dmdlItem = $_POST["dmdl"]["$mdlNum"];
-            
-            //if we have exact match
-            if($dmdlItem['status']=='yes'){
-                
-            }
-            //if not exact match but we select Possible_Match
-            if($dmdlItem['status']=='no' || $dmdlItem['status']=='duplicate'){
-                if(isset($dmdlItem['Possible_Match']) && $dmdlItem['Possible_Match']!=''){
-                    $Guid_patient = $dmdlItem['Possible_Match']; //patient id from admin db
-                    //update patent table
-                    
-                    //update mdl number
-                    
-                    //update account
-                    
-                    //update provider
-                    
-                    //update status log table
+            //var_dump($_POST["dmdl"]["selected"]);
+            //check if checkbox is checked
+            if( isset($_POST["dmdl"]["selected"][$mdlNum])) {
+    
+                //if we have exact match
+                if($dmdlItem['status']=='yes'){
+
                 }
-            }
+                //if not exact match but we select Possible_Match
+                if($dmdlItem['status']=='no' || $dmdlItem['status']=='duplicate'){
+                    if(isset($dmdlItem['Possible_Match']) && $dmdlItem['Possible_Match']!=''){
+                        $Guid_patient = $dmdlItem['Possible_Match']; //patient id from admin db
+                        $thisPatient = $db->row("SELECT * FROM `tblpatient` WHERE Guid_patient=:Guid_patient", array('Guid_patient'=>$Guid_patient));
+                        //update patent table
+                        $patientData = array();
+
+                        //update mdl number
+
+                        //update account
+
+                        //update provider
+
+                        //update status log table
+                    }
+                }
+            } //check if checkbox is checked(from Select All checkboxes)
         }
     }
 }

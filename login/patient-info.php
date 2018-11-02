@@ -1755,7 +1755,7 @@ if(isset($_POST['edit_categories'])){
 	
 ?>
 <?php 
-    if(isset($_GET['status_log']) && $role=='Admin'){ 
+    if(isset($_GET['status_log']) && $role=='Admin' || isset($_GET['specimen'])){ 
         $title= ($_GET['status_log']=='add')?"Add Status Log":"Update Status Log";
         if(isset($_GET['log_id'])&&$_GET['log_id']!=""){
             $logRowQ = "SELECT * FROM tbl_mdl_status_log WHERE Guid_status_log=:Guid_status_log";

@@ -206,15 +206,16 @@ function getUserName($db, $userID){
     $userInfo = $db->row($query);
     
     if($userInfo['role']=='Patient'){
-        $query = "SELECT * FROM `tblpatient` WHERE Guid_user=:Guid_user";
+        $query = "SELECT aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname FROM `tblpatient` WHERE Guid_user=:Guid_user";
         $patientInfo = $db->row($query, array("Guid_user"=>$userInfo['Guid_user']));
+        
         if($patientInfo){
             $result = $patientInfo['firstname'];
         } else {
             $result = $_SESSION['user']['type'];
         }
     } elseif ($userInfo['role']=='Sales Rep' || $userInfo['role']=='Sales Manager') {
-        $query = "SELECT * FROM `tblsalesrep` WHERE Guid_user=:Guid_user";
+        $query = "SELECT first_name FROM `tblsalesrep` WHERE Guid_user=:Guid_user";
         $salesrepInfo = $db->row($query, array("Guid_user"=>$userInfo['Guid_user']));
         if($salesrepInfo){
             $result = $salesrepInfo['first_name'];
@@ -222,7 +223,7 @@ function getUserName($db, $userID){
             $result = $_SESSION['user']['type'];
         }
     } elseif ($userInfo['role']=='Physician') {
-        $query = "SELECT * FROM `tblprovider` WHERE Guid_user=:Guid_user";
+        $query = "SELECT first_name FROM `tblprovider` WHERE Guid_user=:Guid_user";
         $providerInfo = $db->row($query, array("Guid_user"=>$userInfo['Guid_user']));
         if($providerInfo){
             $result = $providerInfo['first_name'];
@@ -230,7 +231,7 @@ function getUserName($db, $userID){
             $result = $_SESSION['user']['type'];
         }
     } elseif ($userInfo['role']=='Admin') {
-        $query = "SELECT * FROM `tbladmins` WHERE Guid_user=:Guid_user";
+        $query = "SELECT first_name FROM `tbladmins` WHERE Guid_user=:Guid_user";
         $providerInfo = $db->row($query, array("Guid_user"=>$userInfo['Guid_user']));
         if($providerInfo){
             $result = $providerInfo['first_name'];
