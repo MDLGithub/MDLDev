@@ -641,8 +641,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 if (event.color) {
                     borderColor = "border: 2px solid " + event.color + " !important";
                 }
+
+                if(event.account && view.name == "basicDay" && event.title == "BRCA Day"){
+                    var accnum = event.account + " - ";
+                }else{
+                    var accnum = "";
+                }
                  
-                var modifiedName = sentenceCase((name == "") ? "Health Care Fair" : name);
+                var modifiedName = accnum + sentenceCase((name == "") ? "Health Care Fair" : name);
 
                 var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable" style="' + borderColor + '">' +
                         '<div class="fc-content evtcontent">' +
