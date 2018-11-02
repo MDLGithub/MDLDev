@@ -177,7 +177,7 @@ cursor:pointer;
 }
 
 #accordion li.active {
-  width: 80%;
+  width: 90%;
 }
 
 #form-print{
@@ -394,15 +394,25 @@ margin-left: 20px;
 margin-top: -5px;
 }
 
+/*iPad portrait*/
+@media only screen and 
+(max-device-width: 1024px) 
+and (min-device-width: 768px) 
+and (orientation: portrait){
+
+	.form-info-container .buttons{
+		top:-70px;
+	}
+
+
+}
 /*iPad landscape*/
 @media only screen and 
 (max-device-width: 1024px) 
 and (min-device-width: 768px) 
 and (orientation: landscape){
 
-  /*#accordion li.active{
-    width:65%;
-  }*/
+
   .modal-class{
     margin:15% auto;
   }

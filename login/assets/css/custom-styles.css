@@ -581,6 +581,16 @@ th.zip input{
     left: 20%;
 }
 
+
+.patientForms #dataTableHome thead {
+    position: relative;
+    margin-top: 0px;
+}
+
+.patientForms #dataTableHome tbody{
+    margin-top:0px;
+}
+
 .modalBlock .close {
     display: block;
     position: absolute;
@@ -1278,6 +1288,17 @@ and (orientation : landscape) {
 
     .dmdlRefresh{
         margin-right:0px !important;
+    }
+
+    
+    .modalBlock .contentBlock.patientForms-open{
+        width:94%;
+        left:3%;
+    }
+
+    .modalBlock .contentBlock.formdetails-open{
+        width:94%;
+        left: 3%;
     }
 
 }

@@ -102,7 +102,7 @@ $(document).ready(function(){
    $("#accordion #form-bar").click(function(){
     tabCounter = $( "#accordion #form-bar" ).index( this );
     $(activeItem).css('width', '50px');
-    $(this).parent().css('width', '80%');
+    $(this).parent().css('width', '90%');
 
     activeItem = $(this).parent();
 });
@@ -111,7 +111,7 @@ $(document).ready(function(){
       if(tabCounter != ($('ul#accordion li').length-1)){
         tabCounter ++;
         $(activeItem).css('width', '50px');
-        $(activeItem).next().css('width', '80%');
+        $(activeItem).next().css('width', '90%');
         activeItem = $(activeItem).next();
       }
  });
@@ -121,7 +121,7 @@ $(document).ready(function(){
       if(tabCounter > 0){
         tabCounter--;
        $(activeItem).css('width', '50px');
-       $(activeItem).prev().css('width', '80%');
+       $(activeItem).prev().css('width', '90%');
        activeItem = $(activeItem).prev();
      }
  });
@@ -132,7 +132,7 @@ $(document).ready(function(){
               if(tabCounter != ($('ul#accordion li').length-1)){
                 tabCounter ++;
                 $(activeItem).css('width', '50px');
-                $(activeItem).next().css('width', '80%');
+                $(activeItem).next().css('width', '90%');
                 activeItem = $(activeItem).next();
               }
             break;
@@ -140,7 +140,7 @@ $(document).ready(function(){
           if(tabCounter > 0){
                 tabCounter--;
                 $(activeItem).css('width', '50px');
-                $(activeItem).prev().css('width', '80%');
+                $(activeItem).prev().css('width', '90%');
                 activeItem = $(activeItem).prev();
               }
             break;
