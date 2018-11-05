@@ -682,7 +682,7 @@ $num_estimates = $qualify_requests;
                                                     $accountURL = SITE_URL . '/accounts.php?account_id='.$qualify_request['Guid_account'];
                                                     echo "<a href='".$accountURL."'>".$qualify_request['account_number']."</a>"; 
                                                     if($qualify_request['account_name']!=""){
-                                                    echo "<span class='account_name'>".ucwords(strtolower($qualify_request['account_name']))."</span>";
+                                                    echo "<span class='account_name'>".formatAccountName($qualify_request['account_name'])."</span>";
                                                     }
                                                 }
                                             ?>

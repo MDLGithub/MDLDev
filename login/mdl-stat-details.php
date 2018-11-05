@@ -249,7 +249,7 @@ require_once ('navbar.php');
                                 <?php } ?>
                                 
                                 <?php if(isFieldVisibleForStatus($db, 'account_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'account_name', $roleID)){ ?>
-                                <td><?php echo ucwords(strtolower($v['account_name'])); ?></td>                              
+                                <td><?php echo formatAccountName($v['account_name']); ?></td>                              
                                 <?php } ?>
                                 
                                 <?php if(isFieldVisibleForStatus($db, 'salesrep', $_GET['status_id']) && isFieldVisibleForRole($db, 'salesrep', $roleID)){ ?>
