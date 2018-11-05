@@ -1358,6 +1358,15 @@ function formatMoney($number){
     return $newNum;
 }
 
+function formatLastName($lastName){
+    $lastNameF = ucwords(strtolower($lastName));
+    if(substr($lastNameF, 0, 2)=='Mc'){
+        return substr_replace($lastNameF, strtoupper(substr($lastNameF, 2, 1)), 2, 1);
+    } else {
+        return $lastNameF;
+    }
+}
+
 /**
  * Get nested status names 
  * used in patient info screen 

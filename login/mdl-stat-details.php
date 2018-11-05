@@ -196,7 +196,7 @@ require_once ('navbar.php');
                                 <?php } ?>
                                 
                                 <?php if(isFieldVisibleForStatus($db, 'last_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'last_name', $roleID)){ ?>
-                                <td><a href="<?php echo $patientInfoUrl.$incomplateStr; ?>"><?php echo ucfirst(strtolower($v['lastname'])); ?></a></td>                              
+                                <td><a href="<?php echo $patientInfoUrl.$incomplateStr; ?>"><?php echo formatLastName($v['lastname']); ?></a></td>                              
                                 <?php } ?>
                                 
                                 <?php if(isFieldVisibleForStatus($db, 'account', $_GET['status_id']) && isFieldVisibleForRole($db, 'account', $roleID)){ ?>

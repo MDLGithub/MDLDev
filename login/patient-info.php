@@ -255,7 +255,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 <div class="error-text"><?php echo $message; ?></div>
                 <?php } ?>
                
-                <h2 class="text-center"><?php echo ucfirst(strtolower($qualifyResult['firstname']))." ".ucfirst(strtolower($qualifyResult['lastname']));?></h2>
+                <h2 class="text-center"><?php echo ucfirst(strtolower($qualifyResult['firstname']))." ".formatLastName($qualifyResult['lastname']);?></h2>
                 <a class="patient_forms">
                     <img src="./images/icon_forms.png" />
                     <p>Forms</p>
