@@ -799,7 +799,7 @@ if(isset($_POST['dmdlUpdate'])){
                             
                                 //update OR insert account
                                 $accountNum = $data['account']['number'];                            
-                                $checkAccount = checkedAccountData($accountNum);
+                                $checkAccount = checkedAccountData($db, $accountNum);
                                 if(!empty($checkAccount)){ //update    
                                     $whereAccount = array('Guid_account'=>$Guid_account);
                                     $updateAccount = updateTable($db, 'tblaccount', $accountData, $whereAccount);
@@ -810,7 +810,7 @@ if(isset($_POST['dmdlUpdate'])){
                                 //update OR insert provider
                                 if(isset($Guid_account) && $Guid_account!=''){
                                     $apiProviderData = $data['Physician'];
-                                    updateOrInsertProvider($accountNum,$Guid_account,$Guid_user,$apiProviderData);
+                                    updateOrInsertProvider($db,$accountNum,$Guid_account,$Guid_user,$apiProviderData);
                                 }
                                 
                                 
@@ -860,7 +860,7 @@ if(isset($_POST['dmdlUpdate'])){
                             
                             //update OR insert account
                             $accountNum = $data['account']['number'];                            
-                            $checkAccount = checkedAccountData($accountNum);
+                            $checkAccount = checkedAccountData($db,$accountNum);
                             if(!empty($checkAccount)){ //update    
                                 $whereAccount = array('Guid_account'=>$Guid_account);
                                 $updateAccount = updateTable($db, 'tblaccount', $accountData, $whereAccount);
@@ -871,7 +871,7 @@ if(isset($_POST['dmdlUpdate'])){
                             //update OR insert provider
                             if(isset($Guid_account) && $Guid_account!=''){
                                 $apiProviderData = $data['Physician'];
-                                updateOrInsertProvider($accountNum,$Guid_account,$Guid_user,$apiProviderData);
+                                updateOrInsertProvider($db,$accountNum,$Guid_account,$Guid_user,$apiProviderData);
                             }
                             
 

@@ -2168,7 +2168,7 @@ function get_stats_info_today($db, $statusID, $hasChildren=FALSE, $searchData=ar
     return $result;
 }
 
-function checkedAccountData($accountNum){
+function checkedAccountData($db, $accountNum){
     $checkAccount = $db->row("SELECT * FROM tblaccount WHERE account=:account", array('account'=>$accountNum));
     $accountData = array();
     if(!empty($checkAccount)){ 
@@ -2215,7 +2215,7 @@ function checkedAccountData($accountNum){
     return $accountData;
 }
 
-function updateOrInsertProvider($accountNum, $Guid_account, $Guid_user, $apiProviderData){    
+function updateOrInsertProvider($db,$accountNum, $Guid_account, $Guid_user, $apiProviderData){    
     //check provider   
     $checkProvider = $db->row("SELECT * FROM tblprovider WHERE account_id=:account_id", array('account_id'=>$accountNum)); 
     if(!empty($checkProvider)){ //update fields which are empty                                    
@@ -2333,7 +2333,7 @@ function dmdl_refresh($db){
             echo $domObj->get_xml_error();            
         } else {             
             $res = $domArr['CombinedResults']['GeneticResults'];
-            var_dump($res);
+            //var_dump($res);
             //admin db date format 1993-01-25           
             
             $Guid_MDLNumber = $res['Guid_MDLNumber'];
@@ -2374,9 +2374,10 @@ function dmdl_refresh($db){
        
                 $SGetPatient = $db->query($SQuery);                
                 
-                $sContent = "";  $sOption = "";
+                $sContent = "";  $sOption = ""; $matchedPatient=array();
                 if(!empty($SGetPatient)){
                     foreach ($SGetPatient as $k=>$v){
+                        $matchedPatient = $v;
                         $this_Guid_user = $v['Guid_user'];
                         $sqlQualify = "SELECT q.account_number FROM tbl_ss_qualify q WHERE Guid_user=:Guid_user ORDER BY q.`Date_created` DESC LIMIT 1 ";
                         $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$this_Guid_user)); 
@@ -2420,9 +2421,10 @@ function dmdl_refresh($db){
             
                     $SGetPatient = $db->query($SQuery);
 
-                    $sContent=""; $sOption=""; $mdl_num = "";
+                    $sContent=""; $sOption=""; $mdl_num = ""; 
                     if(!empty($SGetPatient)){
                         foreach ($SGetPatient as $k=>$v){
+                            $matchedPatient=$v;
                             $this_Guid_user = $v['Guid_user'];
                             $sqlQualify = "SELECT q.account_number FROM tbl_ss_qualify q WHERE Guid_user=:Guid_user ORDER BY q.`Date_created` DESC LIMIT 1 ";
                             $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$this_Guid_user));
