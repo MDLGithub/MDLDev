@@ -160,7 +160,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .top_performer_avg:before{
         background-image: url(assets/images/top_performer.png);
         background-size: 15px;
-        top: 5px;
+        top: -4px;
+        left: 46px;
     }
     .info_block h1 br:first-child {
         display: none;
@@ -186,8 +187,19 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         #detail, #summary{ width: 30%;}
         .top-buttons a.button.submit{ width: 38%; }
         .dropdown_hide{ display: none; }
-        .info_block h1{ width: 155px; line-height: 26px; }
+        .info_block h1{ width: 155px; line-height: 26px; text-align:left; padding-left:10px;}
         .sales-photo img { max-width: 55px; text-align: center; margin-left: 20px; padding: 6px 0px; }
+    }
+
+
+    @media only screen and (min-device-width : 768px) and (max-width : 1024px) 
+    and (orientation : landscape) { 
+
+        .top_performer_avg:before {
+            top: -4px;
+            left: 39px;
+            z-index: 10;
+        }
     }
 </style>
 <script>
