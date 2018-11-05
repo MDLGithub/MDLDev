@@ -2633,6 +2633,12 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number){
         $statusIDs[] = '1';  
         saveStatusLog($db, $statusIDs, $statusLogData);
         updateCurrentStatusID($db, $data['Guid_patient']);
+    }    
+    if(isset($statuses['SpecimenAccessioned']['Date'])){
+        $statusLogData['Date'] = $statuses['SpecimenAccessioned']['Date'];
+        $statusIDs[] = '2';  
+        saveStatusLog($db, $statusIDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     
 }
