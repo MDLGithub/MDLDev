@@ -1648,7 +1648,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
         
         function statImage(total, top){
             var img = "";
-            alert(parseInt(top/2));
+            //alert(parseInt(top/2));
             if( parseInt(total) < parseInt(top/2) ){
                 img = "below_avg";
             }else if( parseInt(total) < parseInt(top/2) && parseInt(total) >= parseInt(top/2) ){
