@@ -838,16 +838,49 @@ $(document).ready(function () {
     $('#dataTable thead tr:eq(0) th, #tableHeaderFixed  thead tr:eq(0) th').each( function (i) {
         if( !$(this).hasClass('noFilter') ){
             var title = $(this).text();
-            $(this).html( '<input class="dataTableFilterInput" type="text" placeholder="'+title+'" />' );
+            if($(this).hasClass('dropdownFilter')){
+                var isStatusColumn = (($(this).text() == 'Status') ? true : false);
+                    var select = $('<select class="dataTableFilterInput"><option value="">'+title+'</option></select>')
+                    .appendTo( $(this).empty() )
+                    .on( 'change', function () {
+                        var val = $(this).val();
+                        table.column( i )
+                            .search( val ? '^'+$(this).val()+'$' : val, true, false )
+                            .draw();
+                    } );
 
-            $( 'input', this ).on( 'keyup change', function () {
-                if ( table.column(i).search() !== this.value ) {
-                    table
-                        .column(i)
-                        .search( this.value )
-                        .draw();
-                }
-            } );
+                    // Get the Status values a specific way since the status is a anchor/image
+                    if (isStatusColumn) {
+                        var statusItems = [];
+                        /* ### IS THERE A BETTER/SIMPLER WAY TO GET A UNIQUE ARRAY OF <TD> data-filter ATTRIBUTES? ### */
+                        table.column( i ).nodes().to$().each( function(d, j){
+                            var thisStatus = $(j).attr("data-filter");
+                            if($.inArray(thisStatus, statusItems) === -1) statusItems.push(thisStatus);
+                        } );
+                        statusItems.sort();
+                        $.each( statusItems, function(i, item){
+                            select.append( '<option value="'+item+'">'+item+'</option>' );
+                        });
+                    }
+                    // All other non-Status columns (like the example)
+                    else {
+                        table.column( i ).data().unique().sort().each( function ( d, j ) {  
+                            select.append( "<option value='"+d+"'>"+d+"</option>" );
+                        } );	
+                    }
+            }else{
+            
+                $(this).html( '<input class="dataTableFilterInput" type="text" placeholder="'+title+'" />' );
+
+                $( 'input', this ).on( 'keyup change', function () {
+                    if ( table.column(i).search() !== this.value ) {
+                        table
+                            .column(i)
+                            .search( this.value )
+                            .draw();
+                    }
+                } );
+            }
         } 
     } );
     
