@@ -42,7 +42,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     q.other_insurance,q.account_number,q.Date_created as qDate,
                     q.provider_id, q.deviceid, q.source, 
                     CONCAT(prov.first_name,' ',prov.last_name) provider,
-                    p.*, aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname, aes_decrypt(lastname_enc, 'L@stn@m3&%#') as lastname, 
+                    p.*, aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname, 
+                    aes_decrypt(lastname_enc, 'L@stn@m3&%#') as lastname, 
                     u.email, u.marked_test ";
     
     if(isset($_GET['incomplete'])){
@@ -254,7 +255,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 <div class="error-text"><?php echo $message; ?></div>
                 <?php } ?>
                
-                <h2 class="text-center"><?php echo ucfirst(strtolower($qualifyResult['firstname']))." ".ucfirst(strtolower($qualifyResult['lastname']));?></h2>
+                <h2 class="text-center"><?php echo ucfirst(strtolower($qualifyResult['firstname']))." ".formatLastName($qualifyResult['lastname']);?></h2>
                 <a class="patient_forms">
                     <img src="./images/icon_forms.png" />
                     <p>Forms</p>
@@ -548,10 +549,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                     <tr>
                                         <td><?php echo date("n/j/Y", strtotime($v['logDate'])); ?></td> 
                                         <td>
-                                            <?php echo get_status_names( $db, $v['Guid_status'], $v['Guid_user'], $v['Log_group'] ); ?>
-                                            <?php //echo get_nested_statuses( $db, $v['Guid_status'], $v['Guid_user'], $v['Log_group'] ); ?>
-                                        
-                                        </td>   
+                                            <?php get_nested_statuses( $db, $v['Guid_status'], $v['Guid_user'], $v['Log_group'] ); ?>
+					</td>   
                                         <?php if($role=='Admin'){ ?>
                                         <td class="text-center">
                                             <div class="action-btns">

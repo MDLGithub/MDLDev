@@ -330,6 +330,9 @@ td{
     outline: none;
     font-weight: bold;
 }
+select.dataTableFilterInput{
+    min-width:190px;
+}
 
 .url_config_box h4{
     padding-bottom: 10px;
@@ -2377,4 +2380,14 @@ a.button.cancel.half{
 }
 .preloader img{
      margin-top: 20%;
+}
+.dropdownFilter.sorting_asc{
+     background-image: none!important;
+}
+
+@media (max-width: 1200px) {
+    .dmdlForm {
+        width: 100%!important;
+        margin: 0;
+    }    
 }

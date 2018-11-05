@@ -340,7 +340,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                                     $selected = (isset($_GET['account_id'])&&$_GET['account_id']==$v['Guid_account']) ? " selected='selected'" : "";
                                 $i++;
                                 ?>
-                                <option <?php echo $selected; ?> data-guid="<?php echo $v['Guid_account']; ?>" value="<?php echo $v['account']; ?>"><?php echo $v['account']." - ".ucwords(strtolower($v['name'])); ?></option>
+                                <option <?php echo $selected; ?> data-guid="<?php echo $v['Guid_account']; ?>" value="<?php echo $v['account']; ?>"><?php echo $v['account']." - ".formatAccountName($v['name']); ?></option>
                                 <?php  } ?>
                             </select>
                             
