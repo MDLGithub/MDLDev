@@ -1456,6 +1456,7 @@ function isStatusSelected($status, $selectedStatuses){
 }
 
 function saveStatusLog($db,$statusIDs, $statusLogData){
+    
     $i = 1;
     foreach ($statusIDs as $k=>$status){        
         $statusLogData ['Guid_status'] = $status;
@@ -2219,9 +2220,9 @@ function updateOrInsertProvider($db,$accountNum, $Guid_account, $Guid_user, $api
     //check provider   
     $checkProvider = $db->row("SELECT * FROM tblprovider WHERE account_id=:account_id", array('account_id'=>$accountNum)); 
     if(!empty($checkProvider)){ //update fields which are empty                                    
-        if(isset($checkProvider['Guid_provider']) && $checkProvider['Guid_provider']==''){
-            $Guid_provider = $checkProvider['Guid_provider'];
-        }
+        
+        $Guid_provider = $checkProvider['Guid_provider'];
+        
         if(isset($checkProvider['first_name']) && $checkProvider['first_name']==''){
             $providerData['first_name'] = $apiProviderData['FirstName'];
         }
@@ -2247,7 +2248,7 @@ function updateOrInsertProvider($db,$accountNum, $Guid_account, $Guid_user, $api
         $Guid_provider = $insertProvider['insertID'];
     }
 
-    return TRUE;
+    return $Guid_provider;
     
 }
 
@@ -2564,28 +2565,26 @@ function dmdl_refresh($db){
             }
             //statuses
             if(isset($res['DOS']) && !empty($res['DOS'])){
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenCollected][Date] value='".convertDmdlDate($res['DOS'])."' />";
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenCollected][Guid_status] value='1' />";
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenCollected][Date]' value='".convertDmdlDate($res['DOS'])."' />";
             }
             if(isset($res['Date_Accessioned']) && !empty($res['Date_Accessioned'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenAccessioned][Date]' value='".convertDmdlDate($res['Date_Accessioned'])."' />";
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenAccessioned][Guid_status] value='2' />";
             }
             if(isset($res['TestCode']) && !empty($res['TestCode'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenAccessioned][Test]' value='".$res['TestCode']."' />";
             }
                         
             if(isset($res['Genetic_Counseling_Status']) && !empty($res['Genetic_Counseling_Status'])){
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][Genetic_Counseling_Status]' value='".$res['Genetic_Counseling_Status']."' />";
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][Genetic_Counseling][Status]' value='".$res['Genetic_Counseling_Status']."' />";
             }
             if(isset($res['Genetic_Counseling_Status_Date']) && !empty($res['Genetic_Counseling_Status_Date'])){
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][Genetic_Counseling_Status_Date]' value='".convertDmdlDate($res['Genetic_Counseling_Status_Date'])."' />";
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][Genetic_Counseling][Date]' value='".convertDmdlDate($res['Genetic_Counseling_Status_Date'])."' />";
             }
             if(isset($res['Testing_Status']) && !empty($res['Testing_Status'])){
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][Laboratory_Testing_Status_Pending]' value='".$res['Testing_Status']."' />";
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][Laboratory_Testing_Status]' value='".$res['Testing_Status']."' />";
             }
             if(isset($res['Testing_Status_Date']) && !empty($res['Testing_Status_Date'])){
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][Laboratory_Testing_Status_Pending_Date]' value='".convertDmdlDate($res['Testing_Status_Date'])."' />";
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][Laboratory_Testing_Status_Date]' value='".convertDmdlDate($res['Testing_Status_Date'])."' />";
             }
             if(isset($res['DateTime_ResultStatus']) && !empty($res['DateTime_ResultStatus'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][Laboratory_Testing_Status_Complete_Date]' value='".convertDmdlDate($res['DateTime_ResultStatus'])."' />";
@@ -2608,6 +2607,35 @@ function dmdl_refresh($db){
     return $content;       
 }
 
+function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number){    
+    
+    $statusLogData = array(
+        'Guid_user' => $data['Guid_user'],
+        'Guid_patient'=> $data['Guid_patient'],
+        'Guid_account' => $data['Guid_account'],
+        'account' => $data['account'],
+        'Guid_salesrep' => $data['Guid_salesrep'],
+        'salesrep_fname' => $data['salesrep_fname'],
+        'salesrep_lname' => $data['salesrep_lname'],
+        'Recorded_by' => $_SESSION['user']['id'],  
+        'provider_id' => $data['provider_id'],
+        'deviceid' => $data['deviceid'],
+        'Date_created'=>date('Y-m-d h:i:s')
+    );
+    
+    updateTable($db, 'tblpatient', array('specimen_collected'=>'Yes'), array('Guid_patient'=>$data['Guid_patient']));
+    //update tbl_mdl_dmdl UpdateDatetime
+    updateTable($db, 'tbl_mdl_dmdl', array('UpdateDatetime'=> date('Y-m-d h:i:s')), array('MDLNumber'=>$dmdl_mdl_number));
+    
+    
+    if(isset($statuses['SpecimenCollected']['Date'])){
+        $statusLogData['Date'] = $statuses['SpecimenCollected']['Date'];
+        $statusIDs[] = '1';  
+        saveStatusLog($db, $statusIDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
+    }
+    
+}
 
 function updatePatientData($db,$data,$where){   
     $updateFields = "";

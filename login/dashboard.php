@@ -763,8 +763,96 @@ if(isset($_POST['dmdlUpdate'])){
                 
                 //if we have exact match
                 if($dmdlItem['status']=='yes'){
+                    $Guid_patient = $dmdlItem['Guid_patient']; //patient id from admin db
+                    $thisPatient = $db->row("SELECT * FROM `tblpatient` WHERE Guid_patient=:Guid_patient", array('Guid_patient'=>$Guid_patient));
+                    $Guid_user = $thisPatient['Guid_user'];    
+                    $Guid_patient = $thisPatient['Guid_patient'];
+                    //update patent table
+                    $patientData = array();
+                    if($thisPatient['Guid_dmdl_patient']==''){
+                        $patientData['Guid_dmdl_patient'] = $data['Guid_PatientId'];
+                    }
+                    if($thisPatient['Guid_dmdl_physician']==''){
+                        $patientData['Guid_dmdl_physician'] = $data['Guid_PatientId'];
+                    }
+                    if($thisPatient['firstname_enc']==''){
+                        $patientData['firstname_enc'] = $data['firstname'];
+                    }
+                    if($thisPatient['lastname_enc']==''){
+                        $patientData['lastname_enc'] = $data['lastname'];
+                    }
+                    if($thisPatient['dob']==''){
+                        $patientData['dob'] = $data['dob'];
+                    }
+                    if($thisPatient['physician_name']==''){
+                        $patientData['physician_name'] = $data['Physician']['FirstName']." ".$data['Physician']['LastName'];
+                    }
+                    if($thisPatient['insurance_name']==''){
+                        $patientData['insurance_name'] = $data['insurance_full'];
+                    }
+                    if(!empty($thisPatient)){
+                        $wherePatient = array('Guid_patient'=>$Guid_patient);
+                        $updatePatient = updatePatientData($db,$patientData,$wherePatient); 
+                    }
+
+                    //update mdl number
+                    $wherUserIs = array('Guid_user'=>$Guid_user);
+                    $thisMdl = $db->row("SELECT * FROM tbl_mdl_number WHERE Guid_user=:Guid_user", $wherUserIs);
+                    $mdlData['mdl_number']=$data['mdlnumber'];
+                    if(isset($thisMdl['mdl_number']) && $thisMdl['mdl_number'] ==''){
+                        $updateMDLNum = updateTable($db, 'tbl_mdl_number', $mdlData, $wherUserIs);
+                    } else {
+                        $mdlData['Guid_user']=$Guid_user;
+                        $insertMDLNum = insertIntoTable($db, 'tbl_mdl_number', $mdlData);
+                    }
+
+                    //update OR insert account
+                    $accountNum = $data['account']['number'];                            
+                    $checkAccount = checkedAccountData($db,$accountNum);
+                    if(!empty($checkAccount)){ //update
+                        $Guid_account = $checkAccount['account'];
+                        $whereAccount = array('Guid_account'=>$Guid_account);
+                        $updateAccount = updateTable($db, 'tblaccount', $accountData, $whereAccount);
+                    } else { //insert 
+                        $insertAccount = insertIntoTable($db, 'tblaccount', $accountData);
+                        $Guid_account = $insertAccount['insertID'];
+                    }
+
+                    //update OR insert provider
+                    if(isset($Guid_account) && $Guid_account!=''){
+                        $apiProviderData = $data['Physician'];
+                        $Guid_provider = updateOrInsertProvider($db,$accountNum,$Guid_account,$Guid_user,$apiProviderData);
+                    }
+
+                    $statuses = $_POST["dmdl"]["$mdlNum"]["statuses"];
+
+                    //insert suatuses
+                    $statusLogData = array(
+                        'Guid_user' =>  $Guid_user,
+                        'Guid_patient'=> $Guid_patient,
+                        'Guid_account' => $Guid_account,
+                        'account' => $accountNum,
+                        'Recorded_by' => $_SESSION['user']['id'],  
+                        'provider_id' => $Guid_provider,
+                        'Guid_salesrep' => "",
+                        'salesrep_fname' => "",
+                        'salesrep_lname' => "",
+                        'deviceid' => "",
+                        'Date_created'=>date('Y-m-d h:i:s')
+                    );
+                    $getSalesrep = $db->row("SELECT * FROM tblsalesrep srep
+                                            LEFT JOIN `tblaccountrep` accrep ON srep.`Guid_salesrep`=accrep.`Guid_salesrep`
+                                            WHERE accrep.`Guid_account`=$Guid_account");
+                    if(!empty($getSalesrep)){
+                        $statusLogData['Guid_salesrep'] = $getSalesrep['Guid_salesrep'];
+                        $statusLogData['salesrep_fname'] = $getSalesrep['first_name'];
+                        $statusLogData['salesrep_lname'] = $accountInfo['last_name'];
+                    }
+                    $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum);
 
                 }
+                
+                
                 
                 //if not exact match but we select Possible_Match
                 if($dmdlItem['status']=='no' || $dmdlItem['status']=='duplicate'){
@@ -796,7 +884,7 @@ if(isset($_POST['dmdlUpdate'])){
                                     'mdl_number'=>$dmdl_mdl_num
                                 );
                                 $insertMDLNum = insertIntoTable($db, 'tbl_mdl_number', $mdlData);
-                            
+
                                 //update OR insert account
                                 $accountNum = $data['account']['number'];                            
                                 $checkAccount = checkedAccountData($db, $accountNum);
@@ -806,19 +894,46 @@ if(isset($_POST['dmdlUpdate'])){
                                 } else { //insert 
                                     $Guid_account = insertIntoTable($db, 'tblaccount', $accountData);
                                 }
-                                
+
                                 //update OR insert provider
                                 if(isset($Guid_account) && $Guid_account!=''){
                                     $apiProviderData = $data['Physician'];
-                                    updateOrInsertProvider($db,$accountNum,$Guid_account,$Guid_user,$apiProviderData);
+                                    $Guid_provider = updateOrInsertProvider($db,$accountNum,$Guid_account,$Guid_user,$apiProviderData);
                                 }
                                 
-                                
+                                $statuses = $_POST["dmdl"]["$mdlNum"]["statuses"];
+                        
+                                //insert suatuses
+                                $statusLogData = array(
+                                    'Guid_user' =>  $Guid_user,
+                                    'Guid_patient'=> $Guid_patient,
+                                    'Guid_account' => $Guid_account,
+                                    'account' => $accountNum['account'],
+                                    'Recorded_by' => $_SESSION['user']['id'],  
+                                    'provider_id' => $Guid_provider,
+                                    'Guid_salesrep' => "",
+                                    'salesrep_fname' => "",
+                                    'salesrep_lname' => "",
+                                    'deviceid' => "",
+                                    'Date_created'=>date('Y-m-d h:i:s')
+                                );
+                                $getSalesrep = $db->row("SELECT * FROM tblsalesrep srep
+                                                        LEFT JOIN `tblaccountrep` accrep ON srep.`Guid_salesrep`=accrep.`Guid_salesrep`
+                                                        WHERE accrep.`Guid_account`=$Guid_account");
+                                if(!empty($getSalesrep)){
+                                    $statusLogData['Guid_salesrep'] = $getSalesrep['Guid_salesrep'];
+                                    $statusLogData['salesrep_fname'] = $getSalesrep['first_name'];
+                                    $statusLogData['salesrep_lname'] = $accountInfo['last_name'];
+                                }
+                                $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum);
+
+                            } 
                         } else { //update 
                             
                             $Guid_patient = $dmdlItem['Possible_Match']; //patient id from admin db
                             $thisPatient = $db->row("SELECT * FROM `tblpatient` WHERE Guid_patient=:Guid_patient", array('Guid_patient'=>$Guid_patient));
-                            $Guid_user = $thisPatient['Guid_user'];                        
+                            $Guid_user = $thisPatient['Guid_user'];    
+                            $Guid_patient = $thisPatient['Guid_patient'];
                             //update patent table
                             $patientData = array();
                             if($thisPatient['Guid_dmdl_patient']==''){
@@ -861,34 +976,48 @@ if(isset($_POST['dmdlUpdate'])){
                             //update OR insert account
                             $accountNum = $data['account']['number'];                            
                             $checkAccount = checkedAccountData($db,$accountNum);
-                            if(!empty($checkAccount)){ //update    
+                            if(!empty($checkAccount)){ //update
+                                $Guid_account = $checkAccount['account'];
                                 $whereAccount = array('Guid_account'=>$Guid_account);
                                 $updateAccount = updateTable($db, 'tblaccount', $accountData, $whereAccount);
                             } else { //insert 
-                                $Guid_account = insertIntoTable($db, 'tblaccount', $accountData);
+                                $insertAccount = insertIntoTable($db, 'tblaccount', $accountData);
+                                $Guid_account = $insertAccount['insertID'];
                             }
                             
                             //update OR insert provider
                             if(isset($Guid_account) && $Guid_account!=''){
                                 $apiProviderData = $data['Physician'];
-                                updateOrInsertProvider($db,$accountNum,$Guid_account,$Guid_user,$apiProviderData);
+                                $Guid_provider = updateOrInsertProvider($db,$accountNum,$Guid_account,$Guid_user,$apiProviderData);
                             }
                             
+                            $statuses = $_POST["dmdl"]["$mdlNum"]["statuses"];
+                        
+                            //insert suatuses
+                            $statusLogData = array(
+                                'Guid_user' =>  $Guid_user,
+                                'Guid_patient'=> $Guid_patient,
+                                'Guid_account' => $Guid_account,
+                                'account' => $accountNum,
+                                'Recorded_by' => $_SESSION['user']['id'],  
+                                'provider_id' => $Guid_provider,
+                                'Guid_salesrep' => "",
+                                'salesrep_fname' => "",
+                                'salesrep_lname' => "",
+                                'deviceid' => "",
+                                'Date_created'=>date('Y-m-d h:i:s')
+                            );
+                            $getSalesrep = $db->row("SELECT * FROM tblsalesrep srep
+                                                    LEFT JOIN `tblaccountrep` accrep ON srep.`Guid_salesrep`=accrep.`Guid_salesrep`
+                                                    WHERE accrep.`Guid_account`=$Guid_account");
+                            if(!empty($getSalesrep)){
+                                $statusLogData['Guid_salesrep'] = $getSalesrep['Guid_salesrep'];
+                                $statusLogData['salesrep_fname'] = $getSalesrep['first_name'];
+                                $statusLogData['salesrep_lname'] = $accountInfo['last_name'];
+                            }
+                            $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum);
 
-                        }
-                        
-                        
-                        
-                        //update status log table
-                        $statusLogData = array(
-                            'Guid_user' => $insertUser['insertID'],
-                            'Guid_patient' => $Guid_patient,
-                            'Guid_account' => $Guid_account,
-                            'account' => $accountNum['account'],
-                            'provider_id' => $Guid_provider
-                        );
-                        
-                        }
+                        }                        
                     }
                 } //check if checkbox is checked(from Select All checkboxes)
             }
