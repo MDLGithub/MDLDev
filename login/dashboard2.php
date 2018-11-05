@@ -697,39 +697,34 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     dataType: 'json',
                     url : 'ajaxHandlerEvents.php',
                     success : function(returndata){
-                        console.log(returndata);
-                        rgCntimg = statImage(returndata.reg);
-                        cmCntimg = statImage(returndata.com);
-                        subCntimg = statImage(returndata.sub);
-                        qCntimg = statImage(returndata.qua);
-                        bCntimg = statImage(returndata.brca);
-                        hcfCntimg = statImage(returndata.hcf);
-                        //console.log(cmCntimg);
-                        $("#meregcnt").text(returndata.reg).removeClass().addClass(rgCntimg).removeClass('decrease');
-                        $("#mecomcnt").text(returndata.com).removeClass().addClass(cmCntimg).removeClass('decrease');
-                        $("#mequalcnt").text(returndata.qua).removeClass().addClass(qCntimg).removeClass('decrease');
-                        $("#mesubcnt").text(returndata.sub).removeClass().addClass(subCntimg).removeClass('decrease');
-                        $("#mebrcacnt").text(returndata.brca).removeClass().addClass(bCntimg).removeClass('decrease');
-                        $("#meeventcnt").text(returndata.hcf).removeClass().addClass(hcfCntimg).removeClass('decrease');
+                        $("#meregcnt").text(returndata.reg).removeClass();
+                        $("#mecomcnt").text(returndata.com).removeClass();
+                        $("#mequalcnt").text(returndata.qua).removeClass();
+                        $("#mesubcnt").text(returndata.sub).removeClass();
+                        $("#mebrcacnt").text(returndata.brca).removeClass();
+                        $("#meeventcnt").text(returndata.hcf).removeClass();
                     }
                 });
-                
+
+                setTimeout(function(){
+                    regtotal = $("#meregcnt").text();
+                    regtop = $("#topregcnt").text();
+                    $("#meregcnt").addClass(statImage(regtotal, regtop));
+                    comtotal = $("#mecomcnt").text();
+                    comtop = $("#topcomcnt").text();
+                    $("#mecomcnt").addClass(statImage(comtotal, comtop));
+                    quatotal = $("#mequalcnt").text();
+                    quatop = $("#topqualcnt").text();
+                    $("#mequalcnt").addClass(statImage(quatotal, quatop));
+                    subtotal = $("#mesubcnt").text();
+                    subtop = $("#topsubcnt").text();
+                    $("#mesubcnt").addClass(statImage(subtotal, subtop));
+                }, 5000);
             },
         });
        
         function onlyUnique(value, index, self) { 
             return self.indexOf(value) === index;
-        }
-        function statImage(value){
-            var img = "";
-            if( value < 5 ){
-                img = "below_avg";
-            }else if( value < 10 && value >= 5 ){
-                img = "above_avg";
-            }else if( value >= 10 ){
-                img = "top_performer_avg";
-            }
-            return img;
         }
 
         // Whenever the user clicks on the "save" button
@@ -1649,6 +1644,19 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             $(".salesrep_dropdown").toggleClass("dropdown_hide");
             $(".info_block h1").toggleClass("hide");
             $(".info_block_arrow").toggleClass("info_block_arrow_show");
+        }
+        
+        function statImage(total, top){
+            var img = "";
+            alert(parseInt(top/2));
+            if( parseInt(total) < parseInt(top/2) ){
+                img = "below_avg";
+            }else if( parseInt(total) < parseInt(top/2) && parseInt(total) >= parseInt(top/2) ){
+                img = "above_avg";
+            }else if( parseInt(total) >= top/2 ){
+                img = "top_performer_avg";
+            }
+            return img;
         }
     </script>
 <?php require_once 'scripts.php'; ?>
