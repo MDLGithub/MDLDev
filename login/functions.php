@@ -1358,76 +1358,42 @@ function formatMoney($number){
     return $newNum;
 }
 
-
-
-function get_status_names($db, $Guid_status, $Guid_user, $Log_group){
-   
-    $statusStr = "";
-    $ids = "";
-    $statusIds = array();
-    //first $Guid_status is parent so we need it in first item of array
-    array_push($statusIds, $Guid_status);
-    
-    $nestedIDs = get_nested_status_ids($db, $Guid_status, $Guid_user, $Log_group);
-    
-    foreach($nestedIDs as $k=>$v){
-        array_push($statusIds, $v['Guid_status']);
-    }    
-   
-    if(!empty($statusIds)){
-        foreach ($statusIds as $k=>$v){
-            $ids .= $v.', ';
-        }
-        $ids = rtrim($ids, ', ');
-        //var_dump("SELECT Guid_status, status FROM tbl_mdl_status WHERE Guid_status IN($ids)");
-        $stQ = "SELECT Guid_status, status FROM tbl_mdl_status WHERE Guid_status IN($ids) ORDER BY parent_id, order_by";
-        
-        $statuses = $db->query($stQ);
-        foreach ($statuses as $k=>$v){
-            if($k==0 ){
-                $statusStr .= $v['status'];
-                if(count($statuses)>1){
-                    $statusStr .= ": ";
+/**
+ * Get nested status names 
+ * used in patient info screen 
+ * Test Status Change Log Table - status names
+ */
+function get_nested_statuses($db, $Guid_status, $Guid_user, $Log_group, $i=0){
+    $statQ = "SELECT sl.Guid_status, s.status FROM tbl_mdl_status_log sl 
+            LEFT JOIN tblpatient p ON sl.Guid_patient=p.Guid_user 
+            Left Join tbl_mdl_status s ON sl.Guid_status=s.Guid_status
+            WHERE sl.Guid_user=$Guid_user AND s.Guid_status=$Guid_status AND Log_group=$Log_group";
+    $status = $db->query($statQ);
+    $names = '';
+    if(!empty($status)){
+        foreach ($status as $k=>$v){   
+            $parent = $v['Guid_status'];
+            $children = $db->query("SELECT sl.Guid_status, s.status FROM tbl_mdl_status_log sl 
+                        LEFT JOIN tblpatient p ON sl.Guid_patient=p.Guid_user 
+                        Left Join tbl_mdl_status s ON sl.Guid_status=s.Guid_status
+                        WHERE sl.Guid_user=$Guid_user AND s.parent_id=$parent AND Log_group=$Log_group");
+            if($i==0 && !empty($children)){
+                echo $v['status'].': ';
+            } elseif ($i==1 && !empty($children) ) {
+                echo $v['status'].', ';
+            } else {
+                echo $v['status'];
+            }            
+            if(!empty($children)){
+                foreach ($children as $key => $value) {
+                    get_nested_statuses($db, $value['Guid_status'], $Guid_user, $Log_group, $i=1);
                 }
             } else {
-                $statusStr .= $v['status'].", ";
+                $i=2;
             }
         }
     }
-    $statusStr = rtrim($statusStr, ', ');
-    return $statusStr;
 }
-
-function get_nested_status_ids($db, $Guid_status, $Guid_user, $Log_group) {
-   
-    $statusIDS = array();
-    $statQ = "SELECT sl.Guid_status FROM tbl_mdl_status_log sl 
-                            LEFT JOIN tblpatient p ON sl.Guid_patient=p.Guid_user 
-                            Left Join tbl_mdl_status s ON sl.Guid_status=s.Guid_status
-                            WHERE sl.Guid_user=$Guid_user AND s.parent_id=$Guid_status AND Log_group=$Log_group";
-    //var_dump($statQ);
-    $statuses = $db->query($statQ);  
-    
-    if ( $statuses ) {         
-        array_push($statusIDS, $statuses['0']);
-        foreach ( $statuses as $status ) {  
-            $parentID = $status['Guid_status'];
-            $checkCildren = $db->query("SELECT sl.Guid_status FROM tbl_mdl_status_log sl 
-                            LEFT JOIN tblpatient p ON sl.Guid_patient=p.Guid_user 
-                            Left Join tbl_mdl_status s ON sl.Guid_status=s.Guid_status
-                            WHERE sl.Guid_user=$Guid_user  AND s.parent_id=$parentID  AND Log_group=$Log_group");      
-            
-      
-            if ( !empty($checkCildren) ) {
-                array_push($statusIDS, $checkCildren['0']);               
-                get_nested_status_ids( $db, $status['Guid_status'], $Guid_user, $Log_group);
-            }             
-        }
-    }   
-    return $statusIDS;
-    //return $statusesIDs;
-}
-
 
 function get_selected_log_dropdown($db, $Log_group, $parent="0") {
     $selectedStatuses = $db->query(
@@ -2186,6 +2152,90 @@ function get_stats_info_today($db, $statusID, $hasChildren=FALSE, $searchData=ar
     
     return $result;
 }
+
+function checkedAccountData($accountNum){
+    $checkAccount = $db->row("SELECT * FROM tblaccount WHERE account=:account", array('account'=>$accountNum));
+    $accountData = array();
+    if(!empty($checkAccount)){ 
+        $Guid_account = $checkAccount['Guid_account'];
+        $whereAccount = array('Guid_account'=>$Guid_account);
+        if(isset($checkAccount['account']) && $checkAccount['account']==''){
+            if(isset($checkAccount['account'])){
+                $accountData['account'] = $accountNum;
+            }
+        }
+        if(isset($checkAccount['name']) && $checkAccount['name']==''){
+            if(isset($data['account']['name'])){
+                $accountData['account'] = $data['account']['name'];
+            }
+        }
+        if(isset($checkAccount['address']) && $checkAccount['address']==''){
+             if(isset($data['account']['addr1'])){
+                $accountData['address'] = $data['account']['addr1'];
+            }  
+        }
+        if(isset($checkAccount['address2']) && $checkAccount['address2']==''){
+            if(isset($data['account']['addr2'])){
+                $accountData['address2'] = $data['account']['addr2'];
+            }
+        }
+        if(isset($checkAccount['city']) && $checkAccount['city']==''){
+            if(isset($data['account']['city'])){
+                $accountData['city'] = $data['account']['city'];
+            }
+        }
+        if(isset($checkAccount['state']) && $checkAccount['state']==''){
+            if(isset($data['account']['state'])){
+                $accountData['state'] = $data['account']['state'];
+            }
+        }
+        if(isset($checkAccount['zip']) && $checkAccount['zip']==''){
+            if(isset($data['account']['zip'])){
+                $accountData['zip'] = $data['account']['zip'];
+            }
+        }
+        return $accountData;
+    }
+    
+    return $accountData;
+}
+
+function updateOrInsertProvider($accountNum, $Guid_account, $Guid_user, $apiProviderData){    
+    //check provider   
+    $checkProvider = $db->row("SELECT * FROM tblprovider WHERE account_id=:account_id", array('account_id'=>$accountNum)); 
+    if(!empty($checkProvider)){ //update fields which are empty                                    
+        if(isset($checkProvider['Guid_provider']) && $checkProvider['Guid_provider']==''){
+            $Guid_provider = $checkProvider['Guid_provider'];
+        }
+        if(isset($checkProvider['first_name']) && $checkProvider['first_name']==''){
+            $providerData['first_name'] = $apiProviderData['FirstName'];
+        }
+        if(isset($checkProvider['last_name']) && $checkProvider['last_name']==''){
+            $providerData['last_name'] = $apiProviderData['LastName'];
+        }
+        if(isset($Guid_provider) && !empty($providerData)){
+            $updateProvider = updateTable($db, 'tblprovider', $providerData, array('Guid_provider'=>$Guid_provider));
+        }                                
+    } else { //insert
+        $providerData = array(
+            'Guid_user'=>$Guid_user,
+            'Guid_account'=>$Guid_account,
+            'account_id'=>$accountNum
+        );
+        if(isset($data['Physician']['FirstName'])){
+            $providerData['first_name'] = $apiProviderData['FirstName'];
+        }
+        if(isset($data['Physician']['LastName'])){
+            $providerData['last_name'] = $apiProviderData['LastName'];
+        }
+        $insertProvider = insertIntoTable($db, 'tblprovider', $providerData);
+        $Guid_provider = $insertProvider['insertID'];
+    }
+
+    return TRUE;
+    
+}
+
 /**
  * API Date format month-day-year ex. 07-31-2017
  * Converted date year-month-day ex. 2017-07-31
@@ -2253,7 +2303,6 @@ function dmdl_refresh($db){
                         </span>
                     </label>
                 </th>";
-    $content .= "<th></th>"; //create New
     $content .= "</tr></thead>";
     $content .= "<tbody>";
     foreach ( $dmdlResult as $k=>$v ){
@@ -2269,7 +2318,7 @@ function dmdl_refresh($db){
             echo $domObj->get_xml_error();            
         } else {             
             $res = $domArr['CombinedResults']['GeneticResults'];
-            //var_dump($res);
+            var_dump($res);
             //admin db date format 1993-01-25           
             
             $Guid_MDLNumber = $res['Guid_MDLNumber'];
@@ -2298,7 +2347,7 @@ function dmdl_refresh($db){
             if(empty($getPatient)){ //patient not match with dmdl data => ststus=no
                 $match = "<td class='mn no'>"
                         . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][status]' value='no' />"
-                        . "No</td>";    
+                        . "No</td>";  
                 
                 $SQuery = "SELECT Guid_patient,Guid_user,dob,"
                     . "AES_DECRYPT(firstname_enc, 'F1rstn@m3@_%') as firstname,"
@@ -2308,25 +2357,39 @@ function dmdl_refresh($db){
                     . "OR LOWER(CONVERT(AES_DECRYPT(lastname_enc, 'L@stn@m3&%#') USING 'utf8')) LIKE '%".strtolower($lastname)."%' "
                     . "OR dob='".convertDmdlDate($Date_Of_Birth)."'";
        
-                $SGetPatient = $db->query($SQuery);
-              
-                $sContent = ""; 
+                $SGetPatient = $db->query($SQuery);                
+                
+                $sContent = "";  $sOption = "";
                 if(!empty($SGetPatient)){
+                    foreach ($SGetPatient as $k=>$v){
+                        $this_Guid_user = $v['Guid_user'];
+                        $sqlQualify = "SELECT q.account_number FROM tbl_ss_qualify q WHERE Guid_user=:Guid_user ORDER BY q.`Date_created` DESC LIMIT 1 ";
+                        $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$this_Guid_user)); 
+                        $mdlNumberResult = $db->query("SELECT `mdl_number` FROM `tbl_mdl_number` WHERE Guid_user=:Guid_user", array('Guid_user'=>$this_Guid_user));
+                        $mdl_num = "";                         
+                        if(!empty($mdlNumberResult)){
+                            foreach ($mdlNumberResult as $key=>$val){
+                                $mdl_num .= $val['mdl_number'].'';
+                            }
+                        }
+                        $sOption .= "<option value='".$v['Guid_patient']."'>";                        
+                        $sOption .= ucwords(strtolower($v['firstname']." ".$v['lastname']));
+                        $sOption .= " (".date("m/d/Y", strtotime($matchedPatient['dob'])).") ";
+                        $sOption .= "Acct#: ".$qualifyResult['account_number'].", ";
+                        if($mdl_num!=''){
+                            $sOption .= "MDL#: ".$mdl_num.", ";
+                        }
+                        $sOption .= "Patient ID: ".$v['Guid_patient'];
+                        $sOption .= "</option>";
+                    }
+                    
                     $sContent .= "<select name='dmdl[".$Guid_MDLNumber."][Possible_Match]'>";
                     $sContent .= "<option value=''>Select From Possible Match</option>";
-                    foreach ($SGetPatient as $k=>$v){
-                        $sContent .= "<option value='".$v['Guid_patient']."'>";
-                        $sContent .= "ID: ".$v['Guid_patient'].", ";
-                        $sContent .= "First name: ".$v['firstname'].", ";
-                        $sContent .= "Last name: ".$v['lastname'].", ";
-                        $sContent .= "DOB:".$v['dob'];
-                        $sContent .= "</option>";
-                    }
+                    $sContent .= "<option value='create_new'>Create New</option>";
+                    $sContent .= $sOption;                    
                     $sContent .= "</select>";
                 }
                 $possibleM = "<td>".$sContent."</td>";
-                $createNew = "<td><input class='button' type='submit' name='dmdlCreateNew[".$Guid_MDLNumber."]' value='Create New'/></td>";
-                
             } else {                
                 if(count($getPatient)>1){ //duplicate records => status=duplicate                  
                     $match = "<td class='hasDuplicate'>"
@@ -2342,40 +2405,88 @@ function dmdl_refresh($db){
             
                     $SGetPatient = $db->query($SQuery);
 
-                    $sContent=""; 
+                    $sContent=""; $sOption=""; $mdl_num = "";
                     if(!empty($SGetPatient)){
+                        foreach ($SGetPatient as $k=>$v){
+                            $this_Guid_user = $v['Guid_user'];
+                            $sqlQualify = "SELECT q.account_number FROM tbl_ss_qualify q WHERE Guid_user=:Guid_user ORDER BY q.`Date_created` DESC LIMIT 1 ";
+                            $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$this_Guid_user));
+                            
+                            $mdlNumberResult = $db->query("SELECT `mdl_number` FROM `tbl_mdl_number` WHERE Guid_user=:Guid_user", array('Guid_user'=>$this_Guid_user));
+                            
+                            if(!empty($mdlNumberResult)){
+                                foreach ($mdlNumberResult as $key=>$val){
+                                    $mdl_num .= $val['mdl_number'].'';
+                                }
+                            }
+                            
+                            $sOption .= "<option value='".$v['Guid_patient']."'>";                        
+                            $sOption .= ucwords(strtolower($v['firstname']." ".$v['lastname']));
+                            $sOption .= " (".date("m/d/Y", strtotime($matchedPatient['dob'])).") ";
+                            $sOption .= "Acct#: ".$qualifyResult['account_number'].", ";
+                            if($mdl_num!=''){
+                                $sOption .= "MDL#: ".$mdl_num.", ";
+                            }
+                            $sOption .= "Patient ID: ".$v['Guid_patient'];
+                            $sOption .= "</option>";
+                        }
+                        
                         $sContent .= "<select name='dmdl[".$Guid_MDLNumber."][Possible_Match]'>";
                         $sContent .= "<option value=''>Select From Possible Match</option>";
-                        foreach ($SGetPatient as $k=>$v){
-                            $sContent .= "<option value='".$v['Guid_patient']."'>";
-                            $sContent .= "ID: ".$v['Guid_patient'].", ";
-                            $sContent .= "First name: ".$v['firstname'].", ";
-                            $sContent .= "Last name: ".$v['lastname'].", ";
-                            $sContent .= "DOB:".$v['dob'];
-                            $sContent .= "</option>";
-                        }
+                        $sContent .= "<option value='create_new'>Create New</option>";
+                        $sContent .= $sOption;
                         $sContent .= "</select>";
                     }
                     $possibleM = "<td>".$sContent."</td>";
-                    $createNew = "<td><input class='button' type='submit' name='dmdlCreateNew[".$Guid_MDLNumber."]' value='Create New'/></td>";
                 }else{ 
                     //update mdl# for this perfect match => status=yes 
                     $matchedPatient = $getPatient['0'];
                     //update the Physician MDL ID Guid_dmdl_patient
                     $update_dmdl_patient = updateTable($db, 'tblpatient', array('Guid_dmdl_patient'=>$res['Guid_PatientId'], 'Guid_dmdl_physician'=>$res['GUID_PhysicianID']), array('Guid_patient'=>$matchedPatient['Guid_patient']));
                     
+                    if(isset($matchedPatient['Guid_user'])){
+                        $this_Guid_user = $matchedPatient['Guid_user'];
+                        $sqlQualify = "SELECT q.account_number FROM tbl_ss_qualify q WHERE Guid_user=:Guid_user ORDER BY q.`Date_created` DESC LIMIT 1 ";
+                        $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$this_Guid_user));
+                        if(isset($qualifyResult['account_number'])&&$qualifyResult['account_number']!=''){
+                            $acctLink = '&account='.$qualifyResult['account_number'];
+                        }
+                        $mdlNumberResult = $db->query("SELECT `mdl_number` FROM `tbl_mdl_number` WHERE Guid_user=:Guid_user", array('Guid_user'=>$this_Guid_user));
+                        $mdl_num = '';
+                        if(!empty($mdlNumberResult)){
+                            foreach ($mdlNumberResult as $key => $val) {
+                                 $mdl_num .= $val['mdl_number'].'';
+                            }                           
+                        }
+                    }
+                    $patientInfoLink = "<a href='".SITE_URL."/patient-info.php?patient=".$matchedPatient['Guid_user'].$acctLink."'>";                        
+                    $patientInfoLink .= ucwords(strtolower($matchedPatient['firstname']." ".$matchedPatient['lastname']));
+                    $patientInfoLink .= " (".date("m/d/Y", strtotime($matchedPatient['dob'])).") ";
+                    if(isset($qualifyResult['account_number'])&&$qualifyResult['account_number']!=''){
+                        $patientInfoLink .= "Acct#: ".$qualifyResult['account_number'].", ";
+                    }
+                    if($mdl_num!=''){
+                        if($Guid_MDLNumber == $mdl_num){
+                            $patientInfoLink .= "MDL#: ".$mdl_num.", ";
+                        }else{
+                            $patientInfoLink .= "<span class='color-red'>MDL#: ".$mdl_num."</span>, ";
+                        }
+                    }
+                    $patientInfoLink .= "Patient ID: ".$matchedPatient['Guid_patient'];
+                    $patientInfoLink .= "</a>";
+
+                    
                     $match = "<td class='mn yes'>"
                             . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][status]' value='yes' />"
                             . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Guid_patient]' value='".$getPatient['0']['Guid_patient']."' />"
                             . "Yes</td>";  
-                    $possibleM = "<td></td>";
-                    $createNew = "<td></td>";
+                    $possibleM = "<td>".$patientInfoLink."</td>";
                 }
             }
             
             $content .= $match; //match status=>yes,no,duplicate             
-            $content .= "<td>$firstname</td>";
-            $content .= "<td>$lastname</td>";
+            $content .= "<td>".ucwords(strtolower($firstname))."</td>";
+            $content .= "<td>".ucwords(strtolower($lastname))."</td>";
             $content .= "<td>$dob</td>"; 
             $content .= "<td>$Guid_MDLNumber</td>";
             $content .= "<td>$accountNumber</td>";            
@@ -2383,8 +2494,7 @@ function dmdl_refresh($db){
             
             $content.= "<td class='text-center'>"
                     . "<input name='dmdl[selected][".$Guid_MDLNumber."]' type='checkbox' class='checkboxSelect' />"
-                    . "</td>";
-            $content .= $createNew;
+                    . "</td>";            
             
             //hidden inputs            
             if(isset($res['Guid_MDLNumber']) && !empty($res['Guid_MDLNumber'])){
@@ -2437,15 +2547,15 @@ function dmdl_refresh($db){
             }
             //statuses
             if(isset($res['DOS']) && !empty($res['DOS'])){
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenCollected][date]' value='".convertDmdlDate($res['DOS'])."' />";
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenCollected][Guid_status]' value='1' />";
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenCollected][Date] value='".convertDmdlDate($res['DOS'])."' />";
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenCollected][Guid_status] value='1' />";
             }
             if(isset($res['Date_Accessioned']) && !empty($res['Date_Accessioned'])){
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenAccessioned]['date]' value='".convertDmdlDate($res['Date_Accessioned'])."' />";
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenAccessioned]['Guid_status]' value='2' />";
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenAccessioned][Date]' value='".convertDmdlDate($res['Date_Accessioned'])."' />";
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenAccessioned][Guid_status] value='2' />";
             }
             if(isset($res['TestCode']) && !empty($res['TestCode'])){
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenCollectedTestCode]' value='".$res['TestCode']."' />";
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenAccessioned][Test]' value='".$res['TestCode']."' />";
             }
                         
             if(isset($res['Genetic_Counseling_Status']) && !empty($res['Genetic_Counseling_Status'])){

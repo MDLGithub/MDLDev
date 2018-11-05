@@ -1020,7 +1020,7 @@ if(isset($_POST['dmdlCreateNew'])){
             "aoColumnDefs": [
               { 
                   "bSortable": false, 
-                  "aTargets": [ 5,6,7 ] } 
+                  "aTargets": [ 6,7 ] } 
             ]
         });  
     }

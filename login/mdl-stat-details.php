@@ -36,8 +36,10 @@ $initLabels = array(
 );
 
     $initQ = 'SELECT s.Guid_status, s.Guid_user, s.Date, s.Date_created, p.Guid_patient, 
-        aes_decrypt(p.firstname_enc, "F1rstn@m3@_%") as firstname, aes_decrypt(p.lastname_enc, "L@stn@m3&%#") as lastname, 
-        a.Guid_account, a.account AS account_number, a.name AS account_name, a.address AS location,  
+        aes_decrypt(p.firstname_enc, "F1rstn@m3@_%") as firstname, 
+        aes_decrypt(p.lastname_enc, "L@stn@m3&%#") as lastname, 
+        a.Guid_account, a.account AS account_number, 
+        a.name AS account_name, a.address AS location,  
         num.mdl_number,
         CONCAT(srep.`first_name`, " " ,srep.`last_name`) AS salesrep  
         FROM `tbl_mdl_status_log` s 

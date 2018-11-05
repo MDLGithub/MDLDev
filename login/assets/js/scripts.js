@@ -40,7 +40,6 @@ $(document).ready(function () {
     $('.datepicker_from').not('.hasDatePicker').datepicker(opt);
     $('.datepicker_to').not('.hasDatePicker').datepicker(opt);
     $('.phone_us').mask('(000) 000-0000');
-   // $('.h-filters .date').mask("00/00/0000", {placeholder: "__/__/____"});
     $('.h-filters .stat_mdl_number').mask("0000000");
     
     $('#file.accountLogoInput').inputFileText( {
@@ -822,12 +821,12 @@ $(document).ready(function () {
      * @param {type} imageName
      * @returns 
      */
-    function setImage(selectorDiv, attr, imageName, uploadUrl=""){
+    function setImage(selectorDiv, attr, imageName, uploadUrl){
         if(uploadUrl==""){
             uploadUrl = baseUrl+"/../images/practice/";
         }
         $(selectorDiv).html("");
-        $(selectorDiv).prepend('<img '+attr+' src="'+uploadUrl+imageName+'" />')
+        $(selectorDiv).prepend('<img '+attr+' src="'+uploadUrl+imageName+'" />');
     }
     
     
@@ -1136,12 +1135,12 @@ $(document).ready(function () {
  * not working for iPad
  * check this option
  */
-$(document).click(function(e) { 
-
-    var ele = $(e.toElement); 
-    if (!ele.hasClass("hasDatepicker") && !ele.hasClass("ui-datepicker") && !ele.hasClass("ui-icon") && !$(ele).parent().parents(".ui-datepicker").length)
-       $(".hasDatepicker").datepicker("hide"); 
-});
+//$(document).click(function(e) { 
+//
+//    var ele = $(e.toElement); 
+//    if (!ele.hasClass("hasDatepicker") && !ele.hasClass("ui-datepicker") && !ele.hasClass("ui-icon") && !$(ele).parent().parents(".ui-datepicker").length)
+//       $(".hasDatepicker").datepicker("hide"); 
+//});
 
 
 /**
