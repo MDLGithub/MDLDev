@@ -429,6 +429,10 @@ and (orientation: landscape){
   #form-option-table tbody{
     margin-top:0px;
   }
+
+  #patient_brca_forms .contentBlock{
+    top: 8%;
+  }
 }
 
 /*iPad Pro Portrait*/

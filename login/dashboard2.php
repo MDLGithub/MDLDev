@@ -423,7 +423,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 $('.tooltipevent').remove();
             },
             eventRender: function (event, element, view) {
-
                 var today = new Date();
                 var currentDate = today.getDate();
                 var eventDate = $.fullCalendar.formatDate(event.start, "DD");
@@ -1246,7 +1245,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 
             <div class="container"> 
                 <div id="stats_header"> 
-                <div id="performance_section">
+                <div id="performance_section" class="col-md-8">
                 <div class="header week_stats" style="font-weight:bold;">    
                     <p>This Week's Stats</p>
                     <p class="top_performer">&#9726; Top Performer</p>
@@ -1280,7 +1279,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 </div>
                 </div>
              </div>
-                <div class="row info_block_row">
+                <div class="row info_block_row col-md-4">
                         <div class = "info_block" style="min-width: 340px;">
                             <?php if($role == 'Sales Rep'): ?>
                                 <div class="sales-photo">

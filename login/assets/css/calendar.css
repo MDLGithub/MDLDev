@@ -1246,6 +1246,7 @@ Author:Gabriela Johnson;
 
 
 
+
 .fc-toolbar.fc-header-toolbar{
 
     width: 65%;
@@ -1267,8 +1268,6 @@ Author:Gabriela Johnson;
     border-radius:20px;
 
     text-align:center;
-
-    min-width:900px;
 
     box-shadow: 0 4px 12px -2px #4e7096;
 
@@ -1767,6 +1766,10 @@ g g g text{
 
   }
 
+
+  .fc-toolbar.fc-header-toolbar{
+    width:66.6%;
+  }
 
 
 }

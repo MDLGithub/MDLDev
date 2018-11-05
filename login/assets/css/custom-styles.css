@@ -1292,7 +1292,6 @@ and (orientation : landscape) {
     .dmdlRefresh{
         margin-right:0px !important;
     }
-
     
     .modalBlock .contentBlock.patientForms-open{
         width:94%;
@@ -1302,6 +1301,18 @@ and (orientation : landscape) {
     .modalBlock .contentBlock.formdetails-open{
         width:94%;
         left: 3%;
+    }
+
+    a[title = "Edit Patient Info"] {
+        margin-left: -10px;
+    }
+
+    #deductable-log {
+        width: 100%;
+    }
+
+    #revenue {
+        width: 100%;
     }
 
 }
@@ -1436,11 +1447,19 @@ and (orientation : portrait) {
         position:relative;
         display:table;       
         width:100%;
-        top:62px;
+
     }
 
     #form-option-table tbody{
         width:100%;
+    }
+
+    #manage-status-modal .contentBlock .content {
+        padding: 10px 5px;
+    }
+
+    #patient-info-box h5.notes{
+        padding-top:20px;
     }
 
 }
