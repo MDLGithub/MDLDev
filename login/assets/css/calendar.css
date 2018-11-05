@@ -1413,7 +1413,7 @@ g g g text{
 
 #performance_chart .row{
 
-  min-width: 900px;
+  /*min-width: 900px;*/
 
   display:flex;
 
@@ -1536,6 +1536,8 @@ g g g text{
 #performance_section{
 
   flex-grow:2;
+
+  padding:0;
 
 }
 
@@ -1859,7 +1861,8 @@ g g g text{
 
     .info_block_row{
 
-      padding-left:1%;
+      padding-left: 10px;
+      padding-right: 0px;
 
     }
 
