@@ -926,6 +926,7 @@ function getProviderSubmitedCount($db, $Guid_provider ){
     
 }
 
+
 /**
  * 
  * @param type $db
