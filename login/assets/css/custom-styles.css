@@ -2384,3 +2384,10 @@ a.button.cancel.half{
 .dropdownFilter.sorting_asc{
      background-image: none!important;
 }
+
+@media (max-width: 1200px) {
+    .dmdlForm {
+        width: 100%!important;
+        margin: 0;
+    }    
+}
