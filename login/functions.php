@@ -1366,6 +1366,12 @@ function formatLastName($lastName){
         return $lastNameF;
     }
 }
+function formatAccountName($accountName){
+    $accountName = ucwords(strtolower($accountName));
+    $accountName = str_replace("Ob/gyn","OB/GYN",$accountName);
+    $accountName = str_replace("Obgyn","OB/GYN",$accountName);
+    return $accountName;
+}
 
 /**
  * Get nested status names 

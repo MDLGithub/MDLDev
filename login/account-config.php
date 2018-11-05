@@ -519,7 +519,7 @@ require_once ('navbar.php');
                                     </td>
                                 <?php } ?>
                                 <?php if(isFieldVisibleByRole($isNameView, $roleID)) {?>
-                                    <td><?php echo ucwords(strtolower($v['name'])); ?></td>
+                                    <td><?php echo formatAccountName($v['name']); ?></td>
                                 <?php } ?> 
                                 <?php if(isFieldVisibleByRole($isCityView, $roleID)) {?>
                                     <td><?php echo $v['city']; ?></td>

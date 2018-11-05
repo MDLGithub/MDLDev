@@ -286,7 +286,7 @@ $accountProviders = '';
                                      <?php
                                          foreach ($accounts as $k=>$v){
                                              $isAccount = ( isset($an) && ($an==$v['account']) ) ? ' selected' : '';  ?>
-                                         <option <?php echo $isAccount; ?> value="<?php echo $v['account'];?>" ><?php echo $v['account']." - ".ucwords(strtolower($v['name']));?></option>
+                                        <option <?php echo $isAccount; ?> value="<?php echo $v['account'];?>" ><?php echo $v['account']." - ".formatAccountName($v['name']);?></option>
                                      <?php } ?>
                                    </select>
                                  </div>                      
