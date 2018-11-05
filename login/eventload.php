@@ -4,8 +4,9 @@ require_once ('functions_event.php');
 
 $salesRepId = isset($_REQUEST['salerepId'])? $_REQUEST['salerepId'] : 0;
 $accountId = isset($_REQUEST['accountId'])? $_REQUEST['accountId'] : 0;
+$reqdashboard = isset($_REQUEST['reqdashboard'])? $_REQUEST['reqdashboard'] : 0;
 
-$result = getEventSchedule($db,$salesRepId,$accountId,0);
+$result = getEventSchedule($db,$salesRepId,$accountId,$reqdashboard, $_GET['start'], $_GET['end']);
 
 foreach($result as $row)
 {
