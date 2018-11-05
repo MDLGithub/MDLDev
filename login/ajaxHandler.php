@@ -484,7 +484,7 @@ function get_account_correlations($db, $id, $name, $selectedIds){
     $accountsHtml = '<option value="">Account</option>';
     foreach ($accounts as $k=>$v){
        $selected = ($id===$v['account']) ? " selected='selected'": "";
-       $accountsHtml .= '<option '.$selected.' value="'.$v['account'].'">'.$v['account'] ." - ". $v['name'].'</option>';
+       $accountsHtml .= '<option '.$selected.' value="'.$v['account'].'">'.$v['account'] ." - ". formatAccountName($v['name']).'</option>';
     }
 
 
@@ -494,93 +494,6 @@ function get_account_correlations($db, $id, $name, $selectedIds){
 			'id' => $id,
 			'name'=>$name,
 			'accounts_html'=>$accountsHtml,
-			'provider_html'=>$providerHtml,
-			'salesrep_html'=>$salesrepHtml
-		    ));
-    exit();
-}
-
-function get_account_correlations__($db, $id, $name, $selectedIds){
-
-    $queryAccounts = "";
-    $queryProviders = "SELECT * FROM tblprovider";
-    $querySalesreps = "SELECT tblaccount.*, tblsalesrep.* FROM tblaccount "
-		    . "LEFT JOIN tblaccountrep ON tblaccount.Guid_account = tblaccountrep.Guid_account "
-		    . "LEFT JOIN tblsalesrep ON tblsalesrep.Guid_salesrep=tblaccountrep.Guid_salesrep ";
-
-    $whereProvider = array();
-    $whereSalesRep = array();
-    $whereAccount  = array();
-    $accountID = "";
-    $providerID ="";
-    $salesRepID = "";
-
-    if($name=='account'){
-	$accountID = $id;
-	if($id != ""){
-	    $querySalesreps .= " WHERE tblaccount.account=:id AND tblsalesrep.Guid_user != ''";
-	    $queryProviders .= " WHERE account_id=:id";
-	    $whereProvider = array("id"=>$id);
-	} else {
-	    $querySalesreps = "SELECT * FROM tblsalesrep";
-	}
-	$whereSalesRep = array("id"=>$id);
-    }
-
-    if($name=='provider'){
-	if($id != ""){
-	    $providerID = $id;
-	    $queryAccounts  = "SELECT a.account FROM tblaccount a "
-			    . "LEFT JOIN tblprovider p ON a.account = p.account_id "
-			    . "WHERE p.Guid_provider=:id";
-	    $whereAccount = array("id"=>$id);
-	    $account = $db->row($queryAccounts, $whereAccount);
-	    $accountID = $account['account'];
-	    $queryProviders .= " WHERE account_id=:id";
-	    $querySalesreps .= " WHERE tblaccount.account=:id AND tblsalesrep.Guid_user != ''";
-	    $whereProvider = array("id"=>$accountID);
-	    $whereSalesRep = array("id"=>$accountID);
-	} else {
-	    $querySalesreps = "SELECT * FROM tblsalesrep";
-	    $queryProviders = "SELECT * FROM tblprovider";
-	    $whereProvider = array();
-	    $whereSalesRep = array();
-	}
-    }
-
-    if($name=='salesrep'){
-	$salesRepID = $id;
-	if($id != ""){
-	    $querySalesreps .= " WHERE tblsalesrep.Guid_user=:id AND tblsalesrep.Guid_user != ''";
-	    $whereSalesRep = array("id"=>$id);
-	    $salesreps = $db->row($querySalesreps, $whereSalesRep);
-	    $accountID = $salesreps['account'];
-	    $queryProviders .= " WHERE account_id=:id ";
-	    $whereProvider = array("id"=>$accountID);
-	}
-    }
-
-    $providers = $db->query($queryProviders, $whereProvider);
-    $providerHtml = '<option value="">Provider</option>';
-    foreach ($providers as $k=>$v){
-       $selected = ($providerID==$v['Guid_provider']) ? " selected='selected'": "";
-       $providerHtml .= '<option '.$selected.' value="'.$v['Guid_provider'].'">'.$v['first_name'].' '.$v['last_name'].'</option>';
-    }
-    $querySalesreps .= ' GROUP BY tblsalesrep.Guid_user';
-
-    $salesreps = $db->query($querySalesreps, $whereSalesRep);
-    $salesrepHtml = '<option value="">Genetic Consultant</option>';
-    foreach ($salesreps as $k=>$v){
-       $selected = ($salesRepID==$v['Guid_user']) ? " selected='selected'": "";
-       $salesrepHtml .= '<option '.$selected.' value="'.$v['Guid_user'].'">'.$v['first_name'].' '.$v['last_name'].'</option>';
-    }
-
-    echo json_encode( array(
-			'id' => $id,
-			'name'=>$name,
-			'accountID'=>$accountID,
-			'providerID'=>$providerID,
-			'salesRepID'=>$salesRepID,
 			'provider_html'=>$providerHtml,
 			'salesrep_html'=>$salesrepHtml
 		    ));

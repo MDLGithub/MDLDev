@@ -319,8 +319,8 @@ require_once ('navbar.php');
                             ?>
                             <tr class="<?php echo $trClass;?>">
                                 <td><?php echo $user['Guid_user']; ?></td>
-                                <td><?php echo $user['first_name']; ?> </td>
-                                <td><?php echo $user['last_name']; ?></td>
+                                <td><?php echo ucfirst(strtolower($user['first_name'])); ?> </td>
+                                <td><?php echo formatLastName($user['last_name']); ?></td>
                                 <td><?php echo $user['email']; ?></td>
                                 <td><?php echo isset($user['role'])?$user['role']:'Patient'; ?></td>
                                 <td class="text-center fs-20">

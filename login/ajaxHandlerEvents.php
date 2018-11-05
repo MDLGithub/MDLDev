@@ -478,7 +478,7 @@ if(isset($_POST['action']) && $_POST['action'] == 'tableStats'){
 
 
 /* Get Dynamic Consultant List */
-if(isset($_GET['action']) && $_GET['srepids'] != 0 && $_GET['action'] == 'getconsultant'){
+if(isset($_GET['action']) && isset($_GET['srepids']) && $_GET['srepids'] != 0 && $_GET['action'] == 'getconsultant'){
     $ids = $_GET['srepids'];
     //print_r($ids);
     $q = "SELECT t.Guid_salesrep, CONCAT(t.first_name,' ',t.last_name) as sNames FROM tblsalesrep t WHERE t.Guid_salesrep IN ($ids)  ";
@@ -507,7 +507,8 @@ if(isset($_GET['_']) && isset($_GET['start'])){
           'qualifiedCnt' => $row['qualifiedCnt'],
           'completedCnt' => $row['completedCnt'],
           'submittedCnt'   => $row['submittedCnt'], 
-          'salesrepid' => $row['salesrepid'] 
+          'salesrepid' => $row['salesrepid'],
+          'account' => $row['account']
           );
     }
 
@@ -516,12 +517,61 @@ if(isset($_GET['_']) && isset($_GET['start'])){
 }
 
 
-if(isset($_POST['action']) && $_POST['action'] = 'genconValues' && isset($_POST['eDate']) && isset($_POST['sDate'])){
+if(isset($_POST['action']) && $_POST['action'] == 'genconValues' && isset($_POST['eDate']) && isset($_POST['sDate'])){
     $query = "SELECT e.salesrepid, CONCAT(l.salesrep_fname, ' ' ,l.salesrep_lname) as snames "
             . "FROM tblevents e "
             . "left join tbl_mdl_status_log l on l.Guid_salesrep = e.salesrepid "
             . "WHERE DATE(e.start_event) between DATE(:sDate) and DATE(:eDate) "
             . "group by e.salesrepid ";
     $result = $db->query($query, array('sDate' => $_POST['sDate'], 'eDate'=>$_POST['eDate']));
+    echo json_encode($result);
+}
+
+if( isset($_POST['action']) && $_POST['action'] == 'eventStats'){
+
+    if($_POST['acc'] != null && $_POST['acc'] != '' && $_POST['acc'] != 0){
+        $accounts = $_POST['acc'];
+        $query = "SELECT count(*) "
+                . ",SUM(IF(l.Guid_status=28, 1, 0)) as regCount "
+                . ",SUM(IF(l.Guid_status=29, 1, 0)) as quaCount "
+                . ",SUM(IF(l.Guid_status=36, 1, 0)) as comCount "
+                . ",SUM(IF(l.Guid_status=1, 1, 0)) as subCount "
+                . "FROM tbl_mdl_status_log l "
+                . "inner join tblevents e on e.accountid = l.Guid_account and DATE(l.Date) = DATE(e.start_event) "
+                . "inner JOIN tbluser u ON l.Guid_user = u.Guid_user "
+                . "WHERE DATE(l.Date) between DATE(:startdate) and DATE(:enddate) and u.marked_test='0' "
+                . "AND l.account IN (".$accounts.") ";
+    }else{
+        $query = "SELECT count(*)
+                ,SUM(IF(l.Guid_status=28, 1, 0)) as regCount
+                ,SUM(IF(l.Guid_status=29, 1, 0)) as quaCount
+                ,SUM(IF(l.Guid_status=36, 1, 0)) as comCount
+                ,SUM(IF(l.Guid_status=1, 1, 0)) as subCount
+                FROM tbl_mdl_status_log l
+                inner join tblevents e on e.accountid = l.Guid_account and DATE(l.Date) = DATE(e.start_event)
+                inner JOIN tbluser u ON l.Guid_user = u.Guid_user
+                WHERE DATE(l.Date) between DATE(:startdate) and DATE(:enddate) and u.marked_test='0' ";
+        if($_POST['acc'] == null && $_POST['acc'] == '' && $_POST['acc'] == 0){
+            $query .= "AND l.account = '' ";
+        }
+    }
+    $result = $db->query($query,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate']));
+    echo json_encode($result);
+}
+
+
+if(isset($_GET['action']) && $_GET['action'] == 'dynamicAccounts'){
+    $sId = $_GET['sId'];
+    $query = "SELECT accrep.`Guid_salesrep`, acc.`Guid_account`, acc.`account`, acc.`name` FROM `tblaccountrep` accrep LEFT JOIN `tblaccount` acc ON acc.`Guid_account` = accrep.`Guid_account` WHERE accrep.`Guid_salesrep` =:sID ";
+    $result = $db->query($query, array('sID' => $sId));
+
+    echo json_encode($result);
+}
+
+if(isset($_GET['action']) && $_GET['action'] == 'dynamicSalesrep'){
+    $aId = $_GET['aId'];
+    $query = "SELECT accrep.`Guid_salesrep`, CONCAT(salesrep.`first_name`, ' ', salesrep.`last_name`) AS sRepNames FROM `tblaccountrep` accrep LEFT JOIN `tblsalesrep` salesrep ON salesrep.`Guid_salesrep` = accrep.`Guid_salesrep` WHERE accrep.`Guid_account` =:aID ";
+    $result = $db->query($query, array('aID' => $aId));
+
     echo json_encode($result);
 }
