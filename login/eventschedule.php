@@ -365,12 +365,24 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         }
         if (localStorage.accountValue) {
             $('#accountfilter').val(localStorage.accountValue);
+            if(localStorage.accountValue != 0 && localStorage.salesrepValue == 0 ){
+                $.ajax({
+                    url:'ajaxHandlerEvents.php',
+                    type:'GET',
+                    data:{ aId : localStorage.accountValue, action:'dynamicSalesrep' },
+                    success: function(res){
+                        console.log(res);
+                        var result = JSON.parse(res);
+                        $("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
+                        $.each(result, function(k, v){
+                            $("#salesrepfilter").append('<option value="'+v.Guid_salesrep+'">'+v.sRepNames+'</option>');
+                        })
+                    }
+                });
+            }
         }
         if (localStorage.salesrepValue != 0 || localStorage.accountValue != 0) {
             var cursource = 'eventload.php?salerepId=' + localStorage.salesrepValue + '&accountId=' + localStorage.accountValue;
-            /*if(localStorage.salesrepValue != 0){
-                $("#salesrepfilter").trigger("change");
-            }*/
         }
         else{
             var cursource = 'eventload.php';
@@ -383,7 +395,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             localStorage.setItem('salesrepValue', salesrep );
             localStorage.setItem('accountValue', account );
             var allcursource = 'eventload.php';
-            if (localStorage.salesrepValue != 0 || localStorage.accountValue != 0) {
+            if ( localStorage.salesrepValue != 0 || localStorage.accountValue != 0 || localStorage.salesrepValue != undefined || localStorage.accountValue != undefined ) {
                 cursource = 'eventload.php?salerepId=' + localStorage.salesrepValue + '&accountId=' + localStorage.accountValue;
             }
 
@@ -404,7 +416,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         $('#summary').on('click touchstart', function () {
             var summarycursource = 'ajaxHandlerEvents.php';
             
-            if (localStorage.salesrepValue != 0 || localStorage.accountValue != 0) {
+            if (localStorage.salesrepValue != 0 && localStorage.salesrepValue != undefined || localStorage.accountValue != 0 && localStorage.accountValue != undefined ) {
                 summarycursource = 'ajaxHandlerEvents.php?var=test&salerepId=' + localStorage.salesrepValue + '&accountId=' + localStorage.accountValue;
             }
             $('#calendar').fullCalendar('removeEventSources');
@@ -751,22 +763,23 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     data: eventData,
                     success: function (res)
                     {
-                        var res = JSON.parse(res);
-                        console.log(res);
-                        var regHTML = res.reg;
-                        var comHTML = res.com;
-                        var subHTML = res.sub;
-                        var quaHTML = res.qua;
-                        if(view.name != 'basicDay' && parsedEventTime < parsedNow){
-                            element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[0].childNodes[0].innerHTML = regHTML;
-                            element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[2].childNodes[0].innerHTML = comHTML;
-                            element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].childNodes[0].innerHTML = quaHTML;
-                            element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[6].childNodes[0].innerHTML = subHTML;
-                        }else if(view.name == 'basicDay' && parsedEventTime < parsedNow){
-                            element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[0].childNodes[0].innerHTML = regHTML;
-                            element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[2].childNodes[0].innerHTML = comHTML;
-                            element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].childNodes[0].innerHTML = quaHTML;
-                            element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[6].childNodes[0].innerHTML = subHTML;
+                        if(res){
+                            var res = JSON.parse(res);
+                            var regHTML = res.reg;
+                            var comHTML = res.com;
+                            var subHTML = res.sub;
+                            var quaHTML = res.qua;
+                            if(view.name != 'basicDay' && parsedEventTime < parsedNow){
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[0].childNodes[0].innerHTML = regHTML;
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[2].childNodes[0].innerHTML = comHTML;
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].childNodes[0].innerHTML = quaHTML;
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[6].childNodes[0].innerHTML = subHTML;
+                            }else if(view.name == 'basicDay' && parsedEventTime < parsedNow){
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[0].childNodes[0].innerHTML = regHTML;
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[2].childNodes[0].innerHTML = comHTML;
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].childNodes[0].innerHTML = quaHTML;
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[6].childNodes[0].innerHTML = subHTML;
+                            }
                         }
                     }
                 });               
@@ -795,9 +808,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var startdate = moment(view.start._d).format('YYYY-MM-DD');
                 var enddate = moment(view.end._d).format('YYYY-MM-DD');
                 if(view.name == 'basicDay'){
-                    evtdata = { salesreps:null, acc: uniqueAccString, startdate: startdate, enddate:startdate, action:'tableStats' };
+                    evtdata = { salesreps:null, acc: uniqueAccString, startdate: startdate, enddate:startdate, action:'eventStats' };
                 }else{
-                    evtdata = {salesreps:null, acc: uniqueAccString, startdate: startdate, enddate:enddate, action:'tableStats'};
+                    evtdata = {salesreps:null, acc: uniqueAccString, startdate: startdate, enddate:enddate, action:'eventStats'};
                 }
                 $.ajax({
                     type : 'POST',
@@ -805,11 +818,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     dataType: 'json',
                     url : 'ajaxHandlerEvents.php',
                     success : function(returndata){
-                        console.log(returndata);
-                        $(".regCnt").text(returndata.reg);
-                        $(".quaCnt").text(returndata.qua);
-                        $(".comCnt").text(returndata.com);
-                        $(".subCnt").text(returndata.sub);
+                        //console.log(returndata);
+                        (returndata[0].regCount != null) ? $(".regCnt").text(returndata[0].regCount) : $(".regCnt").text(0);
+                        (returndata[0].quaCount != null) ? $(".quaCnt").text(returndata[0].quaCount) : $(".quaCnt").text(0);
+                        (returndata[0].comCount != null) ? $(".comCnt").text(returndata[0].comCount) : $(".comCnt").text(0);
+                        (returndata[0].subCount != null) ? $(".subCnt").text(returndata[0].subCount) : $(".subCnt").text(0);
                     }
                 });
 
@@ -1069,26 +1082,49 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $('#modalsalerepid').val(this.value);
         });
 
+        if(localStorage.salesrepValue != 0 && localStorage.accountValue == 0){
+            $.ajax({
+                url:'ajaxHandlerEvents.php',
+                type:'GET',
+                data:{ sId : localStorage.salesrepValue, action:'dynamicAccounts' },
+                success: function(res){
+                    var result = JSON.parse(res);
+                    $("#accountfilter").html('<option value="0">Account</option>');
+                    $.each(result, function(k, v){
+                        $("#accountfilter").append('<option value="'+v.Guid_account+'">'+ v.account + ' - ' + v.name +'</option>');
+                    })
+                }
+            });
+        }
         $('#salesrepfilter').on('change', function () {
+            var selec = $('#accountfilter option:selected').val();
+            $('#accountfilter option').remove();
+            $('#accountfilter').html('<option value="0">Account</option>');
+            var selectedValue = this.value;
 
-                var selec = $('#accountfilter option:selected').val();
-                $('#accountfilter option').remove();
-                $('#accountfilter').html('<option value="0">Account</option>');
+            if(selectedValue != 0){
                 $.ajax({
-                    type : 'POST',
-                    data : 'salerepId='+ this.value,
-                    dataType: 'json',
-                    url : 'accountselection.php',
-                    success : function(data){
-                        console.log(data);
-                        $.each(data, function(k, v) {
-                            if(selec == v.id) var selected = 'selected';
-                            if(v.id) $('#accountfilter').append('<option value="' + v.id + '" '+ selected + '>' + v.name + '</option>');
-                        });
-
-
+                    url:'ajaxHandlerEvents.php',
+                    type:'GET',
+                    data:{ sId : selectedValue, action:'dynamicAccounts' },
+                    success: function(res){
+                        var result = JSON.parse(res);
+                        $("#accountfilter").html('<option value="0">Account</option>');
+                        $.each(result, function(k, v){
+                            $("#accountfilter").append('<option value="'+v.Guid_account+'">'+ v.account + ' - ' + v.name +'</option>');
+                        })
                     }
                 });
+            }else{
+                $("#accountfilter").html('<option value="0">Account</option>');
+                <?php
+                    foreach ($accountdt as $acct) {
+                        ?>
+                            $("#accountfilter").append("<option value='<?php echo $acct["Guid_account"]; ?>'><?php echo $acct['account'] . ' - ' . ucwords(strtolower($acct['name'])); ?></option>");
+                        <?php 
+                    }
+                ?>
+            }
             $('#salerepid').val(this.value);
         });
 

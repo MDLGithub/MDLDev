@@ -1,5 +1,5 @@
 <?php
-function getEventSchedule($db,$salesRepId,$accountId,$reqdashboard){
+function getEventSchedule($db,$salesRepId,$accountId,$reqdashboard, $start='', $end=''){
     if($salesRepId != 0 || $accountId != 0){
         $query = "SELECT evt.id, evt.healthcareid, evt.salesrepid, evt.accountid, evt.title, evt.start_event, evt.end_event,"
                 . " CONCAT(salerep.first_name, ' ', salerep.last_name) as salesrep, salerep.color, "
@@ -98,8 +98,8 @@ function getEventSchedule($db,$salesRepId,$accountId,$reqdashboard){
                 . "LEFT JOIN tblsalesrep salerep ON evt.salesrepid = salerep.Guid_salesrep "
                 . "LEFT JOIN tblaccount acct ON evt.accountid = acct.Guid_account "
                 . "LEFT JOIN tblhealthcare hltcare ON evt.healthcareid = hltcare.Guid_healthcare "
-                . "ORDER BY evt.id";
-        $result = $db->query($query);
+                . "WHERE DATE(evt.start_event) between DATE(:sDate) and DATE(:eDate) ORDER BY evt.id";
+        $result = $db->query($query, array('sDate' => $start, 'eDate' => $end));
     }
     
     return $result;
