@@ -13,6 +13,17 @@ Author:Gabriela Johnson;
 @import url('https://fonts.googleapis.com/css?family=Open+Sans');
 
 
+@font-face {
+    font-family: 'Segoe UI Symbol';
+    src: url('../font_kit/.eot');
+    src: url('../font_kit/.eot?#iefix') format('embedded-opentype'),
+         url('../font_kit/.woff') format('woff'),
+         url('../font_kit/seguisym.ttf') format('truetype'),
+         url('../font_kit/.svg#Segoe') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
 
 .non_responsive{
 
@@ -318,7 +329,7 @@ Author:Gabriela Johnson;
 
 .info_block .button{
 
-  width:100%;
+  /*width:100%;*/
 
 }
 
@@ -328,7 +339,6 @@ Author:Gabriela Johnson;
 
   flex-grow: 1;
 
-  padding-left:3%;
 
 }
 
@@ -336,9 +346,9 @@ Author:Gabriela Johnson;
 
 .info_block_row .col-md-6{
 
-  width:initial !important;
+  /*width:initial !important;
 
-  min-width:242px;
+  min-width:242px;*/
 
   padding: 5% 0;
 
@@ -408,10 +418,6 @@ Author:Gabriela Johnson;
 
     flex-direction: column;
 
-    /*min-width: 240px;
-
-    min-height: 242px;*/
-
     background-image: -moz-linear-gradient( 120deg, rgb(255,255,255) 17%, rgb(230,240,251) 100%);
 
     background-image: -webkit-linear-gradient( 120deg, rgb(255,255,255) 17%, rgb(230,240,251) 100%);
@@ -475,6 +481,9 @@ Author:Gabriela Johnson;
 }
 
 
+#summary{
+  float:left;
+}
 
 
 
@@ -533,10 +542,6 @@ Author:Gabriela Johnson;
     width: 25%;
 
     height: 50%;
-
-    /*min-width: 40px;
-
-    min-height: 42px;*/
 
     background-color: #f7f7f7;
 
@@ -810,15 +815,12 @@ Author:Gabriela Johnson;
 
     border-radius: 10px;
 
-    /*background-color: rgb(252, 252, 252);*/
-
     background: url(../images/stats_background.png) no-repeat;
 
     background-size: cover;
 
     box-shadow: inset 0px 16px 0px 0px rgba(254, 253, 240, 0.004);
 
-    /*height:280px;*/
 
     flex-wrap:wrap;
 
@@ -864,17 +866,9 @@ Author:Gabriela Johnson;
 
 .chart_header .button{
 
-  /*margin:auto;*/
-
   min-width:195px;
 
-  /*display:inline-block;
-
-  text-indent: 30px;*/
-
   height:30px;
-
-  /*vertical-align: middle;*/
 
   position:relative;
 
@@ -916,15 +910,7 @@ Author:Gabriela Johnson;
 
     background: none;
 
-    /* margin-left: -50px; */
-
-    /* margin-top: -60px; */
-
     position:relative;
-
-    /*top:-80px;
-
-    left:150px;*/
 
     z-index:1;
 
@@ -934,11 +920,8 @@ Author:Gabriela Johnson;
 
 .info_block_arrow_show{
 
-    /* margin-top: -100px; */
 
     width: 100%;
-
-    /* margin-left: -216px; */
 
     text-align: right;
 
@@ -1056,17 +1039,7 @@ Author:Gabriela Johnson;
 
     width: 167px;
 
-    /*height: 100px;*/
-
-    /*transition: height 0.6s 0.2s;*/
-
     border-radius: 0px 0px 10px 10px;
-
-    /*margin:auto;*/
-
-    /*overflow-y: scroll;*/
-
-    /* margin-top:20px; */
 
 }
 
@@ -1166,8 +1139,6 @@ Author:Gabriela Johnson;
 
 .top_accounts{
 
-    /*height: 42%;*/
-
     border-style: solid;
 
     border-width: 1px;
@@ -1180,11 +1151,7 @@ Author:Gabriela Johnson;
 
     background-image: -ms-linear-gradient( 120deg, rgb(255,255,255) 0%, rgb(241,241,241) 52%, rgb(255,255,255) 65%);
 
-    /*min-width: 480px;*/
-
     width:100%;
-
-    /*min-height: 220px;*/
 
     align-self:normal;
 
@@ -1196,8 +1163,6 @@ Author:Gabriela Johnson;
 
 .top_consultants{
 
-    /*height: 42%;*/
-
     border-style: solid;
 
     border-width: 1px;
@@ -1210,11 +1175,7 @@ Author:Gabriela Johnson;
 
     background-image: -ms-linear-gradient( 120deg, rgb(255,255,255) 0%, rgb(241,241,241) 52%, rgb(255,255,255) 65%);
 
-    /*min-width: 480px;*/
-
     width:100%;
-
-    /*min-height: 220px;*/
 
     align-self:normal;
 
@@ -1412,8 +1373,6 @@ g g g text{
 
 #performance_chart .row{
 
-  /*min-width: 900px;*/
-
   display:flex;
 
 }
@@ -1441,8 +1400,6 @@ g g g text{
 
 
 #performance_chart .col-md-2 span{
-
-    /*padding: 1px 30px;*/
 
     background: white;
 
@@ -1500,6 +1457,23 @@ g g g text{
 
 }
 
+
+.top_performer_avg:before {
+    background-image: url(../images/top_performer.png);
+    background-size: 15px;
+    top: -4px;
+    left: 46px;
+    z-index: 10;
+}
+
+.below_avg:before, .above_avg:before, .top_performer_avg:before {
+    content: "";
+    background-repeat: no-repeat;
+    left: 39px;
+    position: absolute;
+    width: 18px;
+    height: 23px;
+}
 
 
 .genetic_consultant{
@@ -1756,8 +1730,6 @@ g g g text{
 
   #performance_chart .col-md-2 {
 
-      /*width: initial !important;*/
-
       flex-grow:2;
 
       margin:auto;
@@ -1837,18 +1809,28 @@ g g g text{
 
     }
 
+
     .info_block_arrow{
       top: -3px;
     }
 
 
-    .info_block .button {
-
-      display: inline-block;
-
+    .info_block .button strong{
+        font-size: 13px;
     }
 
+    #performance_chart .col-md-2 span{
+       width:46px;
+    }
 
+    .top_performer_avg:before{
+      left: 36px;
+    }
+
+    .info_block_row.col-sm-12 {
+        padding-left: 15px;
+        padding-right: 0;
+    }
 
   }
 
@@ -1870,22 +1852,18 @@ g g g text{
     }
 
     .info_block .button strong{
-
+      font-size: 1.1em;
       text-indent: 20px;
     }
-
-    #chart_stats{
-
-      /*height:300px;*/
-
-    }
-
-
 
     .chart_header .stats_date{
 
       font-size:20px;
 
+    }
+
+   .top_performer_avg:before{
+        left: 43px;
     }
 
   }
@@ -2042,10 +2020,6 @@ and (orientation : landscape) {
 
 
     .info_block_row .col-md-6{
-
-      width:initial !important;
-
-      min-width:0;
 
       padding:0 15px;
 
@@ -2233,32 +2207,6 @@ and (orientation : landscape) {
 
 
 
-    #chart_stats{
-
-      /*height:250px;*/
-
-    }
-
-
-
-    #piechart{
-
-      /*width:500px !important;
-
-      height:208px !important;*/
-
-    }
-
-
-
-    #chart{
-
-      /*width:500px !important;
-
-      height:208px !important;*/
-
-    }
-
 
 
 }
@@ -2271,7 +2219,9 @@ and (orientation : landscape) {
 
 and (min-device-width : 768px) 
 
-and (max-width : 1024px) 
+and (max-device-width : 1024px) 
+
+and (max-device-height : 1024px) 
 
 and (orientation : portrait) { 
 
@@ -2337,12 +2287,13 @@ and (orientation : portrait) {
 
 
 
-    .info_block_row{
+    .info_block_row.col-sm-12{
 
       padding-left:0;
 
-    }
+      padding-right:0;
 
+    }
 
 
     .info_block{
@@ -2371,8 +2322,6 @@ and (orientation : portrait) {
 
       padding:0;
 
-      display:inherit;
-
     }
 
 
@@ -2389,7 +2338,6 @@ and (orientation : portrait) {
 
     .info_block .button{
 
-      width:45%;
 
       height:33px;
 
@@ -2407,7 +2355,7 @@ and (orientation : portrait) {
 
     .info_block .button strong{
 
-      font-size:14px;
+      font-size:11px;
 
       text-indent:22px;
 

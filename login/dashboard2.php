@@ -143,30 +143,18 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .below_avg, .above_avg, .top_performer_avg {
         position: relative;
     }
-    .below_avg:before, .above_avg:before, .top_performer_avg:before {
-        content: "";
-        background-repeat: no-repeat;
-        left: 39px;
-        position: absolute;
-        width: 18px;
-        height: 23px;
-    }
+
     .below_avg:before{
         background-image: url(assets/images/below_avg.png);
     }
     .above_avg:before{
         background-image: url(assets/images/above_avg.png);
     }
-    .top_performer_avg:before{
-        background-image: url(assets/images/top_performer.png);
-        background-size: 15px;
-        top: -4px;
-        left: 46px;
-    }
+
     .info_block h1 br:first-child {
         display: none;
     }
-    .activeButton{ background: #3f628a !important; color: #fff !important; width: 45%; padding: 0; box-shadow: none !important; float: left;}
+    .activeButton{ background: #3f628a !important; color: #fff !important;    /*width: 45%;*/ padding: 0; box-shadow: none !important; float: left;}
     tr:first-child > td > .fc-day-grid-event{ min-height: 50px; }
     #piechart svg > g > g:nth-child(4) > g text, #chart svg > g > g:nth-child(4) > g text {
         font-weight: 800 !important;
@@ -178,16 +166,15 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .forcehidden{ display: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; }
     #calendar th{ text-align: center; color: #1c487b;}
     #calendar th.fc-today{ color:  white;}
-    #detail, #summary{ width: 48%; padding: 2px; font-size: 15px;}
+    #detail, #summary{ /*width: 48%;*/ padding: 2px; font-size: 15px;}
     .top-buttons button.info-button { background: linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%); }
     .sales-photo img { max-width: 100px; }
     @media only screen and (min-device-width : 768px) and (max-width : 1024px) 
     and (orientation : portrait) { 
-        .top-buttons { width: 65%; }
-        #detail, #summary{ width: 30%;}
-        .top-buttons a.button.submit{ width: 38%; }
+        .top-buttons { /*width: 65%;*/ }
+        #detail, #summary{}
         .dropdown_hide{ display: none; }
-        .info_block h1{ width: 155px; line-height: 26px; text-align:left; padding-left:10px;}
+        .info_block h1{ width: 155px; line-height: 26px; text-align:left; padding-left:10px; font-size:20px;}
         .sales-photo img { max-width: 55px; text-align: center; margin-left: 20px; padding: 6px 0px; }
     }
 
@@ -198,7 +185,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         .top_performer_avg:before {
             top: -4px;
             left: 39px;
-            z-index: 10;
+           
         }
     }
 </style>
@@ -1279,8 +1266,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 </div>
                 </div>
              </div>
-                <div class="row info_block_row col-md-4">
-                        <div class = "info_block" style="min-width: 340px;">
+                <div class="row info_block_row col-md-4 col-sm-12">
+                        <div class = "info_block">
                             <?php if($role == 'Sales Rep'): ?>
                                 <div class="sales-photo">
                                     <?php 
@@ -1318,9 +1305,9 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                 </div>
                             </div>
                         <div class="col-lg-7 col-md-8 top-buttons">
-                        <button type="button" name="Detail" id="detail" class="info-button activeButton" style="">Details</button>
-                        <button type="button" name="Summary" id="summary" class="info-button" style="">Summary</button>
-                        <a href="eventschedule.php" class="button submit"><strong>Full Calendar</strong></a>   
+                        <button type="button" name="Detail" id="detail" class="col-lg-6 col-md-6 info-button activeButton" style="">Details</button>
+                        <button type="button" name="Summary" id="summary" class="col-lg-6 col-md-6 info-button" style="">Summary</button>
+                        <a href="eventschedule.php" class="col-md-12 col-sm-6 button submit"><strong>Full Calendar</strong></a>   
                         </div>    
                     </div>
                 </div>
