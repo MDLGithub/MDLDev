@@ -1,8 +1,6 @@
 <?php
 require_once('config.php');
 require_once('settings.php');
-use mikehaertl\pdftk\Pdf;
-use mikehaertl\tmp\File;
 
 if(isset($_POST['url_config']) && $_POST['url_config']=='1'){
     load_url_config($db, $_POST['id']);

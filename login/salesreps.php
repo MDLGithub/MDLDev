@@ -530,7 +530,7 @@ require_once ('navbar.php');
 		    <a class="add-new-device" href="<?php echo SITE_URL; ?>/salesreps.php?action=add">
 			<span class="fas fa-plus-circle"></span> Add
 		    </a>
-		    <?php if ($roleID == 1) { ?>
+		    <?php if ($roleID == 1 || $roleID == 5) { ?>
 				<a class="export_matrix" id="export">
 					<img src="./images/icon_forms.png" />
 					<p>Geneveda Matrix</p>
