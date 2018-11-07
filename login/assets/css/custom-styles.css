@@ -2370,6 +2370,7 @@ a.button.cancel.half{
     border: 1px solid #8fa2ba;
     padding: 2px 10px;
     width: 100%;
+    max-width: 450px;
     background: white;
 }
 
@@ -2411,7 +2412,7 @@ table#refresh-log-table {
     position: relative;
 }
 
-table#refresh-log-table::before {
+/*table#refresh-log-table::before {
     content: '';
     position: absolute;
     border-left: 1.5px solid #1c2d6b;
@@ -2419,7 +2420,7 @@ table#refresh-log-table::before {
     height: 100%;
     z-index: 10;
     top: 0;
-}
+}*/
 
 #refresh-log-table tr.tableTopInfo .braca{
    
@@ -2449,4 +2450,7 @@ table#refresh-log-table::before {
         width: 100%!important;
         margin: 0;
     }    
+}
+.tbl-borderR{
+    border-left: 1.5px solid #1c2d6b;
 }

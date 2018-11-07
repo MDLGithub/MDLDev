@@ -45,9 +45,9 @@ foreach ($userTables as $k=>$v){
         $roleID = '6'; 
     } 
     
-    $selectQ = "SELECT u.Guid_user, u.status, u.Guid_role, u.marked_test, uInfo.first_name, uInfo.last_name, u.email, r.role ";
+    $selectQ = "SELECT u.Guid_user, u.status, u.Guid_role, u.marked_test,u.Loaded,uInfo.first_name, uInfo.last_name, u.email, r.role ";
     if($k=='patient' || $k=='mdlpatient'){
-        $selectQ = "SELECT u.Guid_user, u.status, u.Guid_role, u.marked_test, uInfo.Guid_patient, "
+        $selectQ = "SELECT u.Guid_user, u.status, u.Guid_role, u.marked_test,u.Loaded, uInfo.Guid_patient, "
                 . "aes_decrypt(uInfo.firstname_enc, 'F1rstn@m3@_%') AS first_name, "
                 . "aes_decrypt(uInfo.lastname_enc, 'L@stn@m3&%#') AS last_name, u.email, r.role ";
     }
@@ -83,6 +83,9 @@ foreach ($userTables as $k=>$v){
         }
         if(isset($_POST['marked_test']) && $_POST['marked_test']=="1"){            
             $selectQ .= " AND u.marked_test = '1'";            
+        }
+        if(isset($_POST['Loaded']) && $_POST['Loaded']=="1"){            
+            $selectQ .= " AND u.Loaded = 'Y'";            
         }
         if(isset($_POST['locked_users']) && $_POST['locked_users']=="1"){            
             //$getLockedEmails = checkbrute($user['email'], $db);  
@@ -225,6 +228,10 @@ require_once ('navbar.php');
                 <div>
                     <input id="show-tests" name="marked_test" value="1" type="checkbox" <?php echo ((!isset($_POST['clear'])) && (isset($_POST['marked_test']) && ($_POST['marked_test'] == 1)) ? " checked" : ""); ?> />
                     <label for="show-tests">Marked As Test</label>                     
+                </div>
+                <div>
+                    <input id="Loaded" name="Loaded" value="1" type="checkbox" <?php echo ((!isset($_POST['clear'])) && (isset($_POST['Loaded']) && ($_POST['Loaded'] == 1)) ? " checked" : ""); ?> />
+                    <label for="Loaded">Loaded</label>                     
                 </div>
                 <div>
                     <input id="locked_users" name="locked_users" value="1" type="checkbox" <?php echo ((!isset($_POST['clear'])) && (isset($_POST['locked_users']) && ($_POST['locked_users'] == 1)) ? " checked" : ""); ?> />
