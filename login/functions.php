@@ -2283,6 +2283,21 @@ function getPaientPossibleMatch($db,$firstname,$lastname,$Date_Of_Birth){
     return $SGetPatient;
 }
 
+function getPaientPerfectMatch($db,$firstname,$lastname,$Date_Of_Birth){
+    $dobConverted = convertDmdlDate($Date_Of_Birth);
+    $query = "SELECT p.Guid_patient, p.Guid_user, p.dob,"
+            . "AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') as firstname,"
+            . "AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') as lastname "
+            . "FROM tblpatient p "
+            . "LEFT JOIN tbluser u ON u.Guid_user = p.Guid_user "
+            . "WHERE u.marked_test='0' AND u.Loaded='N' "
+            . "AND LOWER(CONVERT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') USING 'utf8'))='".strtolower($firstname)."' "
+            . "AND LOWER(CONVERT(AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') USING 'utf8'))='".strtolower($lastname)."' "
+            . "AND dob='$dobConverted'";
+    $getPatient = $db->query($query);
+    return $getPatient;
+}
+
 function dmdl_refresh($db){ 
     require_once 'classes/xmlToArrayParser.php';
     ini_set("soap.wsdl_cache_enabled", 0);
@@ -2369,16 +2384,9 @@ function dmdl_refresh($db){
                 'lastname' => $lastname,
                 'dob' => convertDmdlDate($Date_Of_Birth)
             );
-            $dobConverted = convertDmdlDate($Date_Of_Birth);
-            $query = "SELECT Guid_patient,Guid_user,dob,"
-                    . "aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname,"
-                    . "aes_decrypt(lastname_enc, 'L@stn@m3&%#') as lastname FROM tblpatient "
-                    . "WHERE LOWER(CONVERT(AES_DECRYPT(firstname_enc, 'F1rstn@m3@_%') USING 'utf8'))='".strtolower($firstname)."' "
-                    . "AND LOWER(CONVERT(AES_DECRYPT(lastname_enc, 'L@stn@m3&%#') USING 'utf8'))='".strtolower($lastname)."' "
-                    . "AND dob='$dobConverted'";
-            $getPatient = $db->query($query, $where );
             
-            //$getPatient = getPaientPossibleMatch($db,$firstname,$lastname,$Date_Of_Birth);
+            
+            $getPatient = getPaientPerfectMatch($db,$firstname,$lastname,$Date_Of_Birth);
          
             $content .= "<tr>";
             if(empty($getPatient)){ //patient not match with dmdl data => ststus=no
@@ -2403,7 +2411,9 @@ function dmdl_refresh($db){
                         $sOption .= "<option value='".$v['Guid_patient']."'>";                        
                         $sOption .= ucwords(strtolower($v['firstname']." ".$v['lastname']));
                         $sOption .= " (".date("m/d/Y", strtotime($matchedPatient['dob'])).") ";
+                        if($qualifyResult['account_number']!=''){
                         $sOption .= "Acct#: ".$qualifyResult['account_number'].", ";
+                        }
                         if($mdl_num!=''){
                             $sOption .= "MDL#: ".$mdl_num.", ";
                         }
@@ -2448,7 +2458,9 @@ function dmdl_refresh($db){
                             $sOption .= "<option value='".$v['Guid_patient']."'>";                        
                             $sOption .= ucwords(strtolower($v['firstname']." ".$v['lastname']));
                             $sOption .= " (".date("m/d/Y", strtotime($matchedPatient['dob'])).") ";
+                            if($qualifyResult['account_number']!=''){
                             $sOption .= "Acct#: ".$qualifyResult['account_number'].", ";
+                            }
                             if($mdl_num!=''){
                                 $sOption .= "MDL#: ".$mdl_num.", ";
                             }
