@@ -41,7 +41,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     $sqlQualify = "SELECT q.Guid_qualify,q.Guid_user,q.insurance,
                     q.other_insurance,q.account_number,q.Date_created as qDate,
                     q.provider_id, q.deviceid, q.source, 
-                    CONCAT(prov.first_name,' ',prov.last_name) provider,
+                    CONCAT(prov.first_name,' ',prov.last_name) provider, prov.title,
                     p.*, aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname, 
                     aes_decrypt(lastname_enc, 'L@stn@m3&%#') as lastname, 
                     u.email, u.marked_test ";
@@ -311,7 +311,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 </p>
                                 <p><label>Genetic Consultant: </label><?php echo $accountInfo['salesrep_name']; ?></p>
 
-                                <p><label>Health Care Providers: </label><?php echo $qualifyResult['provider']; ?>
+                                <p><label>Health Care Providers: </label><?php echo $qualifyResult['provider']; if($qualifyResult['title']!=''){ echo ", ".$qualifyResult['title']; } ?>
                                 <p>
                                     <label>Event: </label><?php echo $qualifyResult['source']; ?> 
                                 </p>
