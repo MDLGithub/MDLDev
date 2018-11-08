@@ -318,6 +318,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     window.totalParams = {};
     $(document).ready(function () {
 
+        $('body').on('click', 'button.fc-month-button, button.fc-basicWeek-button, button.fc-basicDay-button', function(e) {
+            e.preventDefault();
+            $(".fc-today-button").trigger('click');
+        });
+
         var salereps = $('#salerepid').val();
         if(salereps){
             $('#accountopt option').remove();
@@ -441,6 +446,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $("#detail").css("background", "#3f628a").css("color","#fff").css("box-shadow", "none");
           
         });
+
 
         var state_count = 0, count = 0, state_count1 = 0, count1 = 0;
         
