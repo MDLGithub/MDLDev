@@ -312,7 +312,7 @@ require_once ('navbar.php');
                                     
                                     <?php if(isFieldVisibleByRole($isSalesrepView, $roleID)) {?>
                                     <div class="row">
-                                        <div class="col-md-9">
+                                        <div class="col-md-9 padd-0">
                                             <div class="f2  <?php echo ($Guid_salesrep!="")?"valid show-label":"";?>">
                                                 <label class="dynamic" for="Guid_salesrep"><span>Genetic Consultant</span></label>
                                                 <div class="group">
@@ -341,7 +341,7 @@ require_once ('navbar.php');
                                     <?php } ?>
                                     <?php if(isFieldVisibleByRole($isLogoView, $roleID)) {?>
                                     <div class="row">                                
-                                        <div class="col-md-9">
+                                        <div class="col-md-9 padd-0">
                                             <div class="f2 <?php echo ($logo!="")?"valid show-label":"";?>">
                                                 <label class="dynamic" for="photo"><span>Photo</span></label>
                                                 <div class="group">
@@ -388,7 +388,7 @@ require_once ('navbar.php');
                                     
                                     <div class="row">
                                         <?php if(isFieldVisibleByRole($isStateView, $roleID)) {?>
-                                        <div class="col-md-6">
+                                        <div class="col-md-5 padd-0">
                                             <div class="f2 <?php echo ($state!="")?"valid show-label":"";?>">
                                                 <label class="dynamic" for="state"><span>State</span></label>
                                                 <div class="group">
@@ -407,7 +407,7 @@ require_once ('navbar.php');
                                         </div>
                                         <?php } ?>
                                         <?php if(isFieldVisibleByRole($isZipView, $roleID)) {?>
-                                        <div class="col-md-6">
+                                        <div class="col-md-5 col-md-offset-2 padd-0">
                                              <div class="f2 <?php echo ($zip!="")?"valid show-label":"";?>">
                                                 <label class="dynamic" for="zip"><span>Zip</span></label>
                                                 <div class="group">
@@ -422,7 +422,7 @@ require_once ('navbar.php');
                                     </div>
                                     <div class="row">
                                         <?php if(isFieldVisibleByRole($isPhoneView, $roleID)) {?>
-                                        <div class="col-md-6">
+                                        <div class="col-md-5 padd-0">
                                             <div class="f2 <?php echo ($phone_number!="")?"valid show-label":"";?>">
                                                 <label class="dynamic" for="phone_number"><span>Phone</span></label>
                                                 <div class="group">
@@ -435,7 +435,7 @@ require_once ('navbar.php');
                                         </div>
                                         <?php } ?>
                                         <?php if(isFieldVisibleByRole($isFaxView, $roleID)) {?>
-                                        <div class="col-md-6">
+                                        <div class="col-md-5 col-md-offset-2 padd-0">
                                             <div class="f2 <?php echo ($fax!="")?"valid show-label":"";?>">
                                                 <label class="dynamic" for="fax"><span>Fax</span></label>
                                                 <div class="group">

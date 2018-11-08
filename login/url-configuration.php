@@ -380,7 +380,7 @@ $accountProviders = '';
               </div>
               <div class="col-md-6">
                   <div class="row">
-                      <div class="col-md-4">
+                      <div class="col-lg-4 col-md-12">
                           <p id="officeLogo">
                               <?php 
                                 if( isset($_POST['an']) && $_POST['an'] != "0"){
@@ -396,7 +396,7 @@ $accountProviders = '';
                               ?>
                           </p>
                       </div>
-                      <div class="col-md-8">
+                      <div class="col-lg-8 col-md-12">
                               <?php 
                                 $addressInfo = "";
                                 $accountInfo = "";                                
