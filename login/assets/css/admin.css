@@ -1403,6 +1403,7 @@ and (orientation : portrait){
 }
 
 .export_matrix {
+    float: right;
     text-align: center;
     width: 100px;
 }
