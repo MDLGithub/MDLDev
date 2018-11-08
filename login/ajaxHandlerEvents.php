@@ -188,46 +188,53 @@ if( isset($_POST['action']) && $_POST['action'] == 'piechart' && isset($_POST['a
     $piedata = [];
     //$accIds = explode(',', $_POST['acc']);
     $accIds = $_POST['acc'];
-    $colors = array('#00713D','#89CB46','#3065B1','#00B7D0','#7C55A5', '#89BD46', '#00D7D0', '#30DDB1', '#7B11A5', '#01CB46', '#89ADD6', '#222B46', '#89CCCC', '#6035B1', '#306BBB');
-    $i=0;
-    $query = "SELECT COUNT(*) AS count, "
-        . "(SELECT acc.name FROM tblaccount acc WHERE acc.account = l.account ) as accname "
-        . "FROM `tbl_mdl_status_log` l "
-        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
-        . "WHERE l.Guid_status ='1' AND l.account IN (".$accIds.") AND u.marked_test='0' AND DATE(l.Date) BETWEEN DATE(:startdate)  AND DATE(:enddate) GROUP BY l.account";
-    $result = $db->query($query,array("startdate"=>$datecreated, 'enddate'=>$_POST['enddate']));
-        
-    foreach($result as $row){
-        if($row['accname'] != null){
-            $acc = wordwrap(ucwords(strtolower($row['accname'])), 40, "\n");
-            $piedata[] = array('category' => $acc, 'value' => (int)$row['count']);
-        }
-    }
+    if($accIds != ""):
+	    $colors = array('#00713D','#89CB46','#3065B1','#00B7D0','#7C55A5', '#89BD46', '#00D7D0', '#30DDB1', '#7B11A5', '#01CB46', '#89ADD6', '#222B46', '#89CCCC', '#6035B1', '#306BBB');
+	    $i=0;
+	    $query = "SELECT COUNT(*) AS count, "
+	        . "(SELECT acc.name FROM tblaccount acc WHERE acc.account = l.account ) as accname "
+	        . "FROM `tbl_mdl_status_log` l "
+	        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
+	        . "WHERE l.Guid_status ='1' AND l.account IN (".$accIds.") AND u.marked_test='0' AND DATE(l.Date) BETWEEN DATE(:startdate)  AND DATE(:enddate) GROUP BY l.account";
+	    $result = $db->query($query,array("startdate"=>$datecreated, 'enddate'=>$_POST['enddate']));
+	        
+	    foreach($result as $row){
+	        if($row['accname'] != null){
+	            $acc = wordwrap(ucwords(strtolower($row['accname'])), 40, "\n");
+	            $piedata[] = array('category' => $acc, 'value' => (int)$row['count']);
+	        }
+	    }
 
-    function method1($a,$b) 
-    {
-        return ($a["value"] <= $b["value"]) ? 1 : -1;
-    }
-    usort($piedata, "method1");
-    $total_submitted = 0;
-    foreach ($piedata as $item) {
-        $total_submitted += $item['value'];
-    }
+	    function method1($a,$b) 
+	    {
+	        return ($a["value"] <= $b["value"]) ? 1 : -1;
+	    }
+	    usort($piedata, "method1");
+	    $total_submitted = 0;
+	    foreach ($piedata as $item) {
+	        $total_submitted += $item['value'];
+	    }
 
-    for($i=0; $i<5;$i++) {
-        $els2 = $piedata;
-        foreach ($els2 as &$el) {
-            $el['color'] = $colors[$i];
-            $el['value'] = round(($el['value']/$total_submitted) * 100);
-            $i++;
-        }
-        unset($el);
-    }
+	    for($i=0; $i<5;$i++) {
+	        $els2 = $piedata;
+	        foreach ($els2 as &$el) {
+	            $el['color'] = $colors[$i];
+	            $el['value'] = round(($el['value']/$total_submitted) * 100);
+	            $i++;
+	        }
+	        unset($el);
+	    }
 
-    $data = array(  'type' => 'pie',
-                    'data' => $els2
-            );
-    echo json_encode($data);
+	    $data = array(  'type' => 'pie',
+	                    'data' => $els2
+	            );
+	else:
+		$data = array(  'type' => 'pie',
+	                    'data' => array()
+	            );
+	endif;
+	echo json_encode($data);
+	
 }
 
 /* --------------------- Dashboard Bar Chart ------------------------- */
@@ -241,14 +248,15 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart' && isset($_POST[
     $ids = $_POST['ids'];
 
     if(isset($_POST['showtopPerformer'])){
-    	$topSubmitted = "SELECT SUM(IF(l.Guid_status=1, 1, 0)) AS cnt "
+    	$topSubmitted = "SELECT SUM(IF(l.Guid_status=1, 1, 0)) AS cnt,concat(l.salesrep_fname, ' ',l.salesrep_lname) as salesrepName "
 	        . "FROM `tbl_mdl_status_log` l "
 	        . "INNER JOIN tbluser u ON l.Guid_user = u.Guid_user "
 	        . "INNER JOIN tblevents e ON e.salesrepid = l.Guid_salesrep and e.accountid = l.Guid_account AND DATE(e.start_event) = DATE(l.Date) "
 	        . "WHERE l.Guid_status = 1 AND u.marked_test='0' AND YEARWEEK(l.Date) = YEARWEEK(:datecreated) GROUP BY l.Guid_salesrep ORDER BY cnt DESC LIMIT 1";
 	    $topSubmittedValue = $db->query($topSubmitted,array("datecreated"=>$sDate));
 	    foreach($topSubmittedValue as $row){
-	        $submit['topsubmittedcount'] =  $row['cnt'];
+	        $submit['topsubmittedcount'] =  (int) $row['cnt'];
+	        $submit['topsubmittedName'] =  $row['salesrepName'];
 	    }
 
     }
@@ -266,20 +274,24 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart' && isset($_POST[
         $submitted[] = (int)$row['submittedCnt'];
         $regSalereps[] = $row['SNames'];
     }
-    if(isset($_POST['showtopPerformer'])){
+    if(isset($_POST['showtopPerformer']) && !empty($submit)){
+    	array_push($regSalereps, $submit['topsubmittedName']);
 	    $data = array(
-	            'series' => array ([
-	                    'name'=> 'Submitted',
-	                    'data'=> $submitted,
-	                    'color'=> "#3a8a5f",
-	                    'labels'=> array('visible' => true),
-	                ],
-	                [
-	                	'name'=> 'Top Submitted',
-	                    'data'=> $submit['topsubmittedcount'],
-	                    'color'=> "#b6942e",
-	                    'labels'=> array('visible' => true),	
-	                ]
+	            'series' => array (
+	            		[
+		                    'name'=> 'Submitted',
+		                    'data'=> array($submitted[0]),
+		                    'color'=> "#3a8a5f",
+		                    'labels'=> array('visible' => true),
+		                    //'spacing'=> 3,
+		                ],
+		                [
+		                	'name'=> 'Top Submitted',
+		                    'data'=> array($submit['topsubmittedcount']),
+		                    'color'=> "#b6942e",
+		                    'labels'=> array('visible' => true),
+		                    'spacing'=> 3,
+		                ]
 	            ),
 	            'categories' => $regSalereps 
 	    );

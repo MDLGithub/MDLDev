@@ -143,14 +143,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .below_avg, .above_avg, .top_performer_avg {
         position: relative;
     }
-
     .below_avg:before{
         background-image: url(assets/images/below_avg.png);
     }
     .above_avg:before{
         background-image: url(assets/images/above_avg.png);
     }
-
     .info_block h1 br:first-child {
         display: none;
     }
@@ -177,8 +175,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         .info_block h1{ width: 155px; line-height: 26px; text-align:left; padding-left:10px; font-size:20px;}
         .sales-photo img { max-width: 55px; text-align: center; margin-left: 20px; padding: 6px 0px; }
     }
-
-
     @media only screen and (min-device-width : 768px) and (max-width : 1024px) 
     and (orientation : landscape) { 
 
@@ -266,11 +262,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         var d = new Date();
         var evtsDate = d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate();
         evtsDate = evtsDate.toString();
-        <?php if(isset($_GET['salerepId'])): ?>
+        <?php /*if(isset($_GET['salerepId'])): ?>
             if (localStorage.evtsDate) {
                 evtsDate = (localStorage.evtsDate).toString();
             }
-        <?php endif; ?>
+        <?php endif;*/ ?>
 
 
         var calendar = $('#calendar').fullCalendar({
@@ -410,6 +406,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 $('.tooltipevent').remove();
             },
             eventRender: function (event, element, view) {
+
                 var today = new Date();
                 var currentDate = today.getDate();
                 var eventDate = $.fullCalendar.formatDate(event.start, "DD");
@@ -448,7 +445,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     borderColor = "border: 2px solid " + event.color + " !important";
                 }
                 
-                var modifiedName = sentenceCase((name == "") ? "Health Care Fair" : name);
+                var modifiedName = (name == "") ? "Health Care Fair" : name;
                 
                 
                 var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable" style="' + borderColor + '">' +
@@ -584,8 +581,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var startdate = moment(event.start._d).format('YYYY-MM-DD');
                 var enddate = moment(event.end._d).format('YYYY-MM-DD');
                 
-                localStorage.setItem('evtsDate', startdate );
-                localStorage.setItem('evteDate', enddate );
+                /*localStorage.setItem('evtsDate', startdate );
+                localStorage.setItem('evteDate', enddate );*/
 
                 var events = $('#calendar').fullCalendar('getView');
                 var ele_events = events._props.currentEvents;
@@ -598,11 +595,15 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
                 
                 //Bar chart
-                
+                <?php if(isset($_GET['salerepId'])):  ?>
+                    var chartParams = {ids: uniqueIds, startdate: startdate, enddate: enddate, action: 'getBarChart', showtopPerformer:true};
+                <?php else: ?>
+                    var chartParams = {ids: uniqueIds, startdate: startdate, enddate: enddate, action: 'getBarChart'};
+                <?php endif; ?>
                 $.ajax({
                     type: 'POST',
                     url: 'ajaxHandlerEvents.php',
-                    data: {ids: uniqueIds, startdate: startdate, enddate: enddate, action: 'getBarChart'},
+                    data: chartParams,
                     dataType: 'json',
                     success: function(returndata){
                         //returndata = JSON.parse(returndata);
@@ -618,6 +619,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             },
                         });
                         chart.refresh();
+                        /*firstSeries = chart.options.series;
+                        firstSeries[0].gap = 5;//parseFloat(5, 10);
+                        firstSeries[0].spacing = 5;
+                        chart.redraw();
+                        console.log(chart);*/
                     },
                 });
 
@@ -705,6 +711,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 });
 
                 setTimeout(function(){
+                    brcatotal = $("#mebrcacnt").text();
+                    brcatop = $("#topbrcacnt").text();
+                    $("#mebrcacnt").addClass(statImage(brcatotal, brcatop));
+                    hcftotal = $("#meeventcnt").text();
+                    hcftop = $("#topeventcnt").text();
+                    $("#meeventcnt").addClass(statImage(hcftotal, hcftop));
                     regtotal = $("#meregcnt").text();
                     regtop = $("#topregcnt").text();
                     $("#meregcnt").addClass(statImage(regtotal, regtop));
@@ -1555,7 +1567,6 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 },
                 seriesDefaults: {
                     type: "column",
-                    stack: true
                 },
                 valueAxis: {
                     line: {
@@ -1648,9 +1659,9 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             var img = "";
             if( parseInt(total) < parseInt(top/2) ){
                 img = "below_avg";
-            }else if( parseInt(total) < parseInt(top/2) && parseInt(total) >= parseInt(top/2) ){
+            }else if( parseInt(total) < parseInt(top) && parseInt(total) >= parseInt(top/2) ){
                 img = "above_avg";
-            }else if( parseInt(total) >= top/2 ){
+            }else if( parseInt(total) >= parseInt(top) ){
                 img = "top_performer_avg";
             }
             return img;
