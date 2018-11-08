@@ -588,25 +588,15 @@ function updateAccounts($db, $salesrep) {
 
 function exportUsers($db) {
     $testsSql = "SELECT q.Date_created AS date, CONCAT(srep.first_name, ' ', srep.last_name) as 'sales', mdl.mdl_number as 'mdl',
-    (SELECT MAX(sp.Date) FROM tbl_mdl_status_log sp WHERE sp.account = a.account AND sp.Guid_patient = p.Guid_patient AND sp.Guid_status = 2) as 'accessioned', 
-    (SELECT MAX(trr.Date) FROM tbl_mdl_status_log trr WHERE trr.account = a.account AND trr.Guid_patient = p.Guid_patient AND trr.Guid_status = 22) as 'reported', 
-    (SELECT tp.status FROM tbl_mdl_status_log tplog
-     LEFT JOIN tbl_mdl_status tp ON tplog.Guid_status = tp.Guid_status
-     WHERE tplog.account = a.account AND tplog.Guid_patient = p.Guid_patient AND tp.parent_id = 52 ORDER BY tplog.Date_created DESC LIMIT 1) as 'test_paid',
-    (SELECT aps.status FROM tbl_mdl_status_log ap 
-     LEFT JOIN tbl_mdl_status aps ON ap.Guid_status = aps.Guid_status
-     WHERE ap.account = a.account AND ap.Guid_patient = p.Guid_patient AND aps.parent_id = 2 ORDER BY ap.Date_created DESC LIMIT 1) as 'test_ordered', 
-    (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 53) as 'last_paid',
-    (CASE WHEN (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 9) THEN 'Declined'
-         WHEN (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 18) THEN 'Approved'
-         ELSE '' END) as 'insurance_app',
+    (SELECT MAX(sp.Date) FROM tbl_mdl_status_log sp WHERE sp.account = a.account AND sp.Guid_patient = p.Guid_patient AND sp.Guid_status = 2) as 'accessioned',
     a.account as 'account',
     a.name as 'account_name',
     q.qualified as 'med_necessity',
     q.source as 'event',
     q.Guid_user as 'user_id',
     srep.color_matrix as 'sales_color',
-    q.Date_created
+    q.Date_created,
+    p.Guid_patient as 'patient_id'
     
     FROM tbl_ss_qualify q 
     LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user 
@@ -614,8 +604,6 @@ function exportUsers($db) {
     LEFT JOIN tblaccount a ON a.account = q.account_number 
     LEFT JOIN tblaccountrep ar ON ar.Guid_account = a.Guid_account 
     LEFT JOIN tblsalesrep srep ON ar.Guid_salesrep = srep.Guid_salesrep
-    LEFT JOIN tbl_mdl_status_log sl ON sl.Guid_salesrep = srep.Guid_salesrep 
-    LEFT JOIN tbl_mdl_status s ON sl.Guid_status = s.Guid_status 
     LEFT JOIN tbl_mdl_number mdl ON q.Guid_user = mdl.Guid_user
     
     WHERE  u.marked_test = '0' 
@@ -635,16 +623,16 @@ function exportUsers($db) {
 
     $params = [];
     if ($_POST['account']) {
-	$params['account'] = $_POST['account'];
+	    $params['account'] = $_POST['account'];
     }
     if ($_POST['consultant']) {
-	$params['consultant'] = $_POST['consultant'];
+	    $params['consultant'] = $_POST['consultant'];
     }
     if ($_POST['from']) {
-	$params['from'] = dbDateFormat($_POST['from']);
+	    $params['from'] = dbDateFormat($_POST['from']);
     }
     if ($_POST['to']) {
-	$params['to'] = dbDateFormat($_POST['to']);
+	    $params['to'] = dbDateFormat($_POST['to']);
     }
 
     $tests = $db->query($testsSql, $params);
@@ -663,7 +651,7 @@ function exportUsers($db) {
         ),
         'font' => array(
             'bold' => true,
-            'color' => array('rgb' => 'ffffff')
+            'color' => array('rgb' => '00009c')
         ),
         'alignment' => array(
             'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
@@ -720,15 +708,47 @@ function exportUsers($db) {
 
         if (isset($data['sales_color'])) {
             $objPHPExcel->getActiveSheet()->getStyle('A'.$rowCount.':N'.$rowCount)->getFill()->applyFromArray(array(
-            'type' => PHPExcel_Style_Fill::FILL_SOLID,
-            'startcolor' => array(
-                'rgb' => (!empty($data['sales_color'])) ? substr($data['sales_color'], 1) : '#ffffff'
-            )
+                'type' => PHPExcel_Style_Fill::FILL_SOLID,
+                'startcolor' => array(
+                    'rgb' => (!empty($data['sales_color'])) ? substr($data['sales_color'], 1) : '#ffffff'
+                ),
+                'alignment' => array(
+                    'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+                )
             ));
         }
 
         $account_name = strtolower($data['account_name']);
         $account_name = ucwords($account_name);
+
+        $reported = "SELECT MAX(trr.Date) as 'reported' FROM tbl_mdl_status_log trr WHERE trr.account = {$data['account']} AND trr.Guid_patient = {$data['patient_id']} AND trr.Guid_status = 22"; 
+        $reportedResp = $db->query($reported);
+        $test_paid = "SELECT tp.status as 'test_paid' FROM tbl_mdl_status_log tplog
+         LEFT JOIN tbl_mdl_status tp ON tplog.Guid_status = tp.Guid_status
+         WHERE tplog.account = {$data['account']} AND tplog.Guid_patient = {$data['patient_id']} AND tp.parent_id = 52 ORDER BY tplog.Date_created DESC LIMIT 1";
+        $testPaidResp = $db->query($test_paid);
+        $test_ordered = "SELECT aps.status as 'test_ordered' FROM tbl_mdl_status_log ap 
+         LEFT JOIN tbl_mdl_status aps ON ap.Guid_status = aps.Guid_status
+         WHERE ap.account = {$data['account']} AND ap.Guid_patient = {$data['patient_id']} AND aps.parent_id = 2 ORDER BY ap.Date_created DESC LIMIT 1"; 
+        $testOrdereResp = $db->query($test_ordered);
+        $last_paid = "SELECT MAX(pr.Date) as 'last_paid' FROM tbl_mdl_status_log pr WHERE pr.account = {$data['account']} AND pr.Guid_patient = {$data['patient_id']} AND pr.Guid_status = 53";
+        $lastPaidResp = $db->query($last_paid);
+        $insurance_app = "SELECT CASE WHEN (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = {$data['account']} AND pr.Guid_patient = {$data['patient_id']} AND pr.Guid_status = 9) THEN 'Declined'
+             WHEN (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = {$data['account']} AND pr.Guid_patient = {$data['patient_id']} AND pr.Guid_status = 18) THEN 'Approved'
+             ELSE '' END as 'insurance_app' from tbl_mdl_status_log";
+        $insuranceAppResp = $db->query($insurance_app);
+
+        $data['reported'] = !empty($reportedResp[0]['reported']) ? $reportedResp[0]['reported'] : '';
+        $data['test_paid'] = !empty($testPaidResp[0]['test_paid']) ? $testPaidResp[0]['test_paid'] : '';
+        $data['test_ordered'] = !empty($testOrdereResp[0]['test_ordered']) ? $testOrdereResp[0]['test_ordered'] : '';
+        $data['last_paid'] = !empty($lastPaidResp[0]['last_paid']) ? $lastPaidResp[0]['last_paid'] : '';
+        $data['insurance_app'] = !empty($insuranceAppResp[0]['insurance_app']) ? $insuranceAppResp[0]['insurance_app'] : '';
+
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$rowCount.':N'.$rowCount)->applyFromArray(array(
+            'alignment' => array(
+                'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            )
+        ));
 
         $objPHPExcel->getActiveSheet()->SetCellValue('A' . $rowCount, formatDate($data['accessioned']));
         $objPHPExcel->getActiveSheet()->SetCellValue('B' . $rowCount, $data['mdl']);

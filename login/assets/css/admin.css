@@ -614,6 +614,11 @@ main {
 .button.export::before {
     content: "";
     background: url(../images/arrow-up.png) no-repeat center;
+    transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    -o-transform: rotate(180deg);
 }
 
 .button.export > strong {
