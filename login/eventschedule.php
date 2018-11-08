@@ -483,9 +483,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     cell.css("background-size", "100% 100%");
                 }
             },
-            /*viewRender: function(view, element) {
-                top_stats();
-            },*/
+            viewRender: function(view, element) {
+                //$("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
+            },
             eventClick: function (event, jsEvent, view)
             {
                 var moment = $.datepicker.formatDate('yy-mm-dd', new Date());
@@ -618,11 +618,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
                 var view = $('#calendar').fullCalendar('getView');
                 if(view.name == 'basicDay'){
-                   //console.log(event);
-                    //cmts = '<div class="fc-number"><span>Account Number: </span>' + event.account + '</div>';
+                    console.log(event);
                     cmts = '<div class = "day_stats">';
-                    cmts += '<div class="show-stats"><span class="silhouette"><span>0</span> <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"><span>0</span> <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna"><span>0</span> <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask"><span>0</span> <img src="assets/eventschedule/icons/flask_icon.png"></span></div>' +
-                                '</div>';
+                    cmts += '<div class="show-stats"><span class="silhouette"><span>0</span> <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"><span>0</span> <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna"><span>0</span> <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask"><span>0</span> <img src="assets/eventschedule/icons/flask_icon.png"></span></div>' + '</div>';
                     cmts += '</div>'
                     cmts += '<div class="fc-comments"><h1>Comments</h1><div class = "day-comments">';
                     if(event.comments != null) 
@@ -634,7 +632,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         cmts += '<img src="<?php echo SITE_URL; ?>/assets/images/'+event.logo+'" onerror="imgError(this);" /></div>';
                     else
                         cmts += '<img src="<?php echo SITE_URL; ?>/assets/images/default.png" /></div>';
-                    
                     state_count = state_count+1;
                 }
 
@@ -653,14 +650,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 if (event.color) {
                     borderColor = "border: 2px solid " + event.color + " !important";
                 }
-
+                var modifiedName = (name == "") ? "Health Care Fair" : name;
                 if(event.account && view.name == "basicDay" && event.title == "BRCA Day"){
-                    var accnum = event.account + " - ";
-                }else{
-                    var accnum = "";
+                    var modifiedName = event.account + " - " + name;
                 }
-                 
-                var modifiedName = accnum + sentenceCase((name == "") ? "Health Care Fair" : name);
 
                 var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable" style="' + borderColor + '">' +
                         '<div class="fc-content evtcontent">' +
@@ -670,7 +663,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             content += '<p class="acc-click" id="acc'+event.accountid+'" >' + modifiedName + '</p></div>';
                         else{
                             if(view.name == 'basicDay'){
-                                content += '<a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id='+event.accountid+'">' + account + " - " + modifiedName + '</a></div>';
+                                content += '<a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id='+event.accountid+'">' +  modifiedName + '</a></div>';
                             }else{
                                 content += '<a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>';
                             }
@@ -681,13 +674,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         '</div>';
 
                 if (event.evtCnt) {
-                    //console.log(event);
                     var content = '<div class="fc-content evtcontent days-' + eventDate + '" style="padding: 0 20px;">';
                     content += '<div class="numberCircleContainer"><span class="numberCircle">' + event.evtCnt + '</span></></div>';
                     content += '<div><img src="assets/eventschedule/icons/silhouette_icon.png" width="13" style="margin-right:5px;">Registered <span style="float:right">' + event.registeredCnt + '</span></div>';
                     content += '<div><img src="assets/eventschedule/icons/checkmark_icon.png" style="margin-right:5px;">Completed <span style="float:right">' + event.completedCnt + '</span></div>';
                     content += '<div><img src="assets/eventschedule/icons/dna_icon.png" style="margin-right:5px;">Qualified <span style="float:right">' + event.qualifiedCnt + '</span></div>';
-                    content += '<div><img src="assets/eventschedule/icons/flask_icon.png" style="margin-right:5px;">Submitted <span style="float:right">0</span></div>';
+                    content += '<div><img src="assets/eventschedule/icons/flask_icon.png" style="margin-right:5px;">Submitted <span style="float:right">'+ event.submittedCnt +'</span></div>';
                     content += '</div>';
                     return $(content);
                 } else {
@@ -802,6 +794,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     salesrepIds.push(v.salesrepid);
                 });
                 var uniqueIds = salesrepIds.filter(onlyUnique);
+                console.log(uniqueIds);
                 var uniqueIdsString = uniqueIds.toString();
 
                 var evtdata = {};
@@ -825,6 +818,26 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         (returndata[0].subCount != null) ? $(".subCnt").text(returndata[0].subCount) : $(".subCnt").text(0);
                     }
                 });
+
+               /* $.get({
+                    url:'ajaxHandlerEvents.php', 
+                    data:{ sDate: startdate, eDate:enddate, action:'getAccountAndSalesRep' }, 
+                    success: function(res){ 
+                        
+                        var result = JSON.parse(res);
+                        console.log(result);
+                        var i = 0;
+                        $("#salesrepfilter").html("<option value='0'>Genetic Consultant</option>");
+                        $("#accountfilter").html("<option value='0'>Select Account</option>");
+                        for(i=0; i<result.accNames.length; i++){
+                            $("#accountfilter").append("<option value='"+ result.accountid[i] +"'>"+ result.accNames[i] +"</option>");
+                        }
+                        for(i=0; i<result.salesrep.length; i++){
+                            $("#salesrepfilter").append("<option value='"+ result.salesrepid[i] +"'>"+ result.salesrep[i] +"</option>");
+                        }
+                         
+                    }
+                });*/
 
                 function onlyUnique(value, index, self) { 
                     return self.indexOf(value) === index;
@@ -1097,6 +1110,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             });
         }
         $('#salesrepfilter').on('change', function () {
+            $('#salesrepfilter option:selected').val($(this).val())
             var selec = $('#accountfilter option:selected').val();
             $('#accountfilter option').remove();
             $('#accountfilter').html('<option value="0">Account</option>');
@@ -1788,7 +1802,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                                 <?php
                                                 foreach ($accountdt as $acct) {
                                                     ?>
-                                                    <option value='<?php echo $acct['Guid_account']; ?>'><?php echo $acct['account'] . ' - ' . ucwords(strtolower($acct['name'])); ?></option>
+                                                    <option value='<?php echo $acct['Guid_account']; ?>'><?php echo $acct['account'] . ' - ' . formatAccountName(ucwords(strtolower($acct['name']))); ?></option>
                                                     <?php
                                                 }
                                                 ?>

@@ -34,34 +34,33 @@ function getEventSchedule($db,$salesRepId,$accountId,$reqdashboard, $start='', $
                 . "  FROM tblevents evt "
                 . "LEFT JOIN tblsalesrep salerep ON evt.salesrepid = salerep.Guid_salesrep "
                 . "LEFT JOIN tblaccount acct ON evt.accountid = acct.Guid_account "
-                . "LEFT JOIN tblhealthcare hltcare ON evt.healthcareid = hltcare.Guid_healthcare ";
+                . "LEFT JOIN tblhealthcare hltcare ON evt.healthcareid = hltcare.Guid_healthcare "
+                . "WHERE DATE(evt.start_event) between DATE(:sDate) and DATE(:eDate) ";
 
                 if($salesRepId != 0 && $accountId != 0){
-                    $query .= "WHERE evt.salesrepid =:salesrepid "
+                    $query .= "AND evt.salesrepid =:salesrepid "
                             . "AND evt.accountid =:accountid ";
                 }
 
                 if($salesRepId == 0 && $accountId != 0){
-                    $query .= "WHERE evt.accountid =:accountid "
+                    $query .= "AND evt.accountid =:accountid "
                             . "OR evt.salesrepid =:salesrepid ";
                 }
 
                 if($salesRepId != 0 && $accountId == 0 && $reqdashboard == 0){
-                    $query .= "WHERE evt.salesrepid =:salesrepid ";
-                            //. "OR evt.accountid =:accountid ";
+                    $query .= "AND evt.salesrepid =:salesrepid ";
                 }
 
                 if($salesRepId != 0 && $accountId == 0 && $reqdashboard == 1){
-                    $query .= "WHERE evt.salesrepid =:salesrepid ";
-                            //. "OR evt.accountid =:accountid ";
+                    $query .= "AND evt.salesrepid =:salesrepid ";
                 }
                 
                 
                 $query .= "ORDER BY evt.id";
         if($accountId != 0)
-            $result = $db->query($query, array("salesrepid"=>$salesRepId,"accountid"=>$accountId));
+            $result = $db->query($query, array("salesrepid"=>$salesRepId,"accountid"=>$accountId, 'sDate' => $start, 'eDate' => $end));
         elseif($accountId == 0)
-            $result = $db->query($query, array("salesrepid"=>$salesRepId));
+            $result = $db->query($query, array("salesrepid"=>$salesRepId, 'sDate' => $start, 'eDate' => $end));
     }
     else{
         $query = "SELECT evt.id, evt.healthcareid, evt.salesrepid, evt.accountid, evt.title, evt.start_event, evt.end_event,"

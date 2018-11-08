@@ -211,7 +211,8 @@ Author:Gabriela Johnson;
 
   width:100%;
 
-  min-height:170px;
+  /*min-height:170px;*/
+  min-height:20px;
 
 }
 
@@ -219,7 +220,7 @@ Author:Gabriela Johnson;
 
 #calendar th{
 
-  height:5%;
+  /*height:5%;*/
 
   border:2px solid grey;
 
@@ -251,7 +252,8 @@ Author:Gabriela Johnson;
 
     min-width: 200px;
 
-    min-height: 244px;
+    /*min-height: 244px;*/
+    min-height: 0px;
 
     vertical-align: top !important;
 
