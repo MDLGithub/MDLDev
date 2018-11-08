@@ -218,7 +218,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         font-weight:bold;
     }
 
-    .fc-basicDay-view .fc-logo img{  width:100%; max-width: 180px;   }
+    .fc-basicDay-view .fc-logo img{  width:100%; max-width: 130px; margin: 10px 0; }
 
     .fc-month-view .fc-scroller{ height: auto !important; }
 
@@ -927,11 +927,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             }
         });
 
-        function imgError(image) {
+        /*function imgError(image) {
             image.onerror = "";
-            image.src = "<?php echo SITE_URL; ?>/assets/images/default.png";
+            image.src = "<?php //echo SITE_URL; ?>/assets/images/default.png";
             return true;
-        }
+        }*/
 
         $("#modalcomment, #modalhealthcareComment, #modalfull_name_id, #modalstreet1_id, #modalstreet2_id, #modalcity_id, #modalstate_id, #modalzip_id").bind("keyup change", function(e) {
             /*$(this).addClass('updated');*/
@@ -1414,7 +1414,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     /* New Code */
     function imgError(image) {
         image.onerror = "";
-        image.src = "../login/images/logo-placeholder.png";
+        image.src = "../login/assets/images/default.png";
         return true;
     }
 
