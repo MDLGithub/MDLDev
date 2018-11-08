@@ -35,6 +35,9 @@ function showFields(forms) {
 
 $(document).ready(function(){
   tabCounter = 0;
+  accordionLength = $('ul#accordion li').length;
+
+
   firsttab = $("#form-option-table");
   firsttab.show();
   $("#forms").addClass("active-tab");
@@ -105,6 +108,7 @@ $(document).ready(function(){
     $(this).parent().css('width', '90%');
 
     activeItem = $(this).parent();
+    $(".page-count").html("Page "+ (tabCounter + 1) +" of "+accordionLength);
 });
 
  $(".next-button").click(function(){
@@ -114,6 +118,7 @@ $(document).ready(function(){
         $(activeItem).next().css('width', '90%');
         activeItem = $(activeItem).next();
       }
+      $(".page-count").html("Page "+ (tabCounter + 1) +" of "+accordionLength);
  });
 
 
@@ -124,6 +129,7 @@ $(document).ready(function(){
        $(activeItem).prev().css('width', '90%');
        activeItem = $(activeItem).prev();
      }
+     $(".page-count").html("Page "+ (tabCounter + 1) +" of "+accordionLength);
  });
 
        var onKeyDown = function ( event ) {
@@ -135,6 +141,7 @@ $(document).ready(function(){
                 $(activeItem).next().css('width', '90%');
                 activeItem = $(activeItem).next();
               }
+              $(".page-count").html("Page "+ (tabCounter + 1) +" of "+accordionLength);
             break;
           case 37:
           if(tabCounter > 0){
@@ -143,6 +150,7 @@ $(document).ready(function(){
                 $(activeItem).prev().css('width', '90%');
                 activeItem = $(activeItem).prev();
               }
+              $(".page-count").html("Page "+ (tabCounter + 1) +" of "+accordionLength);
             break;
         }
       };

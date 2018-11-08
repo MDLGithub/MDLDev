@@ -172,7 +172,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         .top-buttons { /*width: 65%;*/ }
         #detail, #summary{}
         .dropdown_hide{ display: none; }
-        .info_block h1{ width: 155px; line-height: 26px; text-align:left; padding-left:10px; font-size:20px;}
+        .info_block h1{ /*width: 155px;*/ line-height: 26px; text-align:left; padding-left:10px; font-size:20px;}
         .sales-photo img { max-width: 55px; text-align: center; margin-left: 20px; padding: 6px 0px; }
     }
     @media only screen and (min-device-width : 768px) and (max-width : 1024px) 
@@ -1299,9 +1299,9 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                         array_splice( $sTitle, 1, 0, array('<i class="fas fa-angle-down info_block_arrow" onclick="test()" style = "float:right;"></i>') );
                                         //print_r();
                                         $sTitle = implode("<br>",$sTitle);
-                                        echo '<h1>'.$sTitle.'</h1>';
+                                        echo '<h1 class = "col-sm-5">'.$sTitle.'</h1>';
                                     else:
-                                        echo '<h1>  All<i class="fas fa-angle-down info_block_arrow" onclick="test()" style = "float:right;"></i> <br>Genetic <br>Consultants</h1>';
+                                        echo '<h1 class "col-sm-5">  All<i class="fas fa-angle-down info_block_arrow" onclick="test()" style = "float:right;"></i> <br>Genetic <br>Consultants</h1>';
                                     endif;
 
                                 ?>
@@ -1316,10 +1316,10 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                     </ul>
                                 </div>
                             </div>
-                        <div class="col-lg-7 col-md-8 top-buttons">
-                        <button type="button" name="Detail" id="detail" class="col-lg-6 col-md-6 info-button activeButton" style="">Details</button>
-                        <button type="button" name="Summary" id="summary" class="col-lg-6 col-md-6 info-button" style="">Summary</button>
-                        <a href="eventschedule.php" class="col-md-12 col-sm-6 button submit"><strong>Full Calendar</strong></a>   
+                        <div class="col-lg-7 col-md-8 col-sm-7 top-buttons">
+                        <button type="button" name="Detail" id="detail" class="col-lg-6 col-md-6 col-sm-3 col-md-offset-0 col-sm-offset-1 info-button activeButton" style="">Details</button>
+                        <button type="button" name="Summary" id="summary" class="col-lg-6 col-md-6 col-sm-3 info-button" style="">Summary</button>
+                        <a href="eventschedule.php" class="col-md-12 col-sm-5 button submit"><strong>Full Calendar</strong></a>   
                         </div>    
                     </div>
                 </div>

@@ -311,19 +311,13 @@ Author:Gabriela Johnson;
 
   font-weight: bold;
 
-  line-height: 0.9;
+  line-height: 1;
 
   background: none;
 
-  /*padding: 5% 0 0 5%;*/
-
   float:none;
 
-  /*transition:visibility 0s 0.8s;*/
-
-  /*margin-top:25px;*/
-
-  max-width: 170px;
+  /*max-width: 170px;*/
 
 }
 
@@ -1127,6 +1121,8 @@ Author:Gabriela Johnson;
 
   visibility:hidden;
 
+  display:none;
+
 }
 
 
@@ -1759,7 +1755,6 @@ g g g text{
   and (orientation: portrait) {
 
     .salesrep_dropdown{
-      height:40px;
       z-index:10;
     }
 
@@ -1801,7 +1796,6 @@ g g g text{
     }
 
 
-
     .summary_button{
       float:none;
 
@@ -1831,6 +1825,18 @@ g g g text{
 
     .info_block_row.col-sm-12 {
         padding-left: 15px;
+        padding-right: 0;
+    }
+
+    #performance_chart .col-md-1{
+          font-size: 14px;
+    }
+
+    #performance_chart > div:nth-child(2) > div:nth-child(1){
+        white-space: normal;
+        line-height:1.2;
+        display:flex;
+        align-items:center;
         padding-right: 0;
     }
 
@@ -1866,6 +1872,14 @@ g g g text{
 
    .top_performer_avg:before{
         left: 43px;
+    }
+
+    #performance_chart > div:nth-child(2) > div:nth-child(1) {
+      white-space: normal;
+      line-height:1.2;
+      display:flex;
+      align-items:center;
+
     }
 
   }
@@ -1930,6 +1944,14 @@ and (orientation : landscape) {
       line-height:3;
 
       min-width:initial;
+
+      display:flex;
+
+      white-space:pre-wrap;
+
+      line-height:1.5;
+
+      align-items: center;
 
     }
 
@@ -2208,8 +2230,13 @@ and (orientation : landscape) {
     }
 
 
+    #performance_chart > div:nth-child(2) > div:nth-child(1) {
+      padding-right: 0;
+    }
 
-
+    .below_avg:before, .above_avg:before, .top_performer_avg:before{
+      left:33px;
+    }
 
 }
 
@@ -2313,6 +2340,8 @@ and (orientation : portrait) {
       font-size:20px;
 
       flex-grow:0.1;
+
+      max-width:initial;
 
     }
 
@@ -2420,6 +2449,23 @@ and (orientation : portrait) {
 
     }
 
+    #performance_chart > div:nth-child(2) > div:nth-child(1) {
+      white-space: normal;
+      line-height:1.2;
+      padding-right: 0;
+      display:flex;
+      align-items:center;
 
+    }
+
+    .salesrep_dropdown{
+      position:relative;
+      width:41.66666666666667%;
+      height:40px;
+    }
+
+    .below_avg:before, .above_avg:before, .top_performer_avg:before{
+      left:33px;
+    }
 
 }
