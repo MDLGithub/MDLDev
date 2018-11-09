@@ -283,14 +283,13 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart' && isset($_POST[
 		                    'data'=> array($submitted[0]),
 		                    'color'=> "#3a8a5f",
 		                    'labels'=> array('visible' => true),
-		                    //'spacing'=> 3,
+		                    'gap'=> 3,
 		                ],
 		                [
 		                	'name'=> 'Top Submitted',
 		                    'data'=> array($submit['topsubmittedcount']),
 		                    'color'=> "#b6942e",
 		                    'labels'=> array('visible' => true),
-		                    'spacing'=> 3,
 		                ]
 	            ),
 	            'categories' => $regSalereps 
@@ -519,7 +518,7 @@ if(isset($_POST['action']) && $_POST['action'] == 'tableStats'){
 }
 
 
-/* Get Dynamic Consultant List */
+/* ---------------------  Get Dynamic Consultant List --------------------- */
 if(isset($_GET['action']) && isset($_GET['srepids']) && $_GET['srepids'] != 0 && $_GET['action'] == 'getconsultant'){
     $ids = $_GET['srepids'];
     //print_r($ids);
@@ -535,11 +534,10 @@ if(isset($_GET['action']) && isset($_GET['srepids']) && $_GET['srepids'] != 0 &&
 }
 
 
-/* Summary Stats */
-if(isset($_GET['_']) && isset($_GET['start'])){
-    
-    $result = getSummaryEvents($db);
+/* --------------------- Summary Stats --------------------- */
 
+if(isset($_GET['_']) && isset($_GET['start'])){
+    $result = getSummaryEvents($db);
     foreach($result as $row)
     {
      $data[] = array(
@@ -553,11 +551,10 @@ if(isset($_GET['_']) && isset($_GET['start'])){
           'account' => $row['account']
           );
     }
-
     echo json_encode($data);
-
 }
 
+/* --------------------- Dshboard2 Setting Dropdown --------------------- */
 
 if(isset($_POST['action']) && $_POST['action'] == 'genconValues' && isset($_POST['eDate']) && isset($_POST['sDate'])){
     $query = "SELECT e.salesrepid, CONCAT(l.salesrep_fname, ' ' ,l.salesrep_lname) as snames "
@@ -568,6 +565,8 @@ if(isset($_POST['action']) && $_POST['action'] == 'genconValues' && isset($_POST
     $result = $db->query($query, array('sDate' => $_POST['sDate'], 'eDate'=>$_POST['eDate']));
     echo json_encode($result);
 }
+
+/* --------------------- Event Page Stats --------------------- */
 
 if( isset($_POST['action']) && $_POST['action'] == 'eventStats'){
 
@@ -601,30 +600,44 @@ if( isset($_POST['action']) && $_POST['action'] == 'eventStats'){
     echo json_encode($result);
 }
 
+/* --------------------- Event Page - Dependent Account Dropdown Values --------------------- */
 
 if(isset($_GET['action']) && $_GET['action'] == 'dynamicAccounts'){
     $sId = $_GET['sId'];
-    $query = "SELECT accrep.`Guid_salesrep`, acc.`Guid_account`, acc.`account`, acc.`name` FROM `tblaccountrep` accrep LEFT JOIN `tblaccount` acc ON acc.`Guid_account` = accrep.`Guid_account` WHERE accrep.`Guid_salesrep` =:sID ";
-    $result = $db->query($query, array('sID' => $sId));
-    foreach($result as $row)
+    $query = "SELECT distinct(acc.Guid_account), acc.name FROM tblaccount acc  "
+			. "INNER JOIN tblaccountrep accrep ON accrep.Guid_account = acc.Guid_account "
+			. "INNER JOIN tblevents evt ON evt.accountid = acc.Guid_account "
+			. "WHERE accrep.Guid_salesrep = :salesrepid "
+			. "AND DATE(evt.start_event) BETWEEN DATE(:sDate) AND DATE(:eDate) ";
+	$result = $db->query($query, array('salesrepid' => $sId, 'sDate'=>$_GET['sDate'], 'eDate'=>$_GET['eDate']));
+	$accountHTML = "";
+	foreach($result as $row)
 	{
-	    $data[] = array(
-	  		'Guid_salesrep' => $row['Guid_salesrep'],
-	  		'Guid_account' => $row['Guid_account'],
-	  		'account' => $row['account'],
-	  		'name' => formatAccountName($row['name']),
-	  	);
+		$accountHTML .= "<option value='".$row['Guid_account']."'>".$row['name']."</option>";
 	}
-    echo json_encode($data);
+    echo json_encode($accountHTML);
 }
+
+/* --------------------- Event Page - Dependent Salesrep Dropdown Values --------------------- */
 
 if(isset($_GET['action']) && $_GET['action'] == 'dynamicSalesrep'){
-    $aId = $_GET['aId'];
-    $query = "SELECT accrep.`Guid_salesrep`, CONCAT(salesrep.`first_name`, ' ', salesrep.`last_name`) AS sRepNames FROM `tblaccountrep` accrep LEFT JOIN `tblsalesrep` salesrep ON salesrep.`Guid_salesrep` = accrep.`Guid_salesrep` WHERE accrep.`Guid_account` =:aID ";
-    $result = $db->query($query, array('aID' => $aId));
-
-    echo json_encode($result);
+    
+    $query = "SELECT distinct(s.Guid_salesrep), concat(s.first_name, ' ', s.last_name) as snames "
+    		. "FROM tblsalesrep s "
+    		. "INNER JOIN tblaccountrep accrep ON accrep.Guid_salesrep = s.Guid_salesrep "
+			. "INNER JOIN tblevents evt ON evt.salesrepid = accrep.Guid_salesrep "
+			. "WHERE accrep.Guid_account = :accountid "
+			. "AND DATE(evt.start_event) BETWEEN DATE(:sDate) AND DATE(:eDate) ";
+	$result = $db->query($query, array('accountid' => $_GET['aID'], 'sDate'=>$_GET['sDate'], 'eDate'=>$_GET['eDate']));
+	$salesrepHTML = "";
+	foreach($result as $row)
+	{
+		$salesrepHTML .= "<option value='".$row['Guid_salesrep']."'>".$row['snames']."</option>";
+	}
+    echo json_encode($salesrepHTML);
 }
+
+/* --------------------- Event Page - Dropdown Values --------------------- */
 
 if(isset($_GET['action']) && $_GET['action'] == 'getAccountAndSalesRep'){
 	
@@ -637,17 +650,31 @@ if(isset($_GET['action']) && $_GET['action'] == 'getAccountAndSalesRep'){
 	$AccountQueryExec = $db->query($AccountQuery, array('sDate'=>$_GET['sDate'], 'eDate'=> $_GET['eDate']));
 
 	$salesNames = $salesIDs = $accIDs = $accNames =array();
+
 	foreach ($AccountQueryExec as $row) {
 		array_push($salesNames, $row['salesNames']);
 		array_push($salesIDs, $row['salesrepid']);
 		array_push($accIDs, $row['accountid']);
 		array_push($accNames, $row['name']);
 	}
-	$data['salesrep'] = array_unique($salesNames);
-	$data['salesrepid'] = array_unique($salesIDs);
-	$data['accountid'] = array_unique($accIDs);
-	$data['accNames'] = array_unique($accNames);
-	
-	echo json_encode($data);
+	$data['salesrep'] = array_values(array_unique($salesNames));
+	$data['salesrepid'] = array_values(array_unique($salesIDs));
+	$data['accountid'] = array_values(array_unique($accIDs));
+	$data['accNames'] = array_values(array_unique($accNames));
+	$count = 0;
+	$salesHTML = $accHTML = "";
+	foreach($data['salesrep'] as $row){
+		$salesHTML .= "<option value='". $data['salesrepid'][$count] ."'>".$row."</option>";
+		$count++;
+	}
+	$count = 0;
+	foreach($data['accNames'] as $row){
+		$accHTML .= "<option value='". $data['accountid'][$count] ."'>".$row."</option>";
+		$count++;
+	}
+	$result = array(
+		'salesArray' => $salesHTML,
+		'accArray' => $accHTML
+	);
+	echo json_encode($result);
 }
-

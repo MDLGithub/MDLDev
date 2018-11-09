@@ -365,27 +365,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             }
         });
         
-        if (localStorage.salesrepValue) {
-            $('#salesrepfilter').val(localStorage.salesrepValue);
-        }
-        if (localStorage.accountValue) {
-            $('#accountfilter').val(localStorage.accountValue);
-            if(localStorage.accountValue != 0 && localStorage.salesrepValue == 0 ){
-                $.ajax({
-                    url:'ajaxHandlerEvents.php',
-                    type:'GET',
-                    data:{ aId : localStorage.accountValue, action:'dynamicSalesrep' },
-                    success: function(res){
-                        console.log(res);
-                        var result = JSON.parse(res);
-                        $("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
-                        $.each(result, function(k, v){
-                            $("#salesrepfilter").append('<option value="'+v.Guid_salesrep+'">'+v.sRepNames+'</option>');
-                        })
-                    }
-                });
-            }
-        }
         if (localStorage.salesrepValue != 0 || localStorage.accountValue != 0) {
             var cursource = 'eventload.php?salerepId=' + localStorage.salesrepValue + '&accountId=' + localStorage.accountValue;
         }
@@ -491,6 +470,21 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             },
             viewRender: function(view, element) {
                 //$("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
+                /*$.get({
+                    url:'ajaxHandlerEvents.php', 
+                    data:{ sDate: startdate, eDate:enddate, action:'getAccountAndSalesRep' }, 
+                    success: function(res){ 
+                        var result = JSON.parse(res);
+                        $("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
+                        $("#accountfilter").html('<option value="0">Account</option>');
+                        $("#salesrepfilter").append(result.salesArray);
+                        if(localStorage.getItem("salesrepValue") !== null)
+                            $("#salesrepfilter").val(localStorage.salesrepValue);
+                        $("#accountfilter").append(result.accArray);
+                        if(localStorage.getItem("accountValue") !== null)
+                            $("#accountfilter").val(localStorage.accountValue);
+                    }
+                });*/
             },
             eventClick: function (event, jsEvent, view)
             {
@@ -800,7 +794,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     salesrepIds.push(v.salesrepid);
                 });
                 var uniqueIds = salesrepIds.filter(onlyUnique);
-                console.log(uniqueIds);
+                //console.log(uniqueIds);
                 var uniqueIdsString = uniqueIds.toString();
 
                 var evtdata = {};
@@ -825,25 +819,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     }
                 });
 
-               /* $.get({
-                    url:'ajaxHandlerEvents.php', 
-                    data:{ sDate: startdate, eDate:enddate, action:'getAccountAndSalesRep' }, 
-                    success: function(res){ 
-                        
-                        var result = JSON.parse(res);
-                        console.log(result);
-                        var i = 0;
-                        $("#salesrepfilter").html("<option value='0'>Genetic Consultant</option>");
-                        $("#accountfilter").html("<option value='0'>Select Account</option>");
-                        for(i=0; i<result.accNames.length; i++){
-                            $("#accountfilter").append("<option value='"+ result.accountid[i] +"'>"+ result.accNames[i] +"</option>");
-                        }
-                        for(i=0; i<result.salesrep.length; i++){
-                            $("#salesrepfilter").append("<option value='"+ result.salesrepid[i] +"'>"+ result.salesrep[i] +"</option>");
-                        }
-                         
-                    }
-                });*/
+
+                
+                $('#salesrepfilter').val((localStorage.getItem("salesrepValue") !== null) ? localStorage.salesrepValue : 0);
+                $('#accountfilter').val((localStorage.getItem("accountValue") !== null) ? localStorage.accountValue : 0);
+
 
                 function onlyUnique(value, index, self) { 
                     return self.indexOf(value) === index;
@@ -926,12 +906,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 return false;
             }
         });
-
-        /*function imgError(image) {
-            image.onerror = "";
-            image.src = "<?php //echo SITE_URL; ?>/assets/images/default.png";
-            return true;
-        }*/
 
         $("#modalcomment, #modalhealthcareComment, #modalfull_name_id, #modalstreet1_id, #modalstreet2_id, #modalcity_id, #modalstate_id, #modalzip_id").bind("keyup change", function(e) {
             /*$(this).addClass('updated');*/
@@ -1101,11 +1075,22 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $('#modalsalerepid').val(this.value);
         });
 
+
+/*---------------------------------------------------------------------------------------*/
+
+    var events = $('#calendar').fullCalendar('getView');
+    var startdate = moment(events.start._d).format('YYYY-MM-DD');
+    var enddate = moment(events.end._d).format('YYYY-MM-DD');
+    $('.fc-prev-button, .fc-next-button').click(function() {
+        var calendar = $('#calendar').fullCalendar('getCalendar');
+        events = calendar.view;
+        startdate = moment(events.start._d).format('YYYY-MM-DD');
+        enddate = moment(events.end._d).format('YYYY-MM-DD');
         if(localStorage.salesrepValue != 0 && localStorage.accountValue == 0){
             $.ajax({
                 url:'ajaxHandlerEvents.php',
                 type:'GET',
-                data:{ sId : localStorage.salesrepValue, action:'dynamicAccounts' },
+                data:{ sId : localStorage.salesrepValue, sDate:startdate, eDate:enddate, action:'dynamicAccounts' },
                 success: function(res){
                     var result = JSON.parse(res);
                     $("#accountfilter").html('<option value="0">Account</option>');
@@ -1114,59 +1099,106 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     })
                 }
             });
-        }
-        $('#salesrepfilter').on('change', function () {
-            $('#salesrepfilter option:selected').val($(this).val())
-            var selec = $('#accountfilter option:selected').val();
-            $('#accountfilter option').remove();
-            $('#accountfilter').html('<option value="0">Account</option>');
-            var selectedValue = this.value;
-
-            if(selectedValue != 0){
-                $.ajax({
-                    url:'ajaxHandlerEvents.php',
-                    type:'GET',
-                    data:{ sId : selectedValue, action:'dynamicAccounts' },
-                    success: function(res){
-                        var result = JSON.parse(res);
-                        $("#accountfilter").html('<option value="0">Account</option>');
-                        $.each(result, function(k, v){
-                            $("#accountfilter").append('<option value="'+v.Guid_account+'">'+ v.account + ' - ' + v.name +'</option>');
-                        })
-                    }
-                });
-            }else{
-                $("#accountfilter").html('<option value="0">Account</option>');
-                <?php
-                    foreach ($accountdt as $acct) {
-                        ?>
-                            $("#accountfilter").append("<option value='<?php echo $acct["Guid_account"]; ?>'><?php echo $acct['account'] . ' - ' . ucwords(strtolower($acct['name'])); ?></option>");
-                        <?php 
-                    }
-                ?>
-            }
-            $('#salerepid').val(this.value);
-        });
-
-        $('#accountfilter').on('change', function () {
-            var selec = $('#salesrepfilter option:selected').val();
-            $('#salesrepfilter option').remove();
-            $('#salesrepfilter').html('<option value="">Genetic Consultant</option>');
-            $.ajax({
-                type : 'POST',
-                data : 'accountId='+ this.value,
-                dataType: 'json',
-                url : 'salesrepselection.php',
-                success : function(data){
-                    $.each(data, function(k, v) {
-                        if(selec == v.id) var selected = 'selected';
-                        if(v.id) $('#salesrepfilter').append('<option value="' + v.id + '" '+ selected + '>' + v.name + '</option>');
-                    });
-
-
+        }else{
+            $.get({
+                url:'ajaxHandlerEvents.php', 
+                data:{ sDate: startdate, eDate:enddate, action:'getAccountAndSalesRep' }, 
+                success: function(res){ 
+                    var result = JSON.parse(res);
+                    $("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
+                    $("#accountfilter").html('<option value="0">Account</option>');
+                    $("#salesrepfilter").append(result.salesArray);
+                    if(localStorage.getItem("salesrepValue") !== null)
+                        $("#salesrepfilter").val(localStorage.salesrepValue);
+                    $("#accountfilter").append(result.accArray);
+                    if(localStorage.getItem("accountValue") !== null)
+                        $("#accountfilter").val(localStorage.accountValue);
                 }
             });
-        });
+        }
+    });
+        
+    $("#salesrepfilter").change(function(){
+        var thisValue = $(this).val();
+        if(thisValue != 0){
+            localStorage.salesrepValue = thisValue;
+            $('#accountfilter option').remove();
+            $('#accountfilter').html('<option value="0">Account</option>');
+            $.ajax({
+                url:'ajaxHandlerEvents.php',
+                type:'GET',
+                data:{ sId : thisValue, sDate:startdate, eDate:enddate, action:'dynamicAccounts' },
+                success: function(res){
+                    var result = JSON.parse(res);
+                    $("#accountfilter").html('<option value="0">Account</option>');
+                    $("#accountfilter").append(result);
+                    if(localStorage.getItem("accountValue") !== null)
+                        $("#accountfilter").val(localStorage.accountValue);                        
+                }
+            });
+        }else{
+            $.get({
+                url:'ajaxHandlerEvents.php', 
+                data:{ sDate: startdate, eDate:enddate, action:'getAccountAndSalesRep' }, 
+                success: function(res){ 
+                    var result = JSON.parse(res);
+                    $("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
+                    $("#accountfilter").html('<option value="0">Account</option>');
+                    $("#salesrepfilter").append(result.salesArray);
+                    if(localStorage.getItem("salesrepValue") !== null)
+                        $("#salesrepfilter").val(localStorage.salesrepValue);
+                    else
+                        $("#salesrepfilter").val(0);
+                    $("#accountfilter").append(result.accArray);
+                    if(localStorage.getItem("accountValue") !== null)
+                        $("#accountfilter").val(localStorage.accountValue);
+                    else
+                        $("#accountfilter").val(0);
+                }
+            });
+        }
+    })
+
+    $("#accountfilter").change(function(){
+        var thisValue = $(this).val();
+        if(thisValue != 0){
+            localStorage.accountValue = thisValue;
+            $('#salesrepfilter option').remove();
+            $('#salesrepfilter').html('<option value="0">Genetic Consultant</option>');
+            $.ajax({
+                url:'ajaxHandlerEvents.php',
+                type:'GET',
+                data:{ aID : thisValue, sDate:startdate, eDate:enddate, action:'dynamicSalesrep' },
+                success: function(res){
+                    //console.log(res);
+                    var result = JSON.parse(res);
+                    $("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
+                    $("#salesrepfilter").append(result);
+                    if(localStorage.getItem("salesrepValue") !== null)
+                        $("#salesrepfilter").val(localStorage.salesrepValue);                        
+                }
+            });
+        }else{
+            $.get({
+                url:'ajaxHandlerEvents.php', 
+                data:{ sDate: startdate, eDate:enddate, action:'getAccountAndSalesRep' }, 
+                success: function(res){ 
+                    var result = JSON.parse(res);
+                    $("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
+                    $("#accountfilter").html('<option value="0">Account</option>');
+                    $("#salesrepfilter").append(result.salesArray);
+                    if(localStorage.getItem("salesrepValue") !== null)
+                        $("#salesrepfilter").val(localStorage.salesrepValue);
+                    $("#accountfilter").append(result.accArray);
+                    if(localStorage.getItem("accountValue") !== null)
+                        $("#accountfilter").val(localStorage.accountValue);
+                }
+            });
+        }
+    });
+
+/*---------------------------------------------------------------------------------------*/
+
         $('#accountopt').on('change', function () {
                 var selec = $('#salesrepopt option:selected').val();
                 $('#salesrepopt option').remove();
@@ -1790,13 +1822,13 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                             <select class="form-control" id="salesrepfilter">
                                                 <option value="0">Genetic Consultant</option>
                                                 <?php
-                                                foreach ($salesrep as $srole) {
+                                                /*foreach ($salesrep as $srole) {
                                                     if ($srole['first_name']) {
                                                         ?>
                                                         <option value='<?php echo $srole['Guid_salesrep']; ?>'><?php echo $srole['first_name'] . " " . $srole['last_name']; ?></option>
                                                         <?php
                                                     }
-                                                }
+                                                }*/
                                                 ?>
                                             </select>
                                         </div>
@@ -1806,11 +1838,11 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                             <select class="form-control" id="accountfilter">
                                                 <option value="0">Account</option>
                                                 <?php
-                                                foreach ($accountdt as $acct) {
+                                                /*foreach ($accountdt as $acct) {
                                                     ?>
                                                     <option value='<?php echo $acct['Guid_account']; ?>'><?php echo $acct['account'] . ' - ' . formatAccountName(ucwords(strtolower($acct['name']))); ?></option>
                                                     <?php
-                                                }
+                                                }*/
                                                 ?>
                                             </select>
                                         </div>
