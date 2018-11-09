@@ -677,6 +677,7 @@ function exportUsers($db) {
     $objPHPExcel->getActiveSheet()->SetCellValue('N' . $rowCount, 'Payer(s)');
     $objPHPExcel->getActiveSheet()->SetCellValue('O' . $rowCount, 'Total Paid');
 
+    $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(11);
     $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(60);
 
     $totalSum = 0;
