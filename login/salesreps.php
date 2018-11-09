@@ -650,7 +650,7 @@ require_once ('navbar.php');
     <?php }  ?>
     <div id="geneveda-export-modal" class="modalBlock hidden">
     <div class="contentBlock">
-	<a class="close">X</a>
+	<a class="close"></a>
 
 	<h5 class="title">
 	    Geneveda Matrix Export Parameters

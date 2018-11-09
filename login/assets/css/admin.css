@@ -591,6 +591,18 @@ main {
     font-size: 1.1em;
 }
 
+#palette_top .user-mng-button{
+
+}
+
+.user-mng-button::before{
+
+}
+
+.user-mng-button.smaller-button::before{
+
+}
+
 .scroller {
     height: 100%;
     overflow-y: auto;
@@ -1389,7 +1401,65 @@ and (orientation : portrait){
 	padding-right:0;
     }
 
+    #palette_top .user-mng-button{
+        padding: 0px 2px;
+        text-indent: -37px;
+        overflow: hidden;
+    }
+
+    .user-mng-button::before{
+        content:'';
+        position:absolute;
+        display:none;
+    }
+
+    .smaller-button::before{
+        content:'';
+        position:absolute;
+        background: url(../images/button_arrow.png) no-repeat 0 center, radial-gradient(ellipse at center, #6695cb 0%,#1c487b 100%);
+        background-size: 85% auto;
+        display:block;
+    }
+
 }
+
+
+/* iPad Pro Portrait */
+@media only screen 
+and (min-device-width: 1023px) 
+and (max-device-width: 1025px) 
+and (min-device-height: 1365px) 
+and (max-device-height: 1367px) 
+and (orientation: portrait) 
+and (-webkit-min-device-pixel-ratio: 2) {
+
+    #palette_top .user-mng-button{
+        float: right;
+        font-size: .85em;
+        background: linear-gradient(to bottom, rgba(255,255,255,0.34) 0%,rgba(255,255,255,0.34) 46%,rgba(224,224,224,0.34) 64%,rgba(243,243,243,0.34) 100%);
+        padding: 0 1.8em 0 3.4em;
+        text-indent:0px;
+    }
+
+    .user-mng-button::before{
+        content:'';
+        position:absolute;
+        background: url(../images/button_arrow.png) no-repeat 0 center, radial-gradient(ellipse at center, #6695cb 0%,#1c487b 100%);
+        background-size: 85% auto;
+        display:block;
+
+    }
+
+    .smaller-button::before{
+        content:'';
+        position:absolute;
+        background: url(../images/button_arrow.png) no-repeat 0 center, radial-gradient(ellipse at center, #6695cb 0%,#1c487b 100%);
+        background-size: 85% auto;
+        display:block;
+    }
+}
+
+
 /*gabby end*/
 
 .hidden {

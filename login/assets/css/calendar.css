@@ -1829,7 +1829,7 @@ g g g text{
     }
 
     #performance_chart .col-md-1{
-          font-size: 14px;
+          font-size: 12px;
     }
 
     #performance_chart > div:nth-child(2) > div:nth-child(1){
@@ -1848,7 +1848,9 @@ g g g text{
 
 @media only screen 
 
-  and (max-height: 86em) 
+  and (min-device-width: 64em)
+
+  and (max-device-height: 86em) 
 
   and (orientation: landscape) {
 
@@ -1880,6 +1882,14 @@ g g g text{
       display:flex;
       align-items:center;
 
+    }
+
+    #performance_chart .col-md-1{
+       
+    }
+
+    .box.full.visible.dashboard {
+        padding-left: 0.9em;
     }
 
   }

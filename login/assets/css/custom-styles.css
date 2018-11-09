@@ -1626,6 +1626,11 @@ and (-webkit-min-device-pixel-ratio: 2) {
         left: 20%;
     }
 
+    .user_mng_button.smaller_button{
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+    }
+
 }
 
 #accounts .actions h2{
@@ -2180,29 +2185,20 @@ td.tdAccount:hover .account_name{
     font-weight: bold;
 }
 
-.user-managemnet-bg {
-    font-family: "Segoe UI Symbol";
-}
-
 .user-managemnet-bg .admin{
     color: #b1ffcd;
-    font-family: "Segoe UI Symbol";
 }
 .user-managemnet-bg .mdl_patient{
     color: #b186fd;
-    font-family: "Segoe UI Symbol";
 }
 .user-managemnet-bg .marked_test{
     color: #ffc747;
-    font-family: "Segoe UI Symbol";
 }
 .user-managemnet-bg .salesrep{
     color: #eab8d9;
-    font-family: "Segoe UI Symbol";
 }
 .user-managemnet-bg .provider{
     color: #b5d1f3;
-    font-family: "Segoe UI Symbol";
 }
 
 tr.admin{

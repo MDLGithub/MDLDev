@@ -270,7 +270,7 @@ require_once ('navbar.php');
             </h4>
             <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>
             <a href="<?php echo SITE_URL; ?>/dashboard2.php" class="button homeIcon"></a>
-            <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
+            <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit user-mng-button"><strong>View Questionnaire</strong></a>
         </section>
         <div class="scroller">  
             <div class="row">               
@@ -283,11 +283,11 @@ require_once ('navbar.php');
                     </a>
                 </div>  
                 <div class="col-md-12 text-right user-managemnet-bg">
-                    <span class="admin">&#9726; Admin</span>
-                    <span class="salesrep">&#9726; Sales Rep</span>
-                    <span class="provider">&#9726; Physician</span>
-                    <span class="marked_test">&#9726; Test Users</span>
-                    <span class="mdl_patient">&#9726; MDL Patient</span>
+                    <span class="admin">◾&#xfe0e; Admin</span>
+                    <span class="salesrep">◾&#xfe0e; Sales Rep</span>
+                    <span class="provider">◾&#xfe0e; Physician</span>
+                    <span class="marked_test">◾&#xfe0e; Test Users</span>
+                    <span class="mdl_patient">◾&#xfe0e; MDL Patient</span>
                 </div>
             </div>               
             <div class="row">
@@ -675,7 +675,7 @@ require_once ('navbar.php');
             </div>
             <div class="row actionButtons">
                 <div class="col-md-6 col-md-offset-3 pT-20">
-                    <button name="save_user" type="submit" class="button btn-inline">Save</button>
+                    <button name="save_user" type="submit" class="button btn-inline" style = "margin: auto; display: block !important;">Save</button>
                 </div>
             </div>
             

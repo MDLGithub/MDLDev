@@ -1224,7 +1224,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             <h4><?php echo $thisMessage; ?></h4>
         </section>
     <?php } ?>    
-    <div class="box full visible ">  
+    <div class="box full visible dashboard">  
         <section id="palette_top">
             <h4>             
                 <ol class="breadcrumb">
