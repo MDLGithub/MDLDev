@@ -678,3 +678,32 @@ if(isset($_GET['action']) && $_GET['action'] == 'getAccountAndSalesRep'){
 	);
 	echo json_encode($result);
 }
+
+
+if(isset($_GET['action']) && $_GET['action'] == 'getAccounts'){
+	$query = "SELECT distinct(acc.Guid_account), acc.name FROM tblaccount acc "  
+			. "INNER JOIN tblaccountrep accrep ON accrep.Guid_account = acc.Guid_account "
+			. "INNER JOIN tblevents evt ON evt.accountid = acc.Guid_account "
+			. "WHERE accrep.Guid_salesrep = :sID "
+			. "AND DATE(evt.start_event) BETWEEN DATE(:sDate) AND DATE(:eDate) ";
+	$execQuery = $db->query($query, array('sID'=>$_GET['sID'], 'sDate'=>$_GET['sDate'], 'eDate'=> $_GET['eDate']));
+	$html = "";
+	foreach($execQuery as $row){
+		$html .= "<option value='".$row['Guid_account']."'>".$row['name']."</option>";
+	}
+	echo $html;
+}
+
+if(isset($_GET['action']) && $_GET['action'] == 'getSales'){
+	$query = "SELECT distinct(s.Guid_salesrep), concat(s.first_name, ' ', s.last_name) as sNames "
+			. "FROM tblsalesrep s "
+			. "LEFT JOIN tblevents evt ON evt.salesrepid = s.Guid_salesrep "
+			. "WHERE evt.accountid = :sID "
+			. "AND DATE(evt.start_event) BETWEEN DATE(:sDate) AND DATE(:eDate) ";
+	$execQuery = $db->query($query, array('sID'=>$_GET['sID'], 'sDate'=>$_GET['sDate'], 'eDate'=> $_GET['eDate']));
+	$html = "";
+	foreach($execQuery as $row){
+		$html .= "<option value='".$row['Guid_salesrep']."'>".$row['sNames']."</option>";
+	}
+	echo $html;
+}
