@@ -289,17 +289,18 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
         .day_stats {
             padding-top: 0;
-            width: 50%;
-            text-align: center;
+            width: 100%;
         }
 
         .fc-basicDay-view .fc-comments {
             width:100%;
+            padding: 1% 0 1% 1%;
         }
 
         .fc-basicDay-view .fc-logo{
             width: 100%;
         }
+
     }
     @media only screen 
     and (min-device-width : 768px) 
@@ -2073,9 +2074,9 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                 </div> 
                                 <div class="row">
                                     <div class='col-md-10'>
-                                        <button type="button" id="eventupdate" class="btn btn-primary" style="cursor: pointer;" disabled="disabled">Update</button>
-                                        <button type="button" id="eventcancel" class="btn btn-danger" style="cursor: pointer;">Cancel</button>
-                                        <button type="button" class="btn btn-danger" id="eventdelete" style="border-radius: 2em !important; margin: 7px 0;" style="cursor: pointer;">Delete</button>
+                                        <button type="button" id="eventupdate" class="btn btn-primary col-sm-4" style="cursor: pointer;min-width:auto;" disabled="disabled">Update</button>
+                                        <button type="button" id="eventcancel" class="btn btn-danger col-sm-4" style="cursor: pointer;min-width:auto;">Cancel</button>
+                                        <button type="button" class="btn btn-danger col-sm-4" id="eventdelete" style="border-radius: 2em !important;min-width:auto;" style="cursor: pointer;">Delete</button>
                                     </div>
                                 </div>
                             </div>

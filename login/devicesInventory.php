@@ -285,7 +285,7 @@ require_once ('navbar.php');
                                     <?php } ?>
                                     <?php if(isFieldVisibleByRole($isDeviceNameView, $roleID)) {?>
                                     <div class="row">
-                                        <div class="col-md-10 select_device_dropdown">
+                                        <div class="col-md-10 padd-0 select_device_dropdown">
                                           <div class="f2  <?php echo ($deviceid!="")?"valid show-label":"";?>">
                                             <label class="dynamic" for="deviceType"><span>Device Name</span></label>
                                             <div class="group">
