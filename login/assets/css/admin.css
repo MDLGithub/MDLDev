@@ -1313,9 +1313,6 @@ and (orientation : landscape) {
     /*Add Account*/
 
     /*Sales Rep Input*/
-    form .row .col-md-6 .col-md-9 .f2:nth-child(1){
-	margin-left:-15px;
-    }
 
     form .row:nth-child(1) .col-md-6:nth-child(2) .f2{
 	width:100%;
