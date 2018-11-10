@@ -300,7 +300,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         .fc-basicDay-view .fc-logo{
             width: 100%;
         }
-
     }
     @media only screen 
     and (min-device-width : 768px) 
@@ -308,7 +307,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     and (orientation : landscape) { 
 
     }
-    
 </style>
 <script>
     
@@ -365,38 +363,27 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 $("div.modalhealthcare").hide();
             }
         });
-        
-        if (localStorage.salesrepValue != 0 || localStorage.accountValue != 0) {
-            var cursource = 'eventload.php?salerepId=' + localStorage.salesrepValue + '&accountId=' + localStorage.accountValue;
+        var cursource = 'eventload.php?type=search';
+
+        localStorage.setItem('salesrepValue', <?php echo (isset($_GET['salerepId']) && $_GET['salerepId'] != 0) ?  $_GET['salerepId'] : 0 ?>);
+        localStorage.setItem('accountValue', <?php echo (isset($_GET['accountId']) && $_GET['accountId'] != 0) ?  $_GET['accountId'] : 0 ?>);
+        var d = new Date();
+        var evtsDate = d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate();
+        evtsDate = evtsDate.toString();
+        <?php if(isset($_GET['salerepId']) || isset($_GET['accountId'])): ?>
+            if (localStorage.evtsDate) {
+                evtsDate = (localStorage.evtsDate).toString();
+            }
+        <?php endif; ?>
+
+        if (localStorage.salesrepValue != 0) {
+            cursource += '&salerepId=' + localStorage.salesrepValue; 
+        }if(localStorage.accountValue != 0){
+            cursource += '&accountId=' + localStorage.accountValue;
         }
-        else{
-            var cursource = 'eventload.php';
-        }
+
         var salesrep = 0;
         var account = 0;
-        $('#salesrepfilter,#accountfilter').change(function () {
-            salesrep = $('#salesrepfilter option:selected').val();
-            account = $('#accountfilter option:selected').val();
-            localStorage.setItem('salesrepValue', salesrep );
-            localStorage.setItem('accountValue', account );
-            var allcursource = 'eventload.php';
-            if ( localStorage.salesrepValue != 0 || localStorage.accountValue != 0 || localStorage.salesrepValue != undefined || localStorage.accountValue != undefined ) {
-                cursource = 'eventload.php?salerepId=' + localStorage.salesrepValue + '&accountId=' + localStorage.accountValue;
-            }
-
-            $('#calendar').fullCalendar('removeEventSources');
-            $('#calendar').fullCalendar('refetchEvents');
-            if (localStorage.salesrepValue == 0 && localStorage.accountValue == 0) {
-                $('#calendar').fullCalendar('addEventSource', allcursource);
-            } else {
-                $('#calendar').fullCalendar('addEventSource', cursource);
-            }
-            $('#calendar').fullCalendar('refetchEvents');
-            $("#summary").css("background", "linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)").css("color","#000");
-            $("#detail").css("background", "#3f628a").css("color","#fff").css("box-shadow", "none");
-            //top_stats();
-        });
-
         // when summary button is clicked
         $('#summary').on('click touchstart', function () {
             var summarycursource = 'ajaxHandlerEvents.php';
@@ -450,6 +437,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             editable: false,
             eventOverlap: false,
             contentHeight: 'auto',
+            defaultDate: evtsDate,
             dayRender: function (date, cell) {
                 var today = new Date();
                 var dd = today.getDate();
@@ -470,8 +458,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 }
             },
             viewRender: function(view, element) {
-                //$("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
-                
+                $("#salesrepfilter").html("<option value='0'>Generic Consultant</option>");
+                $("#accountfilter").html("<option value='0'>Account</option>");
             },
             eventClick: function (event, jsEvent, view)
             {
@@ -538,7 +526,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     //modal.style.display = "block";
                     $("#myModal").delay( 100 ).fadeIn( 400 )
                 //}
-
             },
             eventMouseover: function (calEvent, jsEvent) {
                 if (!calEvent.evtCnt) {
@@ -572,10 +559,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             $('.tooltipevent').css('left', e.pageX + 20);
                         });
                     }
-                }
-                
+                } 
             },
-
             eventMouseout: function (calEvent, jsEvent) {
                 $(this).css('z-index', 8);
                 $('.tooltipevent').remove();
@@ -693,8 +678,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         return $(content);
                     }
                 }
-
-
             },
             eventAfterRender: function (event, element, view) {
                 if (!event.evtCnt) {
@@ -713,56 +696,58 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         element.css('color', '#000');
                     }
                 }
-                $.ajax({
-                    url: 'ajaxHandlerEvents.php',
-                    type: 'POST',
-                    data: { account_id: event.accountid, action: 'getLogo'},
-                    success:function(res){
-                        if(isEmpty(res)) {
-                            var res = JSON.parse(res);
-                            if(res.length > 0){
-                                logo = res[0];
-                                element[0].childNodes[2].innerHTML = '<img src = "images/practice/'+logo.logo+'" />';
-                            }
-                            else{   
-                                element[0].childNodes[2].innerHTML = '<img src = "images/logo-placeholder.png" />';    
+                if(view.name == 'basicDay'){
+                    $.ajax({
+                        url: 'ajaxHandlerEvents.php',
+                        type: 'POST',
+                        data: { account_id: event.accountid, action: 'getLogo'},
+                        success:function(res){
+                            if(isEmpty(res)) {
+                                var res = JSON.parse(res);
+                                if(res.length > 0){
+                                    logo = res[0];
+                                    element[0].childNodes[2].innerHTML = '<img src = "images/practice/'+logo.logo+'" />';
+                                }
+                                else{   
+                                    element[0].childNodes[2].innerHTML = '<img src = "images/logo-placeholder.png" />';    
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                }
 
-                
                 var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1, selectedDate: $.fullCalendar.formatDate(event.start, "Y-M-DD")};     
                 var today = new Date();
                 var parsedNow =  new Date(today).getUnixTime();
-                var parsedEventTime = new Date(event.start).getUnixTime();           
-                $.ajax({
-                    url: "ajaxHandlerEvents.php",
-                    type: "POST",
-                    data: eventData,
-                    success: function (res)
-                    {
-                        if(res){
-                            var res = JSON.parse(res);
-                            var regHTML = res.reg;
-                            var comHTML = res.com;
-                            var subHTML = res.sub;
-                            var quaHTML = res.qua;
-                            if(view.name != 'basicDay' && parsedEventTime < parsedNow){
-                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[0].childNodes[0].innerHTML = regHTML;
-                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[2].childNodes[0].innerHTML = comHTML;
-                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].childNodes[0].innerHTML = quaHTML;
-                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[6].childNodes[0].innerHTML = subHTML;
-                            }else if(view.name == 'basicDay' && parsedEventTime < parsedNow){
-                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[0].childNodes[0].innerHTML = regHTML;
-                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[2].childNodes[0].innerHTML = comHTML;
-                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].childNodes[0].innerHTML = quaHTML;
-                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[6].childNodes[0].innerHTML = subHTML;
+                var parsedEventTime = new Date(event.start).getUnixTime();  
+                if(event.title == 'BRCA Day'){
+                    $.ajax({
+                        url: "ajaxHandlerEvents.php",
+                        type: "POST",
+                        data: eventData,
+                        success: function (res)
+                        {
+                            if(res){
+                                var res = JSON.parse(res);
+                                var regHTML = res.reg;
+                                var comHTML = res.com;
+                                var subHTML = res.sub;
+                                var quaHTML = res.qua;
+                                if(view.name != 'basicDay' && parsedEventTime < parsedNow){
+                                    element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[0].childNodes[0].innerHTML = regHTML;
+                                    element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[2].childNodes[0].innerHTML = comHTML;
+                                    element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].childNodes[0].innerHTML = quaHTML;
+                                    element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[6].childNodes[0].innerHTML = subHTML;
+                                }else if(view.name == 'basicDay' && parsedEventTime < parsedNow){
+                                    element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[0].childNodes[0].innerHTML = regHTML;
+                                    element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[2].childNodes[0].innerHTML = comHTML;
+                                    element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].childNodes[0].innerHTML = quaHTML;
+                                    element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[6].childNodes[0].innerHTML = subHTML;
+                                }
                             }
                         }
-                    }
-                });               
-                
+                    });
+                }             
             },
             eventAfterAllRender: function(view) {
                 var events = $('#calendar').fullCalendar('getView');
@@ -785,13 +770,17 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var uniqueIdsString = uniqueIds.toString();
 
                 var evtdata = {};
-                var startdate = moment(view.start._d).format('YYYY-MM-DD');
-                var enddate = moment(view.end._d).format('YYYY-MM-DD');
+                
                 if(view.name == 'basicDay'){
+                    var startdate = moment(view.start._d).format('YYYY-MM-DD');
+                    var enddate = moment(view.start._d).format('YYYY-MM-DD');
                     evtdata = { salesreps:null, acc: uniqueAccString, startdate: startdate, enddate:startdate, action:'eventStats' };
                 }else{
+                    var startdate = moment(view.start._d).format('YYYY-MM-DD');
+                    var enddate = moment(view.end._d).format('YYYY-MM-DD');
                     evtdata = {salesreps:null, acc: uniqueAccString, startdate: startdate, enddate:enddate, action:'eventStats'};
                 }
+                localStorage.setItem('evtsDate', startdate );
                 $.ajax({
                     type : 'POST',
                     data : evtdata,
@@ -806,64 +795,114 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     }
                 });
 
-
-                
-                /*$('#salesrepfilter').val((localStorage.getItem("salesrepValue") !== null) ? localStorage.salesrepValue : 0);
-                $('#accountfilter').val((localStorage.getItem("accountValue") !== null) ? localStorage.accountValue : 0);*/
-                if(localStorage.salesrepValue == 0 && localStorage.accountValue == 0){
-                    $.get({
-                        url:'ajaxHandlerEvents.php', 
-                        data:{ sDate: startdate, eDate:enddate, action:'getAccountAndSalesRep' }, 
-                        success: function(res){ 
+                <?php if(isset($_GET['salerepId']) && $_GET['salerepId'] != 0): ?>
+                    var genid = '<?php echo $_GET['salerepId']; ?>'; 
+                    var obj = {};
+                    <?php if(isset($_GET['accountId'])): ?>
+                        obj = { aid: '<?php echo $_GET['accountId']; ?>', id: genid, sDate: startdate, eDate: enddate, action:'eventDynamicSales' };
+                    <?php else: ?>
+                        obj = { id: genid, sDate: startdate, eDate: enddate, action:'eventDynamicSales' };
+                    <?php endif; ?>
+                    $.ajax({
+                        url: 'ajaxHandlerEvents.php',
+                        type: 'POST',
+                        data: obj,
+                        success: function(res){
+                            console.log(res);
                             var result = JSON.parse(res);
-                            $("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
-                            $("#accountfilter").html('<option value="0">Account</option>');
-                            $("#salesrepfilter").append(result.salesArray);
-                            if(localStorage.getItem("salesrepValue") !== null)
-                                $("#salesrepfilter").val(localStorage.salesrepValue);
-                            else
-                                $("#salesrepfilter").val(0);
-                            $("#accountfilter").append(result.accArray);
-                            if(localStorage.getItem("accountValue") !== null)
-                                $("#accountfilter").val(localStorage.accountValue);
-                            else
-                                $("#accountfilter").val(0);
+                            $("#salesrepfilter").empty();
+                            $("#salesrepfilter").html("<option value='0'>Generic Consultant</option>").append(result.salesArray);
+                            if(localStorage.getItem("salesrepValue") !== null && localStorage.salesrepValue != 0){
+                                $('#salesrepfilter').val(localStorage.salesrepValue);    
+                            }else{
+                                $('#salesrepfilter').val("0"); 
+                            }
+                            $("#accountfilter").empty();
+                            $("#accountfilter").html("<option value='0'>Account</option>").append(result.accArray);
+                            if(localStorage.getItem("accountValue") !== null && localStorage.accountValue != 0){
+                                $('#accountfilter').val(localStorage.accountValue);    
+                            }else{
+                                $('#accountfilter').val("0"); 
+                            }
                         }
                     });
-                }else{
-                    if(localStorage.salesrepValue != 0){
-                        $.get({
-                            url:'ajaxHandlerEvents.php', 
-                            data:{ sID: localStorage.salesrepValue, sDate: startdate, eDate:enddate, action:'getAccounts' }, 
-                            success: function(res){
-                                /*alert(res);*/
-                                $("#salesrepfilter").val(localStorage.salesrepValue);
-                                $("#accountfilter").html('<option value="0">Account</option>');
-                                $("#accountfilter").append(res);
-                                $("#accountfilter").val(localStorage.accountValue);
+                <?php endif; ?>
+                <?php if(isset($_GET['accountId']) && $_GET['accountId'] != 0): ?>
+                    var accid = '<?php echo $_GET['accountId']; ?>';
+                    var obj = {};
+                    <?php if(isset($_GET['salerepId'])): ?>
+                        obj = { sid: '<?php echo $_GET['salerepId']; ?>', accid: accid, sDate: startdate, eDate: enddate, action:'eventDynamicAcc' };
+                    <?php else: ?>
+                        obj = { accid: accid, sDate: startdate, eDate: enddate, action:'eventDynamicAcc' };
+                    <?php endif; ?>
+                    $.ajax({
+                        url: 'ajaxHandlerEvents.php',
+                        type: 'POST',
+                        data: obj,
+                        success: function(res){
+                            var result = JSON.parse(res)
+                            $("#salesrepfilter").empty();
+                            $("#salesrepfilter").html("<option value='0'>Generic Consultant</option>").append(result.salesArray);
+                            if(localStorage.getItem("salesrepValue") !== null && localStorage.salesrepValue != 0){
+                                $('#salesrepfilter').val(localStorage.salesrepValue);    
+                            }else{
+                                $('#salesrepfilter').val("0"); 
                             }
-                        });
-                    }
-                    if(localStorage.accountValue != 0){
-
-                        $.get({
-                            url:'ajaxHandlerEvents.php', 
-                            data:{ sID: localStorage.accountValue, sDate: startdate, eDate:enddate, action:'getSales' }, 
-                            success: function(res){
-                                $("#accountfilter").val(localStorage.accountValue);
-                                $("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
-                                $("#salesrepfilter").append(res);
-                                $("#salesrepfilter").val(localStorage.salesrepValue);
+                            $("#accountfilter").empty();
+                            $("#accountfilter").html("<option value='0'>Account</option>").append(result.accArray);
+                            if(localStorage.getItem("accountValue") !== null && localStorage.accountValue != 0){
+                                $('#accountfilter').val(localStorage.accountValue);    
+                            }else{
+                                $('#accountfilter').val("0"); 
                             }
-                        });
-                    }
-                }
+                        }
+                    });
+                <?php endif; ?>
 
+                <?php if( !isset($_GET['accountId']) && !isset($_GET['salerepId']) ): ?>
+                    $("#salesrepfilter").html("<option value='0'>Generic Consultant</option>");
+                    $("#accountfilter").html("<option value='0'>Account</option>");
+                    $.get({
+                        url:'ajaxHandlerEvents.php', 
+                        data:{ srepids: uniqueIdsString, sDate: startdate, eDate: enddate, action: 'getEventConsultant' }, 
+                        success: function(res){
+                            var result = JSON.parse(res);
+                            $('#salesrepfilter').append(result.salesArray);
+                            $('#accountfilter').append(result.accArray);
+                        } 
+                    });
+                <?php endif; ?>
                 function onlyUnique(value, index, self) { 
                     return self.indexOf(value) === index;
                 }
             },
         });
+
+/*--------------------------------------------------------------------------------*/
+
+    var url = "<?php echo SITE_URL ?>/eventschedule.php?type=search";
+    $('#salesrepfilter').on('change', function(){
+        var salesID = $(this).val();
+        //localStorage.setItem('salesrepValue', salesID);
+        if(salesID != 0)
+            url += "&salerepId="+salesID;
+        if(localStorage.getItem('accountValue') !== null && localStorage.accountValue != 0)
+            url += "&accountId="+localStorage.accountValue;
+        window.location.href = url;
+    });
+    $('#accountfilter').on('change', function(){
+        var accID = $(this).val();
+        //alert(localStorage.salesrepValue);
+        //localStorage.setItem('accountValue', accID);
+        if(localStorage.getItem('salesrepValue') !== null && localStorage.salesrepValue != 0)
+            url += "&salerepId="+localStorage.salesrepValue;
+        if(accID != 0)
+            url += "&accountId="+accID;
+        window.location.href = url;
+    });
+
+/*--------------------------------------------------------------------------------*/
+
 
         // Whenever the user clicks on the "save" button
         var clickEventType=((document.ontouchstart!==null)?'click':'touchstart');
@@ -1108,130 +1147,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             });
             $('#modalsalerepid').val(this.value);
         });
-
-
-/*---------------------------------------------------------------------------------------*/
-
-    var events = $('#calendar').fullCalendar('getView');
-    var startdate = moment(events.start._d).format('YYYY-MM-DD');
-    var enddate = moment(events.end._d).format('YYYY-MM-DD');
-    /*$('.fc-prev-button, .fc-next-button').click(function() {
-        var calendar = $('#calendar').fullCalendar('getCalendar');
-        events = calendar.view;
-        startdate = moment(events.start._d).format('YYYY-MM-DD');
-        enddate = moment(events.end._d).format('YYYY-MM-DD');
-        if(localStorage.salesrepValue != 0 && localStorage.accountValue == 0){
-            $.ajax({
-                url:'ajaxHandlerEvents.php',
-                type:'GET',
-                data:{ sId : localStorage.salesrepValue, sDate:startdate, eDate:enddate, action:'dynamicAccounts' },
-                success: function(res){
-                    var result = JSON.parse(res);
-                    $("#accountfilter").html('<option value="0">Account</option>');
-                    $.each(result, function(k, v){
-                        $("#accountfilter").append('<option value="'+v.Guid_account+'">'+ v.account + ' - ' + v.name +'</option>');
-                    })
-                }
-            });
-        }else{
-            $.get({
-                url:'ajaxHandlerEvents.php', 
-                data:{ sDate: startdate, eDate:enddate, action:'getAccountAndSalesRep' }, 
-                success: function(res){ 
-                    var result = JSON.parse(res);
-                    $("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
-                    $("#accountfilter").html('<option value="0">Account</option>');
-                    $("#salesrepfilter").append(result.salesArray);
-                    if(localStorage.getItem("salesrepValue") !== null)
-                        $("#salesrepfilter").val(localStorage.salesrepValue);
-                    $("#accountfilter").append(result.accArray);
-                    if(localStorage.getItem("accountValue") !== null)
-                        $("#accountfilter").val(localStorage.accountValue);
-                }
-            });
-        }
-    });*/
-        
-    $("#salesrepfilter").change(function(){
-        var thisValue = $(this).val();
-        if(thisValue != 0){
-            localStorage.salesrepValue = thisValue;
-            $('#accountfilter option').remove();
-            $('#accountfilter').html('<option value="0">Account</option>');
-            $.ajax({
-                url:'ajaxHandlerEvents.php',
-                type:'GET',
-                data:{ sId : thisValue, sDate:startdate, eDate:enddate, action:'dynamicAccounts' },
-                success: function(res){
-                    var result = JSON.parse(res);
-                    $("#accountfilter").html('<option value="0">Account</option>');
-                    $("#accountfilter").append(result);
-                    if(localStorage.getItem("accountValue") !== null)
-                        $("#accountfilter").val(localStorage.accountValue);                        
-                }
-            });
-        }else{
-            $.get({
-                url:'ajaxHandlerEvents.php', 
-                data:{ sDate: startdate, eDate:enddate, action:'getAccountAndSalesRep' }, 
-                success: function(res){ 
-                    var result = JSON.parse(res);
-                    $("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
-                    $("#accountfilter").html('<option value="0">Account</option>');
-                    $("#salesrepfilter").append(result.salesArray);
-                    if(localStorage.getItem("salesrepValue") !== null)
-                        $("#salesrepfilter").val(localStorage.salesrepValue);
-                    else
-                        $("#salesrepfilter").val(0);
-                    $("#accountfilter").append(result.accArray);
-                    if(localStorage.getItem("accountValue") !== null)
-                        $("#accountfilter").val(localStorage.accountValue);
-                    else
-                        $("#accountfilter").val(0);
-                }
-            });
-        }
-    })
-
-    $("#accountfilter").change(function(){
-        var thisValue = $(this).val();
-        if(thisValue != 0){
-            localStorage.accountValue = thisValue;
-            $('#salesrepfilter option').remove();
-            $('#salesrepfilter').html('<option value="0">Genetic Consultant</option>');
-            $.ajax({
-                url:'ajaxHandlerEvents.php',
-                type:'GET',
-                data:{ aID : thisValue, sDate:startdate, eDate:enddate, action:'dynamicSalesrep' },
-                success: function(res){
-                    //console.log(res);
-                    var result = JSON.parse(res);
-                    $("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
-                    $("#salesrepfilter").append(result);
-                    if(localStorage.getItem("salesrepValue") !== null)
-                        $("#salesrepfilter").val(localStorage.salesrepValue);                        
-                }
-            });
-        }else{
-            $.get({
-                url:'ajaxHandlerEvents.php', 
-                data:{ sDate: startdate, eDate:enddate, action:'getAccountAndSalesRep' }, 
-                success: function(res){ 
-                    var result = JSON.parse(res);
-                    $("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
-                    $("#accountfilter").html('<option value="0">Account</option>');
-                    $("#salesrepfilter").append(result.salesArray);
-                    if(localStorage.getItem("salesrepValue") !== null)
-                        $("#salesrepfilter").val(localStorage.salesrepValue);
-                    $("#accountfilter").append(result.accArray);
-                    if(localStorage.getItem("accountValue") !== null)
-                        $("#accountfilter").val(localStorage.accountValue);
-                }
-            });
-        }
-    });
-
-/*---------------------------------------------------------------------------------------*/
 
         $('#accountopt').on('change', function () {
                 var selec = $('#salesrepopt option:selected').val();
