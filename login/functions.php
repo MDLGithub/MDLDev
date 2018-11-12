@@ -2441,13 +2441,16 @@ function dmdl_refresh($db){
                 </th>";
     $content .= "</tr></thead>";
     $content .= "<tbody>";
+    var_dump("dmdlResult => ");
+    var_dump($dmdlResult);
     foreach ( $dmdlResult as $dmdlKey=>$dmdlVal ){
         $param = array(
             "patientId" => $dmdlVal['PatientID'], 
             "physicianId" => $dmdlVal['PhysicianID']
         );
         $result = (array)$client->GetCombinedResults($param);
-        
+        var_dump("result => ");
+        var_dump($result);
         $domObj = new xmlToArrayParser($result['GetCombinedResultsResult']); 
         $domArr = $domObj->array; 
         if($domObj->parse_error){ 

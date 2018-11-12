@@ -1,5 +1,8 @@
 /*DB table updates */
 
+ALTER TABLE `tbl_mdl_dmdl ` ADD COLUMN Linked ENUM('Yes','No') DEFAULT 'No' AFTER PhysicianID
+ALTER TABLE `tblpatient` ADD COLUMN Linked ENUM('Yes','No') DEFAULT 'No' AFTER Loaded
+
 ALTER TABLE `tblpatient` DROP COLUMN loaded
 ALTER TABLE `tblpatient` ADD COLUMN Loaded ENUM('Y','N') DEFAULT 'N' AFTER test_kit
 ALTER TABLE `tblaccount` ADD COLUMN Loaded ENUM('Y','N') DEFAULT 'N' AFTER account
