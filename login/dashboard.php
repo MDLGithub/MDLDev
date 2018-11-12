@@ -481,7 +481,7 @@ $num_estimates = $qualify_requests;
     <div class="box full visible">
         <?php if($dataViewAccess){ ?>
         <section id="palette_top" class="shorter_palette_top">
-            <h4><?php echo count($num_estimates) . " Results"; ?></h4>
+            <h4 class = "palette_results"><?php echo count($num_estimates) . " Results"; ?></h4>
             <?php echo topNavLinks($role); ?>
         </section>
 
