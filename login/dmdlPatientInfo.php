@@ -75,9 +75,9 @@ if(isset($_GET['patientId'])&&isset( $_GET['physicianId'])){
             if(isset($_GET['patientId'])&&isset( $_GET['physicianId'])){
                 if($domObj->parse_error){ 
                     echo $domObj->get_xml_error();            
-                } else {             
-                    $res = $domArr['CombinedResults']['GeneticResults'];
-                    echo '';
+                } else {
+                    var_dump($result);
+                   $res = $domArr['CombinedResults'];
                     echo "<pre>";
                     print_r($res);
                 }

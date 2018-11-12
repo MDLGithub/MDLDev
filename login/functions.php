@@ -2317,6 +2317,56 @@ function getPaientPossibleMatch($db,$firstname,$lastname,$Date_Of_Birth){
     return $SGetPatient;
 }
 
+function getMatchedPatientsDropdown($db, $Guid_MDLNumber, $SGetPatient){
+    $sOption = ''; $sContent = ''; $mdl_num = '';
+    foreach ($SGetPatient as $k=>$v){
+        $matchedPatient=$v; 
+        $this_Guid_user = $v['Guid_user'];
+        $sqlQualify = "SELECT q.account_number FROM tbl_ss_qualify q WHERE Guid_user=:Guid_user ORDER BY q.`Date_created` DESC LIMIT 1 ";
+        $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$this_Guid_user));
+
+        $mdlNumberResult = $db->query("SELECT `mdl_number` FROM `tbl_mdl_number` WHERE Guid_user=:Guid_user", array('Guid_user'=>$this_Guid_user));
+
+        if(!empty($mdlNumberResult)){
+            foreach ($mdlNumberResult as $key=>$mdlNum){
+                if($mdlNum['mdl_number']!=''){
+                    $mdl_num .= $mdlNum['mdl_number'].', ';
+                }
+            }           
+        }
+        
+        $DOS_braca = $db->query("SELECT Date(`Date`) as Date FROM `tbl_mdl_status_log` WHERE Guid_status='1' AND Guid_user=:Guid_user",array('Guid_user'=>$this_Guid_user));
+        $DOS_braca_date = '';
+        if(!empty($DOS_braca)){
+            foreach ($DOS_braca as $k=>$date){
+                $DOS_braca_date .= $date['Date'].', ';
+            }
+        }
+        $DOS_braca_date = rtrim($DOS_braca_date, ', ');
+        $sOption .= "<option value='".$v['Guid_patient']."'>";                        
+        $sOption .= ucwords(strtolower($v['firstname']." ".$v['lastname']));
+        $sOption .= " (".date("m/d/Y", strtotime($matchedPatient['dob'])).") ";
+        if($mdl_num!=''){
+            $sOption .= "MDL#: ".$mdl_num;
+        }
+        if($qualifyResult['account_number']!=''){
+        $sOption .= "Acct#: ".$qualifyResult['account_number'].", ";
+        }
+        $sOption .= "Patient ID: ".$v['Guid_patient'];
+        if($DOS_braca_date!=''){
+            $sOption .= ", DOS: ".date("m/d/Y", strtotime($DOS_braca_date));
+        }
+        $sOption .= "</option>";
+    }
+
+    $sContent .= "<select name='dmdl[".$Guid_MDLNumber."][Possible_Match]'>";
+    $sContent .= "<option value=''>Select From Possible Match</option>";
+    $sContent .= "<option value='create_new'>Create New</option>";
+    $sContent .= $sOption;
+    $sContent .= "</select>";
+    return $sContent;
+}
+
 function getPaientPerfectMatch($db,$firstname,$lastname,$Date_Of_Birth){
     $dobConverted = convertDmdlDate($Date_Of_Birth);
     $query = "SELECT p.Guid_patient, p.Guid_user, p.dob,"
@@ -2414,7 +2464,7 @@ function dmdl_refresh($db){
             $accountNumber = $res['ClientID'];  
             $DOS = '';
             if(isset($res['DOS'])){
-            $DOS = str_replace('-','/',$res['DOS']);
+                $DOS = str_replace('-','/',$res['DOS']);
             }
             
             $dob = str_replace('-','/',$Date_Of_Birth);
@@ -2436,36 +2486,7 @@ function dmdl_refresh($db){
                 $SGetPatient = getPaientPossibleMatch($db,$firstname,$lastname,$Date_Of_Birth);                
                 $sContent = "";  $sOption = ""; $matchedPatient=array();
                 if(!empty($SGetPatient)){
-                    foreach ($SGetPatient as $k=>$v){
-                        $matchedPatient = $v;
-                        $this_Guid_user = $v['Guid_user'];
-                        $sqlQualify = "SELECT q.account_number FROM tbl_ss_qualify q WHERE Guid_user=:Guid_user ORDER BY q.`Date_created` DESC LIMIT 1 ";
-                        $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$this_Guid_user)); 
-                        $mdlNumberResult = $db->query("SELECT `mdl_number` FROM `tbl_mdl_number` WHERE Guid_user=:Guid_user", array('Guid_user'=>$this_Guid_user));
-                        $mdl_num = "";                         
-                        if(!empty($mdlNumberResult)){
-                            foreach ($mdlNumberResult as $key=>$val){
-                                $mdl_num .= $val['mdl_number'].'';
-                            }
-                        }
-                        $sOption .= "<option value='".$v['Guid_patient']."'>";                        
-                        $sOption .= ucwords(strtolower($v['firstname']." ".$v['lastname']));
-                        $sOption .= " (".date("m/d/Y", strtotime($matchedPatient['dob'])).") ";
-                        if($mdl_num!=''){
-                            $sOption .= "MDL#: ".$mdl_num.", ";
-                        }
-                        if($qualifyResult['account_number']!=''){
-                        $sOption .= "Acct#: ".$qualifyResult['account_number'].", ";
-                        }
-                        $sOption .= "Patient ID: ".$v['Guid_patient'];
-                        $sOption .= "</option>";
-                    }
-                    
-                    $sContent .= "<select name='dmdl[".$Guid_MDLNumber."][Possible_Match]'>";
-                    $sContent .= "<option value=''>Select From Possible Match</option>";
-                    $sContent .= "<option value='create_new'>Create New</option>";
-                    $sContent .= $sOption;                    
-                    $sContent .= "</select>";
+                    $sContent .= getMatchedPatientsDropdown($db, $Guid_MDLNumber, $SGetPatient);
                 } else {
                     //if there is not possible match it should create new records
                     $sContent .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Possible_Match]' value='create_new' />";
@@ -2481,38 +2502,7 @@ function dmdl_refresh($db){
 
                     $sContent=""; $sOption=""; $mdl_num = ""; 
                     if(!empty($SGetPatient)){
-                        foreach ($SGetPatient as $k=>$v){
-                            $matchedPatient=$v;
-                            $this_Guid_user = $v['Guid_user'];
-                            $sqlQualify = "SELECT q.account_number FROM tbl_ss_qualify q WHERE Guid_user=:Guid_user ORDER BY q.`Date_created` DESC LIMIT 1 ";
-                            $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$this_Guid_user));
-                            
-                            $mdlNumberResult = $db->query("SELECT `mdl_number` FROM `tbl_mdl_number` WHERE Guid_user=:Guid_user", array('Guid_user'=>$this_Guid_user));
-                            
-                            if(!empty($mdlNumberResult)){
-                                foreach ($mdlNumberResult as $key=>$val){
-                                    $mdl_num .= $val['mdl_number'].'';
-                                }
-                            }
-                            
-                            $sOption .= "<option value='".$v['Guid_patient']."'>";                        
-                            $sOption .= ucwords(strtolower($v['firstname']." ".$v['lastname']));
-                            $sOption .= " (".date("m/d/Y", strtotime($matchedPatient['dob'])).") ";
-                            if($mdl_num!=''){
-                                $sOption .= "MDL#: ".$mdl_num.", ";
-                            }
-                            if($qualifyResult['account_number']!=''){
-                            $sOption .= "Acct#: ".$qualifyResult['account_number'].", ";
-                            }
-                            $sOption .= "Patient ID: ".$v['Guid_patient'];
-                            $sOption .= "</option>";
-                        }
-                        
-                        $sContent .= "<select name='dmdl[".$Guid_MDLNumber."][Possible_Match]'>";
-                        $sContent .= "<option value=''>Select From Possible Match</option>";
-                        $sContent .= "<option value='create_new'>Create New</option>";
-                        $sContent .= $sOption;
-                        $sContent .= "</select>";
+                        $sContent .= getMatchedPatientsDropdown($db, $Guid_MDLNumber, $SGetPatient);
                     } else { //create new records if possibe match not found
                         $sContent .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Possible_Match]' value='create_new' />";
                     }
@@ -2521,8 +2511,12 @@ function dmdl_refresh($db){
                     //update mdl# for this perfect match => status=yes 
                     $matchedPatient = $getPatient['0'];
                     //update the Physician MDL ID Guid_dmdl_patient
-                    $update_dmdl_patient = updateTable($db, 'tblpatient', array('Guid_dmdl_patient'=>$res['Guid_PatientId'], 'Guid_dmdl_physician'=>$res['GUID_PhysicianID']), array('Guid_patient'=>$matchedPatient['Guid_patient']));
-                    $acctLink = ''; 
+                    $dmdlData = array(
+                                    'Guid_dmdl_patient'=>$res['Guid_PatientId'], 
+                                    'Guid_dmdl_physician'=>$res['GUID_PhysicianID']
+                                );
+                    $update_dmdl_patient = updateTable($db, 'tblpatient', $dmdlData, array('Guid_patient'=>$matchedPatient['Guid_patient']));
+                    $acctLink = ''; $patientInfoOption=''; $patientInfo = '';
                     if(isset($matchedPatient['Guid_user'])){
                         $this_Guid_user = $matchedPatient['Guid_user'];
                         $sqlQualify = "SELECT q.account_number FROM tbl_ss_qualify q WHERE Guid_user=:Guid_user ORDER BY q.`Date_created` DESC LIMIT 1 ";
@@ -2544,31 +2538,68 @@ function dmdl_refresh($db){
                             } 
                             $mdl_num = rtrim($mdl_num, ', ');
                         }
+                        $DOS_braca = $db->query("SELECT Date(`Date`) as Date FROM `tbl_mdl_status_log` WHERE Guid_status='1' AND Guid_user=:Guid_user",array('Guid_user'=>$this_Guid_user));
+                        $DOS_braca_date = '';
+                        if(!empty($DOS_braca)){
+                            foreach ($DOS_braca as $k=>$date){
+                                $DOS_braca_date .= $date['Date'].', ';
+                            }
+                            $DOS_braca_date = rtrim($DOS_braca_date, ', ');
+                        }
                     }
-                    $patientInfoLink = "<a href='".SITE_URL."/patient-info.php?patient=".$matchedPatient['Guid_user'].$acctLink."'>";                        
-                    $patientInfoLink .= ucwords(strtolower($matchedPatient['firstname']." ".$matchedPatient['lastname']));
-                    $patientInfoLink .= " (".date("m/d/Y", strtotime($matchedPatient['dob'])).") ";
+                    
+                    if($DOS_braca_date!=''){
+                        $bracaDOS = date("m/d/Y", strtotime($DOS_braca_date));
+                    } else {
+                        $bracaDOS = '';
+                    }
+                    
+                    $patientInfoStr = '';    
+                    $patientInfoStr .= ucwords(strtolower($matchedPatient['firstname']." ".$matchedPatient['lastname']));
+                    $patientInfoOption .= ucwords(strtolower($matchedPatient['firstname']." ".$matchedPatient['lastname']));
+                    if($bracaDOS!=''){
+                        $patientInfoStr .= " (".$bracaDOS.") ";
+                        $patientInfoOption .= " (".$bracaDOS.") ";                        
+                    }
                     if($mdl_num!=''){
                         if($mdlNumMatch){
-                            $patientInfoLink .= "MDL#: ".$mdl_num.", ";
-                            $patientInfoLink .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Possible_Match]' value='".$matchedPatient['Guid_patient']."' />";
+                            $patientInfoStr .= "MDL#: ".$mdl_num.", ";
+                            $patientInfoOption .= "MDL#: ".$mdl_num.", ";
+                            $patientInfoStr .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Possible_Match]' value='".$matchedPatient['Guid_patient']."' />";
                         }else{
-                            $patientInfoLink .= "<span class='color-red'>MDL#: ".$mdl_num."</span>, ";
-                            $patientInfoLink .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Possible_Match]' value='create_new' />";
+                            $patientInfoStr .= "<span class='color-red'>MDL#: ".$mdl_num."</span>, ";
+                            $patientInfoStr .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Possible_Match]' value='create_new' />";
                         }
                     }
                     if(isset($qualifyResult['account_number'])&&$qualifyResult['account_number']!=''){
-                        $patientInfoLink .= "Acct#: ".$qualifyResult['account_number'].", ";
+                        $patientInfoStr .= "Acct#: ".$qualifyResult['account_number'].", ";
+                        $patientInfoOption .= "Acct#: ".$qualifyResult['account_number'].", ";
                     }
-                    $patientInfoLink .= "Patient ID: ".$matchedPatient['Guid_patient'];
-                    $patientInfoLink .= "</a>";
-
+                    $patientInfoStr .= "Patient ID: ".$matchedPatient['Guid_patient'];
+                    $patientInfoOption .= "Patient ID: ".$matchedPatient['Guid_patient'];
+                    if($bracaDOS!=''){
+                        $patientInfoStr .= ", DOS: ".$bracaDOS;
+                        $patientInfoOption .= ", DOS: ".$bracaDOS;
+                    }
+                    
+                    if( $DOS === $bracaDOS ){    
+                        $patientInfo .= "<a href='".SITE_URL."/patient-info.php?patient=".$matchedPatient['Guid_user'].$acctLink."'>";                        
+                        $patientInfo .= $patientInfoStr;
+                        $patientInfo .= "</a>";
+                    } else {
+                        $patientInfo .= "<select name='dmdl[".$Guid_MDLNumber."][Possible_Match]'>";
+                        $patientInfo .= "<option value=''>Select From Possible Match</option>";
+                        $patientInfo .= "<option value='create_new'>Create New</option>";
+                        $patientInfo .= "<option value='".$matchedPatient['Guid_user']."'>".$patientInfoOption."</option>";
+                        $patientInfo .= "</select>";
+                    }
+                    
                     
                     $match = "<td class='mn yes'>"
                             . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][status]' value='yes' />"
                             . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Guid_patient]' value='".$getPatient['0']['Guid_patient']."' />"
                             . "Yes</td>";  
-                    $possibleM = "<td  class='tbl-borderR'>".$patientInfoLink."</td>";
+                    $possibleM = "<td  class='tbl-borderR'>".$patientInfo."</td>";
                 }
             }
             
