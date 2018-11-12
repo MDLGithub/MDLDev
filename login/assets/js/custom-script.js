@@ -14,7 +14,7 @@ $(document).ready(function(){
 		$("#setDate").css("display","none");
 	});
 
-	$("#today_date").click(function(e){
+	$("#print").click(function(e){
 		e.preventDefault();
 		var today = $(this).val();
 		var account = $('input[name="account"]').val();
@@ -27,7 +27,7 @@ $(document).ready(function(){
 				var toPrint = res
 				var popupWin = window.open('', '_blank','width=900,height=900,location=no,left=200px');
 		        popupWin.document.open();
-		        popupWin.document.write('<html><title>::Print Preview::</title><link rel="stylesheet" type="text/css" href="Print.css" media="screen"/></head><body">')
+		        popupWin.document.write('<html><link rel="stylesheet" type="text/css" href="Print.css" media="screen"/></head><body">')
 		        popupWin.document.write(toPrint);
 		        popupWin.document.write('</html>');
 		        popupWin.document.close();
