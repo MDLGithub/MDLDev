@@ -2378,7 +2378,10 @@ function getPaientPerfectMatch($db,$firstname,$lastname,$Date_Of_Birth){
             . "AND LOWER(CONVERT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') USING 'utf8'))='".strtolower($firstname)."' "
             . "AND LOWER(CONVERT(AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') USING 'utf8'))='".strtolower($lastname)."' "
             . "AND dob='$dobConverted'";
+    var_dump("getPaientPerfectMatch Query");
+    var_dump($query);
     $getPatient = $db->query($query);
+    var_dump($getPatient);
     return $getPatient;
 }
 
