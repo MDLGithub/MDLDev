@@ -35,6 +35,9 @@ function showFields(forms) {
 
 $(document).ready(function(){
   tabCounter = 0;
+  accordionLength = $('ul#accordion li').length;
+
+
   firsttab = $("#form-option-table");
   firsttab.show();
   $("#forms").addClass("active-tab");
@@ -102,18 +105,20 @@ $(document).ready(function(){
    $("#accordion #form-bar").click(function(){
     tabCounter = $( "#accordion #form-bar" ).index( this );
     $(activeItem).css('width', '50px');
-    $(this).parent().css('width', '80%');
+    $(this).parent().css('width', '90%');
 
     activeItem = $(this).parent();
+    $(".page-count").html("Page "+ (tabCounter + 1) +" of "+accordionLength);
 });
 
  $(".next-button").click(function(){
       if(tabCounter != ($('ul#accordion li').length-1)){
         tabCounter ++;
         $(activeItem).css('width', '50px');
-        $(activeItem).next().css('width', '80%');
+        $(activeItem).next().css('width', '90%');
         activeItem = $(activeItem).next();
       }
+      $(".page-count").html("Page "+ (tabCounter + 1) +" of "+accordionLength);
  });
 
 
@@ -121,9 +126,10 @@ $(document).ready(function(){
       if(tabCounter > 0){
         tabCounter--;
        $(activeItem).css('width', '50px');
-       $(activeItem).prev().css('width', '80%');
+       $(activeItem).prev().css('width', '90%');
        activeItem = $(activeItem).prev();
      }
+     $(".page-count").html("Page "+ (tabCounter + 1) +" of "+accordionLength);
  });
 
        var onKeyDown = function ( event ) {
@@ -132,17 +138,19 @@ $(document).ready(function(){
               if(tabCounter != ($('ul#accordion li').length-1)){
                 tabCounter ++;
                 $(activeItem).css('width', '50px');
-                $(activeItem).next().css('width', '80%');
+                $(activeItem).next().css('width', '90%');
                 activeItem = $(activeItem).next();
               }
+              $(".page-count").html("Page "+ (tabCounter + 1) +" of "+accordionLength);
             break;
           case 37:
           if(tabCounter > 0){
                 tabCounter--;
                 $(activeItem).css('width', '50px');
-                $(activeItem).prev().css('width', '80%');
+                $(activeItem).prev().css('width', '90%');
                 activeItem = $(activeItem).prev();
               }
+              $(".page-count").html("Page "+ (tabCounter + 1) +" of "+accordionLength);
             break;
         }
       };

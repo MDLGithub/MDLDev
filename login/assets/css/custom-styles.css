@@ -3,6 +3,7 @@
     Author     : Elmira
 */
 
+
 body{
     line-height: 1.5em;
 }
@@ -330,6 +331,9 @@ td{
     outline: none;
     font-weight: bold;
 }
+select.dataTableFilterInput{
+    min-width:190px;
+}
 
 .url_config_box h4{
     padding-bottom: 10px;
@@ -390,9 +394,22 @@ table.prev_settings thead > tr > th,
 #add-account-provider{
     cursor: pointer;
 }
-#add-account-provider-box{
+#add-account-provider-box .contentBlock{
+	padding:0px 0px 30px 0px;
 
+}
 
+#add-account-provider-box form{
+	padding: 10px 20px;
+}
+
+#add-account-provider-box .contentBlock > h5 {
+    background: #2b4d77;
+    color: #fff;
+    padding: 10px;
+    font-size: 18px;
+    padding-right: 50px;
+    height: 45px;
 }
 
 select {
@@ -579,6 +596,16 @@ th.zip input{
 .modalBlock .contentBlock.formdetails-open{
     width:60%;
     left: 20%;
+}
+
+
+.patientForms #dataTableHome thead {
+    position: relative;
+    margin-top: 0px;
+}
+
+.patientForms #dataTableHome tbody{
+    margin-top:0px;
 }
 
 .modalBlock .close {
@@ -907,6 +934,8 @@ button[name="submit_config_tables"]{
 }
 
 thead{
+	-webkit-appearance: none;
+	-webkit-box-shadow: 0 -0.313em 0.563em rgba(177,189,200,.4);
     box-shadow: 0 -0.313em 0.563em rgba(177,189,200,.4);
     color: #1c487b;
     font-size: .938em;
@@ -947,6 +976,10 @@ thead th{
     table-layout:fixed;
 }
 
+.dataTables_wrapper.no-footer#dataTableHome_wrapper {
+    width: 100%;
+}
+
 #dataTableHome_wrapper,
 #tableHeaderFixed_wrapper{
     display:flex;
@@ -961,11 +994,13 @@ thead th{
 
 #dataTableHome thead,
 #tableHeaderFixed thead{
-    position: -webkit-sticky;
+    /*position: -webkit-sticky;
     position: -moz-sticky;
     position: -ms-sticky;
     position: -o-sticky;
-    position:sticky;
+    position:sticky;*/
+    position:absolute;
+    margin-top:36px;
     transition:width 0.6s 0.2s;
     top:0;
     z-index:5;
@@ -993,6 +1028,7 @@ thead th{
     overflow-x:hidden;
     display:block;
     width:calc(100% - 18px);
+    margin-top:61px;
 }
 #dataTableHome tbody .t_row,
 #tableHeaderFixed tbody .t_row {
@@ -1190,15 +1226,14 @@ and (orientation : landscape) {
     }
 
     #dataTableHome thead{
-        top:220px;
         position: absolute;
-        display: table-row;
-        width: 97%;
-        top: 33px;
+        width: calc(100% - 18px);
+        top: 0px;
+        margin-top:23px;
     }
 
     #dataTableHome tbody{
-        margin-top:70px;
+        margin-top:61px;
     }
 
     #dataTableHome tbody td {
@@ -1220,8 +1255,8 @@ and (orientation : landscape) {
     }
 
     .wider-bar{
-        width: 98% !important;
-        display:table !important;
+        width: calc(100% - 18px) !important;
+
     }
 
     .pseudo_t{
@@ -1273,6 +1308,32 @@ and (orientation : landscape) {
     .dmdlRefresh{
         margin-right:0px !important;
     }
+    
+    .modalBlock .contentBlock.patientForms-open{
+        width:94%;
+        left:3%;
+    }
+
+    .modalBlock .contentBlock.formdetails-open{
+        width:94%;
+        left: 3%;
+    }
+
+    a[title = "Edit Patient Info"] {
+        margin-left: -10px;
+    }
+
+    #deductable-log {
+        width: 100%;
+    }
+
+    #revenue {
+        width: 100%;
+    }
+
+    #refresh-log-table .switch #switchLabel{
+        left:-32px;
+    }
 
 }
 
@@ -1298,17 +1359,17 @@ and (orientation : portrait) {
     }
 
     #dataTableHome thead{
-        top:25px;
+        top:0px;
         position:absolute;
-        display:table-row;
         width:165%;
+        margin-top: 25px;
     }
 
 
     #dataTableHome tbody{
         overflow-x: scroll;
         width:165%;
-        margin-top: 60px;
+        margin-top: 64px;
     }
 
     #dataTableHome tbody td{
@@ -1336,7 +1397,7 @@ and (orientation : portrait) {
 
     .wider-bar{
         width:calc(103% - 18px) !important;
-        display:table !important;
+
     }
 
     .wider-tbody{
@@ -1406,12 +1467,29 @@ and (orientation : portrait) {
         position:relative;
         display:table;       
         width:100%;
-        top:62px;
+
     }
 
     #form-option-table tbody{
         width:100%;
     }
+
+    #manage-status-modal .contentBlock .content {
+        padding: 10px 5px;
+    }
+
+    #patient-info-box h5.notes{
+        padding-top:20px;
+    }
+
+    #refresh-log-table .switch #switchLabel{
+        left:-32px;
+    }
+
+	#add-account-provider-box .contentBlock {
+	    width: 45%;
+	    left: 28%;
+	}
 
 }
 
@@ -1423,13 +1501,14 @@ and (orientation: landscape)
 and (-webkit-min-device-pixel-ratio: 2) {
 
     #dataTableHome thead{
-        top:233px;
-        position:fixed;
-        width:70%;
+        top:0px;
+        position:absolute;
+        width:calc(100% - 18px);
+        margin-top:25px;
     }
 
     #dataTableHome tbody{
-        margin-top: 70px;
+        margin-top: 62px;
     }
 
     #dataTableHome_info{
@@ -1442,7 +1521,7 @@ and (-webkit-min-device-pixel-ratio: 2) {
     }
 
     .wider-bar{
-        width: 93% !important;
+        width: calc(100% - 18px) !important;
     }
 
     #app_data .url_config_box input[type='radio'], input[type='radio']:checked{
@@ -1473,14 +1552,15 @@ and (orientation: portrait)
 and (-webkit-min-device-pixel-ratio: 2) {
 
     #dataTableHome thead{
-        top:230px;
-        position:fixed;
-        width:63%;
+        top:0px;
+        position:absolute;
+        width:calc(100% - 18px);
+        margin-top: 25px;
     }
 
     #dataTableHome tbody{
 
-        margin-top: 70px;
+        margin-top: 65px;
 
     }
 
@@ -1494,7 +1574,7 @@ and (-webkit-min-device-pixel-ratio: 2) {
     }
 
     .wider-bar{
-        width: 93%!important;
+        width: calc(100% - 18px) !important;
     }
 
     #app_data .url_config_box  div.col-md-7 .col-md-6:nth-child(1){
@@ -1589,17 +1669,24 @@ table.dataTable thead .sorting {
 }
 #patient-info-box h2 {
     font-size: 30px;
-    margin: 20px 0 35px 0;
+    margin: 20px 0 25px 0;
 }
 #patient-info-box h5 {
     margin-bottom: 7px;
+    
+}
+#patient-info-box h5.inline{
     display: inline-block;
-    width: 100%;
+}
+#patient-info-box h5.notes{
+    line-height: 13px;
+    margin-bottom: 13px;
 }
 #patient-info-box .pInfo .bordered{
     padding: 20px 0;
     border: 1px solid #d6dce2;
     box-shadow: 0px 4px 4px 0px rgba(78, 112, 150, 0.26);
+    margin-top: 20px;
 }
 #patient-info-box .pInfo label {
     min-width: 210px;
@@ -1635,8 +1722,18 @@ table.dataTable thead .sorting {
     text-align: right;
     font-weight: normal;
 }
+#mdlInfoBox.pInfo p{
+    width: 300px;
+    margin: 0 auto;
+    text-align: center;
+    margin-bottom: 20px;
+}
+#mdlInfoBox.pInfo p input{
+    text-align: center;
+}
 #mdlInfoBox.pInfo label {
-    min-width: 70px;
+    min-width: auto;
+    
 }
 .add-status-form .datepicker,
 .add-status-form .order_by{
@@ -1806,6 +1903,12 @@ button[name="search"] > strong{
 .stats-table tr.show{
     display: table-row;
 }
+
+#specimenRadioBox{
+	margin-bottom:10px;
+	text-align:center;
+}
+
 #specimenRadioBox #specimen{
     position: relative;
 }
@@ -1820,6 +1923,15 @@ button[name="search"] > strong{
     z-index: 100;
 
 }
+
+#specimenRadioBox h5{
+	padding-right:10px;
+}
+
+#specimenRadioBox > div{
+	display:inline-block;
+}
+
 #specimenRadioBox .specimenCollected{
     display: none;
 }
@@ -1989,7 +2101,7 @@ td.tdAccount .account_name:after{
     height: 0;
     border-style: solid;
     border-width: 0 10px 8px 10px;
-    border-color: transparent transparent #dee3e8 transparent;
+    border-color: rgba(255, 255, 255, 0) rgba(255, 255, 255, 0) #dee3e8 rgba(255, 255, 255, 0);
 }
 td.tdAccount:hover .account_name{
     display: block;
@@ -2067,20 +2179,30 @@ td.tdAccount:hover .account_name{
     padding-right: 10px;
     font-weight: bold;
 }
+
+.user-managemnet-bg {
+    font-family: "Segoe UI Symbol";
+}
+
 .user-managemnet-bg .admin{
     color: #b1ffcd;
+    font-family: "Segoe UI Symbol";
 }
 .user-managemnet-bg .mdl_patient{
     color: #b186fd;
+    font-family: "Segoe UI Symbol";
 }
 .user-managemnet-bg .marked_test{
     color: #ffc747;
+    font-family: "Segoe UI Symbol";
 }
 .user-managemnet-bg .salesrep{
     color: #eab8d9;
+    font-family: "Segoe UI Symbol";
 }
 .user-managemnet-bg .provider{
     color: #b5d1f3;
+    font-family: "Segoe UI Symbol";
 }
 
 tr.admin{
@@ -2274,32 +2396,75 @@ a.button.cancel.half{
 }
 
 .modalBlock .refreshModal{
-    width: 90%;
-    left: 5%;
+    width: 95%;
+    left: 2.5%;
     margin-bottom: 50px;
 }
 .hasDuplicate{
     color: #ff930d;
     font-weight: bold;
 }
+
 #refresh-log-table select{
     border: 1px solid #8fa2ba;
     padding: 2px 10px;
     width: 100%;
+    max-width: 450px;
+    background: white;
 }
-#refresh-log-table tr.tableTopInfo{}
 
+
+#refresh-log-table .switch #switchLabel {
+    position: absolute;
+    margin-top: -20px;
+    width: 110px;
+    left: -30px;
+    text-align: center;
+}
+
+#refresh-log-table tr.tableTopInfo{
+    background-image: linear-gradient( 360deg, rgb(172, 172, 172) 0%, rgb(255,255,255) 93%, rgb(255, 255, 255) 100%);
+}
+
+#refresh-log-table tbody tr.even td:nth-child(7), #refresh-log-table tbody tr.even td:nth-child(8) {
+    background: #e2e2e2;
+}
+
+#refresh-log-table tbody tr.odd td:nth-child(7), #refresh-log-table tbody tr.odd td:nth-child(8) {
+    background: #f1f1f1;
+}
 
 #refresh-log-table tr.tableTopInfo .dmdl,
 #refresh-log-table tr.tableTopInfo .braca{
-    background: #002060;
-    color: #fff;
-    text-align: center;
+    background:-moz-repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0), white 5px, #f0f0f0 6px);
+    background:-webkit-repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0), white 5px, #f0f0f0 6px);
+    background: repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0), white 5px, #f0f0f0 6px);
+    font-size: 18px;
+    font-family: "Open Sans";
+    color: rgb(43, 77, 119);
+    font-weight: bold;
+    text-align: left;
+    padding: 0px;
+    text-indent: 10px;
 
 }
 
+table#refresh-log-table {
+    position: relative;
+}
+
+/*table#refresh-log-table::before {
+    content: '';
+    position: absolute;
+    border-left: 1.5px solid #1c2d6b;
+    left: 49.6%;
+    height: 100%;
+    z-index: 10;
+    top: 0;
+}*/
+
 #refresh-log-table tr.tableTopInfo .braca{
-    background: #00B050;
+   
 }
 
 #refresh-log-table tr.tableHeader{}
@@ -2316,4 +2481,17 @@ a.button.cancel.half{
 }
 .preloader img{
      margin-top: 20%;
+}
+.dropdownFilter.sorting_asc{
+     background-image: none!important;
+}
+
+@media (max-width: 1200px) {
+    .dmdlForm {
+        width: 100%!important;
+        margin: 0;
+    }    
+}
+.tbl-borderR{
+    border-left: 1.5px solid #1c2d6b;
 }

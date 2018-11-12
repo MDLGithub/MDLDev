@@ -329,7 +329,11 @@ $(document).ready(function () {
 });
 
 $('#matrix_parameters').submit(function(event) {
-    $('body').LoadingOverlay('show');
+    $('body').LoadingOverlay("show", {
+		image: "./assets/images/preloader.gif",
+		imageAnimation: ""
+	});
+
     $.ajax('ajaxHandler.php', {
 	type: 'POST',
 	data: {

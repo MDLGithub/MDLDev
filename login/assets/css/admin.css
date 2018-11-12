@@ -614,6 +614,11 @@ main {
 .button.export::before {
     content: "";
     background: url(../images/arrow-up.png) no-repeat center;
+    transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    -o-transform: rotate(180deg);
 }
 
 .button.export > strong {
@@ -1079,9 +1084,6 @@ form {
 
 /*Sales Rep Input*************************************************/
 /*gabby*/
-form .row .col-md-6 .col-md-9 .f2:nth-child(1){
-    margin-left:-15px;
-}
 
 form .row:nth-child(1) .col-md-6:nth-child(2) .f2{
     width:100%;
@@ -1311,9 +1313,6 @@ and (orientation : landscape) {
     /*Add Account*/
 
     /*Sales Rep Input*/
-    form .row .col-md-6 .col-md-9 .f2:nth-child(1){
-	margin-left:-15px;
-    }
 
     form .row:nth-child(1) .col-md-6:nth-child(2) .f2{
 	width:100%;
@@ -1398,6 +1397,7 @@ and (orientation : portrait){
 }
 
 .export_matrix {
+    float: right;
     text-align: center;
     width: 100px;
 }
@@ -1406,7 +1406,7 @@ and (orientation : portrait){
     text-align: center;
     width: 100px;
     float: right;
-    margin-top: -45px;
+    margin-top: -65px;
 }
 
 .export_matrix img {
