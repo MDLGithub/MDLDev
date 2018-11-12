@@ -10,6 +10,16 @@ require_once('config.php');
 require_once ('functions_event.php');
 require_once ('functions.php');
 
+sec_session_start();
+$userID = $_SESSION['user']["id"];
+$roleInfo = getRole($db, $userID);
+$role = $roleInfo['role'];
+$username = "";
+if($role == 'Sales Rep'):
+    $username = getUserName($db, $userID);
+endif;
+
+
 /* --------------------- Save Event ------------------------- */
 
 if(isset($_POST["action"]) && $_POST["action"] == 'eventinsert')
@@ -277,14 +287,14 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart' && isset($_POST[
 	    $data = array(
 	            'series' => array (
 	            		[
-		                    'name'=> 'Submitted',
+		                    'name'=> ($role == 'Sales Rep') ? $username : 'Submitted',
 		                    'data'=> array($submitted[0]),
 		                    'color'=> "#3a8a5f",
 		                    'labels'=> array('visible' => true),
 		                    'gap'=> 3,
 		                ],
 		                [
-		                	'name'=> 'Top Submitted',
+		                	'name'=> 'Top Performer',
 		                    'data'=> array($submit['topsubmittedcount']),
 		                    'color'=> "#b6942e",
 		                    'labels'=> array('visible' => true),

@@ -21,7 +21,7 @@ require_once ('functions_event.php');
 $roles = array('Admin', 'Sales Rep', 'Sales Manager');
 
 $userID = $_SESSION['user']["id"];
-
+$username = getUserName($db, $userID);
 $roleInfo = getRole($db, $userID);
 $role = $roleInfo['role'];
 
@@ -167,6 +167,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     #detail, #summary{ /*width: 48%;*/ padding: 2px; font-size: 15px;}
     .top-buttons button.info-button { background: linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%); }
     .sales-photo img { max-width: 100px; }
+    #calendar .fc-toolbar.fc-header-toolbar h2:after {
+        content: '"';
+        padding-left: 5px;
+    }
+    #calendar .fc-toolbar.fc-header-toolbar h2:before {
+        content: '"';
+        padding-right: 5px;
+    }
     @media only screen and (min-device-width : 768px) and (max-width : 1024px) 
     and (orientation : portrait) { 
         .top-buttons { /*width: 65%;*/ }
@@ -591,11 +599,13 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     salesrepIds.push(v.salesrepid);
                 });
                 var uniqueIds = salesrepIds.filter(onlyUnique);
-                uniqueIds = uniqueIds.toString();
-
-                
+                <?php if($role == 'Sales Rep') : ?>
+                    uniqueIds = "<?php echo $salesRepDetails['Guid_salesrep']; ?>";
+                <?php else : ?>
+                    uniqueIds = uniqueIds.toString();
+                <?php endif;  ?>
                 //Bar chart
-                <?php if(isset($_GET['salerepId'])):  ?>
+                <?php if(isset($_GET['salerepId']) || ($role == 'Sales Rep')):  ?>
                     var chartParams = {ids: uniqueIds, startdate: startdate, enddate: enddate, action: 'getBarChart', showtopPerformer:true};
                 <?php else: ?>
                     var chartParams = {ids: uniqueIds, startdate: startdate, enddate: enddate, action: 'getBarChart'};
