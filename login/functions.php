@@ -2453,6 +2453,8 @@ function dmdl_refresh($db){
         var_dump($result);
         $domObj = new xmlToArrayParser($result['GetCombinedResultsResult']); 
         $domArr = $domObj->array; 
+        var_dump("Dom Array => ");
+        var_dump($domArr);
         if($domObj->parse_error){ 
             echo $domObj->get_xml_error();            
         } else {             
