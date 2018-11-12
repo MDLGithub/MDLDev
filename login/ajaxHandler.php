@@ -1,8 +1,6 @@
 <?php
 require_once('config.php');
 require_once('settings.php');
-use mikehaertl\pdftk\Pdf;
-use mikehaertl\tmp\File;
 
 if(isset($_POST['url_config']) && $_POST['url_config']=='1'){
     load_url_config($db, $_POST['id']);
@@ -484,7 +482,7 @@ function get_account_correlations($db, $id, $name, $selectedIds){
     $accountsHtml = '<option value="">Account</option>';
     foreach ($accounts as $k=>$v){
        $selected = ($id===$v['account']) ? " selected='selected'": "";
-       $accountsHtml .= '<option '.$selected.' value="'.$v['account'].'">'.$v['account'] ." - ". $v['name'].'</option>';
+       $accountsHtml .= '<option '.$selected.' value="'.$v['account'].'">'.$v['account'] ." - ". formatAccountName($v['name']).'</option>';
     }
 
 
@@ -494,93 +492,6 @@ function get_account_correlations($db, $id, $name, $selectedIds){
 			'id' => $id,
 			'name'=>$name,
 			'accounts_html'=>$accountsHtml,
-			'provider_html'=>$providerHtml,
-			'salesrep_html'=>$salesrepHtml
-		    ));
-    exit();
-}
-
-function get_account_correlations__($db, $id, $name, $selectedIds){
-
-    $queryAccounts = "";
-    $queryProviders = "SELECT * FROM tblprovider";
-    $querySalesreps = "SELECT tblaccount.*, tblsalesrep.* FROM tblaccount "
-		    . "LEFT JOIN tblaccountrep ON tblaccount.Guid_account = tblaccountrep.Guid_account "
-		    . "LEFT JOIN tblsalesrep ON tblsalesrep.Guid_salesrep=tblaccountrep.Guid_salesrep ";
-
-    $whereProvider = array();
-    $whereSalesRep = array();
-    $whereAccount  = array();
-    $accountID = "";
-    $providerID ="";
-    $salesRepID = "";
-
-    if($name=='account'){
-	$accountID = $id;
-	if($id != ""){
-	    $querySalesreps .= " WHERE tblaccount.account=:id AND tblsalesrep.Guid_user != ''";
-	    $queryProviders .= " WHERE account_id=:id";
-	    $whereProvider = array("id"=>$id);
-	} else {
-	    $querySalesreps = "SELECT * FROM tblsalesrep";
-	}
-	$whereSalesRep = array("id"=>$id);
-    }
-
-    if($name=='provider'){
-	if($id != ""){
-	    $providerID = $id;
-	    $queryAccounts  = "SELECT a.account FROM tblaccount a "
-			    . "LEFT JOIN tblprovider p ON a.account = p.account_id "
-			    . "WHERE p.Guid_provider=:id";
-	    $whereAccount = array("id"=>$id);
-	    $account = $db->row($queryAccounts, $whereAccount);
-	    $accountID = $account['account'];
-	    $queryProviders .= " WHERE account_id=:id";
-	    $querySalesreps .= " WHERE tblaccount.account=:id AND tblsalesrep.Guid_user != ''";
-	    $whereProvider = array("id"=>$accountID);
-	    $whereSalesRep = array("id"=>$accountID);
-	} else {
-	    $querySalesreps = "SELECT * FROM tblsalesrep";
-	    $queryProviders = "SELECT * FROM tblprovider";
-	    $whereProvider = array();
-	    $whereSalesRep = array();
-	}
-    }
-
-    if($name=='salesrep'){
-	$salesRepID = $id;
-	if($id != ""){
-	    $querySalesreps .= " WHERE tblsalesrep.Guid_user=:id AND tblsalesrep.Guid_user != ''";
-	    $whereSalesRep = array("id"=>$id);
-	    $salesreps = $db->row($querySalesreps, $whereSalesRep);
-	    $accountID = $salesreps['account'];
-	    $queryProviders .= " WHERE account_id=:id ";
-	    $whereProvider = array("id"=>$accountID);
-	}
-    }
-
-    $providers = $db->query($queryProviders, $whereProvider);
-    $providerHtml = '<option value="">Provider</option>';
-    foreach ($providers as $k=>$v){
-       $selected = ($providerID==$v['Guid_provider']) ? " selected='selected'": "";
-       $providerHtml .= '<option '.$selected.' value="'.$v['Guid_provider'].'">'.$v['first_name'].' '.$v['last_name'].'</option>';
-    }
-    $querySalesreps .= ' GROUP BY tblsalesrep.Guid_user';
-
-    $salesreps = $db->query($querySalesreps, $whereSalesRep);
-    $salesrepHtml = '<option value="">Genetic Consultant</option>';
-    foreach ($salesreps as $k=>$v){
-       $selected = ($salesRepID==$v['Guid_user']) ? " selected='selected'": "";
-       $salesrepHtml .= '<option '.$selected.' value="'.$v['Guid_user'].'">'.$v['first_name'].' '.$v['last_name'].'</option>';
-    }
-
-    echo json_encode( array(
-			'id' => $id,
-			'name'=>$name,
-			'accountID'=>$accountID,
-			'providerID'=>$providerID,
-			'salesRepID'=>$salesRepID,
 			'provider_html'=>$providerHtml,
 			'salesrep_html'=>$salesrepHtml
 		    ));
@@ -677,25 +588,15 @@ function updateAccounts($db, $salesrep) {
 
 function exportUsers($db) {
     $testsSql = "SELECT q.Date_created AS date, CONCAT(srep.first_name, ' ', srep.last_name) as 'sales', mdl.mdl_number as 'mdl',
-    (SELECT MAX(sp.Date) FROM tbl_mdl_status_log sp WHERE sp.account = a.account AND sp.Guid_patient = p.Guid_patient AND sp.Guid_status = 2) as 'accessioned', 
-    (SELECT MAX(trr.Date) FROM tbl_mdl_status_log trr WHERE trr.account = a.account AND trr.Guid_patient = p.Guid_patient AND trr.Guid_status = 22) as 'reported', 
-    (SELECT tp.status FROM tbl_mdl_status_log tplog
-     LEFT JOIN tbl_mdl_status tp ON tplog.Guid_status = tp.Guid_status
-     WHERE tplog.account = a.account AND tplog.Guid_patient = p.Guid_patient AND tp.parent_id = 52 ORDER BY tplog.Date_created DESC LIMIT 1) as 'test_paid',
-    (SELECT aps.status FROM tbl_mdl_status_log ap 
-     LEFT JOIN tbl_mdl_status aps ON ap.Guid_status = aps.Guid_status
-     WHERE ap.account = a.account AND ap.Guid_patient = p.Guid_patient AND aps.parent_id = 2 ORDER BY ap.Date_created DESC LIMIT 1) as 'test_ordered', 
-    (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 53) as 'last_paid',
-    (CASE WHEN (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 9) THEN 'Declined'
-         WHEN (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = a.account AND pr.Guid_patient = p.Guid_patient AND pr.Guid_status = 18) THEN 'Approved'
-         ELSE '' END) as 'insurance_app',
+    (SELECT MAX(sp.Date) FROM tbl_mdl_status_log sp WHERE sp.account = a.account AND sp.Guid_patient = p.Guid_patient AND sp.Guid_status = 2) as 'accessioned',
     a.account as 'account',
     a.name as 'account_name',
     q.qualified as 'med_necessity',
     q.source as 'event',
     q.Guid_user as 'user_id',
     srep.color_matrix as 'sales_color',
-    q.Date_created
+    q.Date_created,
+    p.Guid_patient as 'patient_id'
     
     FROM tbl_ss_qualify q 
     LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user 
@@ -703,8 +604,6 @@ function exportUsers($db) {
     LEFT JOIN tblaccount a ON a.account = q.account_number 
     LEFT JOIN tblaccountrep ar ON ar.Guid_account = a.Guid_account 
     LEFT JOIN tblsalesrep srep ON ar.Guid_salesrep = srep.Guid_salesrep
-    LEFT JOIN tbl_mdl_status_log sl ON sl.Guid_salesrep = srep.Guid_salesrep 
-    LEFT JOIN tbl_mdl_status s ON sl.Guid_status = s.Guid_status 
     LEFT JOIN tbl_mdl_number mdl ON q.Guid_user = mdl.Guid_user
     
     WHERE  u.marked_test = '0' 
@@ -724,16 +623,16 @@ function exportUsers($db) {
 
     $params = [];
     if ($_POST['account']) {
-	$params['account'] = $_POST['account'];
+	    $params['account'] = $_POST['account'];
     }
     if ($_POST['consultant']) {
-	$params['consultant'] = $_POST['consultant'];
+	    $params['consultant'] = $_POST['consultant'];
     }
     if ($_POST['from']) {
-	$params['from'] = dbDateFormat($_POST['from']);
+	    $params['from'] = dbDateFormat($_POST['from']);
     }
     if ($_POST['to']) {
-	$params['to'] = dbDateFormat($_POST['to']);
+	    $params['to'] = dbDateFormat($_POST['to']);
     }
 
     $tests = $db->query($testsSql, $params);
@@ -752,7 +651,7 @@ function exportUsers($db) {
         ),
         'font' => array(
             'bold' => true,
-            'color' => array('rgb' => 'ffffff')
+            'color' => array('rgb' => '00009c')
         ),
         'alignment' => array(
             'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
@@ -761,23 +660,25 @@ function exportUsers($db) {
 
     $objPHPExcel->getActiveSheet()->getDefaultColumnDimension()->setWidth(20);
 
-    $objPHPExcel->getActiveSheet()->getStyle('A' . $rowCount . ':N' . $rowCount)->applyFromArray($headerStyleArray);
-    $objPHPExcel->getActiveSheet()->SetCellValue('A' . $rowCount, 'Accessioned');
-    $objPHPExcel->getActiveSheet()->SetCellValue('B' . $rowCount, 'MDL #');
-    $objPHPExcel->getActiveSheet()->SetCellValue('C' . $rowCount, 'Test Ordered');
-    $objPHPExcel->getActiveSheet()->SetCellValue('D' . $rowCount, 'Sales Rep');
-    $objPHPExcel->getActiveSheet()->SetCellValue('E' . $rowCount, 'Account #');
-    $objPHPExcel->getActiveSheet()->SetCellValue('F' . $rowCount, 'Account Name');
-    $objPHPExcel->getActiveSheet()->SetCellValue('G' . $rowCount, 'Med Necessity');
-    $objPHPExcel->getActiveSheet()->SetCellValue('H' . $rowCount, 'Event');
-    $objPHPExcel->getActiveSheet()->SetCellValue('I' . $rowCount, 'Insurance App/Dec');
-    $objPHPExcel->getActiveSheet()->SetCellValue('J' . $rowCount, 'Reported');
-    $objPHPExcel->getActiveSheet()->SetCellValue('K' . $rowCount, 'Test Paid');
-    $objPHPExcel->getActiveSheet()->SetCellValue('L' . $rowCount, 'Last Paid');
-    $objPHPExcel->getActiveSheet()->SetCellValue('M' . $rowCount, 'Payer(s)');
-    $objPHPExcel->getActiveSheet()->SetCellValue('N' . $rowCount, 'Total Paid');
+    $objPHPExcel->getActiveSheet()->getStyle('A' . $rowCount . ':O' . $rowCount)->applyFromArray($headerStyleArray);
+    $objPHPExcel->getActiveSheet()->SetCellValue('A' . $rowCount, '#');
+    $objPHPExcel->getActiveSheet()->SetCellValue('B' . $rowCount, 'Accessioned');
+    $objPHPExcel->getActiveSheet()->SetCellValue('C' . $rowCount, 'MDL #');
+    $objPHPExcel->getActiveSheet()->SetCellValue('D' . $rowCount, 'Test Ordered');
+    $objPHPExcel->getActiveSheet()->SetCellValue('E' . $rowCount, 'Sales Rep');
+    $objPHPExcel->getActiveSheet()->SetCellValue('F' . $rowCount, 'Account #');
+    $objPHPExcel->getActiveSheet()->SetCellValue('G' . $rowCount, 'Account Name');
+    $objPHPExcel->getActiveSheet()->SetCellValue('H' . $rowCount, 'Med Necessity');
+    $objPHPExcel->getActiveSheet()->SetCellValue('I' . $rowCount, 'Event');
+    $objPHPExcel->getActiveSheet()->SetCellValue('J' . $rowCount, 'Insurance App/Dec');
+    $objPHPExcel->getActiveSheet()->SetCellValue('K' . $rowCount, 'Reported');
+    $objPHPExcel->getActiveSheet()->SetCellValue('L' . $rowCount, 'Test Paid');
+    $objPHPExcel->getActiveSheet()->SetCellValue('M' . $rowCount, 'Last Paid');
+    $objPHPExcel->getActiveSheet()->SetCellValue('N' . $rowCount, 'Payer(s)');
+    $objPHPExcel->getActiveSheet()->SetCellValue('O' . $rowCount, 'Total Paid');
 
-    $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(60);
+    $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(11);
+    $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(60);
 
     $totalSum = 0;
     if (!empty($tests)) {
@@ -808,32 +709,64 @@ function exportUsers($db) {
         $rowCount++;
 
         if (isset($data['sales_color'])) {
-            $objPHPExcel->getActiveSheet()->getStyle('A'.$rowCount.':N'.$rowCount)->getFill()->applyFromArray(array(
-            'type' => PHPExcel_Style_Fill::FILL_SOLID,
-            'startcolor' => array(
-                'rgb' => (!empty($data['sales_color'])) ? substr($data['sales_color'], 1) : '#ffffff'
-            )
+            $objPHPExcel->getActiveSheet()->getStyle('A'.$rowCount.':O'.$rowCount)->getFill()->applyFromArray(array(
+                'type' => PHPExcel_Style_Fill::FILL_SOLID,
+                'startcolor' => array(
+                    'rgb' => (!empty($data['sales_color'])) ? substr($data['sales_color'], 1) : '#ffffff'
+                ),
+                'alignment' => array(
+                    'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+                )
             ));
         }
 
-        $account_name = strtolower($data['account_name']);
-        $account_name = ucwords($account_name);
+        $account_name = formatAccountName($data['account_name']);
 
-        $objPHPExcel->getActiveSheet()->SetCellValue('A' . $rowCount, formatDate($data['accessioned']));
-        $objPHPExcel->getActiveSheet()->SetCellValue('B' . $rowCount, $data['mdl']);
-        $objPHPExcel->getActiveSheet()->SetCellValue('C' . $rowCount, $data['test_ordered']);
-        $objPHPExcel->getActiveSheet()->SetCellValue('D' . $rowCount, $data['sales']);
-        $objPHPExcel->getActiveSheet()->SetCellValue('E' . $rowCount, $data['account']);
-        $objPHPExcel->getActiveSheet()->SetCellValue('F' . $rowCount, $account_name);
-        $objPHPExcel->getActiveSheet()->SetCellValue('G' . $rowCount, substr($data['med_necessity'], 0, 1));
-        $objPHPExcel->getActiveSheet()->SetCellValue('H' . $rowCount, $data['event']);
-        $objPHPExcel->getActiveSheet()->SetCellValue('I' . $rowCount, $data['insurance_app']);
-        $objPHPExcel->getActiveSheet()->SetCellValue('J' . $rowCount, formatDate($data['reported']));
-        $objPHPExcel->getActiveSheet()->SetCellValue('K' . $rowCount, $data['test_paid']);
-        $objPHPExcel->getActiveSheet()->SetCellValue('L' . $rowCount, formatDate($data['last_paid']));
-        $objPHPExcel->getActiveSheet()->SetCellValue('M' . $rowCount, $payersNames);
-        $objPHPExcel->getActiveSheet()->SetCellValue('N' . $rowCount, $revSum);
-        $objPHPExcel->getActiveSheet()->getStyle('N' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+        $reported = "SELECT MAX(trr.Date) as 'reported' FROM tbl_mdl_status_log trr WHERE trr.account = {$data['account']} AND trr.Guid_patient = {$data['patient_id']} AND trr.Guid_status = 22"; 
+        $reportedResp = $db->query($reported);
+        $test_paid = "SELECT tp.status as 'test_paid' FROM tbl_mdl_status_log tplog
+         LEFT JOIN tbl_mdl_status tp ON tplog.Guid_status = tp.Guid_status
+         WHERE tplog.account = {$data['account']} AND tplog.Guid_patient = {$data['patient_id']} AND tp.parent_id = 52 ORDER BY tplog.Date_created DESC LIMIT 1";
+        $testPaidResp = $db->query($test_paid);
+        $test_ordered = "SELECT aps.status as 'test_ordered' FROM tbl_mdl_status_log ap 
+         LEFT JOIN tbl_mdl_status aps ON ap.Guid_status = aps.Guid_status
+         WHERE ap.account = {$data['account']} AND ap.Guid_patient = {$data['patient_id']} AND aps.parent_id = 2 ORDER BY ap.Date_created DESC LIMIT 1"; 
+        $testOrdereResp = $db->query($test_ordered);
+        $last_paid = "SELECT MAX(pr.Date) as 'last_paid' FROM tbl_mdl_status_log pr WHERE pr.account = {$data['account']} AND pr.Guid_patient = {$data['patient_id']} AND pr.Guid_status = 53";
+        $lastPaidResp = $db->query($last_paid);
+        $insurance_app = "SELECT CASE WHEN (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = {$data['account']} AND pr.Guid_patient = {$data['patient_id']} AND pr.Guid_status = 9) THEN 'Declined'
+             WHEN (SELECT MAX(pr.Date) FROM tbl_mdl_status_log pr WHERE pr.account = {$data['account']} AND pr.Guid_patient = {$data['patient_id']} AND pr.Guid_status = 18) THEN 'Approved'
+             ELSE '' END as 'insurance_app' from tbl_mdl_status_log";
+        $insuranceAppResp = $db->query($insurance_app);
+
+        $data['reported'] = !empty($reportedResp[0]['reported']) ? $reportedResp[0]['reported'] : '';
+        $data['test_paid'] = !empty($testPaidResp[0]['test_paid']) ? $testPaidResp[0]['test_paid'] : '';
+        $data['test_ordered'] = !empty($testOrdereResp[0]['test_ordered']) ? $testOrdereResp[0]['test_ordered'] : '';
+        $data['last_paid'] = !empty($lastPaidResp[0]['last_paid']) ? $lastPaidResp[0]['last_paid'] : '';
+        $data['insurance_app'] = !empty($insuranceAppResp[0]['insurance_app']) ? $insuranceAppResp[0]['insurance_app'] : '';
+
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$rowCount.':O'.$rowCount)->applyFromArray(array(
+            'alignment' => array(
+                'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            )
+        ));
+
+        $objPHPExcel->getActiveSheet()->SetCellValue('A' . $rowCount, $rowCount - 3);
+        $objPHPExcel->getActiveSheet()->SetCellValue('B' . $rowCount, formatDate($data['accessioned']));
+        $objPHPExcel->getActiveSheet()->SetCellValue('C' . $rowCount, $data['mdl']);
+        $objPHPExcel->getActiveSheet()->SetCellValue('D' . $rowCount, $data['test_ordered']);
+        $objPHPExcel->getActiveSheet()->SetCellValue('E' . $rowCount, $data['sales']);
+        $objPHPExcel->getActiveSheet()->SetCellValue('F' . $rowCount, $data['account']);
+        $objPHPExcel->getActiveSheet()->SetCellValue('G' . $rowCount, $account_name);
+        $objPHPExcel->getActiveSheet()->SetCellValue('H' . $rowCount, substr($data['med_necessity'], 0, 1));
+        $objPHPExcel->getActiveSheet()->SetCellValue('I' . $rowCount, $data['event']);
+        $objPHPExcel->getActiveSheet()->SetCellValue('J' . $rowCount, $data['insurance_app']);
+        $objPHPExcel->getActiveSheet()->SetCellValue('K' . $rowCount, formatDate($data['reported']));
+        $objPHPExcel->getActiveSheet()->SetCellValue('L' . $rowCount, $data['test_paid']);
+        $objPHPExcel->getActiveSheet()->SetCellValue('M' . $rowCount, formatDate($data['last_paid']));
+        $objPHPExcel->getActiveSheet()->SetCellValue('N' . $rowCount, $payersNames);
+        $objPHPExcel->getActiveSheet()->SetCellValue('O' . $rowCount, $revSum);
+        $objPHPExcel->getActiveSheet()->getStyle('O' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
       }
     }
 
@@ -859,13 +792,13 @@ function exportUsers($db) {
 	));
 
     $objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$rowCount, 'Total:');
-    $objPHPExcel->getActiveSheet()->mergeCells('A' . $rowCount . ':M' . $rowCount);
+    $objPHPExcel->getActiveSheet()->mergeCells('A' . $rowCount . ':N' . $rowCount);
 
-    $objPHPExcel->getActiveSheet()->SetCellValue('N' . $rowCount, $totalSum);
-    $objPHPExcel->getActiveSheet()->getStyle('N' . $rowCount)->getNumberFormat()->setFormatCode('"$" #,##0.00');
+    $objPHPExcel->getActiveSheet()->SetCellValue('O' . $rowCount, $totalSum);
+    $objPHPExcel->getActiveSheet()->getStyle('O' . $rowCount)->getNumberFormat()->setFormatCode('"$" #,##0.00');
 
-    $objPHPExcel->getActiveSheet()->getStyle('A' . $rowCount . ':N' . $rowCount)->applyFromArray($footerStyleArray);
-    $objPHPExcel->getActiveSheet()->getStyle('A3:N' . $rowCount)->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->getStyle('A' . $rowCount . ':O' . $rowCount)->applyFromArray($footerStyleArray);
+    $objPHPExcel->getActiveSheet()->getStyle('A3:O' . $rowCount)->applyFromArray($styleArray);
 
     $filename = date('his', time()).'_geneveda_matrix.xlsx';
     $directory = SITE_ROOT . '/uploads/';

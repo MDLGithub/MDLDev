@@ -285,7 +285,7 @@ require_once ('navbar.php');
                                     <?php } ?>
                                     <?php if(isFieldVisibleByRole($isDeviceNameView, $roleID)) {?>
                                     <div class="row">
-                                        <div class="col-md-10 select_device_dropdown">
+                                        <div class="col-md-10 padd-0 select_device_dropdown">
                                           <div class="f2  <?php echo ($deviceid!="")?"valid show-label":"";?>">
                                             <label class="dynamic" for="deviceType"><span>Device Name</span></label>
                                             <div class="group">
@@ -368,10 +368,10 @@ require_once ('navbar.php');
                         <thead>
                             <tr>                                
                                 <?php if(isFieldVisibleByRole($isSalesRepView, $roleID)) {?>
-                                    <th>Genetic Consultant</th>
+                                    <th class="dropdownFilter">Genetic Consultant</th>
                                 <?php } ?>
                                 <?php if(isFieldVisibleByRole($isDeviceNameView, $roleID)) {?>
-                                    <th>Device Name</th>
+                                    <th class="dropdownFilter">Device Name</th>
                                 <?php } ?>
                                 <?php if(isFieldVisibleByRole($isSerialView, $roleID)) {?>
                                     <th>Serial Number</th>
@@ -380,6 +380,7 @@ require_once ('navbar.php');
                                 <th class="">Completed</th>           
                                 <th class="">Qualified</th>           
                                 <th class="">Submitted</th>
+                                <th class="noFilter text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -395,11 +396,7 @@ require_once ('navbar.php');
                                     </td>
                                 <?php } ?>
                                 <?php if(isFieldVisibleByRole($isDeviceNameView, $roleID)) {?>
-                                    <td>
-                                        <a href="<?php echo SITE_URL; ?>/devicesInventory.php?action=edit&id=<?php echo $v['id']; ?>">
-                                        <?php echo $v['device_name']; ?>
-                                        </a>
-                                    </td>
+                                    <td><?php echo $v['device_name']; ?></td>
                                 <?php } ?>
                                 <?php if(isFieldVisibleByRole($isSerialView, $roleID)) {?>
                                     <td><?php echo $v['serial_number']; ?></td>
@@ -428,6 +425,14 @@ require_once ('navbar.php');
                                     $Submitted = getDeviceStatusCount($db, $v['Guid_salesrep'], '1', $v['id'] ); //28->Submitted (Specimen Collected) 
                                     echo ($Submitted>0)?$Submitted:'-';
                                     ?>
+                                </td>
+                                
+                                <td class="text-center">
+                                    <?php if(isFieldVisibleByRole($isActionEdit, $roleID)) {?>
+                                    <a href="<?php echo SITE_URL; ?>/devicesInventory.php?action=edit&id=<?php echo $v['id']; ?>">
+                                        <span class="fas fa-pencil-alt" aria-hidden="true"></span>
+                                    </a>
+                                    <?php } ?>
                                 </td>
                                 
                             </tr>
@@ -497,7 +502,12 @@ require_once ('navbar.php');
             lengthChange: false,
             "paging":   false,
             "info":     false,
-            
+            "aoColumnDefs": [
+              { 
+                  
+                  "bSortable": false, 
+                  "aTargets": [ 0,1,7 ] } 
+            ]
         });
     }
    

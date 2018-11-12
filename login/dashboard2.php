@@ -143,26 +143,16 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .below_avg, .above_avg, .top_performer_avg {
         position: relative;
     }
-    .below_avg:before, .above_avg:before, .top_performer_avg:before {
-        content: "";
-        background-repeat: no-repeat;
-        left: 39px;
-        position: absolute;
-        width: 18px;
-        height: 23px;
-    }
     .below_avg:before{
         background-image: url(assets/images/below_avg.png);
     }
     .above_avg:before{
         background-image: url(assets/images/above_avg.png);
     }
-    .top_performer_avg:before{
-        background-image: url(assets/images/top_performer.png);
-        background-size: 15px;
-        top: 5px;
+    .info_block h1 br:first-child {
+        display: none;
     }
-    .activeButton{ background: #3f628a !important; color: #fff !important; width: 45%; padding: 0; box-shadow: none !important; float: left;}
+    .activeButton{ background: #3f628a !important; color: #fff !important;    /*width: 45%;*/ padding: 0; box-shadow: none !important; float: left;}
     tr:first-child > td > .fc-day-grid-event{ min-height: 50px; }
     #piechart svg > g > g:nth-child(4) > g text, #chart svg > g > g:nth-child(4) > g text {
         font-weight: 800 !important;
@@ -172,18 +162,27 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .consultant_changed{ visibility: hidden; }
     .consultant_changed:before{ position: absolute;display: inline-block; width: 60px; border-radius: 20px; left: 0; content: "0"; background-color: #fff; visibility: visible; }
     .forcehidden{ display: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; }
-
-    #detail, #summary{ width: 48%; padding: 2px; /*background: #90bcf7;*/ font-size: 15px;}
+    #calendar th{ text-align: center; color: #1c487b;}
+    #calendar th.fc-today{ color:  white;}
+    #detail, #summary{ /*width: 48%;*/ padding: 2px; font-size: 15px;}
     .top-buttons button.info-button { background: linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%); }
     .sales-photo img { max-width: 100px; }
     @media only screen and (min-device-width : 768px) and (max-width : 1024px) 
     and (orientation : portrait) { 
-        .top-buttons { width: 65%; }
-        #detail, #summary{ width: 30%;}
-        .top-buttons a.button.submit{ width: 38%; }
+        .top-buttons { /*width: 65%;*/ }
+        #detail, #summary{}
         .dropdown_hide{ display: none; }
-        .info_block h1{ width: 155px; line-height: 26px; }
+        .info_block h1{ /*width: 155px;*/ line-height: 26px; text-align:left; padding-left:10px; font-size:20px;}
         .sales-photo img { max-width: 55px; text-align: center; margin-left: 20px; padding: 6px 0px; }
+    }
+    @media only screen and (min-device-width : 768px) and (max-width : 1024px) 
+    and (orientation : landscape) { 
+
+        .top_performer_avg:before {
+            top: -4px;
+            left: 39px;
+           
+        }
     }
 </style>
 <script>
@@ -192,7 +191,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     if(!Date.now) Date.now = function() { return new Date(); }
     Date.time = function() { return Date.now().getUnixTime(); }
 
+    
     $(document).ready(function () {
+        
         createChart();
 
         $(".f2").width('95%');
@@ -229,7 +230,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
         // when summary button is clicked
         $('#summary').on('click touchstart', function () {
-            var summarycursource = 'ajaxHandlerEvents.php';
+            if(salesrep == 0)
+                var summarycursource = 'ajaxHandlerEvents.php';
+            else
+                var summarycursource = 'ajaxHandlerEvents.php?salerepId='+salesrep;
 
             $('#calendar').fullCalendar('removeEventSources');
             $('#calendar').fullCalendar('refetchEvents');
@@ -242,8 +246,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
         // when detail button is clicked
         $('#detail').on('click touchstart', function () {
-            var detailcursource = 'eventload.php';
-
+            if(salesrep == 0)
+                var detailcursource = 'eventload.php';
+            else
+                var detailcursource = 'eventload.php?salerepId='+salesrep;
             $('#calendar').fullCalendar('removeEventSources');
             $('#calendar').fullCalendar('refetchEvents');
             $('#calendar').fullCalendar('addEventSource', detailcursource);
@@ -256,9 +262,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         var d = new Date();
         var evtsDate = d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate();
         evtsDate = evtsDate.toString();
-        if (localStorage.evtsDate) {
-            evtsDate = (localStorage.evtsDate).toString();
-        }
+        <?php /*if(isset($_GET['salerepId'])): ?>
+            if (localStorage.evtsDate) {
+                evtsDate = (localStorage.evtsDate).toString();
+            }
+        <?php endif;*/ ?>
+
 
         var calendar = $('#calendar').fullCalendar({
             header: {
@@ -436,7 +445,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     borderColor = "border: 2px solid " + event.color + " !important";
                 }
                 
-                var modifiedName = sentenceCase((name == "") ? "Health Care Fair" : name);
+                var modifiedName = (name == "") ? "Health Care Fair" : name;
                 
                 
                 var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable" style="' + borderColor + '">' +
@@ -496,8 +505,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 
             },
             eventAfterRender: function (event, element, view) {
-                //salesrepIDList.push(event.salesrepid);
-                //salesrepNameList.push(event.salesrep);
                 
                 if (!event.evtCnt) {
                     if ((event.salesrep == null || event.account == null) && event.title == 'BRCA Day') {
@@ -552,7 +559,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 $('#topcomcnt').html('0');
                 $('#topsubcnt').html('0');
 
-               <?php //if(!isset($_GET['salerepId'])): ?>
+               
                 $.ajax({
                     type : 'POST',
                     data : { userid:<?php echo $userID; ?>, startdate:start, action:'topbrcacount' },//inputparam,
@@ -574,8 +581,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var startdate = moment(event.start._d).format('YYYY-MM-DD');
                 var enddate = moment(event.end._d).format('YYYY-MM-DD');
                 
-                localStorage.setItem('evtsDate', startdate );
-                localStorage.setItem('evteDate', enddate );
+                /*localStorage.setItem('evtsDate', startdate );
+                localStorage.setItem('evteDate', enddate );*/
 
                 var events = $('#calendar').fullCalendar('getView');
                 var ele_events = events._props.currentEvents;
@@ -588,15 +595,15 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
                 
                 //Bar chart
-                /*$.each(ele_events,function(k, v){
-                    salesrepIds.push(v.salesrepid);
-                });
-                var uniqueIds = salesrepIds.filter(onlyUnique);
-                uniqueIds = uniqueIds.toString();*/
+                <?php if(isset($_GET['salerepId'])):  ?>
+                    var chartParams = {ids: uniqueIds, startdate: startdate, enddate: enddate, action: 'getBarChart', showtopPerformer:true};
+                <?php else: ?>
+                    var chartParams = {ids: uniqueIds, startdate: startdate, enddate: enddate, action: 'getBarChart'};
+                <?php endif; ?>
                 $.ajax({
                     type: 'POST',
                     url: 'ajaxHandlerEvents.php',
-                    data: {ids: uniqueIds, startdate: startdate, enddate: enddate, action: 'getBarChart'},
+                    data: chartParams,
                     dataType: 'json',
                     success: function(returndata){
                         //returndata = JSON.parse(returndata);
@@ -611,8 +618,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                                 max:returndata.yaxis
                             },
                         });
-                        chart.options.legend.offsetX = $('#chart').width() - 100;
                         chart.refresh();
+                        /*firstSeries = chart.options.series;
+                        firstSeries[0].gap = 5;//parseFloat(5, 10);
+                        firstSeries[0].spacing = 5;
+                        chart.redraw();
+                        console.log(chart);*/
                     },
                 });
 
@@ -690,39 +701,40 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     dataType: 'json',
                     url : 'ajaxHandlerEvents.php',
                     success : function(returndata){
-                        console.log(returndata);
-                        rgCntimg = statImage(returndata.reg);
-                        cmCntimg = statImage(returndata.com);
-                        subCntimg = statImage(returndata.sub);
-                        qCntimg = statImage(returndata.qua);
-                        bCntimg = statImage(returndata.brca);
-                        hcfCntimg = statImage(returndata.hcf);
-                        //console.log(cmCntimg);
-                        $("#meregcnt").text(returndata.reg).removeClass().addClass(rgCntimg).removeClass('decrease');
-                        $("#mecomcnt").text(returndata.com).removeClass().addClass(cmCntimg).removeClass('decrease');
-                        $("#mequalcnt").text(returndata.qua).removeClass().addClass(qCntimg).removeClass('decrease');
-                        $("#mesubcnt").text(returndata.sub).removeClass().addClass(subCntimg).removeClass('decrease');
-                        $("#mebrcacnt").text(returndata.brca).removeClass().addClass(bCntimg).removeClass('decrease');
-                        $("#meeventcnt").text(returndata.hcf).removeClass().addClass(hcfCntimg).removeClass('decrease');
+                        $("#meregcnt").text(returndata.reg).removeClass();
+                        $("#mecomcnt").text(returndata.com).removeClass();
+                        $("#mequalcnt").text(returndata.qua).removeClass();
+                        $("#mesubcnt").text(returndata.sub).removeClass();
+                        $("#mebrcacnt").text(returndata.brca).removeClass();
+                        $("#meeventcnt").text(returndata.hcf).removeClass();
                     }
                 });
-                
+
+                setTimeout(function(){
+                    brcatotal = $("#mebrcacnt").text();
+                    brcatop = $("#topbrcacnt").text();
+                    $("#mebrcacnt").addClass(statImage(brcatotal, brcatop));
+                    hcftotal = $("#meeventcnt").text();
+                    hcftop = $("#topeventcnt").text();
+                    $("#meeventcnt").addClass(statImage(hcftotal, hcftop));
+                    regtotal = $("#meregcnt").text();
+                    regtop = $("#topregcnt").text();
+                    $("#meregcnt").addClass(statImage(regtotal, regtop));
+                    comtotal = $("#mecomcnt").text();
+                    comtop = $("#topcomcnt").text();
+                    $("#mecomcnt").addClass(statImage(comtotal, comtop));
+                    quatotal = $("#mequalcnt").text();
+                    quatop = $("#topqualcnt").text();
+                    $("#mequalcnt").addClass(statImage(quatotal, quatop));
+                    subtotal = $("#mesubcnt").text();
+                    subtop = $("#topsubcnt").text();
+                    $("#mesubcnt").addClass(statImage(subtotal, subtop));
+                }, 5000);
             },
         });
        
         function onlyUnique(value, index, self) { 
             return self.indexOf(value) === index;
-        }
-        function statImage(value){
-            var img = "";
-            if( value < 5 ){
-                img = "below_avg";
-            }else if( value < 10 && value >= 5 ){
-                img = "above_avg";
-            }else if( value >= 10 ){
-                img = "top_performer_avg";
-            }
-            return img;
         }
 
         // Whenever the user clicks on the "save" button
@@ -1232,7 +1244,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 
             <div class="container"> 
                 <div id="stats_header"> 
-                <div id="performance_section">
+                <div id="performance_section" class="col-md-8">
                 <div class="header week_stats" style="font-weight:bold;">    
                     <p>This Week's Stats</p>
                     <p class="top_performer">&#9726; Top Performer</p>
@@ -1266,8 +1278,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 </div>
                 </div>
              </div>
-                <div class="row info_block_row">
-                        <div class = "info_block" style="min-width: 340px;">
+                <div class="row info_block_row col-md-4 col-sm-12">
+                        <div class = "info_block">
                             <?php if($role == 'Sales Rep'): ?>
                                 <div class="sales-photo">
                                     <?php 
@@ -1287,9 +1299,9 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                         array_splice( $sTitle, 1, 0, array('<i class="fas fa-angle-down info_block_arrow" onclick="test()" style = "float:right;"></i>') );
                                         //print_r();
                                         $sTitle = implode("<br>",$sTitle);
-                                        echo '<h1>'.$sTitle.'</h1>';
+                                        echo '<h1 class = "col-sm-5">'.$sTitle.'</h1>';
                                     else:
-                                        echo '<h1>  All<i class="fas fa-angle-down info_block_arrow" onclick="test()" style = "float:right;"></i> <br>Genetic <br>Consultants</h1>';
+                                        echo '<h1 class "col-sm-5">  All<i class="fas fa-angle-down info_block_arrow" onclick="test()" style = "float:right;"></i> <br>Genetic <br>Consultants</h1>';
                                     endif;
 
                                 ?>
@@ -1304,10 +1316,10 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                     </ul>
                                 </div>
                             </div>
-                        <div class="col-lg-7 col-md-8 top-buttons">
-                        <button type="button" name="Detail" id="detail" class="info-button activeButton" style="">Details</button>
-                        <button type="button" name="Summary" id="summary" class="info-button" style="">Summary</button>
-                        <a href="eventschedule.php" class="button submit"><strong>Full Calendar</strong></a>   
+                        <div class="col-lg-7 col-md-8 col-sm-7 top-buttons">
+                        <button type="button" name="Detail" id="detail" class="col-lg-6 col-md-6 col-sm-3 col-md-offset-0 col-sm-offset-1 info-button activeButton" style="">Details</button>
+                        <button type="button" name="Summary" id="summary" class="col-lg-6 col-md-6 col-sm-3 info-button" style="">Summary</button>
+                        <a href="eventschedule.php" class="col-md-12 col-sm-5 button submit"><strong>Full Calendar</strong></a>   
                         </div>    
                     </div>
                 </div>
@@ -1550,13 +1562,11 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     dir:"desc"
                 },
                 legend: {
-                    position: "custom",
-                    orientation: "vertical",
-                    height: 50    
+                    position: "top",
+
                 },
                 seriesDefaults: {
                     type: "column",
-                    stack: true
                 },
                 valueAxis: {
                     line: {
@@ -1577,8 +1587,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     template: "#= series.name #: #= value #"
                 },
                 chartArea: {
-                    width: 570,
-                    height: 350
+                    width: 580,
+                    height: 450
                 },
             });
 
@@ -1587,8 +1597,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     text: "Top Submitting Accounts"
                 },
                 chartArea: {
-                    width: 630,
-                    height: 350
+                    width: 620,
+                    height: 450
                 },
                 legend: {
                     position: "left",
@@ -1643,6 +1653,18 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             $(".salesrep_dropdown").toggleClass("dropdown_hide");
             $(".info_block h1").toggleClass("hide");
             $(".info_block_arrow").toggleClass("info_block_arrow_show");
+        }
+        
+        function statImage(total, top){
+            var img = "";
+            if( parseInt(total) < parseInt(top/2) ){
+                img = "below_avg";
+            }else if( parseInt(total) < parseInt(top) && parseInt(total) >= parseInt(top/2) ){
+                img = "above_avg";
+            }else if( parseInt(total) >= parseInt(top) ){
+                img = "top_performer_avg";
+            }
+            return img;
         }
     </script>
 <?php require_once 'scripts.php'; ?>

@@ -218,7 +218,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         font-weight:bold;
     }
 
-    .fc-basicDay-view .fc-logo img{  width:100%; max-width: 180px;   }
+    .fc-basicDay-view .fc-logo img{  width:100%; max-width: 130px; margin: 10px 0; }
 
     .fc-month-view .fc-scroller{ height: auto !important; }
 
@@ -243,9 +243,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     }
     #calendar th {
         height: 5%;
-        /*border: 2px solid grey;*/
-        text-align: right;
-        color: white;
+        text-align: center;
+        color: #1c487b;
         font-weight: bold;
         text-transform: uppercase;
     }
@@ -290,17 +289,18 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
         .day_stats {
             padding-top: 0;
-            width: 50%;
-            text-align: center;
+            width: 100%;
         }
 
         .fc-basicDay-view .fc-comments {
             width:100%;
+            padding: 1% 0 1% 1%;
         }
 
         .fc-basicDay-view .fc-logo{
             width: 100%;
         }
+
     }
     @media only screen 
     and (min-device-width : 768px) 
@@ -318,6 +318,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     var startRange = "", endRange = "";
     window.totalParams = {};
     $(document).ready(function () {
+
+        $('body').on('click', 'button.fc-month-button, button.fc-basicWeek-button, button.fc-basicDay-button', function(e) {
+            e.preventDefault();
+            $(".fc-today-button").trigger('click');
+        });
 
         var salereps = $('#salerepid').val();
         if(salereps){
@@ -361,46 +366,44 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             }
         });
         
-        if (localStorage.salesrepValue) {
-            $('#salesrepfilter').val(localStorage.salesrepValue);
-        }
-        if (localStorage.accountValue) {
-            $('#accountfilter').val(localStorage.accountValue);
-        }
         if (localStorage.salesrepValue != 0 || localStorage.accountValue != 0) {
             var cursource = 'eventload.php?salerepId=' + localStorage.salesrepValue + '&accountId=' + localStorage.accountValue;
         }
         else{
             var cursource = 'eventload.php';
         }
-
+        var salesrep = 0;
+        var account = 0;
         $('#salesrepfilter,#accountfilter').change(function () {
-            var salesrep = 0;
-            var account = 0;
             salesrep = $('#salesrepfilter option:selected').val();
             account = $('#accountfilter option:selected').val();
             localStorage.setItem('salesrepValue', salesrep );
             localStorage.setItem('accountValue', account );
             var allcursource = 'eventload.php';
-            if (salesrep != 0 || account != 0) {
-                cursource = 'eventload.php?salerepId=' + salesrep + '&accountId=' + account;
+            if ( localStorage.salesrepValue != 0 || localStorage.accountValue != 0 || localStorage.salesrepValue != undefined || localStorage.accountValue != undefined ) {
+                cursource = 'eventload.php?salerepId=' + localStorage.salesrepValue + '&accountId=' + localStorage.accountValue;
             }
 
             $('#calendar').fullCalendar('removeEventSources');
             $('#calendar').fullCalendar('refetchEvents');
-            if (salesrep == 0 && account == 0) {
+            if (localStorage.salesrepValue == 0 && localStorage.accountValue == 0) {
                 $('#calendar').fullCalendar('addEventSource', allcursource);
             } else {
                 $('#calendar').fullCalendar('addEventSource', cursource);
             }
             $('#calendar').fullCalendar('refetchEvents');
+            $("#summary").css("background", "linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%)").css("color","#000");
+            $("#detail").css("background", "#3f628a").css("color","#fff").css("box-shadow", "none");
             //top_stats();
         });
 
         // when summary button is clicked
         $('#summary').on('click touchstart', function () {
             var summarycursource = 'ajaxHandlerEvents.php';
-
+            
+            if (localStorage.salesrepValue != 0 && localStorage.salesrepValue != undefined || localStorage.accountValue != 0 && localStorage.accountValue != undefined ) {
+                summarycursource = 'ajaxHandlerEvents.php?var=test&salerepId=' + localStorage.salesrepValue + '&accountId=' + localStorage.accountValue;
+            }
             $('#calendar').fullCalendar('removeEventSources');
             $('#calendar').fullCalendar('refetchEvents');
             $('#calendar').fullCalendar('addEventSource', summarycursource);
@@ -412,7 +415,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         // when detail button is clicked
         $('#detail').on('click touchstart', function () {
             var detailcursource = 'eventload.php';
-
+            if (localStorage.salesrepValue != 0 || localStorage.accountValue != 0) {
+                detailcursource = 'eventload.php?salerepId=' + localStorage.salesrepValue + '&accountId=' + localStorage.accountValue;
+            }
             $('#calendar').fullCalendar('removeEventSources');
             $('#calendar').fullCalendar('refetchEvents');
             $('#calendar').fullCalendar('addEventSource', detailcursource);
@@ -421,6 +426,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             $("#detail").css("background", "#3f628a").css("color","#fff").css("box-shadow", "none");
           
         });
+
 
         var state_count = 0, count = 0, state_count1 = 0, count1 = 0;
         
@@ -463,9 +469,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     cell.css("background-size", "100% 100%");
                 }
             },
-            /*viewRender: function(view, element) {
-                top_stats();
-            },*/
+            viewRender: function(view, element) {
+                //$("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
+                
+            },
             eventClick: function (event, jsEvent, view)
             {
                 var moment = $.datepicker.formatDate('yy-mm-dd', new Date());
@@ -598,11 +605,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
                 var view = $('#calendar').fullCalendar('getView');
                 if(view.name == 'basicDay'){
-                   console.log(event);
-                    cmts = '<div class="fc-number"><span>Account Number: </span>' + event.account + '</div>';
-                    cmts += '<div class = "day_stats">';
-                    cmts += '<div class="show-stats"><span class="silhouette"><span>0</span> <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"><span>0</span> <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna"><span>0</span> <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask"><span>0</span> <img src="assets/eventschedule/icons/flask_icon.png"></span></div>' +
-                                '</div>';
+                    console.log(event);
+                    cmts = '<div class = "day_stats">';
+                    cmts += '<div class="show-stats"><span class="silhouette"><span>0</span> <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"><span>0</span> <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna"><span>0</span> <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask"><span>0</span> <img src="assets/eventschedule/icons/flask_icon.png"></span></div>' + '</div>';
                     cmts += '</div>'
                     cmts += '<div class="fc-comments"><h1>Comments</h1><div class = "day-comments">';
                     if(event.comments != null) 
@@ -611,10 +616,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     
                     cmts += '<div class="fc-logo" id="fc-logo-'+state_count+'">';
                     if(event.logo != '' || event.logo != null)
-                        cmts += '<img src="<?php echo SITE_URL; ?>/assets/images/'+event.logo+'" /></div>';
+                        cmts += '<img src="<?php echo SITE_URL; ?>/assets/images/'+event.logo+'" onerror="imgError(this);" /></div>';
                     else
                         cmts += '<img src="<?php echo SITE_URL; ?>/assets/images/default.png" /></div>';
-                    
                     state_count = state_count+1;
                 }
 
@@ -633,8 +637,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 if (event.color) {
                     borderColor = "border: 2px solid " + event.color + " !important";
                 }
-                
-                var modifiedName = sentenceCase((name == "") ? "Health Care Fair" : name);
+                var modifiedName = (name == "") ? "Health Care Fair" : name;
+                if(event.account && view.name == "basicDay" && event.title == "BRCA Day"){
+                    var modifiedName = event.account + " - " + name;
+                }
 
                 var content = '<div class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-draggable" style="' + borderColor + '">' +
                         '<div class="fc-content evtcontent">' +
@@ -643,7 +649,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         if(event.title == "Health Care Fair")
                             content += '<p class="acc-click" id="acc'+event.accountid+'" >' + modifiedName + '</p></div>';
                         else{
-                            content += '<a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>';
+                            if(view.name == 'basicDay'){
+                                content += '<a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id='+event.accountid+'">' +  modifiedName + '</a></div>';
+                            }else{
+                                content += '<a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>';
+                            }
                         }
                         content += salesrep + cmts +
                         '<div class="' + icon + '"></div>' +
@@ -651,13 +661,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         '</div>';
 
                 if (event.evtCnt) {
-                    //console.log(event);
                     var content = '<div class="fc-content evtcontent days-' + eventDate + '" style="padding: 0 20px;">';
                     content += '<div class="numberCircleContainer"><span class="numberCircle">' + event.evtCnt + '</span></></div>';
                     content += '<div><img src="assets/eventschedule/icons/silhouette_icon.png" width="13" style="margin-right:5px;">Registered <span style="float:right">' + event.registeredCnt + '</span></div>';
                     content += '<div><img src="assets/eventschedule/icons/checkmark_icon.png" style="margin-right:5px;">Completed <span style="float:right">' + event.completedCnt + '</span></div>';
                     content += '<div><img src="assets/eventschedule/icons/dna_icon.png" style="margin-right:5px;">Qualified <span style="float:right">' + event.qualifiedCnt + '</span></div>';
-                    content += '<div><img src="assets/eventschedule/icons/flask_icon.png" style="margin-right:5px;">Submitted <span style="float:right">0</span></div>';
+                    content += '<div><img src="assets/eventschedule/icons/flask_icon.png" style="margin-right:5px;">Submitted <span style="float:right">'+ event.submittedCnt +'</span></div>';
                     content += '</div>';
                     return $(content);
                 } else {
@@ -733,23 +742,23 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     data: eventData,
                     success: function (res)
                     {
-                        var res = JSON.parse(res);
-                        //console.log(res);
-                        var regHTML = res.reg;
-                        var comHTML = res.com;
-                        var subHTML = res.sub;
-                        var quaHTML = res.qua;
-                        
-                        if(view.name != 'basicDay' && parsedEventTime < parsedNow){
-                            element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[0].childNodes[0].innerHTML = regHTML;
-                            element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[2].childNodes[0].innerHTML = comHTML;
-                            element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].childNodes[0].innerHTML = quaHTML;
-                            element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[6].childNodes[0].innerHTML = subHTML;
-                        }else if(view.name == 'basicDay' && parsedEventTime < parsedNow){
-                            element[0].childNodes[0].childNodes[3].childNodes[0].childNodes[0].childNodes[0].innerHTML = regHTML;
-                            element[0].childNodes[0].childNodes[3].childNodes[0].childNodes[2].childNodes[0].innerHTML = comHTML;
-                            element[0].childNodes[0].childNodes[3].childNodes[0].childNodes[4].childNodes[0].innerHTML = quaHTML;
-                            element[0].childNodes[0].childNodes[3].childNodes[0].childNodes[6].childNodes[0].innerHTML = subHTML;
+                        if(res){
+                            var res = JSON.parse(res);
+                            var regHTML = res.reg;
+                            var comHTML = res.com;
+                            var subHTML = res.sub;
+                            var quaHTML = res.qua;
+                            if(view.name != 'basicDay' && parsedEventTime < parsedNow){
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[0].childNodes[0].innerHTML = regHTML;
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[2].childNodes[0].innerHTML = comHTML;
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].childNodes[0].innerHTML = quaHTML;
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[6].childNodes[0].innerHTML = subHTML;
+                            }else if(view.name == 'basicDay' && parsedEventTime < parsedNow){
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[0].childNodes[0].innerHTML = regHTML;
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[2].childNodes[0].innerHTML = comHTML;
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].childNodes[0].innerHTML = quaHTML;
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[6].childNodes[0].innerHTML = subHTML;
+                            }
                         }
                     }
                 });               
@@ -761,25 +770,94 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 //console.log(ele_events);
                 var accounts = [];
                 $.each(ele_events,function(k, v){
-                    accounts.push(v.account)
+                    if(v.account!=null)
+                        accounts.push(v.account)
                 });
-                var uniqueAcc = accounts.filter( onlyUnique );
-                uniqueAcc = uniqueAcc.toString();
+                var uniqueAcc = accounts.filter(onlyUnique);
+                var uniqueAccString = uniqueAcc.toString();
+                //alert(uniqueAccString);
+                var categories = salesrepIds = [];
+                $.each(ele_events,function(k, v){
+                    salesrepIds.push(v.salesrepid);
+                });
+                var uniqueIds = salesrepIds.filter(onlyUnique);
+                //console.log(uniqueIds);
+                var uniqueIdsString = uniqueIds.toString();
+
+                var evtdata = {};
                 var startdate = moment(view.start._d).format('YYYY-MM-DD');
                 var enddate = moment(view.end._d).format('YYYY-MM-DD');
-                
+                if(view.name == 'basicDay'){
+                    evtdata = { salesreps:null, acc: uniqueAccString, startdate: startdate, enddate:startdate, action:'eventStats' };
+                }else{
+                    evtdata = {salesreps:null, acc: uniqueAccString, startdate: startdate, enddate:enddate, action:'eventStats'};
+                }
                 $.ajax({
                     type : 'POST',
-                    data : { salesreps:null, acc: uniqueAcc, startdate: startdate, enddate:enddate, action:'tableStats' },
+                    data : evtdata,
                     dataType: 'json',
                     url : 'ajaxHandlerEvents.php',
                     success : function(returndata){
-                        $(".regCnt").text(returndata.reg);
-                        $(".quaCnt").text(returndata.qua);
-                        $(".comCnt").text(returndata.com);
-                        $(".subCnt").text(returndata.sub);
+                        //console.log(returndata);
+                        (returndata[0].regCount != null) ? $(".regCnt").text(returndata[0].regCount) : $(".regCnt").text(0);
+                        (returndata[0].quaCount != null) ? $(".quaCnt").text(returndata[0].quaCount) : $(".quaCnt").text(0);
+                        (returndata[0].comCount != null) ? $(".comCnt").text(returndata[0].comCount) : $(".comCnt").text(0);
+                        (returndata[0].subCount != null) ? $(".subCnt").text(returndata[0].subCount) : $(".subCnt").text(0);
                     }
                 });
+
+
+                
+                /*$('#salesrepfilter').val((localStorage.getItem("salesrepValue") !== null) ? localStorage.salesrepValue : 0);
+                $('#accountfilter').val((localStorage.getItem("accountValue") !== null) ? localStorage.accountValue : 0);*/
+                if(localStorage.salesrepValue == 0 && localStorage.accountValue == 0){
+                    $.get({
+                        url:'ajaxHandlerEvents.php', 
+                        data:{ sDate: startdate, eDate:enddate, action:'getAccountAndSalesRep' }, 
+                        success: function(res){ 
+                            var result = JSON.parse(res);
+                            $("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
+                            $("#accountfilter").html('<option value="0">Account</option>');
+                            $("#salesrepfilter").append(result.salesArray);
+                            if(localStorage.getItem("salesrepValue") !== null)
+                                $("#salesrepfilter").val(localStorage.salesrepValue);
+                            else
+                                $("#salesrepfilter").val(0);
+                            $("#accountfilter").append(result.accArray);
+                            if(localStorage.getItem("accountValue") !== null)
+                                $("#accountfilter").val(localStorage.accountValue);
+                            else
+                                $("#accountfilter").val(0);
+                        }
+                    });
+                }else{
+                    if(localStorage.salesrepValue != 0){
+                        $.get({
+                            url:'ajaxHandlerEvents.php', 
+                            data:{ sID: localStorage.salesrepValue, sDate: startdate, eDate:enddate, action:'getAccounts' }, 
+                            success: function(res){
+                                /*alert(res);*/
+                                $("#salesrepfilter").val(localStorage.salesrepValue);
+                                $("#accountfilter").html('<option value="0">Account</option>');
+                                $("#accountfilter").append(res);
+                                $("#accountfilter").val(localStorage.accountValue);
+                            }
+                        });
+                    }
+                    if(localStorage.accountValue != 0){
+
+                        $.get({
+                            url:'ajaxHandlerEvents.php', 
+                            data:{ sID: localStorage.accountValue, sDate: startdate, eDate:enddate, action:'getSales' }, 
+                            success: function(res){
+                                $("#accountfilter").val(localStorage.accountValue);
+                                $("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
+                                $("#salesrepfilter").append(res);
+                                $("#salesrepfilter").val(localStorage.salesrepValue);
+                            }
+                        });
+                    }
+                }
 
                 function onlyUnique(value, index, self) { 
                     return self.indexOf(value) === index;
@@ -1030,7 +1108,131 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             });
             $('#modalsalerepid').val(this.value);
         });
+
+
+/*---------------------------------------------------------------------------------------*/
+
+    var events = $('#calendar').fullCalendar('getView');
+    var startdate = moment(events.start._d).format('YYYY-MM-DD');
+    var enddate = moment(events.end._d).format('YYYY-MM-DD');
+    /*$('.fc-prev-button, .fc-next-button').click(function() {
+        var calendar = $('#calendar').fullCalendar('getCalendar');
+        events = calendar.view;
+        startdate = moment(events.start._d).format('YYYY-MM-DD');
+        enddate = moment(events.end._d).format('YYYY-MM-DD');
+        if(localStorage.salesrepValue != 0 && localStorage.accountValue == 0){
+            $.ajax({
+                url:'ajaxHandlerEvents.php',
+                type:'GET',
+                data:{ sId : localStorage.salesrepValue, sDate:startdate, eDate:enddate, action:'dynamicAccounts' },
+                success: function(res){
+                    var result = JSON.parse(res);
+                    $("#accountfilter").html('<option value="0">Account</option>');
+                    $.each(result, function(k, v){
+                        $("#accountfilter").append('<option value="'+v.Guid_account+'">'+ v.account + ' - ' + v.name +'</option>');
+                    })
+                }
+            });
+        }else{
+            $.get({
+                url:'ajaxHandlerEvents.php', 
+                data:{ sDate: startdate, eDate:enddate, action:'getAccountAndSalesRep' }, 
+                success: function(res){ 
+                    var result = JSON.parse(res);
+                    $("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
+                    $("#accountfilter").html('<option value="0">Account</option>');
+                    $("#salesrepfilter").append(result.salesArray);
+                    if(localStorage.getItem("salesrepValue") !== null)
+                        $("#salesrepfilter").val(localStorage.salesrepValue);
+                    $("#accountfilter").append(result.accArray);
+                    if(localStorage.getItem("accountValue") !== null)
+                        $("#accountfilter").val(localStorage.accountValue);
+                }
+            });
+        }
+    });*/
         
+    $("#salesrepfilter").change(function(){
+        var thisValue = $(this).val();
+        if(thisValue != 0){
+            localStorage.salesrepValue = thisValue;
+            $('#accountfilter option').remove();
+            $('#accountfilter').html('<option value="0">Account</option>');
+            $.ajax({
+                url:'ajaxHandlerEvents.php',
+                type:'GET',
+                data:{ sId : thisValue, sDate:startdate, eDate:enddate, action:'dynamicAccounts' },
+                success: function(res){
+                    var result = JSON.parse(res);
+                    $("#accountfilter").html('<option value="0">Account</option>');
+                    $("#accountfilter").append(result);
+                    if(localStorage.getItem("accountValue") !== null)
+                        $("#accountfilter").val(localStorage.accountValue);                        
+                }
+            });
+        }else{
+            $.get({
+                url:'ajaxHandlerEvents.php', 
+                data:{ sDate: startdate, eDate:enddate, action:'getAccountAndSalesRep' }, 
+                success: function(res){ 
+                    var result = JSON.parse(res);
+                    $("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
+                    $("#accountfilter").html('<option value="0">Account</option>');
+                    $("#salesrepfilter").append(result.salesArray);
+                    if(localStorage.getItem("salesrepValue") !== null)
+                        $("#salesrepfilter").val(localStorage.salesrepValue);
+                    else
+                        $("#salesrepfilter").val(0);
+                    $("#accountfilter").append(result.accArray);
+                    if(localStorage.getItem("accountValue") !== null)
+                        $("#accountfilter").val(localStorage.accountValue);
+                    else
+                        $("#accountfilter").val(0);
+                }
+            });
+        }
+    })
+
+    $("#accountfilter").change(function(){
+        var thisValue = $(this).val();
+        if(thisValue != 0){
+            localStorage.accountValue = thisValue;
+            $('#salesrepfilter option').remove();
+            $('#salesrepfilter').html('<option value="0">Genetic Consultant</option>');
+            $.ajax({
+                url:'ajaxHandlerEvents.php',
+                type:'GET',
+                data:{ aID : thisValue, sDate:startdate, eDate:enddate, action:'dynamicSalesrep' },
+                success: function(res){
+                    //console.log(res);
+                    var result = JSON.parse(res);
+                    $("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
+                    $("#salesrepfilter").append(result);
+                    if(localStorage.getItem("salesrepValue") !== null)
+                        $("#salesrepfilter").val(localStorage.salesrepValue);                        
+                }
+            });
+        }else{
+            $.get({
+                url:'ajaxHandlerEvents.php', 
+                data:{ sDate: startdate, eDate:enddate, action:'getAccountAndSalesRep' }, 
+                success: function(res){ 
+                    var result = JSON.parse(res);
+                    $("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
+                    $("#accountfilter").html('<option value="0">Account</option>');
+                    $("#salesrepfilter").append(result.salesArray);
+                    if(localStorage.getItem("salesrepValue") !== null)
+                        $("#salesrepfilter").val(localStorage.salesrepValue);
+                    $("#accountfilter").append(result.accArray);
+                    if(localStorage.getItem("accountValue") !== null)
+                        $("#accountfilter").val(localStorage.accountValue);
+                }
+            });
+        }
+    });
+
+/*---------------------------------------------------------------------------------------*/
+
         $('#accountopt').on('change', function () {
                 var selec = $('#salesrepopt option:selected').val();
                 $('#salesrepopt option').remove();
@@ -1278,7 +1480,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     /* New Code */
     function imgError(image) {
         image.onerror = "";
-        image.src = "../login/images/logo-placeholder.png";
+        image.src = "../login/assets/images/default.png";
         return true;
     }
 
@@ -1654,13 +1856,13 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                             <select class="form-control" id="salesrepfilter">
                                                 <option value="0">Genetic Consultant</option>
                                                 <?php
-                                                foreach ($salesrep as $srole) {
+                                                /*foreach ($salesrep as $srole) {
                                                     if ($srole['first_name']) {
                                                         ?>
                                                         <option value='<?php echo $srole['Guid_salesrep']; ?>'><?php echo $srole['first_name'] . " " . $srole['last_name']; ?></option>
                                                         <?php
                                                     }
-                                                }
+                                                }*/
                                                 ?>
                                             </select>
                                         </div>
@@ -1670,11 +1872,11 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                             <select class="form-control" id="accountfilter">
                                                 <option value="0">Account</option>
                                                 <?php
-                                                foreach ($accountdt as $acct) {
+                                                /*foreach ($accountdt as $acct) {
                                                     ?>
-                                                    <option value='<?php echo $acct['Guid_account']; ?>'><?php echo $acct['account'] . ' - ' . ucwords(strtolower($acct['name'])); ?></option>
+                                                    <option value='<?php echo $acct['Guid_account']; ?>'><?php echo $acct['account'] . ' - ' . formatAccountName(ucwords(strtolower($acct['name']))); ?></option>
                                                     <?php
-                                                }
+                                                }*/
                                                 ?>
                                             </select>
                                         </div>
@@ -1872,9 +2074,9 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                 </div> 
                                 <div class="row">
                                     <div class='col-md-10'>
-                                        <button type="button" id="eventupdate" class="btn btn-primary" style="cursor: pointer;" disabled="disabled">Update</button>
-                                        <button type="button" id="eventcancel" class="btn btn-danger" style="cursor: pointer;">Cancel</button>
-                                        <button type="button" class="btn btn-danger" id="eventdelete" style="border-radius: 2em !important; margin: 7px 0;" style="cursor: pointer;">Delete</button>
+                                        <button type="button" id="eventupdate" class="btn btn-primary col-sm-4" style="cursor: pointer;min-width:auto;" disabled="disabled">Update</button>
+                                        <button type="button" id="eventcancel" class="btn btn-danger col-sm-4" style="cursor: pointer;min-width:auto;">Cancel</button>
+                                        <button type="button" class="btn btn-danger col-sm-4" id="eventdelete" style="border-radius: 2em !important;min-width:auto;" style="cursor: pointer;">Delete</button>
                                     </div>
                                 </div>
                             </div>

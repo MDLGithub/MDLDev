@@ -4,8 +4,9 @@ require_once ('functions_event.php');
 
 $salesRepId = isset($_REQUEST['salerepId'])? $_REQUEST['salerepId'] : 0;
 $accountId = isset($_REQUEST['accountId'])? $_REQUEST['accountId'] : 0;
+$reqdashboard = isset($_REQUEST['reqdashboard'])? $_REQUEST['reqdashboard'] : 0;
 
-$result = getEventSchedule($db,$salesRepId,$accountId,0);
+$result = getEventSchedule($db,$salesRepId,$accountId,$reqdashboard, $_GET['start'], $_GET['end']);
 
 foreach($result as $row)
 {
@@ -17,14 +18,14 @@ foreach($result as $row)
   'salesrep' => $row['salesrep'],
   'logo' => $row['logo'],
   'account' => $row['account'],
-  'name' => $row['name'],  
+  'name' => formatAccountName($row['name']),
   'hltname' => $row['hltname'],
   'street1' => $row['street1'],
   'street2' => $row['street2'],
   'city' => $row['city'],
   'state' => $row['state'],
   'zip' => $row['zip'],
-  'healthcareid' => $row['healthcareid'], 
+  'healthcareid' => $row['healthcareid'],
   'salesrepid' => $row['salesrepid'],   
   'accountid' => $row['accountid'],
   'color' => $row['color'],

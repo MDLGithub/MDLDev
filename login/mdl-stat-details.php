@@ -36,8 +36,10 @@ $initLabels = array(
 );
 
     $initQ = 'SELECT s.Guid_status, s.Guid_user, s.Date, s.Date_created, p.Guid_patient, 
-        aes_decrypt(p.firstname_enc, "F1rstn@m3@_%") as firstname, aes_decrypt(p.lastname_enc, "L@stn@m3&%#") as lastname, 
-        a.Guid_account, a.account AS account_number, a.name AS account_name, a.address AS location,  
+        aes_decrypt(p.firstname_enc, "F1rstn@m3@_%") as firstname, 
+        aes_decrypt(p.lastname_enc, "L@stn@m3&%#") as lastname, 
+        a.Guid_account, a.account AS account_number, 
+        a.name AS account_name, a.address AS location,  
         num.mdl_number,
         CONCAT(srep.`first_name`, " " ,srep.`last_name`) AS salesrep  
         FROM `tbl_mdl_status_log` s 
@@ -96,21 +98,66 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
 }
 
 $labels = array(
-    'mdl_number'=>'MDL#', 
-    'first_name'=>'Patient First Name', 
-    'last_name'=>'Patient Last Name', 
-    'account'=>'Account#', 
-    'account_name'=>'Account Name', 
-    'salesrep'=>'Sales Rep', 
-    'date'=>'Date of the most recent status', 
-    'date_accessioned'=>'Date Accessioned',
-    'date_reported'=>'Date Reported', 
-    'insurance_paid'=>'Insurance Paid', 
-    'patient_paid'=>'Patient Paid', 
-    'total_paid'=>'Total Paid', 
-    'insurance_name'=>'Insurance Name',
-    'test_ordered'=>'Test Ordered', 
-    'location'=>'Location'
+    'mdl_number'=>array(
+        'name' => 'MDL#',
+        'class' => 'dropdownFilter'
+    ),
+    'first_name'=>array(
+        'name' => 'Patient First Name',
+        'class' => ''
+    ), 
+    'last_name'=>array(
+        'name' => 'Patient Last Name',
+        'class' => ''
+    ),  
+    'account'=>array(
+        'name' => 'Account#',
+        'class' => 'dropdownFilter'
+    ),   
+    'account_name'=>array(
+        'name' => 'Account Name',
+        'class' => ''
+    ),  
+    'salesrep'=>array(
+        'name' => 'Sales Rep', 
+        'class' => 'dropdownFilter'
+    ),
+    'date'=>array(
+        'name' => 'Date of the most recent status', 
+        'class' => ''
+    ), 
+    'date_accessioned'=>array(
+        'name' => 'Date Accessioned', 
+        'class' => ''
+    ),
+    'date_reported'=>array(
+        'name' => 'Date Reported',
+        'class' => ''
+    ), 
+    'insurance_paid'=>array(
+        'name' => 'Insurance Paid', 
+        'class' => ''
+    ), 
+    'patient_paid'=>array(
+        'name' => 'Patient Paid',
+        'class' => ''
+    ),  
+    'total_paid'=>array(
+        'name' => 'Total Paid',
+        'class' => ''
+    ),   
+    'insurance_name'=>array(
+        'name' => 'Insurance Name',
+        'class' => 'dropdownFilter'
+    ),  
+    'test_ordered'=>array(
+        'name' => 'Test Ordered', 
+        'class' => ''
+    ),  
+    'location'=>array(
+        'name' => 'Location', 
+        'class' => 'dropdownFilter'
+    )
 );
 
 $configOptions = getOption($db, 'stat_details_config');
@@ -153,11 +200,11 @@ require_once ('navbar.php');
                                 $isVisibleForStatus = isFieldVisibleForStatus($db, $k, $_GET['status_id']);
                                 $isVisibleForRole = isFieldVisibleForRole($db, $k, $roleID);
                                 if($isVisibleForStatus&&$isVisibleForRole){
-                                    echo '<th>';
+                                    echo '<th class="'.$v['class'].'">';
                                     if(isset($optionVal[$k]['label'])){
                                         echo $optionVal[$k]['label']; 
                                     } else {
-                                        echo $v;
+                                        echo $v['name'];
                                     } 
                                     echo '</th>';
                                 }
@@ -194,15 +241,15 @@ require_once ('navbar.php');
                                 <?php } ?>
                                 
                                 <?php if(isFieldVisibleForStatus($db, 'last_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'last_name', $roleID)){ ?>
-                                <td><a href="<?php echo $patientInfoUrl.$incomplateStr; ?>"><?php echo ucfirst(strtolower($v['lastname'])); ?></a></td>                              
+                                <td><a href="<?php echo $patientInfoUrl.$incomplateStr; ?>"><?php echo formatLastName($v['lastname']); ?></a></td>                              
                                 <?php } ?>
                                 
                                 <?php if(isFieldVisibleForStatus($db, 'account', $_GET['status_id']) && isFieldVisibleForRole($db, 'account', $roleID)){ ?>
-                                <td><a href="<?php echo SITE_URL.'/accounts.php?account_id='.$v['Guid_account']; ?>"><?php echo $v['account_number'];?></a></td>                              
+                                <td><?php echo $v['account_number'];?></td>                              
                                 <?php } ?>
                                 
                                 <?php if(isFieldVisibleForStatus($db, 'account_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'account_name', $roleID)){ ?>
-                                <td><?php echo ucwords(strtolower($v['account_name'])); ?></td>                              
+                                <td><?php echo formatAccountName($v['account_name']); ?></td>                              
                                 <?php } ?>
                                 
                                 <?php if(isFieldVisibleForStatus($db, 'salesrep', $_GET['status_id']) && isFieldVisibleForRole($db, 'salesrep', $roleID)){ ?>

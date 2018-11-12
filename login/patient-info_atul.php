@@ -17,11 +17,6 @@ $roleInfo = getRole($db, $userID);
 $roleID = $roleInfo['Guid_role'];
 $role = $roleInfo['role'];
 $default_account = "";
-$uploadMessage = "";
-//check if patient (the same as Guid_user) empty 
-if(!isset($_GET['patient']) || $_GET['patient']==''){
-    Leave(SITE_URL);
-}
 
 $accessRole = getAccessRoleByKey('home');
 $roleIDs = unserialize($accessRole['value']);
@@ -38,14 +33,9 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         $patientInfoUrl .= '&incomplete=1';   
     }
     
-    $sqlQualify = "SELECT q.Guid_qualify,q.Guid_user,q.insurance,
-                    q.other_insurance,q.account_number,q.Date_created as qDate,
-                    q.provider_id, q.deviceid, q.source, 
-                    CONCAT(prov.first_name,' ',prov.last_name) provider, prov.title,
-                    p.*, aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname, 
-                    aes_decrypt(lastname_enc, 'L@stn@m3&%#') as lastname, 
-                    u.email, u.marked_test ";
-    
+    $sqlQualify = "SELECT q.Guid_qualify,q.Guid_user,q.insurance,q.other_insurance,q.Date_created,q.provider_id,q.`mark_as_test`, 
+                    CONCAT(prov.first_name,' ',prov.last_name) provider,
+                    p.*, u.email ";
     if(isset($_GET['incomplete'])){
         $sqlQualify .= "FROM tblqualify q ";
     } else {
@@ -54,31 +44,9 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     $sqlQualify .= "LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user
                     LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user 
                     LEFT JOIN tblprovider prov ON prov.Guid_provider = q.provider_id
-                    WHERE q.Guid_user=:Guid_user ";
-    if($role == 'Sales Rep'){
-        $salesrepAccountIDs = getSalesrepAccounts($db, $userID);        
-        $sqlQualify .= " AND q.account_number IN (" . $salesrepAccountIDs . ") ";
-    }
-    if($role=='Physician'){
-        $physicianInfo = $db->row('SELECT account_id FROM tblprovider WHERE Guid_user='.$userID);
-        $account_id = $physicianInfo['account_id']; 
-        $sqlQualify .= " AND q.account_number IN (" . $account_id . ")";
-    }
-    $sqlQualify .= "ORDER BY q.`Date_created` DESC LIMIT 1";
-    $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$Guid_user));  
-
-    $patientData = $qualifyResult;
-    unset($patientData['firstname_enc']);
-    unset($patientData['lastname_enc']);
-
-    $patientInfo = json_encode($patientData);
-
-    //If one is a physician or sales rep, 
-    //should not be able to see other patients that they are not allowed to
-    if(!$qualifyResult){
-        Leave(SITE_URL);
-    }
-        
+                    WHERE q.Guid_user=:Guid_user ORDER BY q.`Date_created` DESC LIMIT 1";
+    $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$Guid_user));    
+    
     $mdlInfoQ = "SELECT * FROM tbl_mdl_number WHERE Guid_user=:Guid_user";
     $mdlInfo = $db->row($mdlInfoQ, array('Guid_user'=>$Guid_user));
     
@@ -92,7 +60,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
        
         $numSize = strlen($_POST['mdl_number']);
         if(isset($_POST['mdl_number'])&&$_POST['mdl_number']!=""){
-            if(!isset($_POST['mark_as_test'])){
+            if(!isset($_POST['mark_as_test']) && !isset($_POST['mark_as_test_incomplate']) ){
                 if(isset($_POST['mdl_number']) && $numSize != 7){
                     $isValid = false;
                     $errorMsgMdlStats .= "MDL# must contain 7 digits only <br/>";
@@ -100,25 +68,65 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
             }
         }
         if($isValid){
+            $userData = array();
+            if(isset($_POST['email']) && $_POST['email']!=''){
+                $userData['email'] = $_POST['email'];
+            }
+        
+            if(!empty($userData)){
+                $userData['Date_modified'] = date('Y-m-d H:i:s');
+                $whereUser = array('Guid_user'=>$_GET['patient']);
+                //check if user exists
+                $isUserExists=$db->row("SELECT * FROM tbluser WHERE Guid_user=:Guid_user", $whereUser);            
+                if($isUserExists){//update user                
+                    $updateUser = updateTable($db, 'tbluser', $userData, $whereUser);
+                    saveUserRole($db, $_GET['patient'], '3');
+                } else { //insert user
+                    $userData['user_type'] = 'patient';
+                    $userData['Date_created'] = date('Y-m-d H:i:s');
+                    $inserUser = insertIntoTable($db, 'tbluser', $userData);
+                    if($inserUser['insertID']){            
+                        $inserRole = insertIntoTable($db, 'tbluserrole', array('Guid_user'=>$inserUser['insertID'], 'Guid_role'=>'3'));
+                    }
+                }            
+            }
             
-            //total_deductible
+            if(isset($_POST['dob']) && $_POST['dob']!=""){
+                $dob= date('Y-m-d h:i:s', strtotime($_POST['dob']));
+                updateTable($db, 'tblpatient', array('dob'=>$dob), array('Guid_user'=>$_GET['patient']));
+            }
+            
             if(isset($_POST['total_deductible']) && $_POST['total_deductible']!=""){                
                 updateTable($db, 'tblpatient', array('total_deductible'=> $_POST['total_deductible']), array('Guid_user'=>$_GET['patient']));
             }
             
-            //test kit
-            if(isset($_POST['test_kit'])){  
-                updateTable($db,'tblpatient', array('test_kit'=>'1'), array('Guid_user'=>$_GET['patient']));
-            } else {
-                updateTable($db,'tblpatient', array('test_kit'=>'0'), array('Guid_user'=>$_GET['patient']));
+             //update patient table for reason and cpecimen collected values
+            $wherePatient = array('Guid_user'=>$_GET['patient']);
+            $patientData = array();
+//            if(isset($_POST['specimen_collected'])&&$_POST['specimen_collected']!=""){
+//                $patientData['specimen_collected']=$_POST['specimen_collected']; 
+//            }
+//            if(isset($_POST['Guid_reason'])&&$_POST['Guid_reason']!=""){
+//                $patientData['Guid_reason']=$_POST['Guid_reason']; 
+//            } else {
+//                $patientData['Guid_reason']="";
+//            }
+            if(!empty($patientData)){
+                $updatePatient = updateTable($db, 'tblpatient', $patientData, $wherePatient);
             }
             
-            //mark user as a test            
+            //mark user as a test
+            $markedUserID = $_GET['patient'];            
             if(isset($_POST['mark_as_test'])){  
-                updateTable($db,'tbluser', array('marked_test'=>'1'), array('Guid_user'=>$_GET['patient']));
+                updateTable($db,'tbl_ss_qualify', array('mark_as_test'=>'1'), array('Guid_user'=>$markedUserID));
             } else {
-                updateTable($db,'tbluser', array('marked_test'=>'0'), array('Guid_user'=>$_GET['patient']));
-            }           
+                updateTable($db,'tbl_ss_qualify', array('mark_as_test'=>'0'), array('Guid_user'=>$markedUserID));
+            }
+            if(isset($_POST['mark_as_test_incomplate'])){  
+                updateTable($db,'tblqualify', array('mark_as_test'=>'1'), array('Guid_user'=>$markedUserID));
+            } else {
+                updateTable($db,'tblqualify', array('mark_as_test'=>'0'), array('Guid_user'=>$markedUserID));
+            }
 
             //Update MDL# info
             if(isset($_POST['mdl_number'])){
@@ -137,7 +145,41 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 if($mdlNumberData){                    
                    insertIntoTable($db, 'tbl_mdl_number', $mdlNumberData); 
                 }
-            }           
+            }
+            
+            
+            
+           //add revenue data if exists
+            if(isset($_POST['revenueAdd']) && !empty($_POST['revenueAdd'])){                
+                $revData = $_POST['revenueAdd'];                
+                $size = count($revData['date_paid']);
+                for($i=0; $i<$size; $i++){
+                    $date_paid = ($revData['date_paid'][$i] != "")?date('Y-m-d h:i:s', strtotime($revData['date_paid'][$i])):"";
+                    $dataRevenue = array(
+                        'Guid_user'=>$_GET['patient'],
+                        'date_paid'=>$date_paid,
+                        'payor'=>$revData['payor'][$i],
+                        'insurance'=>$revData['insurance'][$i],
+                        'patient'=>$revData['patient'][$i]
+                    );        
+                    insertIntoTable($db, 'tbl_revenue', $dataRevenue);
+                }
+            }
+            //update 
+            if(isset($_POST['revenueEdit']) && !empty($_POST['revenueEdit'])){
+                $revenues = $_POST['revenueEdit'];
+                foreach ($revenues as $revenueKey => $revenueData){
+                    $whereRevenue = array('Guid_revenue'=>$revenueKey);
+                    $date_paid = ($revenueData['date_paid'] != "")?date('Y-m-d h:i:s', strtotime($revenueData['date_paid'])):"";
+                    $dataRevenue = array(
+                        'date_paid'=>$date_paid,
+                        'payor'=>$revenueData['payor'],
+                        'insurance'=>$revenueData['insurance'],
+                        'patient'=>$revenueData['patient']
+                    ); 
+                    $updateReveue = updateTable($db, 'tbl_revenue', $dataRevenue, $whereRevenue);            
+                }
+            }
            
             //add deductable log 
             if(isset($_POST['deductableAdd']) && !empty($_POST['deductableAdd'])){
@@ -175,24 +217,24 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         }
     }
     //delete deductible log row 
-    if(isset($_GET['delete-deductible']) && $_GET['delete-deductible']!="" && $role=='Admin'){
+    if(isset($_GET['delete-deductible']) && $_GET['delete-deductible']!=""){
         deleteByField($db,'tbl_deductable_log', 'Guid_deductable', $_GET['delete-deductible']);        
         Leave($patientInfoUrl);
     }
     //delete revenue row
-    if(isset($_GET['delete-revenue']) && $_GET['delete-revenue']!="" && $role=='Admin'){
+    if(isset($_GET['delete-revenue']) && $_GET['delete-revenue']!=""){
         deleteByField($db,'tbl_revenue', 'Guid_revenue', $_GET['delete-revenue']);
         Leave($patientInfoUrl);
     }
     //delete status log row and update lats status log id in patients table
-    if(isset($_GET['delete-status-log']) && $_GET['delete-status-log']!="" && $role=='Admin'){
+    if(isset($_GET['delete-status-log']) && $_GET['delete-status-log']!=""){
         $Guid_patient = $qualifyResult['Guid_patient'];        
         deleteByField($db,'tbl_mdl_status_log', 'Log_group', $_GET['group']);
         updateCurrentStatusID($db, $Guid_patient);
         Leave($patientInfoUrl);
     }
     //delete note log
-    if(isset($_GET['delete-note-log']) && $_GET['delete-note-log']!="" && $role=='Admin'){
+    if(isset($_GET['delete-note-log']) && $_GET['delete-note-log']!=""){
         deleteByField($db,'tbl_mdl_note', 'Guid_note', $_GET['delete-note-log']);
         Leave($patientInfoUrl);
     }
@@ -201,27 +243,20 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 
 
 <?php 
-    if(isset($qualifyResult['account_number'])&&$qualifyResult['account_number']!=""){
+    if(isset($_GET['account'])&&$_GET['account']!=""){
         $accountQ = "SELECT a.Guid_account, a.account, a.name AS account_name, "
                     . "sr.Guid_salesrep, sr.first_name AS salesrep_fname, sr.last_name AS salesrep_lname, CONCAT(sr.first_name, ' ', sr.last_name) AS salesrep_name "
                     . "FROM tblaccount a "
                     . "LEFT JOIN tblaccountrep ar ON a.Guid_account=ar.Guid_account "
                     . "LEFT JOIN tblsalesrep sr ON ar.Guid_salesrep = sr.Guid_salesrep "
-                    . "WHERE a.account = '" . $qualifyResult['account_number'] . "'";
+                    . "WHERE a.account = '" . $_GET['account'] . "'";
         $accountInfo = $db->row($accountQ);        
     } else {
         $accountInfo = FALSE;
     }
 ?>
-
-<link rel="stylesheet" href="assets/css/brca_forms.css">
-<script src="assets/js/brca_forms.js"></script>
-
 <?php require_once 'navbar.php'; ?> 
-
 <main class="full-width">
-    <input type="hidden" id="guid_patient" />
-    <input type="hidden" id="post" value='<?php echo $patientInfo; ?>' />
         <?php 
         $thisMessage = "";
         if(isset($_GET['u']) || isset($_GET['i']) ){ 
@@ -244,7 +279,6 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 </ol>                
             </h4>
             <a href="<?php echo SITE_URL; ?>/patient-info.php?logout=1" name="log_out" class="button red back logout"></a>
-            <a href="<?php echo SITE_URL; ?>/dashboard2.php" class="button homeIcon"></a>
             <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit smaller_button"><strong>View Questionnaire</strong></a>
         </section>
 
@@ -254,156 +288,172 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 <?php if(isset($message)){ ?>
                 <div class="error-text"><?php echo $message; ?></div>
                 <?php } ?>
-               
-                <h2 class="text-center"><?php echo ucfirst(strtolower($qualifyResult['firstname']))." ".formatLastName($qualifyResult['lastname']);?></h2>
-                <a class="patient_forms">
-                    <img src="./images/icon_forms.png" />
-                    <p>Forms</p>
-                </a>
-                <div class="row">
-                     <div id="message" class="error-text text-center">
-                        <?php if($errorMsgMdlStats){ ?>   
-                            <!--Form Error messages go here-->
-                            <?php echo $errorMsgMdlStats; ?>
-                        <?php } ?>
-                    </div>
-                    <div id="specimenRadioBox" class="<?php echo ($qualifyResult['specimen_collected']=='Yes')?'hidden':"";?>" >
-                        <h5 class="inline">Specimen collected?</h5>                        
-                        <a class="yes" href="<?php echo $patientInfoUrl.'&status_log=add&specimen=yes'?>"><i class="fas fa-tint"></i> Yes</a> &nbsp;&nbsp;
-                        <a class="no" href="<?php echo $patientInfoUrl.'&status_log=add&specimen=no'?>"><i class="fas fa-tint-slash"></i> No</a>
-                    </div>
-                    <?php if( isset($qualifyResult['specimen_collected']) && $qualifyResult['specimen_collected']!=NULL && $qualifyResult['specimen_collected']!='0' ){ ?>
-                    <div id="mdlInfoBox" class="pInfo <?php echo ($qualifyResult['specimen_collected']!='Yes')?'hidden':"";?>">
-                        <p>
-                            <label>MDL#:</label>
-                            <?php 
-                            $mdlNumber = isset($_POST['mdl_number'])?$_POST['mdl_number']:$mdlInfo['mdl_number'];
-                            $mdlClass = (strlen($mdlNumber)!=0 && strlen($mdlNumber)<7)?' error error-border' : '';
-                            ?>
-                            <?php if($role=='Admin') {?>
-                            <input type="number" autocomplete="off" class="mdlnumber <?php echo $mdlClass; ?>" name="mdl_number" value="<?php echo $mdlNumber; ?>" />
-                            <?php } else { 
-                                echo $mdlNumber;
-                            }  ?>
-                        </p>
-                    </div> 
-                    <?php } ?>
-                </div>
+                <h2 class="text-center"><?php echo ucfirst($qualifyResult['firstname'])." ".ucfirst($qualifyResult['lastname']);?></h2>
                 
-                
-                <div class="row">
-                    <div class="col-md-6 pInfo ">
-                        <div class="row bordered">
-                        <div class="col-md-11">
-                                <p><label>Date of Birth: </label><?php echo ($qualifyResult['dob']!="")?date("n/j/Y", strtotime($qualifyResult['dob'])):""; ?></p>
-                                <p><label>Email: </label><?php echo $qualifyResult['email']; ?></p>
+                <form id="mdlInfoForm" action="" method="POST" > 
+                        <input type="hidden" name="save" value="1"/>
+                        <input type="hidden" name="account" value="<?php echo isset($_GET['account'])?$_GET['account']:(isset($mdlInfo['account'])?$mdlInfo['account']:""); ?>"/>
+                        <div class="row">
+                            <div class="col-md-6 pInfo">
+                                <p><label>Date of Birth: </label><input type="text" name="dob" class="datepicker" value="<?php echo ($qualifyResult['dob']!="")?date("n/j/Y", strtotime($qualifyResult['dob'])):""; ?>" autocomplete="off" /></p>
+                                <p><label>Email: </label><input type="email" name="email" value="<?php echo $qualifyResult['email']; ?>" autocomplete="off"/> </p>
                                 <p class="capitalize"><label>Insurance: </label><?php echo $qualifyResult['insurance'];
-                                            if($qualifyResult['other_insurance']!="" && $qualifyResult['other_insurance']!="Other"){
-                                                echo " (".$qualifyResult['other_insurance'].")";
-                                            }?>                                  
+                                                                                        if($qualifyResult['other_insurance']!="" && $qualifyResult['other_insurance']!="Other"){
+                                                                                            echo " (".$qualifyResult['other_insurance'].")";
+                                                                                        }
+                                                                                ?>                                  
                                 </p>
-                                <p><label>Account: </label><a href="<?php echo SITE_URL.'/accounts.php?account_id='.$accountInfo['Guid_account']; ?>"><?php echo $qualifyResult['account_number']; ?></a>
-                                    <?php
-                                        if($accountInfo['account_name']!=""){
-                                            echo " - ". ucwords(strtolower($accountInfo['account_name']));
-                                        }
-                                    ?>
+                                <?php if($accountInfo) { ?>
+                                <p><label>Account: </label><?php echo $accountInfo['account'];
+                                                                if($accountInfo['account_name']!=""){
+                                                                    echo " - ". ucwords(strtolower($accountInfo['account_name']));
+                                                                }
+                                                            ?>
                                 </p>
                                 <p><label>Genetic Consultant: </label><?php echo $accountInfo['salesrep_name']; ?></p>
-
-                                <p><label>Health Care Providers: </label><?php echo $qualifyResult['provider']; if($qualifyResult['title']!=''){ echo ", ".$qualifyResult['title']; } ?>
-                                <p>
-                                    <label>Event: </label><?php echo $qualifyResult['source']; ?> 
-                                </p>
+                                <?php } ?>
+                                <p><label>Health Care Providers: </label><?php echo $qualifyResult['provider']; ?>
                                 
-                                <input type="hidden" value="<?php echo $qualifyResult['provider_id']; ?>" />
-                                <input type="hidden" value="<?php echo $qualifyResult['deviceid']; ?>" />
                             </div>
-                        
-                            <div class="col-md-1">
-                                <a title="Edit Patient Info" href="<?php echo $patientInfoUrl."&edit_patient_info=1";?>">
-                                    <span class="fas fa-cogs fs-20" aria-hidden="true"></span>
-                                </a>
-                            </div>
-                        </div>
-                    </div> 
-
+                            <div class="col-md-6 pB-30">                    
+                                <div class="row">
+                                    <div id="message" class="error-text">
+                                    <?php if($errorMsgMdlStats){ ?>   
+                                        <!--Form Error messages go here-->
+                                        <?php echo $errorMsgMdlStats; ?>
+                                    <?php } ?>
+                                    </div>
+                                    <div id="specimenRadioBox" class="<?php echo ($qualifyResult['specimen_collected']=='Yes')?'hidden':"";?>" >
+                                        <h5>Specimen collected?</h5>
+                                        <div class="col-md-4 pL-0">
+                                            <div id="specimen">
+                                                <input id="specimen-collected-cbox" <?php echo ($qualifyResult['specimen_collected']=='Yes')?"checked":"";?> type="radio" name="specimen_collected" value="Yes" /> Yes &nbsp;&nbsp;
+                                                <?php if($qualifyResult['specimen_collected'] !== 'Yes'){ ?>
+                                                <input id="specimen-notcollected-cbox" <?php echo ($qualifyResult['specimen_collected']=='No')?"checked":"";?> type="radio" name="specimen_collected" value="No" /> No
+                                                <?php } ?>                                               
+                                                <div class="specimenCollected yes">                                                    
+                                                    <label>Date: </label>
+                                                    <input id="redirectUrl" type="hidden" value="<?php echo $patientInfoUrl; ?>" />
+                                                    <input id="Guid_user" type="hidden" value="<?php echo $_GET['patient']; ?>" />
+                                                    <input id="account" type="hidden" value="<?php echo isset($_GET['account'])?$_GET['account']:""; ?>" />
+                                                    <input type="text" class="datepicker" value="<?php echo date('n/j/Y'); ?>">
+                                                    <button id="save-specimen-collected" class="btn btn-specimen btn-inline" type="button">OK</button>
+                                                    <button class="cancel-specimen-collected btn btn-specimen btn-inline" type="button">Cancel</button>
+                                                </div>
+                                                <div class="specimenCollected not">   
+                                                    <label>Date: </label>
+                                                    <input id="redirectUrl" type="hidden" value="<?php echo $patientInfoUrl; ?>" />
+                                                    <input id="Guid_user" type="hidden" value="<?php echo $_GET['patient']; ?>" />
+                                                    <input id="account" type="hidden" value="<?php echo isset($_GET['account'])?$_GET['account']:""; ?>" />
+                                                    <input type="text" class="datepicker" value="<?php echo date('n/j/Y'); ?>">
+                                                    
+                                                    <?php $notCollected= $db->row("SELECT * FROM tbl_mdl_status WHERE Guid_status=:Guid_status", array('Guid_status'=>'37')); ?>
+                                                    
+                                                    <select id="specimen-not-collected" class="selectBox" name="">
+                                                        <option value="<?php echo $notCollected['Guid_status']; ?>"><?php echo $notCollected['status']; ?></option>
+                                                        <?php echo get_option_of_nested_status($db, $notCollected['Guid_status'], "&nbsp;&nbsp;");?>
+                                                    </select>
+                                                    
+                                                    <button id="save-specimen-notcollected" class="btn btn-specimen btn-inline" type="button">OK</button>
+                                                    <button class="cancel-specimen-collected btn btn-specimen btn-inline" type="button">Cancel</button>
+                                                </div>
                                                 
-                            
-                    <div class="col-md-6 pB-30">                    
-                        <div class="row">
-                            
-
-                            <div id="statusLogs"  class="col-md-12 clearfix padd-0">
-                                <h5 class="notes">
-                                    Notes:                                    
-                                    <a title="Add Note" class="pull-right" href="<?php echo $patientInfoUrl."&note_log=add";?>">
-                                        <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
-                                    </a>                                     
-                                </h5>
-                                <table class="table valignTop">
-                                    <thead>
-                                        <th>Date</th>
-                                        <th>Category &nbsp;&nbsp; 
-                                            <?php if($role=='Admin'){ ?>
-                                            <a title="Edit Statuses"  href="<?php echo $patientInfoUrl.'&manage_note_category=edit'; ?>" >
-                                                <span class="fas fa-pencil-alt" aria-hidden="true"></span>
-                                            </a>
-                                            <a title="Add New Status"  href="<?php echo $patientInfoUrl.'&manage_note_category=add'; ?>" >
-                                                <span class="fas fa-plus-circle" aria-hidden="true"></span> 
-                                            </a>
-                                            <?php } ?>
-                                        </th>
-                                        <th>Recorded By</th>
-                                        <th>Comment</th>
-                                        <?php if($role=='Admin'){ ?><th class="text-center wh-100">Action</th><?php } ?>
-                                    </thead>
-                                    <tbody>
-                                        <?php //note_id
-                                            $nQ =  "SELECT DISTINCT n.*, AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') as firstname, aes_decrypt(p.lastname_enc, 'L@stn@m3&%#') as lastname, cat.name AS category 
-                                                    FROM `tbl_mdl_note` n
-                                                    LEFT JOIN `tblpatient` p ON n.Guid_user=p.Guid_user
-                                                    LEFT JOIN `tbl_mdl_note_category` cat ON n.Guid_note_category=cat.Guid_note_category
-                                                    WHERE n.Guid_user=:Guid_user"; 
-                                            $notes = $db->query($nQ, array('Guid_user'=>$_GET['patient']));
-                                            //var_dump($nQ);
-                                            foreach ($notes as $k=>$v) { 
-                                                $userInfo = getUserFullInfo($db, $v['Recorded_by']);
-                                        ?>
-                                            <tr>
-                                                <td><?php echo date("n/j/Y", strtotime($v['Date'])); ?></td>
-                                                <td><?php echo $v['category']; ?></td>
-                                                <td><?php echo $userInfo['first_name']." ".$userInfo['last_name']; ?></td>
-                                                <td><?php echo $v['Comment']; ?></td>                                                   
-                                                <?php if($role=='Admin'){ ?>
-                                                    <td class="text-center">
-                                                        <div class="action-btns">
-                                                            <a href="<?php echo $patientInfoUrl."&note_log=edit&note_id=".$v['Guid_note'];?>" class="">
-                                                                <span class="fas fa-pencil-alt"></span>
-                                                            </a>
-                                                            <a href="<?php echo $patientInfoUrl.'&delete-note-log='.$v['Guid_note']; ?>" onclick="javascript:confirmationDeleteNooteLog($(this));return false;" class="color-red">
-                                                                <span class="far fa-trash-alt"></span> 
-                                                            </a>   
-                                                        </div>
-                                                    </td>   
+                                            </div>
+                                        </div>
+                                    </div>
+<!--                                    <div id="select-reson" class="col-md-8 <?php echo ( is_null($qualifyResult['specimen_collected']) || $qualifyResult['specimen_collected']=='Yes')?"hidden":"";?>">
+                                        <div class="f2">
+                                            <label class="dynamic" for="reason_not"><span>Reasons for not taking the test</span></label>
+                                            <?php //$reasons = $db->selectAll('tbl_reasons');?>
+                                            <div class="group">
+                                                <select id="reason" name="Guid_reason" class="no-selection">
+                                                    <option value="">Reasons for not taking the test</option>	
+                                                    <?php foreach ($reasons as $k=>$v){?>
+                                                        <option <?php echo ($qualifyResult['Guid_reason']==$v['Guid_reason'])?"selected":""; ?> value="<?php echo $v['Guid_reason']; ?>"><?php echo $v['reason']; ?></option>
+                                                    <?php } ?>
+                                                </select>
+                                                <p class="f_status">
+                                                    <span class="status_icons"><strong></strong></span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>-->
+                                    <?php if( isset($qualifyResult['specimen_collected']) && $qualifyResult['specimen_collected']!=NULL && $qualifyResult['specimen_collected']!='0' ){ ?>
+                                    <div id="mdlInfoBox" class="pInfo <?php echo ($qualifyResult['specimen_collected']!='Yes')?'hidden':"";?>">
+                                        <p>
+                                            <label>MDL#:</label>
+                                            <?php 
+                                            $mdlNumber = isset($_POST['mdl_number'])?$_POST['mdl_number']:$mdlInfo['mdl_number'];
+                                            $mdlClass = (strlen($mdlNumber)!=0 && strlen($mdlNumber)<7)?' error error-border' : '';
+                                            ?>
+                                            <input type="number" autocomplete="off" class="mdlnumber <?php echo $mdlClass; ?>" name="mdl_number" value="<?php echo $mdlNumber; ?>" />
+                                        </p>
+                                    </div> 
+                                    <?php } ?>
+                                    
+                                    <div id="statusLogs"  class="col-md-12 clearfix padd-0">
+                                        <h5 class="pT-30">
+                                            Notes:                                            
+                                            <a title="Add Note" class="pull-right" href="<?php echo $patientInfoUrl."&note_log=add";?>">
+                                                <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
+                                            </a>                                            
+                                        </h5>
+                                        <table class="table valignTop">
+                                            <thead>
+                                                <th>Date</th>
+                                                <th>Category &nbsp;&nbsp; 
+                                                    <?php if($role=='Admin'){ ?>
+                                                    <a title="Edit Statuses"  href="<?php echo $patientInfoUrl.'&manage_note_category=edit'; ?>" >
+                                                        <span class="fas fa-pencil-alt" aria-hidden="true"></span>
+                                                    </a>
+                                                    <a title="Add New Status"  href="<?php echo $patientInfoUrl.'&manage_note_category=add'; ?>" >
+                                                        <span class="fas fa-plus-circle" aria-hidden="true"></span> 
+                                                    </a>
+                                                    <?php } ?>
+                                                </th>
+                                                <th>Recorded By</th>
+                                                <th>Comment</th>
+                                                <?php if($role=='Admin'){ ?><th class="text-center wh-100">Action</th><?php } ?>
+                                            </thead>
+                                            <tbody>
+                                                <?php //note_id
+                                                    $nQ =  "SELECT DISTINCT n.*, p.firstname, p.lastname, cat.name AS category 
+                                                            FROM `tbl_mdl_note` n
+                                                            LEFT JOIN `tblpatient` p ON n.Guid_user=p.Guid_user
+                                                            LEFT JOIN `tbl_mdl_note_category` cat ON n.Guid_note_category=cat.Guid_note_category
+                                                            WHERE n.Guid_user=:Guid_user"; 
+                                                    $notes = $db->query($nQ, array('Guid_user'=>$_GET['patient']));
+                                                    //var_dump($nQ);
+                                                    foreach ($notes as $k=>$v) { 
+                                                        $userInfo = getUserFullInfo($db, $v['Recorded_by']);
+                                                ?>
+                                                    <tr>
+                                                        <td><?php echo date("n/j/Y", strtotime($v['Date'])); ?></td>
+                                                        <td><?php echo $v['category']; ?></td>
+                                                        <td><?php echo $userInfo['first_name']." ".$userInfo['last_name']; ?></td>
+                                                        <td><?php echo $v['Comment']; ?></td>                                                   
+                                                        <?php if($role=='Admin'){ ?>
+                                                            <td class="text-center">
+                                                                <div class="action-btns">
+                                                                    <a href="<?php echo $patientInfoUrl."&note_log=edit&note_id=".$v['Guid_note'];?>" class="">
+                                                                        <span class="fas fa-pencil-alt"></span>
+                                                                    </a>
+                                                                    <a href="<?php echo $patientInfoUrl.'&delete-note-log='.$v['Guid_note']; ?>" onclick="javascript:confirmationDeleteNooteLog($(this));return false;" class="color-red">
+                                                                        <span class="far fa-trash-alt"></span> 
+                                                                    </a>   
+                                                                </div>
+                                                            </td>   
+                                                        <?php } ?>
+                                                    </tr>
                                                 <?php } ?>
-                                            </tr>
-                                        <?php } ?>
 
-                                    </tbody>
-                                </table>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                 
-                <form id="mdlInfoForm" action="" method="POST" >
-                    <?php $mdlNumber = isset($_POST['mdl_number'])?$_POST['mdl_number']:$mdlInfo['mdl_number']; ?>
-                    <input type="hidden" name="save" value="1"/>
-                    <input type="hidden" name="account" value="<?php echo isset($_GET['account'])?$_GET['account']:(isset($mdlInfo['account'])?$mdlInfo['account']:""); ?>"/>
-                    <input type="hidden" name="qDate" value="<?php echo $qualifyResult['qDate']; ?>"/>
-                    <input type="hidden" name="Guid_qualify" value="<?php echo $qualifyResult['Guid_qualify']; ?>"/>
-                    <input type="hidden"  name="mdl_number" id="mdlNumber" value="<?php echo $mdlNumber; ?>" />     
+                    
                     <div class="row pT-30">
                         <div id="questionaryInfo"  class="col-md-6">
                             <h5>
@@ -427,6 +477,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                         //$qFam = $db->query("SELECT * FROM `tblqualifyfam` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created", array('Guid_qualify'=>$Guid_qualify, 'Date_created'=>$Date_created));
                                         //$queryPers = "SELECT * FROM `tbl_ss_qualifypers` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created";
                                         //$qPers = $db->query($queryPers, array('Guid_qualify'=>$Guid_qualify, 'Date_created'=>$Date_created));
+										echo "SELECT * FROM `tbl_ss_qualifyans` WHERE `Guid_qualify`={$Guid_qualify} AND `Date_created`={$Date_created}";
                                         $qAns = $db->query("SELECT * FROM `tbl_ss_qualifyans` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created", array('Guid_qualify'=>$Guid_qualify, 'Date_created'=>$Date_created));
                                         $qualifyedClass = "";
                                         if($v['qualified'] == 'No'){
@@ -503,11 +554,9 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             <h5>
                                 Test Status Change Log:
                                 <?php if(isset($qualifyResult['specimen_collected']) && $qualifyResult['specimen_collected']=='Yes'){ ?>
-                                <?php if($role=='Admin'){ ?>
                                 <a title="Add New Test Status Log" class="pull-right" href="<?php echo $patientInfoUrl."&status_log=add";?>">
                                     <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
                                 </a>
-                                <?php } ?>
                                 <?php } ?>
                             </h5>
                             <table class="table">
@@ -528,29 +577,20 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             <tbody>
                                 <?php 
                                 $patientID=$_GET['patient'];
-                                $qStatusLog = 'SELECT sl.Guid_status_log,sl.Log_group, sl.Guid_user, sl.Guid_status,  '
-                                            . 'DATE(sl.Date) AS logDate, s.parent_id, s.access_roles '
+                                $qStatusLog = 'SELECT sl.Guid_status_log,sl.Log_group, sl.Guid_user, sl.Guid_status, '
+                                            . 'DATE(sl.Date) AS logDate, s.parent_id '
                                             . 'FROM tbl_mdl_status_log sl '
                                             . 'LEFT JOIN tblpatient p ON sl.Guid_patient=p.Guid_user '
                                             . 'LEFT JOIN tbl_mdl_status s ON sl.Guid_status=s.Guid_status '
                                             . 'WHERE sl.Guid_user='.$patientID.'  AND s.parent_id="0" '
                                             . 'ORDER BY logDate DESC, s.order_by DESC';
-                               
+                                 
                                 $ststusLogs = $db->query($qStatusLog);
-                                
                                 foreach ($ststusLogs as $k=>$v){ 
-                                   
-                                    if( $role=='Admin' || (isset($v['access_roles']) && $v['access_roles']!="")){
-                                        $access_roles = unserialize($v['access_roles']);
-                                        if($role=='Admin' || key_exists($roleID, $access_roles)){
-                                       
-                                       
                                 ?>
                                     <tr>
                                         <td><?php echo date("n/j/Y", strtotime($v['logDate'])); ?></td> 
-                                        <td>
-                                            <?php get_nested_statuses( $db, $v['Guid_status'], $v['Guid_user'], $v['Log_group'] ); ?>
-					</td>   
+                                        <td><?php echo get_status_names( $db, $v['Guid_status'], $v['Guid_user'], $v['Log_group'] ); ?></td>   
                                         <?php if($role=='Admin'){ ?>
                                         <td class="text-center">
                                             <div class="action-btns">
@@ -564,12 +604,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                         </td>   
                                         <?php } ?>
                                     </tr>
-                                <?php } } } ?>
+                                <?php } ?>
                             </tbody>
                         </table>
                         </div>
                     </div>
-                    <?php if($role!="Physician"){ ?>   
                     <div id="pLogs" class="row <?php echo (!$qualifyResult['specimen_collected'] || $qualifyResult['specimen_collected']=='No')?"hidden":"";?>">
                         <div id="deductable-log" class="col-md-6">
                             <?php 
@@ -579,22 +618,16 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             ?>
                             <h5>
                                 Deductible Log: 
-                                <?php if($role=='Admin'){ ?>
                                 <a class="pull-right" id="add-deductable-log">
                                     <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
-                                </a>                                 
+                                </a>  
                                 <?php if(!$qualifyResult['total_deductible']){ ?>
                                 <a class="pull-right  mR-10" id="add-patient-deductable">
                                     <span class="fas fa-plus-circle" aria-hidden="true"></span>  Deductible
                                 </a>  
                                 <?php } ?>
-                                <?php } ?>
                                 <span id="total-deductible" class="<?php echo (!$qualifyResult['total_deductible'])?"hidden":"";?> pull-right">
-                                    <?php if($role=='Admin'){ ?>
                                     $<input value="<?php echo ($qualifyResult['total_deductible']!="")?$qualifyResult['total_deductible']:""; ?>" name="total_deductible" placeholder="Total Deductible" type="number" min="0.00" step="0.01">
-                                    <?php } else { ?>
-                                    <?php echo "$".formatMoney($qualifyResult['total_deductible']); ?>
-                                    <?php } ?>
                                 </span>
                                 
                             </h5>
@@ -608,7 +641,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                             <th>Date Checked</th>
                                             <th>Checked By</th>
                                             <th>Deductible $</th>
-                                            <?php if($role=='Admin'){ ?><th class="text-center wh-100">Action</th><?php } ?>
+                                            <th class="text-center wh-100">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -623,7 +656,6 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                             <td><span class="editable_date_checked"><?php echo (!preg_match("/0{4}/" , $v['date_checked'])) ? date('n/j/Y', strtotime($v['date_checked'])) : ""; ?></span></td>
                                             <td><span class="editable_checked_by"><?php echo $v['checked_by']; ?></span></td>
                                             <td>$<span class="editable_deductable"><?php echo formatMoney($v['deductable']); ?></span></td>
-                                            <?php if($role=='Admin'){ ?>
                                             <td class="text-center">
                                                 <div class="action-btns">
                                                 <a data-id="<?php echo $v['Guid_deductable']; ?>" class="edit_deductable">
@@ -634,7 +666,6 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                                 </a>
                                                 </div>
                                             </td>
-                                            <?php } ?>
                                         </tr> 
                                         <?php } ?>
                                         <tr class="priceSum">
@@ -649,16 +680,12 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 </table>
                             </div>
                         </div>
-                         
-                        
                         <div id="revenue" class="col-md-6">
                             <h5>
                                 Revenue:
-                                <?php if($role=='Admin'){ ?>
                                 <a title="Add Revenue" class="pull-right" href="<?php echo $patientInfoUrl."&add_revenue=1";?>">
                                     <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
                                 </a>
-                                <?php } ?>
                             </h5>
                             <div class="revenue-form"></div>
                            
@@ -669,9 +696,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                         <th>Payor</th>
                                         <th>CPT</th>
                                         <th>Amount $</th>
-                                        <?php if($role=='Admin'){ ?>
                                         <th class="text-center wh-100">Action</th>
-                                        <?php } ?>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -693,7 +718,6 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                         <td><?php echo $v['payor']; ?></td>
                                         <td><?php echo $v['code']; ?></td>
                                         <td>$<?php echo formatMoney($v['amount']); ?></td>
-                                        <?php if($role=='Admin'){ ?>
                                         <td class="text-center">
                                             <div class="action-btns">
                                             <a href="<?php echo $patientInfoUrl.'&edit_revenue='.$v['Guid_revenue']; ?>" class="">
@@ -704,7 +728,6 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                             </a>    
                                             </div>
                                         </td>
-                                        <?php } ?>
                                     </tr> 
 
                                     <?php } ?>     
@@ -721,45 +744,24 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             </table>
                         </div>
                     </div>
-                    <?php } ?>       
-                        
                     <div class="row actionButtons pB-30">
                         <div class="col-md-12">
-                            
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <?php if( $qualifyResult['source']=='HealthCare Fair' && ($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager') ){ ?>
-                                    <span class="pull-left markTest">                               
-                                        <input id="test-kit" <?php echo $qualifyResult['test_kit']=='1'?' checked': ''; ?>  type="checkbox" name="test_kit" value="1" /> 
-                                        <label for="test-kit">Test kit has been given to the patient</label>
-                                    </span><br/>
-                                    <?php } ?>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-4">                                    
-                                    <?php if($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager' ){ ?>
-                                    <span class="pull-left markTest">                               
-                                        <input id="mark-as-test" <?php echo $qualifyResult['marked_test']=='1'?' checked': ''; ?>  type="checkbox" name="mark_as_test" value="1" /> 
-                                        <label for="mark-as-test">Mark As Test</label>
-                                    </span>
-                                    <?php } ?>
-                                </div>
-                                <div class="col-md-4"></div>
-                                <div class="col-md-4">
-                                    <?php if($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager' ){ ?>
-                                        <button id="save-patient-info" name="save" type="submit" class="button btn-inline pull-right">Save</button>
-                                    <?php } ?>   
-                                </div>
-                            </div>
+                            <?php if($role=='Admin' ||$role=='Sales Rep' || $role=='Sales Manager' ){ ?>
+                            <span class="pull-left markTest"> 
+                                <?php if(isset($_GET['incomplete'])&&$_GET['incomplete']==1){ ?>
+                                <input <?php echo $qualifyResult['mark_as_test']=='1'?' checked': ''; ?>  type="checkbox" name="mark_as_test_incomplate" value="1" /> 
+                                <?php } else { ?>
+                                <input <?php echo $qualifyResult['mark_as_test']=='1'?' checked': ''; ?>  type="checkbox" name="mark_as_test" value="1" /> 
+                                <?php } ?>
+                                <label for="mark-as-test">Mark As Test</label>
+                            </span>
+                            <?php } ?>
+                            <button id="save-patient-info" name="save" type="submit" class="button btn-inline pull-right">Save</button>
                         </div>
                     </div>
-                        
-                </form>                
+                </form>
             </div>
-        </div> 
-            
-        
+        </div>  
           
         </div>
         <?php } else { ?>
@@ -767,545 +769,10 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         <?php } ?>
     </div>
     <div id="admin_print"></div>
-    <div id="patient_brca_forms" class="modalBlock" style="display: none;">
-        <div class="contentBlock patientForms">
-        <span class = "close"></span>
-        <div class="container form-container" style="margin:auto"> 
-            <div class = "form-row">
-                <div id = "forms">
-                    <h2>Forms</h2>
-                </div>
-                <div id = "form-details">
-                    <h2>Details</h2>
-                </div>
-                <div class = "patient_name"><?= ucfirst(strtolower($qualifyResult['firstname']))." ".ucfirst(strtolower($qualifyResult['lastname'])) ?></div>
-                <button class = "print_button button" id = "form-print"><i class="fas fa-print"></i> Print</button>
-            <ul id="accordion">
-              <li>
-                <div id = "form-bar">
-                    <h2>Patient Demographics</h2>
-                </div>
-                <div class = "form-info-container">
-                <div class = "form-info col-md-8 patient_demographics">
-                    <strong class = "fh">Patient Demographics</strong><br/>
-                        <div class="f2 required col-md-6 form_field first_name">
-                            <label class="dynamic" for="form_first_name"><span>First name</span></label>
-                                <div class="group">
-                                    <input id="form_first_name" name="form_first_name" type="text" value="<?php echo $qualifyResult['firstname'] ?>" placeholder="First name" required="">
-                                    <p class="f_status">
-                                        <span class="status_icons"><strong>*</strong></span>
-                                    </p>
-                                </div>
-                        </div>
-                        <div class="f2 required col-md-6 form_field last_name">
-                            <label class="dynamic" for="form_last_name"><span>Last name</span></label>
-                                <div class="group">
-                                    <input id="form_last_name" name="form_last_name" type="text" value="<?php echo $qualifyResult['lastname'] ?>" placeholder="Last name" required="">
-                                    <p class="f_status">
-                                        <span class="status_icons"><strong>*</strong></span>
-                                    </p>
-                                </div>
-                        </div>
-                        <div class="f2 required col-md-6 form_field dob">
-                            <label class="dynamic" for="form_dob"><span>DOB</span></label>
-                                <div class="group">
-                                    <input id="form_dob" name="form_dob" type="text" value="<?php echo $qualifyResult['dob'] ?>" placeholder="Date of birth" required="">
-                                    <p class="f_status">
-                                        <span class="status_icons"><strong>*</strong></span>
-                                    </p>
-                                </div>
-                        </div>
-                        <div class="f2 required col-md-6 form_field addr1">
-                            <label class="dynamic" for="form_addr1"><span>Address line 1</span></label>
-                                <div class="group">
-                                    <input id="form_addr1" name="form_addr1" type="text" value="<?php echo $qualifyResult['address'] ?>" placeholder="Address line 1" required="">
-                                    <p class="f_status">
-                                        <span class="status_icons"><strong>*</strong></span>
-                                    </p>
-                                </div>
-                        </div>
-                        <div class="f2 required col-md-6 form_field addr2">
-                            <label class="dynamic" for="form_addr2"><span>Address line 2</span></label>
-                                <div class="group">
-                                    <input id="form_addr2" name="form_addr2" type="text" value="" placeholder="Address line 2" required="">
-                                    <p class="f_status">
-                                        <span class="status_icons"><strong>*</strong></span>
-                                    </p>
-                                </div>
-                        </div>
-                        <div class="f2 required col-md-6 form_field city">
-                            <label class="dynamic" for="form_city"><span>City</span></label>
-                                <div class="group">
-                                    <input id="form_city" name="form_city" type="text" value="<?php echo $qualifyResult['city'] ?>" placeholder="City" required="">
-                                    <p class="f_status">
-                                        <span class="status_icons"><strong>*</strong></span>
-                                    </p>
-                                </div>
-                        </div>
-                        <div class="f2 required col-md-6 form_field state">
-                            <label class="dynamic" for="form_state"><span>State</span></label>
-                                <div class="group">
-                                    <input id="form_state" name="form_state" type="text" value="<?php echo $qualifyResult['state'] ?>" placeholder="State" required="">
-                                    <p class="f_status">
-                                        <span class="status_icons"><strong>*</strong></span>
-                                    </p>
-                                </div>
-                        </div>
-                        <div class="f2 required col-md-6 form_field zip">
-                            <label class="dynamic" for="form_zip"><span>Zip</span></label>
-                                <div class="group">
-                                    <input id="form_zip" name="form_zip" type="text" value="<?php echo $qualifyResult['zip'] ?>" placeholder="Zip" required="">
-                                    <p class="f_status">
-                                        <span class="status_icons"><strong>*</strong></span>
-                                    </p>
-                                </div>
-                        </div>
-                        <div class="f2 required col-md-6 form_field phone">
-                            <label class="dynamic" for="form_phone"><span>Phone</span></label>
-                                <div class="group">
-                                    <input id="form_phone" name="form_phone" type="text" value="<?php echo $qualifyResult['phone_number'] ?>" placeholder="Phone" required="">
-                                    <p class="f_status">
-                                        <span class="status_icons"><strong>*</strong></span>
-                                    </p>
-                                </div>
-                        </div>
-                        <div class="f2 required col-md-6 form_field ethnicity">
-                            <label class="dynamic" for="form_ethnicity"><span>Ethnicity</span></label>
-                                <div class="group">
-                                    <input id="form_ethnicity" name="form_ethnicity" type="text" value="<?php ?>" placeholder="Ethnicity" required="">
-                                    <p class="f_status">
-                                        <span class="status_icons"><strong>*</strong></span>
-                                    </p>
-                                </div>
-                        </div>
-                </div>
-                    <div class = "buttons">
-                        <div></div>
-                    	<!--<i class="fas fa-angle-left prev-button"></i>-->
-                    	<!--<div class = "save">Save</div>-->
-                        <div class = "page-count"><p>Page 1 of 5</p></div>
-                        <i class="fas fa-angle-right next-button"></i>
-                    </div>
-               </div>
-              </li>
-              <li>
-                 <div id = "form-bar">
-                     <h2>Insurance</h2>
-                 </div>
-                <div class = "form-info-container">
-                <div class = "form-info col-md-8">
-                    <strong class = "fh">Insurance</strong><br/>
-                        <div class="f2 required col-md-6">
-                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
-                                <div class="group">
-                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
-                                    <p class="f_status">
-                                        <span class="status_icons"><strong>*</strong></span>
-                                    </p>
-                                </div>
-                        </div>
-                </div>
-                    <div class = "buttons">
-                    	<i class="fas fa-angle-left prev-button"></i>
-                    	<!--<div class = "save">Save</div>-->
-                        <div class = "page-count"><p>Page 1 of 5</p></div>
-                        <i class="fas fa-angle-right next-button"></i>
-                    </div>
-               </div>
-              </li>
-              <li>
-                 <div id = "form-bar">
-                     <h2>Test</h2>
-                 </div>
-                <div class = "form-info-container">
-                <div class = "form-info col-md-8">
-                    <strong class = "fh">Test</strong><br/>
-                        <div class="f2 required col-md-6">
-                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
-                                <div class="group">
-                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
-                                    <p class="f_status">
-                                        <span class="status_icons"><strong>*</strong></span>
-                                    </p>
-                                </div>
-                        </div>
-                </div>
-                    <div class = "buttons">
-                    	<i class="fas fa-angle-left prev-button"></i>
-                    	<!--<div class = "save">Save</div>-->
-                        <div class = "page-count"><p>Page 1 of 5</p></div>
-                        <i class="fas fa-angle-right next-button"></i>
-                    </div>
-               </div>
-              </li>
-              <li>
-                 <div id = "form-bar">
-                     <h2>Genetic Counseling</h2>
-                 </div>
-                <div class = "form-info-container">
-                <div class = "form-info col-md-8">
-                    <strong class = "fh">Genetic Counseling</strong><br/>
-                        <div class="f2 required col-md-6">
-                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
-                                <div class="group">
-                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
-                                    <p class="f_status">
-                                        <span class="status_icons"><strong>*</strong></span>
-                                    </p>
-                                </div>
-                        </div>
-                </div>
-                  <div class = "buttons">
-                    	<i class="fas fa-angle-left prev-button"></i>
-                    	<!--<div class = "save">Save</div>-->
-                        <div class = "page-count"><p>Page 1 of 5</p></div>
-                        <i class="fas fa-angle-right next-button"></i>
-                    </div>
-               </div>
-            </li>
-             <li>
-                 <div id = "form-bar">
-                     <h2>Physician</h2>
-                 </div>
-                <div class = "form-info-container">
-                <div class = "form-info col-md-8">
-                    <strong class = "fh">Physician</strong><br/>
-                        <div class="f2 required col-md-6">
-                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
-                                <div class="group">
-                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
-                                    <p class="f_status">
-                                        <span class="status_icons"><strong>*</strong></span>
-                                    </p>
-                                </div>
-                        </div>
-                        <div class="f2 required col-md-6">
-                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
-                                <div class="group">
-                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
-                                    <p class="f_status">
-                                        <span class="status_icons"><strong>*</strong></span>
-                                    </p>
-                                </div>
-                        </div>
-                        <div class="f2 required col-md-6">
-                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
-                                <div class="group">
-                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
-                                    <p class="f_status">
-                                        <span class="status_icons"><strong>*</strong></span>
-                                    </p>
-                                </div>
-                        </div>
-                        <div class="f2 required col-md-6">
-                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
-                                <div class="group">
-                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
-                                    <p class="f_status">
-                                        <span class="status_icons"><strong>*</strong></span>
-                                    </p>
-                                </div>
-                        </div>
-                        <div class="f2 required col-md-6">
-                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
-                                <div class="group">
-                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
-                                    <p class="f_status">
-                                        <span class="status_icons"><strong>*</strong></span>
-                                    </p>
-                                </div>
-                        </div>
-                        <div class="f2 required col-md-6">
-                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
-                                <div class="group">
-                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
-                                    <p class="f_status">
-                                        <span class="status_icons"><strong>*</strong></span>
-                                    </p>
-                                </div>
-                        </div>
-                        <div class="f2 required col-md-6">
-                            <label class="dynamic" for="serial_number"><span>Serial</span></label>
-                                <div class="group">
-                                    <input id="serial_number" name="serial_number" type="text" value="" placeholder="Serial" required="">
-                                    <p class="f_status">
-                                        <span class="status_icons"><strong>*</strong></span>
-                                    </p>
-                                </div>
-                        </div>
-                </div>
-                    <div class = "buttons">
-                    	<i class="fas fa-angle-left prev-button"></i>
-                    	<!--<div class = "save">Save</div>-->
-                        <div class = "page-count"><p>Page 1 of 5</p></div>
-                        <!--<i class="fas fa-angle-right next-button"></i>-->
-                        <div></div>
-                    </div>
-               </div>
-              </li>                
-            </ul>
-              <div id = "form-option-table">
-                <table id="dataTableHome" class="pseudo_t table without_scroll">
-                    <thead class="">
-                        <tr>
-                        <th class="text-center no-bg">
-                            <label class="switch">
-                                <input id="selectAllPrintOptions" type="checkbox">
-                                <span class="slider round">
-                                    <span id="switchLabel">Select All</span>
-                                </span>
-                            </label>
-                        </th>
-                        <th>Forms</th>
-                        </tr>
-                    </thead>
-                    <tbody> 
-                        <tr class="t_row">
-                            <td class="printSelectBlock text-center">
-                                <input name="forms" value="test_req_form" type="checkbox" class="print1 report1" data-prinatble="0" />
-                            </td>
-                            <td class="left-td">
-                                <a href= "./forms/BRCA_Genetic_Req_IH0119_10_2018.pdf" target="_blank">BRCA Test Requisition</a>
-                            </td>
-                        </tr>
-                        <tr class="t_row">
-                            <td class="printSelectBlock text-center">
-                                <input name="forms" value="informed_consent" type="checkbox" class="print1 report1" data-prinatble="0" />
-                            </td>
-                            <td class="left-td">
-                                <a href="./forms/BRCA_test_Consent.pdf" target="_blank">Informed consent</a>
-                            </td>
-                        </tr>
-                        <tr class="t_row">
-                            <td class="printSelectBlock text-center">
-                                <input name="forms" value="prior_authorization" type="checkbox" class="print1 report1" data-prinatble="0" />
-                            </td>
-                            <td class="left-td">
-                                <a href="./forms/Prior Authorization Reqest form.pdf" target="_blank">Prior Authorization</a>
-                            </td>
-                        </tr>
-                        <tr class="t_row">
-                            <td class="printSelectBlock text-center">
-                                <input name="forms" value="genetic_counseling" type="checkbox" class="print1 report1" data-prinatble="0" />
-                            </td>
-                            <td class="left-td">
-                                <a href="./forms/BRCA_Genetic_Counseling_Referral.pdf" target="_blank">Genetic Counseling Referral</a>
-                            </td>
-                        </tr>
-                        <tr class="t_row">
-                            <td class="printSelectBlock text-center">
-                                <input name="forms" value="cancer_genetic_counseling" type="checkbox" class="print1 report1" data-prinatble="0" />
-                            </td>
-                            <td class="left-td">
-                                <a href="./forms/Cancer-Referral-Form_9.2018.pdf" target="_blank">Cancer Genetic Counseling Referral</a>
-                            </td>
-                        </tr>
-                        <tr class="t_row">
-                            <td class="printSelectBlock text-center">
-                                <input name="forms" value="aetna_precertification" type="checkbox" class="print1 report1" data-prinatble="0" />
-                            </td>
-                            <td class="left-td">
-                                <a href="./forms/BRCA-precertification-request-form.pdf" target="_blank">Aetna Precertification Information Request</a>
-                            </td>
-                        </tr>
-                        <tr class="t_row">
-                            <td class="printSelectBlock text-center">
-                                <input name="forms" disabled value="aim" type="checkbox" class="print1 report1" data-prinatble="0" />
-                            </td>
-                            <td class="left-td">
-                                <span>AIMs Precertification</span>
-                            </td>
-                        </tr>
-                        <tr class="t_row">
-                            <td class="printSelectBlock text-center">
-                                <input name="forms" disabled value="beacon" type="checkbox" class="print1 report1" data-prinatble="0" />
-                            </td>
-                            <td class="left-td">
-                                <span>Beacon LBS</span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-              	<div class = "buttons">
-              	</div>
-              </div>
-          </div>
 </main>
 
 
 
-<?php
-    if(isset($_POST['save_patient_info'])){ 
-        extract($_POST);
-        $userData = array();
-        if(isset($_POST['email']) && $_POST['email']!=''){
-            $userData['email'] = $_POST['email'];
-        }
-        
-        $userData['Guid_role'] = '3';
-        if(!empty($userData)){
-            $userData['Date_modified'] = date('Y-m-d H:i:s');
-            $whereUser = array('Guid_user'=>$_GET['patient']);
-            //check if user exists
-            $isUserExists=$db->row("SELECT * FROM tbluser WHERE Guid_user=:Guid_user", $whereUser);            
-            if($isUserExists){//update user                
-                $updateUser = updateTable($db, 'tbluser', $userData, $whereUser);                    
-            } else { //insert user
-                $userData['user_type'] = 'patient';
-                $userData['Date_created'] = date('Y-m-d H:i:s');
-                $userData['Guid_role']='3';
-                $inserUser = insertIntoTable($db, 'tbluser', $userData);
-            }            
-        }
-
-        if(isset($_POST['dob']) && $_POST['dob']!=""){
-            $dob= date('Y-m-d h:i:s', strtotime($_POST['dob']));
-            updateTable($db, 'tblpatient', array('dob'=>$dob), array('Guid_user'=>$_GET['patient']));
-        }
-
-         
-        
-        $dateCreated = $_POST['qDate'];
-
-        if(isset($_POST['incomplate'])){  
-            $updateQualify = " UPDATE `tblqualify` "
-                    . "SET `source`=:source,account_number=:account_number, "
-                    . "insurance=:insurance, other_insurance=:other_insurance,"
-                    . "provider_id=:provider_id "
-                    . "WHERE `Date_created`=:Date_created AND Guid_qualify=:Guid_qualify";                    
-        }else{
-            $updateQualify = " UPDATE `tbl_ss_qualify` "
-                    . "SET `source`=:source,account_number=:account_number, "
-                    . "insurance=:insurance, other_insurance=:other_insurance,"
-                    . "provider_id=:provider_id "
-                    . "WHERE `Date_created`=:Date_created AND Guid_qualify=:Guid_qualify";
-        }
-        $db->query( $updateQualify, array(
-                                        'source'=>$source ,
-                                        'account_number'=>$account_number,
-                                        'insurance'=>$insurance,
-                                        'other_insurance'=>$other_insurance,
-                                        'provider_id'=>$provider_id,
-                                        'Guid_qualify'=>$Guid_qualify, 
-                                        'Date_created'=>$dateCreated
-                                    ));
-        
-        
-       Leave($patientInfoUrl.'&u');
-        
-    }
-?>
-<?php if( (isset($_GET['edit_patient_info'])) && $_GET['edit_patient_info']=="1" ){ ?>
-<div id="manage-status-modal" class="modalBlock ">
-    <div class="contentBlock patientInfo">
-        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a> 
-        <h5 class="title">
-            Update Patient Info
-        </h5>
-        <div class="content">
-            <form class="paientInfo" action="" method="POST">
-               
-               <input type="hidden" name="qDate" value="<?php echo $qualifyResult['qDate']; ?>"/>
-               <input type="hidden" name="Guid_qualify" value="<?php echo $qualifyResult['Guid_qualify']; ?>"/>
-
-                <p>
-                    <label>Date of Birth: </label>
-                    <input type="text" name="dob" class="datepicker" value="<?php echo ($qualifyResult['dob']!="")?date("n/j/Y", strtotime($qualifyResult['dob'])):""; ?>" autocomplete="off" />
-                </p>
-                <p><label>Email: </label>
-                    <input type="email" name="email" value="<?php echo $qualifyResult['email']; ?>" autocomplete="off"/> </p>
-                <p class="capitalize"><label>Insurance: </label>
-                    <input type="text" name="insurance" value="<?php echo $qualifyResult['insurance']; ?>" autocomplete="off" />
-                </p>
-                <p class="capitalize"><label>Other Insurance: </label>
-                    <input type="text" name="other_insurance" value="<?php echo $qualifyResult['other_insurance']; ?>" autocomplete="off" />
-                </p>
-                <?php if($role!='Physician'){  ?>
-                <p>
-                    <label>Account: </label>                    
-                    <?php 
-                    if (($role == "Sales Rep") || ((isset($_POST['salesrep']) && strlen($_POST['salesrep']) && (!isset($_POST['clear']))))) {
-                        $query = "SELECT 
-                        tblaccount.*                   
-                        FROM tblsalesrep 
-                        LEFT JOIN `tblaccountrep` ON  tblsalesrep.Guid_salesrep = tblaccountrep.Guid_salesrep
-                        LEFT JOIN `tblaccount` ON tblaccountrep.Guid_account = tblaccount.Guid_account                    
-                        WHERE tblsalesrep.Guid_user=";
-
-                        if (isset($_POST['salesrep']) && strlen($_POST['salesrep'])) {
-                            $query .= $_POST['salesrep'];
-                        } else {
-                            $query .= $_SESSION['user']['id'];
-                        }
-                    } else {
-                        $query = "SELECT * FROM tblaccount";
-                    }
-                    $query .= " ORDER BY account";
-                    $accounts = $db->query($query);                   
-                    ?>
-                    <select class="patientAccount" name="account_number">
-                        <option value="">Select Account</option>
-                        <?php 
-                        
-                        foreach ($accounts as $k=>$v){ 
-                        $selected = $qualifyResult['account_number']==$v['account'] ? ' selected' : '';
-                        ?>
-                        <option <?php echo $selected; ?> value="<?php echo $v['account']; ?>" ><?php echo $v['account'] .'-'. ucwords(strtolower($v['name'])); ?></option>
-                        <?php } ?>
-                    </select>  
-                </p>
-                <?php } else { ?>
-                    <input type="hidden" name="account_number" value="<?php echo $qualifyResult['account_number']; ?>" />
-                <?php } ?>
-                <p>
-                    <label>Health Care Provider: </label>
-                    <select id="pInfoAccountProviders" name="provider_id">
-                        <option value="">Select Provider</option>
-                        <?php 
-                        //$tblproviders = $db->query('SELECT * FROM tblprovider WHERE account_id='.$qualifyResult['account_number']);
-                        if(isset($qualifyResult['account_number'])&&$qualifyResult['account_number']!=""){
-                        $tblproviders = $db->query('SELECT pr.* FROM tblprovider pr '                                
-                                                . 'LEFT JOIN tbluser u ON u.`Guid_user`=pr.`Guid_user`'
-                                                . ' WHERE account_id='.$qualifyResult['account_number'].' AND u.status="1" ');
-                        foreach ($tblproviders as $k=>$v){ 
-                        $selected = $qualifyResult['provider_id']==$v['Guid_provider'] ? ' selected' : '';
-                        ?>
-                        <option <?php echo $selected; ?> value="<?php echo $v['Guid_provider']; ?>" ><?php echo $v['first_name'].' '.$v['last_name']; ?></option>
-                        <?php }} ?>
-                    </select> 
-                </p>
-                
-                
-                <?php if($role!='Physician'){  ?>
-                <p>
-                    <label>Event: </label>
-                    <select name="source">
-                        <option value="">Select Location</option>
-                        <?php 
-                        $sources = $db->selectAll('tblsource', ' ORDER BY `description` ASC');
-                        foreach ($sources as $k=>$v){ 
-                        $selected = $qualifyResult['source']==$v['description'] ? ' selected' : '';
-                        ?>
-                        <option <?php echo $selected; ?> value="<?php echo $v['description']; ?>" ><?php echo $v['description']; ?></option>
-                        <?php } ?>
-                    </select>   
-                </p>
-                <?php } else { ?>
-                    <input type="hidden" name="source" value="<?php echo $qualifyResult['source']; ?>" />
-                <?php }  ?>
-                    
-                <div class="text-right pT-10">
-                    <button class="button btn-inline" name="save_patient_info" type="submit">Save</button>
-                    <a href="<?php echo $patientInfoUrl; ?>" class="btn-inline btn-cancel">Cancel</a>                   
-                </div>                
-            </form> 
-        </div>
-    </div>
-</div>
-<?php } ?>
-
-    
-    
 <?php
     if(isset($_POST['manage_revenue'])){ 
         $date_paid = ($_POST['date_paid'] != "")?date('Y-m-d h:i:s', strtotime($_POST['date_paid'])):"";
@@ -1337,7 +804,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         extract($revenueRow);
     }
 ?>
-<?php if($role=='Admin' && (isset($_GET['add_revenue']) || (isset($_GET['edit_revenue'])&& $_GET['edit_revenue']!="")) ){ ?>
+<?php if(isset($_GET['add_revenue']) || (isset($_GET['edit_revenue'])&&$_GET['edit_revenue']!="") ){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock">
         <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>        
@@ -1381,7 +848,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         <select name="Guid_cpt">
                             <option value=" ">Select CPT Code</option>
                             <?php 
-                            $cpt_codes = $db->selectAll('tbl_mdl_cpt_code', ' ORDER BY code ASC');
+                            $cpt_codes = $db->selectAll('tbl_mdl_cpt_code', ' ORDER BY code DESC');
                             foreach ($cpt_codes as $k=>$v){
                             ?>
                             <option <?php echo (isset($Guid_cpt)&&$Guid_cpt==$v['Guid_cpt'])?" selected":""; ?> value="<?php echo $v['Guid_cpt']; ?>"><?php echo $v['code']; ?></option>
@@ -1484,24 +951,18 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 <?php 
 if(isset($_POST['edit_statuses'])){    
     if(isset($_POST['status']['Guid_status'])){
-        
         $statusIDS = $_POST['status']['Guid_status'];
         $statusNames = $_POST['status']['name'];
         $statusOrder = $_POST['status']['order'];
         $statusVisibility = $_POST['status']['visibility'];
-        $access_roles = $_POST['status']['roles'];
         $count = count($statusIDS);
-        foreach ($statusIDS as $k => $statusID) {            
+        foreach ($statusIDS as $k => $statusID) {
             $whereEditStatus = array('Guid_status'=>$statusID);
             $editStatusData = array(
                 'status' => $statusNames[$k],
                 'visibility' => $statusVisibility[$k],
-                'access_roles' => $access_roles,
                 'order_by' => $statusOrder[$k]
             );
-            if(isset($access_roles[$statusID])){                
-                $editStatusData['access_roles'] = serialize($access_roles[$statusID]);
-            }
             
             updateTable($db, 'tbl_mdl_status', $editStatusData, $whereEditStatus);
         }
@@ -1527,11 +988,9 @@ if(isset($_POST['edit_statuses'])){
                     <table class="table">
                         <thead>
                             <tr>
-                                <th class="w-50">Status#</th>
                                 <th class="status_name">Status Name</th>
                                 <th>Order</th>
                                 <th>Visibility</th>
-                                <th>Roles <span class="toggleRoles pull-right far fa-eye-slash"></span></th>
                             </tr>
                         </thead>
                         <tbody>                            
@@ -1676,7 +1135,6 @@ if(isset($_POST['edit_categories'])){
 <?php } ?>
 
 <?php
-   
     if(isset($_POST['manage_status_log'])){ 
         $statusIDs = $_POST['status'];
         $date=($_POST['date']!="")?date('Y-m-d h:i:s',strtotime($_POST['date'])):"";
@@ -1690,15 +1148,13 @@ if(isset($_POST['edit_categories'])){
             'Guid_salesrep' => $accountInfo['Guid_salesrep'],
             'salesrep_fname' => $accountInfo['salesrep_fname'],
             'salesrep_lname' => $accountInfo['salesrep_lname'],
-            'Recorded_by' => $_SESSION['user']['id'],  
-            'provider_id' => $qualifyResult['provider_id'],
-            'deviceid' => $qualifyResult['deviceid'],
+            'Recorded_by' => $_SESSION['user']['id'],                
             'Date'=>$date,
             'Date_created'=>date('Y-m-d h:i:s')
         );
         
-        if(isset($_POST['Guid_status_log']) && $_POST['Guid_status_log']!=""){//update log
-		
+        if(isset($_POST['Guid_status_log']) && $_POST['Guid_status_log']!=""){
+            //update log
             $thisLog = $db->row("SELECT * FROM tbl_mdl_status_log WHERE Guid_status_log=:Guid_status_log", array('Guid_status_log'=>$_POST['Guid_status_log']));
             $statusLogData['Date_created'] = $thisLog['Date_created'];
             $LogGroup = $thisLog['Log_group'];
@@ -1708,26 +1164,20 @@ if(isset($_POST['edit_categories'])){
             //update last status id in patient table too
             updateCurrentStatusID($db, $Guid_patient);
             Leave($patientInfoUrl);
-        } else {//insert log		
-            if(isset($_POST['specimenCollected']) && $_POST['specimenCollected']=='no'){
-                updateTable($db, 'tblpatient', array('specimen_collected'=>'No'), array('Guid_patient'=>$Guid_patient));
-            }
-            if(isset($_POST['specimenCollected']) && $_POST['specimenCollected']=='yes'){
-                updateTable($db, 'tblpatient', array('specimen_collected'=>'Yes'), array('Guid_patient'=>$Guid_patient));
-            }
+        } else {
+            //insert log
             saveStatusLog($db, $statusIDs, $statusLogData);
             updateCurrentStatusID($db, $Guid_patient);
             Leave($patientInfoUrl);
-        }  
+        }   
+       
     } 
-	
 ?>
 <?php 
-    if(isset($_GET['status_log']) && $role=='Admin' || isset($_GET['specimen'])){ 
+    if(isset($_GET['status_log'])){ 
         $title= ($_GET['status_log']=='add')?"Add Status Log":"Update Status Log";
         if(isset($_GET['log_id'])&&$_GET['log_id']!=""){
-            $logRowQ = "SELECT * FROM tbl_mdl_status_log WHERE Guid_status_log=:Guid_status_log";
-            $logRow = $db->row($logRowQ, array('Guid_status_log'=>$_GET['log_id']));
+            $logRow = $db->row("SELECT * FROM tbl_mdl_status_log WHERE Guid_status_log=:Guid_status_log", array('Guid_status_log'=>$_GET['log_id']));
         }
         
 ?>
@@ -1753,23 +1203,9 @@ if(isset($_POST['edit_categories'])){
                 <div class="col-md-12 clearfix" id="status-dropdowns-box">                                            
                     <?php 
                         if(isset($_GET['log_id']) && $_GET['log_id']!="" ){
-                            if(!empty($logRow)){
-                                echo get_selected_log_dropdown($db, $logRow['Log_group']);
-                            } else {
-                                Leave($patientInfoUrl);
-                            }
+                            echo get_selected_log_dropdown($db, $logRow['Log_group']); 
                         }else{
-                            if(isset($_GET['specimen'])){
-                                if($_GET['specimen']=='yes'){
-                                    echo "<input type='hidden' name='specimenCollected' value='yes'>";
-                                    echo get_status_dropdown($db, $parent_id='0', $Guid_status='1');
-                                }else{
-                                    echo "<input type='hidden' name='specimenCollected' value='no'>";
-                                    echo get_status_dropdown($db, $parent_id='0', $Guid_status='37');
-                                }
-                            }else{
-                                echo get_status_dropdown($db, $parent_id='0'); 
-                            }
+                            echo get_status_dropdown($db, $parent_id='0'); 
                         }
                     ?>                            
                 </div>             
@@ -1814,7 +1250,7 @@ if(isset($_POST['edit_categories'])){
     } 
 ?>
 <?php 
-    if(isset($_GET['note_log'])) { 
+    if(isset($_GET['note_log'])){ 
         $title= ($_GET['note_log']=='add')?"Add Note":"Update Note";
         if(isset($_GET['note_id'])&&$_GET['note_id']!=""){
             $catLogRow = $db->row("SELECT * FROM tbl_mdl_note WHERE Guid_note=:Guid_note", array('Guid_note'=>$_GET['note_id']));

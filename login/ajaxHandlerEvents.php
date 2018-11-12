@@ -188,46 +188,53 @@ if( isset($_POST['action']) && $_POST['action'] == 'piechart' && isset($_POST['a
     $piedata = [];
     //$accIds = explode(',', $_POST['acc']);
     $accIds = $_POST['acc'];
-    $colors = array('#00713D','#89CB46','#3065B1','#00B7D0','#7C55A5', '#89BD46', '#00D7D0', '#30DDB1', '#7B11A5', '#01CB46', '#89ADD6', '#222B46', '#89CCCC', '#6035B1', '#306BBB');
-    $i=0;
-    $query = "SELECT COUNT(*) AS count, "
-        . "(SELECT acc.name FROM tblaccount acc WHERE acc.account = l.account ) as accname "
-        . "FROM `tbl_mdl_status_log` l "
-        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
-        . "WHERE l.Guid_status ='1' AND l.account IN (".$accIds.") AND u.marked_test='0' AND DATE(l.Date) BETWEEN DATE(:startdate)  AND DATE(:enddate) GROUP BY l.account";
-    $result = $db->query($query,array("startdate"=>$datecreated, 'enddate'=>$_POST['enddate']));
-        
-    foreach($result as $row){
-        if($row['accname'] != null){
-            $acc = wordwrap(ucwords(strtolower($row['accname'])), 40, "\n");
-            $piedata[] = array('category' => $acc, 'value' => (int)$row['count']);
-        }
-    }
+    if($accIds != ""):
+	    $colors = array('#00713D','#89CB46','#3065B1','#00B7D0','#7C55A5', '#89BD46', '#00D7D0', '#30DDB1', '#7B11A5', '#01CB46', '#89ADD6', '#222B46', '#89CCCC', '#6035B1', '#306BBB');
+	    $i=0;
+	    $query = "SELECT COUNT(*) AS count, "
+	        . "(SELECT acc.name FROM tblaccount acc WHERE acc.account = l.account ) as accname "
+	        . "FROM `tbl_mdl_status_log` l "
+	        . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
+	        . "WHERE l.Guid_status ='1' AND l.account IN (".$accIds.") AND u.marked_test='0' AND DATE(l.Date) BETWEEN DATE(:startdate)  AND DATE(:enddate) GROUP BY l.account";
+	    $result = $db->query($query,array("startdate"=>$datecreated, 'enddate'=>$_POST['enddate']));
+	        
+	    foreach($result as $row){
+	        if($row['accname'] != null){
+	            $acc = wordwrap(ucwords(strtolower($row['accname'])), 40, "\n");
+	            $piedata[] = array('category' => $acc, 'value' => (int)$row['count']);
+	        }
+	    }
 
-    function method1($a,$b) 
-    {
-        return ($a["value"] <= $b["value"]) ? 1 : -1;
-    }
-    usort($piedata, "method1");
-    $total_submitted = 0;
-    foreach ($piedata as $item) {
-        $total_submitted += $item['value'];
-    }
+	    function method1($a,$b) 
+	    {
+	        return ($a["value"] <= $b["value"]) ? 1 : -1;
+	    }
+	    usort($piedata, "method1");
+	    $total_submitted = 0;
+	    foreach ($piedata as $item) {
+	        $total_submitted += $item['value'];
+	    }
 
-    for($i=0; $i<5;$i++) {
-        $els2 = $piedata;
-        foreach ($els2 as &$el) {
-            $el['color'] = $colors[$i];
-            $el['value'] = round(($el['value']/$total_submitted) * 100);
-            $i++;
-        }
-        unset($el);
-    }
+	    for($i=0; $i<5;$i++) {
+	        $els2 = $piedata;
+	        foreach ($els2 as &$el) {
+	            $el['color'] = $colors[$i];
+	            $el['value'] = round(($el['value']/$total_submitted) * 100);
+	            $i++;
+	        }
+	        unset($el);
+	    }
 
-    $data = array(  'type' => 'pie',
-                    'data' => $els2
-            );
-    echo json_encode($data);
+	    $data = array(  'type' => 'pie',
+	                    'data' => $els2
+	            );
+	else:
+		$data = array(  'type' => 'pie',
+	                    'data' => array()
+	            );
+	endif;
+	echo json_encode($data);
+	
 }
 
 /* --------------------- Dashboard Bar Chart ------------------------- */
@@ -240,31 +247,65 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart' && isset($_POST[
     $eDate = $_POST['enddate'];
     $ids = $_POST['ids'];
 
-    //foreach ($salesrepids as $s) {
-        $q = "SELECT count(*) as submittedCnt, CONCAT(l.salesrep_fname,' ',l.salesrep_lname) as SNames "
-                . "FROM tbl_mdl_status_log l "
-                . "LEFT JOIN tblevents e ON DATE(e.start_event) = DATE(l.Date) AND l.Guid_salesrep = e.salesrepid "
-                . "AND l.Guid_account = e.accountid "
-                . "LEFT JOIN tbluser u on u.Guid_user = l.Guid_user "
-                . "WHERE DATE(e.start_event) >= :sDate AND DATE(e.start_event) < :eDate "
-                . "AND l.Guid_status = 1 AND l.Guid_salesrep in (".$ids.") AND u.marked_test = '0' GROUP BY l.Guid_salesrep order by submittedCnt desc limit 5";
-        $result = $db->query($q, array('sDate'=>$sDate, 'eDate'=>$eDate));
+    if(isset($_POST['showtopPerformer'])){
+    	$topSubmitted = "SELECT SUM(IF(l.Guid_status=1, 1, 0)) AS cnt,concat(l.salesrep_fname, ' ',l.salesrep_lname) as salesrepName "
+	        . "FROM `tbl_mdl_status_log` l "
+	        . "INNER JOIN tbluser u ON l.Guid_user = u.Guid_user "
+	        . "INNER JOIN tblevents e ON e.salesrepid = l.Guid_salesrep and e.accountid = l.Guid_account AND DATE(e.start_event) = DATE(l.Date) "
+	        . "WHERE l.Guid_status = 1 AND u.marked_test='0' AND YEARWEEK(l.Date) = YEARWEEK(:datecreated) GROUP BY l.Guid_salesrep ORDER BY cnt DESC LIMIT 1";
+	    $topSubmittedValue = $db->query($topSubmitted,array("datecreated"=>$sDate));
+	    foreach($topSubmittedValue as $row){
+	        $submit['topsubmittedcount'] =  (int) $row['cnt'];
+	        $submit['topsubmittedName'] =  $row['salesrepName'];
+	    }
 
-        foreach($result as $row){
-            $submitted[] = (int)$row['submittedCnt'];
-            $regSalereps[] = $row['SNames'];
-        }
-    //}
-    $data = array(
-            'series' => array ([
-                    'name'=> 'Submitted',
-                    'data'=> $submitted,
-                    'color'=> "#3a8a5f",
-                    'labels'=> array('visible' => true),
-                ]
-            ),
-            'categories' => $regSalereps 
-    );
+    }
+
+    $q = "SELECT count(*) as submittedCnt, CONCAT(l.salesrep_fname,' ',l.salesrep_lname) as SNames "
+            . "FROM tbl_mdl_status_log l "
+            . "LEFT JOIN tblevents e ON DATE(e.start_event) = DATE(l.Date) AND l.Guid_salesrep = e.salesrepid "
+            . "AND l.Guid_account = e.accountid "
+            . "LEFT JOIN tbluser u on u.Guid_user = l.Guid_user "
+            . "WHERE DATE(e.start_event) >= :sDate AND DATE(e.start_event) < :eDate "
+            . "AND l.Guid_status = 1 AND l.Guid_salesrep in (".$ids.") AND u.marked_test = '0' GROUP BY l.Guid_salesrep order by submittedCnt desc limit 5";
+    $result = $db->query($q, array('sDate'=>$sDate, 'eDate'=>$eDate));
+
+    foreach($result as $row){
+        $submitted[] = (int)$row['submittedCnt'];
+        $regSalereps[] = $row['SNames'];
+    }
+    if(isset($_POST['showtopPerformer']) && !empty($submit)){
+    	array_push($regSalereps, $submit['topsubmittedName']);
+	    $data = array(
+	            'series' => array (
+	            		[
+		                    'name'=> 'Submitted',
+		                    'data'=> array($submitted[0]),
+		                    'color'=> "#3a8a5f",
+		                    'labels'=> array('visible' => true),
+		                    'gap'=> 3,
+		                ],
+		                [
+		                	'name'=> 'Top Submitted',
+		                    'data'=> array($submit['topsubmittedcount']),
+		                    'color'=> "#b6942e",
+		                    'labels'=> array('visible' => true),
+		                ]
+	            ),
+	            'categories' => $regSalereps 
+	    );
+	}else{
+		$data = array(
+	            'series' => array ([
+	                    'name'=> 'Submitted',
+	                    'data'=> $submitted,
+	                    'color'=> "#3a8a5f",
+	                    'labels'=> array('visible' => true),
+	                ]
+	            ),
+	            'categories' => $regSalereps 
+	    );
+	}
     echo json_encode($data);
 }
 
@@ -477,8 +518,8 @@ if(isset($_POST['action']) && $_POST['action'] == 'tableStats'){
 }
 
 
-/* Get Dynamic Consultant List */
-if(isset($_GET['action']) && $_GET['srepids'] != 0 && $_GET['action'] == 'getconsultant'){
+/* ---------------------  Get Dynamic Consultant List --------------------- */
+if(isset($_GET['action']) && isset($_GET['srepids']) && $_GET['srepids'] != 0 && $_GET['action'] == 'getconsultant'){
     $ids = $_GET['srepids'];
     //print_r($ids);
     $q = "SELECT t.Guid_salesrep, CONCAT(t.first_name,' ',t.last_name) as sNames FROM tblsalesrep t WHERE t.Guid_salesrep IN ($ids)  ";
@@ -493,11 +534,10 @@ if(isset($_GET['action']) && $_GET['srepids'] != 0 && $_GET['action'] == 'getcon
 }
 
 
-/* Summary Stats */
-if(isset($_GET['_']) && isset($_GET['start'])){
-    
-    $result = getSummaryEvents($db);
+/* --------------------- Summary Stats --------------------- */
 
+if(isset($_GET['_']) && isset($_GET['start'])){
+    $result = getSummaryEvents($db);
     foreach($result as $row)
     {
      $data[] = array(
@@ -507,16 +547,16 @@ if(isset($_GET['_']) && isset($_GET['start'])){
           'qualifiedCnt' => $row['qualifiedCnt'],
           'completedCnt' => $row['completedCnt'],
           'submittedCnt'   => $row['submittedCnt'], 
-          'salesrepid' => $row['salesrepid'] 
+          'salesrepid' => $row['salesrepid'],
+          'account' => $row['account']
           );
     }
-
     echo json_encode($data);
-
 }
 
+/* --------------------- Dshboard2 Setting Dropdown --------------------- */
 
-if(isset($_POST['action']) && $_POST['action'] = 'genconValues' && isset($_POST['eDate']) && isset($_POST['sDate'])){
+if(isset($_POST['action']) && $_POST['action'] == 'genconValues' && isset($_POST['eDate']) && isset($_POST['sDate'])){
     $query = "SELECT e.salesrepid, CONCAT(l.salesrep_fname, ' ' ,l.salesrep_lname) as snames "
             . "FROM tblevents e "
             . "left join tbl_mdl_status_log l on l.Guid_salesrep = e.salesrepid "
@@ -524,4 +564,146 @@ if(isset($_POST['action']) && $_POST['action'] = 'genconValues' && isset($_POST[
             . "group by e.salesrepid ";
     $result = $db->query($query, array('sDate' => $_POST['sDate'], 'eDate'=>$_POST['eDate']));
     echo json_encode($result);
+}
+
+/* --------------------- Event Page Stats --------------------- */
+
+if( isset($_POST['action']) && $_POST['action'] == 'eventStats'){
+
+    if($_POST['acc'] != null && $_POST['acc'] != '' && $_POST['acc'] != 0){
+        $accounts = $_POST['acc'];
+        $query = "SELECT count(*) "
+                . ",SUM(IF(l.Guid_status=28, 1, 0)) as regCount "
+                . ",SUM(IF(l.Guid_status=29, 1, 0)) as quaCount "
+                . ",SUM(IF(l.Guid_status=36, 1, 0)) as comCount "
+                . ",SUM(IF(l.Guid_status=1, 1, 0)) as subCount "
+                . "FROM tbl_mdl_status_log l "
+                . "inner join tblevents e on e.accountid = l.Guid_account and DATE(l.Date) = DATE(e.start_event) "
+                . "inner JOIN tbluser u ON l.Guid_user = u.Guid_user "
+                . "WHERE DATE(l.Date) between DATE(:startdate) and DATE(:enddate) and u.marked_test='0' "
+                . "AND l.account IN (".$accounts.") ";
+    }else{
+        $query = "SELECT count(*)
+                ,SUM(IF(l.Guid_status=28, 1, 0)) as regCount
+                ,SUM(IF(l.Guid_status=29, 1, 0)) as quaCount
+                ,SUM(IF(l.Guid_status=36, 1, 0)) as comCount
+                ,SUM(IF(l.Guid_status=1, 1, 0)) as subCount
+                FROM tbl_mdl_status_log l
+                inner join tblevents e on e.accountid = l.Guid_account and DATE(l.Date) = DATE(e.start_event)
+                inner JOIN tbluser u ON l.Guid_user = u.Guid_user
+                WHERE DATE(l.Date) between DATE(:startdate) and DATE(:enddate) and u.marked_test='0' ";
+        if($_POST['acc'] == null && $_POST['acc'] == '' && $_POST['acc'] == 0){
+            $query .= "AND l.account = '' ";
+        }
+    }
+    $result = $db->query($query,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate']));
+    echo json_encode($result);
+}
+
+/* --------------------- Event Page - Dependent Account Dropdown Values --------------------- */
+
+if(isset($_GET['action']) && $_GET['action'] == 'dynamicAccounts'){
+    $sId = $_GET['sId'];
+    $query = "SELECT distinct(acc.Guid_account), acc.name FROM tblaccount acc  "
+			. "INNER JOIN tblaccountrep accrep ON accrep.Guid_account = acc.Guid_account "
+			. "INNER JOIN tblevents evt ON evt.accountid = acc.Guid_account "
+			. "WHERE accrep.Guid_salesrep = :salesrepid "
+			. "AND DATE(evt.start_event) BETWEEN DATE(:sDate) AND DATE(:eDate) ";
+	$result = $db->query($query, array('salesrepid' => $sId, 'sDate'=>$_GET['sDate'], 'eDate'=>$_GET['eDate']));
+	$accountHTML = "";
+	foreach($result as $row)
+	{
+		$accountHTML .= "<option value='".$row['Guid_account']."'>".$row['name']."</option>";
+	}
+    echo json_encode($accountHTML);
+}
+
+/* --------------------- Event Page - Dependent Salesrep Dropdown Values --------------------- */
+
+if(isset($_GET['action']) && $_GET['action'] == 'dynamicSalesrep'){
+    
+    $query = "SELECT distinct(s.Guid_salesrep), concat(s.first_name, ' ', s.last_name) as snames "
+    		. "FROM tblsalesrep s "
+    		. "INNER JOIN tblaccountrep accrep ON accrep.Guid_salesrep = s.Guid_salesrep "
+			. "INNER JOIN tblevents evt ON evt.salesrepid = accrep.Guid_salesrep "
+			. "WHERE accrep.Guid_account = :accountid "
+			. "AND DATE(evt.start_event) BETWEEN DATE(:sDate) AND DATE(:eDate) ";
+	$result = $db->query($query, array('accountid' => $_GET['aID'], 'sDate'=>$_GET['sDate'], 'eDate'=>$_GET['eDate']));
+	$salesrepHTML = "";
+	foreach($result as $row)
+	{
+		$salesrepHTML .= "<option value='".$row['Guid_salesrep']."'>".$row['snames']."</option>";
+	}
+    echo json_encode($salesrepHTML);
+}
+
+/* --------------------- Event Page - Dropdown Values --------------------- */
+
+if(isset($_GET['action']) && $_GET['action'] == 'getAccountAndSalesRep'){
+	
+	$AccountQuery = "SELECT e.salesrepid, e.accountid, a.name, CONCAT(s.first_name, ' ', s.last_name) AS salesNames "
+		. "FROM tblevents e "
+		. "LEFT JOIN tblaccount a ON a.Guid_account = e.accountid "
+		. "LEFT JOIN tblsalesrep s ON s.Guid_salesrep = e.salesrepid "
+		. "WHERE DATE(e.start_event) BETWEEN DATE(:sDate) AND DATE(:eDate) "
+		. "ORDER BY e.start_event ";
+	$AccountQueryExec = $db->query($AccountQuery, array('sDate'=>$_GET['sDate'], 'eDate'=> $_GET['eDate']));
+
+	$salesNames = $salesIDs = $accIDs = $accNames =array();
+
+	foreach ($AccountQueryExec as $row) {
+		array_push($salesNames, $row['salesNames']);
+		array_push($salesIDs, $row['salesrepid']);
+		array_push($accIDs, $row['accountid']);
+		array_push($accNames, $row['name']);
+	}
+	$data['salesrep'] = array_values(array_unique($salesNames));
+	$data['salesrepid'] = array_values(array_unique($salesIDs));
+	$data['accountid'] = array_values(array_unique($accIDs));
+	$data['accNames'] = array_values(array_unique($accNames));
+	$count = 0;
+	$salesHTML = $accHTML = "";
+	foreach($data['salesrep'] as $row){
+		$salesHTML .= "<option value='". $data['salesrepid'][$count] ."'>".$row."</option>";
+		$count++;
+	}
+	$count = 0;
+	foreach($data['accNames'] as $row){
+		$accHTML .= "<option value='". $data['accountid'][$count] ."'>".$row."</option>";
+		$count++;
+	}
+	$result = array(
+		'salesArray' => $salesHTML,
+		'accArray' => $accHTML
+	);
+	echo json_encode($result);
+}
+
+
+if(isset($_GET['action']) && $_GET['action'] == 'getAccounts'){
+	$query = "SELECT distinct(acc.Guid_account), acc.name FROM tblaccount acc "  
+			. "INNER JOIN tblaccountrep accrep ON accrep.Guid_account = acc.Guid_account "
+			. "INNER JOIN tblevents evt ON evt.accountid = acc.Guid_account "
+			. "WHERE accrep.Guid_salesrep = :sID "
+			. "AND DATE(evt.start_event) BETWEEN DATE(:sDate) AND DATE(:eDate) ";
+	$execQuery = $db->query($query, array('sID'=>$_GET['sID'], 'sDate'=>$_GET['sDate'], 'eDate'=> $_GET['eDate']));
+	$html = "";
+	foreach($execQuery as $row){
+		$html .= "<option value='".$row['Guid_account']."'>".$row['name']."</option>";
+	}
+	echo $html;
+}
+
+if(isset($_GET['action']) && $_GET['action'] == 'getSales'){
+	$query = "SELECT distinct(s.Guid_salesrep), concat(s.first_name, ' ', s.last_name) as sNames "
+			. "FROM tblsalesrep s "
+			. "LEFT JOIN tblevents evt ON evt.salesrepid = s.Guid_salesrep "
+			. "WHERE evt.accountid = :sID "
+			. "AND DATE(evt.start_event) BETWEEN DATE(:sDate) AND DATE(:eDate) ";
+	$execQuery = $db->query($query, array('sID'=>$_GET['sID'], 'sDate'=>$_GET['sDate'], 'eDate'=> $_GET['eDate']));
+	$html = "";
+	foreach($execQuery as $row){
+		$html .= "<option value='".$row['Guid_salesrep']."'>".$row['sNames']."</option>";
+	}
+	echo $html;
 }

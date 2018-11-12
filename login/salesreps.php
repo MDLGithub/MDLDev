@@ -321,7 +321,7 @@ require_once ('navbar.php');
 				<?php if(isFieldVisibleByRole($isPhotoView, $roleID)) {?>
 				<div class="form-group">
 				    <div class="row">
-					<div class="col-md-9">
+					<div class="col-md-9 padd-0">
 					    <div class="f2 <?php echo ($photo_filename!="") ? "valid show-label" : ""; ?>">
 						<label class="dynamic" for="address"><span>Photo</span></label>
 						<div class="group">
@@ -473,7 +473,7 @@ require_once ('navbar.php');
 				<?php } ?>
 				<div class="row">
 				    <?php if(isFieldVisibleByRole($isStateView, $roleID)) {?>
-				    <div class="col-md-6">
+				    <div class="col-md-5 padd-0">
 					<div class="f2 <?php echo ($state!="") ? "valid show-label" : ""; ?>">
 					    <label class="dynamic" for="state"><span>State</span></label>
 					    <div class="group">
@@ -492,7 +492,7 @@ require_once ('navbar.php');
 				    </div>
 				    <?php } ?>
 				    <?php if(isFieldVisibleByRole($isZipView, $roleID)) {?>
-				    <div class="col-md-6">
+				    <div class="col-md-5 col-md-offset-2 padd-0">
 				       <div class="f2 <?php echo ($zip!="") ? "valid show-label" : ""; ?>">
 					    <label class="dynamic" for="zip"><span>Zip</span></label>
 					    <div class="group">
@@ -530,7 +530,7 @@ require_once ('navbar.php');
 		    <a class="add-new-device" href="<?php echo SITE_URL; ?>/salesreps.php?action=add">
 			<span class="fas fa-plus-circle"></span> Add
 		    </a>
-		    <?php if ($roleID == 1) { ?>
+		    <?php if ($roleID == 1 || $roleID == 5) { ?>
 				<a class="export_matrix" id="export">
 					<img src="./images/icon_forms.png" />
 					<p>Geneveda Matrix</p>
