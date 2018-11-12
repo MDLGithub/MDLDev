@@ -2459,7 +2459,7 @@ function dmdl_refresh($db){
             echo $domObj->get_xml_error();            
         } else {             
             $res = $domArr['CombinedResults']['GeneticResults'];
-            //var_dump($res);
+            var_dump($res);
             //admin db date format 1993-01-25           
             
             $Guid_MDLNumber = $res['Guid_MDLNumber'];
