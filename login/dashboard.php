@@ -758,7 +758,7 @@ if(isset($_POST['dmdlUpdate'])){
                 $lastname_enc = $data['lastname'];
                 $dob = $data['dob'];
                 $physician_name = $data['Physician']['FirstName']." ".$data['Physician']['LastName'];
-                $insurance_name = $data['insurance_full'];
+                $insurance_name = isset($data['insurance_full'])?$data['insurance_full']:'';
                 $dmdl_mdl_num = $data['mdlnumber'];
                 
                 
@@ -778,12 +778,13 @@ if(isset($_POST['dmdlUpdate'])){
                         if($insertUser['insertID'] && $insertUser['insertID']!=''){
                             $Guid_user = $insertUser['insertID'];
                             //insert into patients
-                            $insertPatient = $db->query("INSERT INTO `tblpatient` (Guid_dmdl_patient,Guid_user,firstname_enc,lastname_enc,dob,physician_name,insurance_name,Date_created) "
+                            $insertPatient = $db->query("INSERT INTO `tblpatient` (Guid_dmdl_patient,Guid_user,firstname_enc,lastname_enc,dob,Loaded,Linked,physician_name,insurance_name,Date_created) "
                                     . "VALUES ('$Guid_dmdl_patient','$Guid_user', "
                                     . "AES_ENCRYPT('$firstname_enc', 'F1rstn@m3@_%'), "
                                     . "AES_ENCRYPT('$lastname_enc', 'L@stn@m3&%#'), "
-                                    . "'$dob', '$physician_name','$insurance_name', NOW())");
+                                    . "'$dob','Y','Y', '$physician_name','$insurance_name', NOW())");
                             $Guid_patient = $db->lastInsertId();
+                            
                             //update mdl number
                             $mdlData = array(
                                 'Guid_user'=>$insertUser['insertID'],
@@ -869,6 +870,7 @@ if(isset($_POST['dmdlUpdate'])){
                             $patientData['insurance_name'] = $data['insurance_full'];
                         }
                         if(!empty($thisPatient)){
+                            $patientData['Linked'] = 'Y';
                             $wherePatient = array('Guid_patient'=>$Guid_patient);
                             $updatePatient = updatePatientData($db,$patientData,$wherePatient); 
                         }
@@ -917,7 +919,6 @@ if(isset($_POST['dmdlUpdate'])){
                         $mdlNum = $data['mdlnumber'];
                         if( isset($_POST["dmdl"]["$mdlNum"]["statuses"])){
                             $statuses = $_POST["dmdl"]["$mdlNum"]["statuses"];
-                            var_dump($statuses);
                             //insert suatuses
                             $statusLogData = array(
                                 'Guid_user' =>  $Guid_user,

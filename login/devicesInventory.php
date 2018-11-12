@@ -74,7 +74,7 @@ if(isset($_GET['add_device']) && $_GET['add_device']=='1'){
 } else {
     $modalBoxClass = "hide";
 }
-
+$serialExistsMsg = '';
 if(isset($_POST['save_device_inv'])){
     
     $data = $_POST;
@@ -97,7 +97,7 @@ if(isset($_POST['save_device_inv'])){
             $update = updateTable($db,'tbldeviceinv', $data, array('id'=>$_POST['id']));
             Leave(SITE_URL.'/devicesInventory.php?update');
         } else {
-            $thisMessage = "Device ID <strong>".$_POST['serial_number']."</strong> Exists. Please choose another.";
+            $serialExistsMsg = "The serial number <strong>".$_POST['serial_number']."</strong> already exists. Please check the serial number and try again.";
             $accountFieldMsg = 'error';
         }        
     } else {
@@ -108,7 +108,7 @@ if(isset($_POST['save_device_inv'])){
                 Leave(SITE_URL.'/devicesInventory.php?insert');
             }
         }else {
-            $thisMessage = "Account ID <strong>".$_POST['serial_number']."</strong> Exists. Please choose another.";
+            $serialExistsMsg = "The serial number <strong>".$_POST['serial_number']."</strong> already exists. Please check the serial number and try again.";
             $accountFieldMsg = 'error';
         }
     }
@@ -168,6 +168,13 @@ require_once ('navbar.php');
             <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
         </section>
         <div id="app_data" class="scroller">
+            <?php if($serialExistsMsg!=''){?>
+            <div class="row">
+                <div class="col-md-12 text-center color-red pB-15">
+                    <?php echo $serialExistsMsg; ?>
+                </div>
+            </div>
+            <?php } ?>
             <div class="row">
                 <?php 
                 if( isset($_GET['action']) && $_GET['action'] !='' ){

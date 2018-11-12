@@ -307,7 +307,7 @@ require_once ('navbar.php');
                         <tbody>
                             <?php foreach ($users as $k=>$user){  ?>
                             <?php 
-                            $trClass = "";
+                            $trClass = ""; $patientInfoLink = "";
                             if($user['marked_test']=='1'){
                                 $trClass = "marked_test";
                             }
@@ -322,11 +322,20 @@ require_once ('navbar.php');
                             }
                             if($user['Guid_role']=='6'){
                                 $trClass = "mdl_patient";
+                                $patientInfoLink = SITE_URL.'/patient-info.php?patient='.$user['Guid_user'];
                             }
+                            if($user['Guid_role']=='3'){
+                                $patientInfoLink = SITE_URL.'/patient-info.php?patient='.$user['Guid_user'];
+                            }
+                            
                             ?>
                             <tr class="<?php echo $trClass;?>">
+                                <?php if($patientInfoLink!=''){ ?>
+                                <td><a href="<?php echo $patientInfoLink; ?>"><?php echo $user['Guid_user']; ?></a></td>
+                                <?php } else { ?>
                                 <td><?php echo $user['Guid_user']; ?></td>
-                                <td><?php echo ucfirst(strtolower($user['first_name'])); ?> </td>
+                                <?php } ?>
+                                <td><?php echo ucfirst(strtolower($user['first_name'])); ?></td>
                                 <td><?php echo formatLastName($user['last_name']); ?></td>
                                 <td><?php echo $user['email']; ?></td>
                                 <td><?php echo isset($user['role'])?$user['role']:'Patient'; ?></td>

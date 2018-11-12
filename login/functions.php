@@ -2253,6 +2253,40 @@ function updateOrInsertProvider($db,$accountNum, $Guid_account, $Guid_user, $api
     return $Guid_provider;
     
 }
+function loadTableData($db, $tableName, $tableClass='', $tableID=''){
+    $columns = $db->query('SHOW COLUMNS FROM ' . $tableName);
+    $data = $db->query('SELECT * FROM ' . $tableName);
+    
+    $cnt = "";
+    $cnt .= "<table class='".$tableClass."' id='".$tableID."'>";
+    $cnt .= "<thead>";
+    $cnt .= "<tr>";
+    foreach ($columns as $k=>$v){
+        $cnt .= "<th>";
+        $cnt .=  $v['Field'];
+        $cnt .= "</th>";
+    }
+    $cnt .= "</tr>";
+    $cnt .= "</thead>";
+    
+    $cnt .= "<tbody>";
+    
+    foreach ($data as $k=>$rowData){
+        $cnt .= "<tr>";
+        foreach ($rowData as $key=>$val){
+        $cnt .= "<td>";
+        $cnt .= $val;
+        $cnt .= "</td>";
+        }
+        $cnt .= "</tr>";
+    }
+    
+    $cnt .= "</tbody>";
+    $cnt .= "</table>";
+    
+    
+    return $cnt;
+}
 
 /**
  * API Date format month-day-year ex. 07-31-2017
@@ -2273,7 +2307,7 @@ function getPaientPossibleMatch($db,$firstname,$lastname,$Date_Of_Birth){
             . "AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') as lastname "
             . "FROM tblpatient p "
             . "LEFT JOIN tbluser u ON u.Guid_user = p.Guid_user "
-            . "WHERE u.marked_test='0' AND u.Loaded='N' "
+            . "WHERE u.marked_test='0' AND u.Loaded='N' AND p.Linked='N' "
             . "AND (LOWER(CONVERT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') USING 'utf8')) LIKE '%".strtolower($firstname)."%' "
             . "OR LOWER(CONVERT(AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') USING 'utf8')) LIKE '%".strtolower($lastname)."%' "
             . "OR p.dob='".convertDmdlDate($Date_Of_Birth)."' )";
@@ -2290,7 +2324,7 @@ function getPaientPerfectMatch($db,$firstname,$lastname,$Date_Of_Birth){
             . "AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') as lastname "
             . "FROM tblpatient p "
             . "LEFT JOIN tbluser u ON u.Guid_user = p.Guid_user "
-            . "WHERE u.marked_test='0' AND u.Loaded='N' "
+            . "WHERE u.marked_test='0' AND u.Loaded='N' AND p.Linked='N' "
             . "AND LOWER(CONVERT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') USING 'utf8'))='".strtolower($firstname)."' "
             . "AND LOWER(CONVERT(AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') USING 'utf8'))='".strtolower($lastname)."' "
             . "AND dob='$dobConverted'";
@@ -2317,12 +2351,13 @@ function dmdl_refresh($db){
     }    
     //skip ToUpdate='N' 
     //select [toupdate = Y] and [time of now - updatedatetime > 1 hour or is null
-    $dmdlResult = $db->query("SELECT * FROM tbl_mdl_dmdl "
-            . "WHERE ToUpdate='Y' "
+    /* $dmdlResult = $db->query("SELECT * FROM tbl_mdl_dmdl "
+            . "WHERE ToUpdate='Y' AND Linked='N' "
             . "AND UpdateDatetime IS NULL "
             . "OR UpdateDatetime = '' "
-            . "OR UpdateDatetime < NOW() - INTERVAL 60 MINUTE ");
-    
+            . "OR UpdateDatetime < NOW() - INTERVAL 60 MINUTE "); */
+    $dmdlResult = $db->query("SELECT * FROM tbl_mdl_dmdl "
+                            ."WHERE ToUpdate='Y' AND Linked='N' ");
     $content=""; $match=""; $possibleM ="";
     
     $content .= "<form action='' method='POST'>";
@@ -2334,7 +2369,7 @@ function dmdl_refresh($db){
     $content .= "<table id='refresh-log-table' class='table'>";
     $content .= "<thead>";
     $content .= "<tr class='tableTopInfo'>";
-    $content .= "<th colspan='6' class='dmdl'>dMDL</th>";
+    $content .= "<th colspan='7' class='dmdl'>dMDL</th>";
     $content .= "<th colspan='3' class='tbl-borderR braca'>BRCA Admin</th>";
     $content .= "</tr>";
     $content .= "<tr class='tableHeader'>";
@@ -2344,6 +2379,7 @@ function dmdl_refresh($db){
     $content .= "<th>DOB</th>";
     $content .= "<th>MDL#</th>";
     $content .= "<th>Account#</th>";
+    $content .= "<th>DOS</th>";
     $content .= "<th class='tbl-borderR'>Possible Match</th>";
     $content .= "<th>
                     <label class='switch'>
@@ -2355,10 +2391,10 @@ function dmdl_refresh($db){
                 </th>";
     $content .= "</tr></thead>";
     $content .= "<tbody>";
-    foreach ( $dmdlResult as $k=>$v ){
+    foreach ( $dmdlResult as $dmdlKey=>$dmdlVal ){
         $param = array(
-            "patientId" => $v['PatientID'], 
-            "physicianId" => $v['PhysicianID']
+            "patientId" => $dmdlVal['PatientID'], 
+            "physicianId" => $dmdlVal['PhysicianID']
         );
         $result = (array)$client->GetCombinedResults($param);
         
@@ -2375,7 +2411,11 @@ function dmdl_refresh($db){
             $Date_Of_Birth = $res['Date_Of_Birth'];          
             $firstname = $res['Patient_FirstName'];
             $lastname = $res['Patient_LastName'];           
-            $accountNumber = $res['ClientID'];           
+            $accountNumber = $res['ClientID'];  
+            $DOS = '';
+            if(isset($res['DOS'])){
+            $DOS = str_replace('-','/',$res['DOS']);
+            }
             
             $dob = str_replace('-','/',$Date_Of_Birth);
             
@@ -2411,11 +2451,11 @@ function dmdl_refresh($db){
                         $sOption .= "<option value='".$v['Guid_patient']."'>";                        
                         $sOption .= ucwords(strtolower($v['firstname']." ".$v['lastname']));
                         $sOption .= " (".date("m/d/Y", strtotime($matchedPatient['dob'])).") ";
-                        if($qualifyResult['account_number']!=''){
-                        $sOption .= "Acct#: ".$qualifyResult['account_number'].", ";
-                        }
                         if($mdl_num!=''){
                             $sOption .= "MDL#: ".$mdl_num.", ";
+                        }
+                        if($qualifyResult['account_number']!=''){
+                        $sOption .= "Acct#: ".$qualifyResult['account_number'].", ";
                         }
                         $sOption .= "Patient ID: ".$v['Guid_patient'];
                         $sOption .= "</option>";
@@ -2458,11 +2498,11 @@ function dmdl_refresh($db){
                             $sOption .= "<option value='".$v['Guid_patient']."'>";                        
                             $sOption .= ucwords(strtolower($v['firstname']." ".$v['lastname']));
                             $sOption .= " (".date("m/d/Y", strtotime($matchedPatient['dob'])).") ";
-                            if($qualifyResult['account_number']!=''){
-                            $sOption .= "Acct#: ".$qualifyResult['account_number'].", ";
-                            }
                             if($mdl_num!=''){
                                 $sOption .= "MDL#: ".$mdl_num.", ";
+                            }
+                            if($qualifyResult['account_number']!=''){
+                            $sOption .= "Acct#: ".$qualifyResult['account_number'].", ";
                             }
                             $sOption .= "Patient ID: ".$v['Guid_patient'];
                             $sOption .= "</option>";
@@ -2508,9 +2548,6 @@ function dmdl_refresh($db){
                     $patientInfoLink = "<a href='".SITE_URL."/patient-info.php?patient=".$matchedPatient['Guid_user'].$acctLink."'>";                        
                     $patientInfoLink .= ucwords(strtolower($matchedPatient['firstname']." ".$matchedPatient['lastname']));
                     $patientInfoLink .= " (".date("m/d/Y", strtotime($matchedPatient['dob'])).") ";
-                    if(isset($qualifyResult['account_number'])&&$qualifyResult['account_number']!=''){
-                        $patientInfoLink .= "Acct#: ".$qualifyResult['account_number'].", ";
-                    }
                     if($mdl_num!=''){
                         if($mdlNumMatch){
                             $patientInfoLink .= "MDL#: ".$mdl_num.", ";
@@ -2519,6 +2556,9 @@ function dmdl_refresh($db){
                             $patientInfoLink .= "<span class='color-red'>MDL#: ".$mdl_num."</span>, ";
                             $patientInfoLink .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Possible_Match]' value='create_new' />";
                         }
+                    }
+                    if(isset($qualifyResult['account_number'])&&$qualifyResult['account_number']!=''){
+                        $patientInfoLink .= "Acct#: ".$qualifyResult['account_number'].", ";
                     }
                     $patientInfoLink .= "Patient ID: ".$matchedPatient['Guid_patient'];
                     $patientInfoLink .= "</a>";
@@ -2532,12 +2572,20 @@ function dmdl_refresh($db){
                 }
             }
             
-            $content .= $match; //match status=>yes,no,duplicate             
-            $content .= "<td>".ucwords(strtolower($firstname))."</td>";
-            $content .= "<td>".ucwords(strtolower($lastname))."</td>";
+            $apiDataLink = SITE_URL."/dmdlPatientInfo.php?patientId=".$dmdlVal['PatientID']."&physicianId=".$dmdlVal['PhysicianID'];
+
+            $content .= $match; //match status=>yes,no,duplicate  
+            $content .= "<td><a target='_blank' href='".$apiDataLink."'>".ucwords(strtolower($firstname))."</a></td>";
+            $content .= "<td><a target='_blank' href='".$apiDataLink."'>".ucwords(strtolower($lastname))."</a></td>";
             $content .= "<td>$dob</td>"; 
-            $content .= "<td>$Guid_MDLNumber</td>";
+            if($dmdlVal['MDLNumber'] != $Guid_MDLNumber){
+                $content .= "<td class='color-red'>dmdl: $Guid_MDLNumber <br/>csv: ".$dmdlVal['MDLNumber']."</td>";
+            } else {
+                $content .= "<td>$Guid_MDLNumber</td>";
+            }
+           
             $content .= "<td>$accountNumber</td>";            
+            $content .= "<td>$DOS</td>";            
             $content .= $possibleM;
             
             $content.= "<td class='text-center'>"
@@ -2639,7 +2687,7 @@ function dmdl_refresh($db){
 
 function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number){    
     //update tbl_mdl_dmdl UpdateDatetime    
-    updateTable($db, 'tbl_mdl_dmdl', array('UpdateDatetime'=> date('Y-m-d h:i:s')), array('MDLNumber'=>$dmdl_mdl_number));
+    updateTable($db, 'tbl_mdl_dmdl', array('UpdateDatetime'=> date('Y-m-d h:i:s'),'Linked'=>'Y'), array('MDLNumber'=>$dmdl_mdl_number));
     
     $statusLogData = array(
         'Loaded' => 'Y',
