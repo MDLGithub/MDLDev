@@ -762,6 +762,7 @@ if(isset($_POST['dmdlUpdate'])){
                 $dmdl_mdl_num = $data['mdlnumber'];
                 
                 
+                
                 if(isset($dmdlItem['Possible_Match']) && $dmdlItem['Possible_Match']!=''){
 
                     //check if Create New selected
@@ -837,13 +838,14 @@ if(isset($_POST['dmdlUpdate'])){
                                 $statusLogData['salesrep_fname'] = $getSalesrep['first_name'];
                                 $statusLogData['salesrep_lname'] = $accountInfo['last_name'];
                             }
-                            $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum);
+                            $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum,$data['Guid_mdl_dmdl']);
 
                         } 
                     } else { //update 
 
                         $Guid_patient = $dmdlItem['Possible_Match']; //patient id from admin db
                         $thisPatient = $db->row("SELECT * FROM `tblpatient` WHERE Guid_patient=:Guid_patient", array('Guid_patient'=>$Guid_patient));
+                        
                         $Guid_user = $thisPatient['Guid_user'];    
                         $Guid_patient = $thisPatient['Guid_patient'];
                         //update patent table
@@ -942,7 +944,7 @@ if(isset($_POST['dmdlUpdate'])){
                                 $statusLogData['salesrep_lname'] = $accountInfo['last_name'];
                             }
                             //var_dump($statusLogData);
-                            $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum);
+                            $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum,$data['Guid_mdl_dmdl']);
                         }
                     }                        
                 } 
@@ -986,7 +988,7 @@ if(isset($_POST['dmdlUpdate'])){
             "aoColumnDefs": [
               { 
                   "bSortable": false, 
-                  "aTargets": [ 6,7 ] } 
+                  "aTargets": [ 7,8 ] } 
             ]
         });  
     }

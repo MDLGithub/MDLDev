@@ -2122,7 +2122,7 @@ function get_stats_info_today($db, $statusID, $hasChildren=FALSE, $searchData=ar
             LEFT JOIN `tbl_mdl_status_log` statuslogs ON statuses.`Guid_status`= statuslogs.`Guid_status`
             LEFT JOIN `tbl_mdl_number` mdlnum ON statuslogs.Guid_user=mdlnum.Guid_user ";
     
-    $q .=  "WHERE  statuslogs.`currentstatus`='Y' AND DATE(statuslogs.`Date`) =:today ";
+    $q .=  "WHERE statuslogs.`currentstatus`='Y' AND DATE(statuslogs.`Date`) =:today ";
     
     if(!empty($searchData)){ 
         if (isset($searchData['from_date']) && $searchData['from_date']!="" && isset($searchData['to_date']) && $searchData['to_date']!="") {
@@ -2546,14 +2546,12 @@ function dmdl_refresh($db){
                             }
                             $DOS_braca_date = rtrim($DOS_braca_date, ', ');
                         }
-                    }
-                    
+                    }                    
                     if($DOS_braca_date!=''){
                         $bracaDOS = date("m/d/Y", strtotime($DOS_braca_date));
                     } else {
                         $bracaDOS = '';
-                    }
-                    
+                    }                    
                     $patientInfoStr = '';    
                     $patientInfoStr .= ucwords(strtolower($matchedPatient['firstname']." ".$matchedPatient['lastname']));
                     $patientInfoOption .= ucwords(strtolower($matchedPatient['firstname']." ".$matchedPatient['lastname']));
@@ -2580,8 +2578,7 @@ function dmdl_refresh($db){
                     if($bracaDOS!=''){
                         $patientInfoStr .= ", DOS: ".$bracaDOS;
                         $patientInfoOption .= ", DOS: ".$bracaDOS;
-                    }
-                    
+                    }                    
                     if( $DOS === $bracaDOS ){    
                         $patientInfo .= "<a href='".SITE_URL."/patient-info.php?patient=".$matchedPatient['Guid_user'].$acctLink."'>";                        
                         $patientInfo .= $patientInfoStr;
@@ -2590,11 +2587,9 @@ function dmdl_refresh($db){
                         $patientInfo .= "<select name='dmdl[".$Guid_MDLNumber."][Possible_Match]'>";
                         $patientInfo .= "<option value=''>Select From Possible Match</option>";
                         $patientInfo .= "<option value='create_new'>Create New</option>";
-                        $patientInfo .= "<option value='".$matchedPatient['Guid_user']."'>".$patientInfoOption."</option>";
+                        $patientInfo .= "<option value='".$matchedPatient['Guid_patient']."'>".$patientInfoOption."</option>";
                         $patientInfo .= "</select>";
                     }
-                    
-                    
                     $match = "<td class='mn yes'>"
                             . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][status]' value='yes' />"
                             . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Guid_patient]' value='".$getPatient['0']['Guid_patient']."' />"
@@ -2626,6 +2621,12 @@ function dmdl_refresh($db){
             //hidden inputs            
             if(isset($res['Guid_MDLNumber']) && !empty($res['Guid_MDLNumber'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][mdlnumber]' value='". $res['Guid_MDLNumber']."' />";
+            }
+            if(isset($dmdlVal['MDLNumber']) && !empty($dmdlVal['MDLNumber'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][csv_mdlnumber]' value='". $dmdlVal['MDLNumber']."' />";
+            }
+            if(isset($dmdlVal['Guid_mdl_dmdl']) && !empty($dmdlVal['Guid_mdl_dmdl'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Guid_mdl_dmdl]' value='". $dmdlVal['Guid_mdl_dmdl']."' />";
             }
             if(isset($res['Patient_FirstName']) && !empty($res['Patient_FirstName'])){
                 $content .=  "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][firstname]' value='".$res['Patient_FirstName']."' />";
@@ -2716,10 +2717,10 @@ function dmdl_refresh($db){
     return $content;       
 }
 
-function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number){    
-    //update tbl_mdl_dmdl UpdateDatetime    
-    updateTable($db, 'tbl_mdl_dmdl', array('UpdateDatetime'=> date('Y-m-d h:i:s'),'Linked'=>'Y'), array('MDLNumber'=>$dmdl_mdl_number));
-    
+function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl){    
+    //update tbl_mdl_dmdl UpdateDatetime   
+    updateTable($db, 'tbl_mdl_dmdl', array('UpdateDatetime'=> date('Y-m-d h:i:s'),'Linked'=>'Y'), array('Guid_mdl_dmdl'=>$Guid_mdl_dmdl));
+    //var_dump($data);
     $statusLogData = array(
         'Loaded' => 'Y',
         'Guid_user' => $data['Guid_user'],
