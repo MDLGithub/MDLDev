@@ -1479,6 +1479,19 @@ and (orientation : portrait) {
         width: 270px;
     }
 
+    .device_palette_header{
+        width: 200px;
+        margin-top: -6px;
+        line-height: 17px;
+    }
+
+    .es_palette_header{
+        width: 50px;
+        margin-top: -6px;
+        line-height: 17px;
+        padding-left: 0;
+    }
+
     #form-option-table thead{
         position:relative;
         display:table;       

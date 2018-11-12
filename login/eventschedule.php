@@ -300,6 +300,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         .fc-basicDay-view .fc-logo{
             width: 100%;
         }
+
     }
     @media only screen 
     and (min-device-width : 768px) 
@@ -1733,7 +1734,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
     <?php } ?>    
     <div class="box full visible ">  
         <section id="palette_top">
-            <h4>             
+            <h4 class = "es_palette_header">             
                 <ol class="breadcrumb">
                     <li><a href="<?php echo SITE_URL; ?>">Home</a></li>
                     <li class="active">Event Schedule</li>  
