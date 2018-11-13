@@ -1492,6 +1492,16 @@ and (orientation : portrait) {
         padding-left: 0;
     }
 
+    .um_palette_header{
+        width: 50px;
+        line-height: 17px;
+    }
+
+    .um_palette_header li:nth-child(2){
+        width: 50px;
+        line-height: 17px;
+    }
+
     #form-option-table thead{
         position:relative;
         display:table;       
@@ -1536,6 +1546,7 @@ and (orientation : portrait) {
     select.dataTableFilterInput{
         min-width: 110px;
     }
+
 
 }
 

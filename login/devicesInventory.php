@@ -292,7 +292,7 @@ require_once ('navbar.php');
                                     <?php } ?>
                                     <?php if(isFieldVisibleByRole($isDeviceNameView, $roleID)) {?>
                                     <div class="row">
-                                        <div class="col-md-10 padd-0 select_device_dropdown">
+                                        <div class="col-md-10 col-sm-10 select_device_dropdown">
                                           <div class="f2  <?php echo ($deviceid!="")?"valid show-label":"";?>">
                                             <label class="dynamic" for="deviceType"><span>Device Name</span></label>
                                             <div class="group">
@@ -311,7 +311,7 @@ require_once ('navbar.php');
                                             </div>
                                         </div>
                                         </div>
-                                        <div class="col-md-2 text-center addPlusIconBox">
+                                        <div class="col-md-2 col-sm-2 text-center addPlusIconBox">
                                           <a class="add-new-device wh-35" href="<?php echo $link; ?>&add_device=1">
                                               <span class="fas fa-plus-circle" aria-hidden="true"></span>
                                           </a>
