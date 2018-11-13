@@ -135,8 +135,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .fc-basic-view .fc-comments{width: 90%;}
     .fc-comments{white-space: nowrap !important; overflow: hidden;text-overflow: ellipsis;}
 
-    .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px; pointer-events: visible;}
-    .rightCircleicon2{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_health_fair.png"); background-repeat: no-repeat;background-size: 20px 20px;}
+    .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 3px; top: 3px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px; pointer-events: visible;}
+    .rightCircleicon2{ position: absolute; width: 20px; height: 20px; right: 3px; top: 3px; background-image: url("assets/eventschedule/images/icon_health_fair.png"); background-repeat: no-repeat;background-size: 20px 20px;}
     
     select#sidebar_select { border: 1px solid #ccc; border-radius: 20px; width: 100%; padding: 5px 8px;   margin-bottom: 8px;}
     .modalaccounttype.hide { display: none; }
@@ -167,13 +167,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     #detail, #summary{ /*width: 48%;*/ padding: 2px; font-size: 15px;}
     .top-buttons button.info-button { background: linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%); }
     .sales-photo img { max-width: 100px; }
-    #calendar .fc-toolbar.fc-header-toolbar h2:after {
-        content: '"';
-        padding-left: 5px;
-    }
-    #calendar .fc-toolbar.fc-header-toolbar h2:before {
-        content: '"';
-        padding-right: 5px;
+    .info_block h1.hide {
+        display: none;
     }
     @media only screen and (min-device-width : 768px) and (max-width : 1024px) 
     and (orientation : portrait) { 
@@ -267,15 +262,22 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             
         });
         var state_count1 = 0, count1 = 0;
-        var d = new Date();
+        /*var d = new Date();
         var evtsDate = d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate();
-        evtsDate = evtsDate.toString();
+        evtsDate = evtsDate.toString();*/
         <?php /*if(isset($_GET['salerepId'])): ?>
             if (localStorage.evtsDate) {
                 evtsDate = (localStorage.evtsDate).toString();
             }
         <?php endif;*/ ?>
-
+        var d = new Date();
+        var evtsDate = d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate();
+        evtsDate = evtsDate.toString();
+        <?php if(isset($_GET['salerepId'])): ?>
+            if (localStorage.evtsDate) {
+                evtsDate = (localStorage.evtsDate).toString();
+            }
+        <?php endif; ?>
 
         var calendar = $('#calendar').fullCalendar({
             header: {
@@ -284,8 +286,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             },
             views: {
                 week: {
-                    titleFormat: '[Week of ] MMMM D, YYYY',
-                    titleRangeSeparator: ' to ',
+                    //titleFormat: '[Week of ] MMMM D, YYYY',
+                    //titleRangeSeparator: ' to ',
                 }
             },
             defaultView: 'basicWeek',
@@ -303,6 +305,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 $("#calendarmonth").html($.fullCalendar.formatDate(beginOfWeek,"MMMM DD"));
                 $("#calendaryear").html($.fullCalendar.formatDate(beginOfWeek,"YYYY"));
                 $(".salesrep_list").html("<ul><li><a href='<?php echo SITE_URL; ?>/dashboard2.php'>Select All</a></li></ul>");
+                window.setTimeout(function(){
+                    $("#calendar").find('.fc-toolbar > div.fc-center > h2').empty().append(
+                        "Week of "+view.start.format('MMMM D, YYYY')
+                    );
+                },0);
                 //top_stats();
             },
             dayRender: function (date, cell) {
@@ -589,8 +596,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var startdate = moment(event.start._d).format('YYYY-MM-DD');
                 var enddate = moment(event.end._d).format('YYYY-MM-DD');
                 
-                /*localStorage.setItem('evtsDate', startdate );
-                localStorage.setItem('evteDate', enddate );*/
+                localStorage.setItem('evtsDate', startdate );
+                localStorage.setItem('evteDate', enddate );
 
                 var events = $('#calendar').fullCalendar('getView');
                 var ele_events = events._props.currentEvents;
@@ -616,24 +623,23 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     data: chartParams,
                     dataType: 'json',
                     success: function(returndata){
-                        //returndata = JSON.parse(returndata);
-                        console.log(returndata);
+                        //console.log(returndata);
                         var chart = $("#chart").data("kendoChart");
-                        var catr = returndata.categories;
                         chart.setOptions({
-                            series: returndata.series,
-                            categoryAxis: {
-                                categories: catr},
+                            <?php if(isset($_GET['salerepId']) || $role == 'Sales Rep'): ?>
+                                dataSource: returndata.dataSource,
+                                series: returndata.series,
+                            <?php else: ?>
+                                series: returndata.series,
+                                categoryAxis: {
+                                    categories: returndata.categories
+                                },
+                            <?php endif; ?>
                             valueAxis:{
                                 max:returndata.yaxis
                             },
                         });
                         chart.refresh();
-                        /*firstSeries = chart.options.series;
-                        firstSeries[0].gap = 5;//parseFloat(5, 10);
-                        firstSeries[0].spacing = 5;
-                        chart.redraw();
-                        console.log(chart);*/
                     },
                 });
 
@@ -1573,7 +1579,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 },
                 legend: {
                     position: "top",
-
+                    visible: false,
+                    template: chartTemplate,
                 },
                 seriesDefaults: {
                     type: "column",
@@ -1585,6 +1592,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     }
                 },
                 categoryAxis: {
+                    width: 25,
                     majorGridLines: {
                         visible: false
                     },
@@ -1594,7 +1602,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 },
                 tooltip: {
                     visible: true,
-                    template: "#= series.name #: #= value #"
+                    template: tooltipLabel//"#= dataSource.data.name #: #= value #"
                 },
                 chartArea: {
                     width: 580,
@@ -1633,6 +1641,18 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             });
         }
 
+        function chartTemplate(e){
+            console.log(e);
+        }
+
+        function tooltipLabel(e){
+            <?php if(isset($_GET['salerepId']) || $role == 'Sales Rep'): ?>
+                return e.category+": "+e.value;
+            <?php else: ?>
+                return "Submitted: "+e.value;
+            <?php endif; ?>
+
+        }
 
         function get_date(){
             var d = new Date();
