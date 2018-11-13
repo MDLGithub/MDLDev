@@ -298,7 +298,7 @@ $uploadMessage = "";
 if(isset($_POST['dmdlUpload'])){        
     $tmpName = $_FILES['dmdlCsvUpload']['tmp_name'];
     $csvArray = array_map('str_getcsv', file($tmpName));
-    $tableFields = $csvArray[0];
+    $tableFields = array('TestCode','TestName','MDLNumber','PatientID', 'PhysicianID');
     unset($csvArray[0]);        
     $data = array();
     $csvArrData = array();
@@ -736,7 +736,7 @@ if(isset($_POST['dmdlUpdate'])){
                     $accountData['account'] = $data['account']['number'];
                 }
                 if(isset($data['account']['name'])){
-                    $accountData['account'] = $data['account']['name'];
+                    $accountData['name'] = $data['account']['name'];
                 }
                 if(isset($data['account']['addr1'])){
                     $accountData['address'] = $data['account']['addr1'];
@@ -758,8 +758,9 @@ if(isset($_POST['dmdlUpdate'])){
                 $lastname_enc = $data['lastname'];
                 $dob = $data['dob'];
                 $physician_name = $data['Physician']['FirstName']." ".$data['Physician']['LastName'];
-                $insurance_name = $data['insurance_full'];
+                $insurance_name = isset($data['insurance_full'])?$data['insurance_full']:'';
                 $dmdl_mdl_num = $data['mdlnumber'];
+                
                 
                 
                 if(isset($dmdlItem['Possible_Match']) && $dmdlItem['Possible_Match']!=''){
@@ -778,12 +779,13 @@ if(isset($_POST['dmdlUpdate'])){
                         if($insertUser['insertID'] && $insertUser['insertID']!=''){
                             $Guid_user = $insertUser['insertID'];
                             //insert into patients
-                            $insertPatient = $db->query("INSERT INTO `tblpatient` (Guid_dmdl_patient,Guid_user,firstname_enc,lastname_enc,dob,physician_name,insurance_name,Date_created) "
+                            $insertPatient = $db->query("INSERT INTO `tblpatient` (Guid_dmdl_patient,Guid_user,firstname_enc,lastname_enc,dob,Loaded,Linked,physician_name,insurance_name,Date_created) "
                                     . "VALUES ('$Guid_dmdl_patient','$Guid_user', "
                                     . "AES_ENCRYPT('$firstname_enc', 'F1rstn@m3@_%'), "
                                     . "AES_ENCRYPT('$lastname_enc', 'L@stn@m3&%#'), "
-                                    . "'$dob', '$physician_name','$insurance_name', NOW())");
+                                    . "'$dob','Y','Y', '$physician_name','$insurance_name', NOW())");
                             $Guid_patient = $db->lastInsertId();
+                            
                             //update mdl number
                             $mdlData = array(
                                 'Guid_user'=>$insertUser['insertID'],
@@ -836,13 +838,14 @@ if(isset($_POST['dmdlUpdate'])){
                                 $statusLogData['salesrep_fname'] = $getSalesrep['first_name'];
                                 $statusLogData['salesrep_lname'] = $accountInfo['last_name'];
                             }
-                            $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum);
+                            $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum,$data['Guid_mdl_dmdl']);
 
                         } 
                     } else { //update 
 
                         $Guid_patient = $dmdlItem['Possible_Match']; //patient id from admin db
                         $thisPatient = $db->row("SELECT * FROM `tblpatient` WHERE Guid_patient=:Guid_patient", array('Guid_patient'=>$Guid_patient));
+                        
                         $Guid_user = $thisPatient['Guid_user'];    
                         $Guid_patient = $thisPatient['Guid_patient'];
                         //update patent table
@@ -869,6 +872,7 @@ if(isset($_POST['dmdlUpdate'])){
                             $patientData['insurance_name'] = $data['insurance_full'];
                         }
                         if(!empty($thisPatient)){
+                            $patientData['Linked'] = 'Y';
                             $wherePatient = array('Guid_patient'=>$Guid_patient);
                             $updatePatient = updatePatientData($db,$patientData,$wherePatient); 
                         }
@@ -917,7 +921,6 @@ if(isset($_POST['dmdlUpdate'])){
                         $mdlNum = $data['mdlnumber'];
                         if( isset($_POST["dmdl"]["$mdlNum"]["statuses"])){
                             $statuses = $_POST["dmdl"]["$mdlNum"]["statuses"];
-                            var_dump($statuses);
                             //insert suatuses
                             $statusLogData = array(
                                 'Guid_user' =>  $Guid_user,
@@ -941,7 +944,7 @@ if(isset($_POST['dmdlUpdate'])){
                                 $statusLogData['salesrep_lname'] = $accountInfo['last_name'];
                             }
                             //var_dump($statusLogData);
-                            $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum);
+                            $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum,$data['Guid_mdl_dmdl']);
                         }
                     }                        
                 } 
@@ -985,7 +988,7 @@ if(isset($_POST['dmdlUpdate'])){
             "aoColumnDefs": [
               { 
                   "bSortable": false, 
-                  "aTargets": [ 6,7 ] } 
+                  "aTargets": [ 7,8 ] } 
             ]
         });  
     }

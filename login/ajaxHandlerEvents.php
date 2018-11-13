@@ -10,29 +10,33 @@ require_once('config.php');
 require_once ('functions_event.php');
 require_once ('functions.php');
 
+sec_session_start();
+$userID = $_SESSION['user']["id"];
+$roleInfo = getRole($db, $userID);
+$role = $roleInfo['role'];
 
 /* --------------------- Save Event ------------------------- */
 
 if(isset($_POST["action"]) && $_POST["action"] == 'eventinsert')
 {
 
- if(isset($_POST['full_name'])){
-    $healthCare = array(
-        'name' => $_POST['full_name'],
-        'street1' => $_POST['street1'],
-        'street2' => $_POST['street2'],
-        'city' => $_POST['city'],
-        'state' => $_POST['state'],
-        'zip' => $_POST['zip'],
-    );
-    $insresult = insertIntoTable($db,'tblhealthcare',$healthCare);
- } 
- $healthId = 0;
- if(isset($insresult['insertID'])){
-     $healthId = $insresult['insertID'];
- }
+    if(isset($_POST['full_name'])){
+        $healthCare = array(
+            'name' => $_POST['full_name'],
+            'street1' => $_POST['street1'],
+            'street2' => $_POST['street2'],
+            'city' => $_POST['city'],
+            'state' => $_POST['state'],
+            'zip' => $_POST['zip'],
+        );
+        $insresult = insertIntoTable($db,'tblhealthcare',$healthCare);
+    } 
+    $healthId = 0;
+    if(isset($insresult['insertID'])){
+        $healthId = $insresult['insertID'];
+    }
 
-$insertArr = array(
+    $insertArr = array(
                 'title'  => $_POST['title'],
                 'start_event' => $_POST['start'],
                 'end_event' => $_POST['end'],
@@ -40,7 +44,7 @@ $insertArr = array(
                 'accountid' => $_POST['accountId'],
                 'healthcareid' => $healthId,
                );
-$insresult2 = insertIntoTable($db,'tblevents',$insertArr);
+    $insresult2 = insertIntoTable($db,'tblevents',$insertArr);
     if( isset($insresult2['insertID']) && $_POST['comments'] != '' ){
         $insertarrComment = array(
                             'comments' => $_POST['comments'],
@@ -258,7 +262,6 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart' && isset($_POST[
 	        $submit['topsubmittedcount'] =  (int) $row['cnt'];
 	        $submit['topsubmittedName'] =  $row['salesrepName'];
 	    }
-
     }
 
     $q = "SELECT count(*) as submittedCnt, CONCAT(l.salesrep_fname,' ',l.salesrep_lname) as SNames "
@@ -277,22 +280,21 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart' && isset($_POST[
     if(isset($_POST['showtopPerformer']) && !empty($submit)){
     	array_push($regSalereps, $submit['topsubmittedName']);
 	    $data = array(
-	            'series' => array (
-	            		[
-		                    'name'=> 'Submitted',
-		                    'data'=> array($submitted[0]),
-		                    'color'=> "#3a8a5f",
-		                    'labels'=> array('visible' => true),
-		                    'gap'=> 3,
-		                ],
-		                [
-		                	'name'=> 'Top Submitted',
-		                    'data'=> array($submit['topsubmittedcount']),
-		                    'color'=> "#b6942e",
-		                    'labels'=> array('visible' => true),
-		                ]
-	            ),
-	            'categories' => $regSalereps 
+            'dataSource' => array(
+                'data' => array(
+                    ['key'=> $regSalereps[0], 'value'=> $submitted[0], 'color'=>"#3a8a5f", 'labname'=>"Submitted"],
+                    ['key'=> $regSalereps[1], 'value'=> $submit['topsubmittedcount'], 'color'=>"#b6942e", 'labname'=>"Top Performer"],
+                )
+            ),
+            'series' => array(
+                [
+                    'field' => 'value',
+                    'categoryField' => 'key',
+                    'labels' => array( 'visible' => 'true'),
+                    //'name' => array('Submitted', 'Top')//'labname'
+                ]
+
+            )
 	    );
 	}else{
 		$data = array(
@@ -437,11 +439,9 @@ if(isset($_POST['action']) && $_POST['action'] == "getAccountSetup"){
         $i++;
         $options .='<option '. $selected .' data-guid="'. $v['Guid_account'] .'" value="'. $v['account'] .'">'. $v['account']." - ".ucwords(strtolower($v['name'])).'</option>';
     }
-
     $data = array(
                     'options' => $options
                 );
-
     echo json_encode($data);
 }
 
@@ -613,7 +613,7 @@ if(isset($_GET['action']) && $_GET['action'] == 'dynamicAccounts'){
 	$accountHTML = "";
 	foreach($result as $row)
 	{
-		$accountHTML .= "<option value='".$row['Guid_account']."'>".$row['name']."</option>";
+		$accountHTML .= "<option value='".$row['Guid_account']."'>".formatAccountName($row['name'])."</option>";
 	}
     echo json_encode($accountHTML);
 }
@@ -655,7 +655,7 @@ if(isset($_GET['action']) && $_GET['action'] == 'getAccountAndSalesRep'){
 		array_push($salesNames, $row['salesNames']);
 		array_push($salesIDs, $row['salesrepid']);
 		array_push($accIDs, $row['accountid']);
-		array_push($accNames, $row['name']);
+		array_push($accNames, formatAccountName($row['name']));
 	}
 	$data['salesrep'] = array_values(array_unique($salesNames));
 	$data['salesrepid'] = array_values(array_unique($salesIDs));
@@ -689,7 +689,7 @@ if(isset($_GET['action']) && $_GET['action'] == 'getAccounts'){
 	$execQuery = $db->query($query, array('sID'=>$_GET['sID'], 'sDate'=>$_GET['sDate'], 'eDate'=> $_GET['eDate']));
 	$html = "";
 	foreach($execQuery as $row){
-		$html .= "<option value='".$row['Guid_account']."'>".$row['name']."</option>";
+		$html .= "<option value='".$row['Guid_account']."'>".formatAccountName($row['name'])."</option>";
 	}
 	echo $html;
 }

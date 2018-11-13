@@ -115,8 +115,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
     .fc-month-view .evttitle, .fc-basicWeek-view .evttitle{width:90%;}
     .fc-basicWeek-view .fc-comments{width: 90%;}
-    .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px; pointer-events: visible;}
-    .rightCircleicon2{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_health_fair.png"); background-repeat: no-repeat;background-size: 20px 20px;pointer-events: visible;}
+    .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 3px; top: 3px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px; pointer-events: visible;}
+    .rightCircleicon2{ position: absolute; width: 20px; height: 20px; right: 3px; top: 3px; background-image: url("assets/eventschedule/images/icon_health_fair.png"); background-repeat: no-repeat;background-size: 20px 20px;pointer-events: visible;}
    
     .numberCircle {
         padding: 14px;
@@ -429,6 +429,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
 
         var state_count = 0, count = 0, state_count1 = 0, count1 = 0;
+        var d = new Date();
+        var evtsDate = d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate();
+        evtsDate = evtsDate.toString();
+        <?php if(isset($_GET['salerepId']) || isset($_GET['accountId'])): ?>
+            if (localStorage.evtsDate) {
+                evtsDate = (localStorage.evtsDate).toString();
+            }
+        <?php endif; ?>
         
         window.regCnt = 0;
         var calendar = $('#calendar').fullCalendar({
@@ -439,8 +447,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             },
             views: {
                 week: {
-                    titleFormat: '[Week of ] MMMM D, YYYY',
-                    titleRangeSeparator: ' to ',
+                    //titleFormat: '[Week of ] MMMM D, YYYY',
+                    //titleRangeSeparator: ' to ',
                 }
             },
             defaultView: 'basicWeek',
@@ -450,6 +458,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             editable: false,
             eventOverlap: false,
             contentHeight: 'auto',
+            defaultDate: evtsDate,
             dayRender: function (date, cell) {
                 var today = new Date();
                 var dd = today.getDate();
@@ -471,6 +480,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             },
             viewRender: function(view, element) {
                 //$("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
+                window.setTimeout(function(){
+                    $("#calendar").find('.fc-toolbar > div.fc-center > h2').empty().append(
+                        "Week of "+view.start.format('MMMM D, YYYY')
+                    );
+                },0);
                 
             },
             eventClick: function (event, jsEvent, view)
@@ -616,9 +630,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     
                     cmts += '<div class="fc-logo" id="fc-logo-'+state_count+'">';
                     if(event.logo != '' || event.logo != null)
-                        cmts += '<img src="<?php echo SITE_URL; ?>/assets/images/'+event.logo+'" onerror="imgError(this);" /></div>';
+                        cmts += '<img src="<?php echo SITE_URL; ?>/images/practice/'+event.logo+'" onerror="" /></div>';
                     else
-                        cmts += '<img src="<?php echo SITE_URL; ?>/assets/images/default.png" /></div>';
+                        cmts += '<img src="<?php echo SITE_URL; ?>/images/practice/default.png" /></div>';
                     state_count = state_count+1;
                 }
 
@@ -787,6 +801,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var evtdata = {};
                 var startdate = moment(view.start._d).format('YYYY-MM-DD');
                 var enddate = moment(view.end._d).format('YYYY-MM-DD');
+                localStorage.setItem('evtsDate', startdate );
+
                 if(view.name == 'basicDay'){
                     evtdata = { salesreps:null, acc: uniqueAccString, startdate: startdate, enddate:startdate, action:'eventStats' };
                 }else{
@@ -1818,7 +1834,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
     <?php } ?>    
     <div class="box full visible ">  
         <section id="palette_top">
-            <h4>             
+            <h4 class = "es_palette_header">             
                 <ol class="breadcrumb">
                     <li><a href="<?php echo SITE_URL; ?>">Home</a></li>
                     <li class="active">Event Schedule</li>  

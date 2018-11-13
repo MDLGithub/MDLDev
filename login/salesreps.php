@@ -156,7 +156,7 @@ require_once ('navbar.php');
     <?php } ?>
     <div class="box full visible">
 	<section id="palette_top">
-	    <h4>
+	    <h4 class = "gc_palette_header">
 	    <?php if(isset($_GET['action']) && $_GET['action']=='edit'){ ?>
 		<ol class="breadcrumb">
 		    <li><a href="<?php echo SITE_URL; ?>">Home</a></li>
@@ -650,7 +650,7 @@ require_once ('navbar.php');
     <?php }  ?>
     <div id="geneveda-export-modal" class="modalBlock hidden">
     <div class="contentBlock">
-	<a class="close">X</a>
+	<a class="close"></a>
 
 	<h5 class="title">
 	    Geneveda Matrix Export Parameters

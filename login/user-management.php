@@ -270,7 +270,7 @@ require_once ('navbar.php');
             </h4>
             <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>
             <a href="<?php echo SITE_URL; ?>/dashboard2.php" class="button homeIcon"></a>
-            <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
+            <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit user-mng-button"><strong>View Questionnaire</strong></a>
         </section>
         <div class="scroller">  
             <div class="row">               
@@ -283,11 +283,11 @@ require_once ('navbar.php');
                     </a>
                 </div>  
                 <div class="col-md-12 text-right user-managemnet-bg">
-                    <span class="admin">&#9726; Admin</span>
-                    <span class="salesrep">&#9726; Sales Rep</span>
-                    <span class="provider">&#9726; Physician</span>
-                    <span class="marked_test">&#9726; Test Users</span>
-                    <span class="mdl_patient">&#9726; MDL Patient</span>
+                    <span class="admin">◾&#xfe0e; Admin</span>
+                    <span class="salesrep">◾&#xfe0e; Sales Rep</span>
+                    <span class="provider">◾&#xfe0e; Physician</span>
+                    <span class="marked_test">◾&#xfe0e; Test Users</span>
+                    <span class="mdl_patient">◾&#xfe0e; MDL Patient</span>
                 </div>
             </div>               
             <div class="row">
@@ -307,7 +307,7 @@ require_once ('navbar.php');
                         <tbody>
                             <?php foreach ($users as $k=>$user){  ?>
                             <?php 
-                            $trClass = "";
+                            $trClass = ""; $patientInfoLink = "";
                             if($user['marked_test']=='1'){
                                 $trClass = "marked_test";
                             }
@@ -322,12 +322,23 @@ require_once ('navbar.php');
                             }
                             if($user['Guid_role']=='6'){
                                 $trClass = "mdl_patient";
+                                $patientInfoLink = SITE_URL.'/patient-info.php?patient='.$user['Guid_user'];
                             }
+                            if($user['Guid_role']=='3'){
+                                $patientInfoLink = SITE_URL.'/patient-info.php?patient='.$user['Guid_user'];
+                            }
+                            
                             ?>
                             <tr class="<?php echo $trClass;?>">
+                                <?php if($patientInfoLink!=''){ ?>
+                                <td><a href="<?php echo $patientInfoLink; ?>"><?php echo $user['Guid_user']; ?></a></td>
+                                <td><a href="<?php echo $patientInfoLink; ?>"><?php echo ucfirst(strtolower($user['first_name'])); ?></a></td>
+                                <td><a href="<?php echo $patientInfoLink; ?>"><?php echo formatLastName($user['last_name']); ?></a></td>
+                                <?php } else { ?>
                                 <td><?php echo $user['Guid_user']; ?></td>
-                                <td><?php echo ucfirst(strtolower($user['first_name'])); ?> </td>
+                                <td><?php echo ucfirst(strtolower($user['first_name'])); ?></td>
                                 <td><?php echo formatLastName($user['last_name']); ?></td>
+                                <?php } ?>                                
                                 <td><?php echo $user['email']; ?></td>
                                 <td><?php echo isset($user['role'])?$user['role']:'Patient'; ?></td>
                                 <td class="text-center fs-20">
@@ -675,7 +686,7 @@ require_once ('navbar.php');
             </div>
             <div class="row actionButtons">
                 <div class="col-md-6 col-md-offset-3 pT-20">
-                    <button name="save_user" type="submit" class="button btn-inline">Save</button>
+                    <button name="save_user" type="submit" class="button btn-inline" style = "margin: auto; display: block !important;">Save</button>
                 </div>
             </div>
             
