@@ -1,15 +1,10 @@
-$(document).ready(function() { 
-	
-});
 $(function() {	
 	// $('#app_wrap').keypress(function(e) {
 		// if (e.which == 13) {
 		// return false;
 	  // }
 	// });
-	if ($("#in_office_print").val() == "1") {			
-		window.print();	
-	}
+	
 	$('#start').on( 'click', '#start_btn', function(){
 		$('body').addClass('start');
 	});
@@ -382,13 +377,7 @@ $(function() {
 	$('.accordion > .acc_btn:first-child').addClass('show');
 	$('.acc_con').not('.acc_con.first').hide();
 	
-	$('.add_field').click(function(e){	
-		$('#additional_relatives').val("Yes");
-		
-		$('#app_wrap').submit();
-	});
-	
-	$('.answers,.ps_info').on('click touchstart tap', '.add_field', function(){
+	$('.answers').on('click touchstart tap', '.add_field', function(){
 		var $ul = $('.extra_input'),
 			$li = $ul.find('li:first-child'),
 			$remove = "<button type=\"button\" class=\"remove_field iconP\">X</button>";
@@ -450,24 +439,20 @@ $(function() {
 		var id = $(this).attr("id");
 
 		var email = $("#email_" + id).val();
-		var practice_name = $("#practice_name").val();
-		var physician_name = $("#physician_name").val();
-		var address = $("#address").val();
-		var city = $("#city").val();
-		var state = $("#state").val();
-		var zip = $("#zip").val();
-		var phone = $("#phone").val();
 		
-		var lc = $("#lc").val();
-		var co = $("#co").val();
-		
-		var quaily_id = $("#" + id + "_quaily_id").val();
-		
-		if ((($.trim(email).length) > 0) || (($.trim(practice_name).length) > 0) || (($.trim(physician_name).length) > 0) || (($.trim(address).length) > 0) || (($.trim(city).length) > 0) || (($.trim(state).length) > 0) || (($.trim(zip).length) > 0) || (($.trim(phone).length) > 0)) {
-			$.post( "https://www.mdlab.com/questionnaire/ajaxHandler.php", {validate_input: "1", email: email, zip: zip, phone: phone}, function(response) {
+		if (($.trim(email).length) > 0) {
+			var quaily_id = $("#" + id + "_quaily_id").val();
+			
+			if (id == "finish_later") {
+				var finish_later_np = $("#finish_later_np").val();
+			}
+			var lc = $("#lc").val();
+			var co = $("#co").val();
+			
+			$.post( "https://www.mdlab.com/questionnaire/ajaxHandler.php", {validate_email: "1", email: email, quaily_id: quaily_id, finish_later_np: finish_later_np, lc: lc, co: co}, function(response) {
 				var result = JSON.parse(response);
-				
-				if ((result.valid_email_format == 0) || (result.valid_email == 0) || (result.valid_zip == 0) || (result.valid_phone == 0)) {
+
+				if ((result.valid_email_format == 0) || (result.valid_email == 0)) {
 					$(".display_msg").remove();
 					
 					$("#email_" + id).closest('.field').addClass("error");							
@@ -476,39 +461,14 @@ $(function() {
 
 					if (result.valid_email == 0) {
 						error_html += '<p>Account with that Email already exists</p>';
-					} 
-					if (result.valid_email_format == 0) {
+					} else {
 						error_html += '<p>Email is invalid</p>';
-					}
-					if (result.valid_zip == 0) {
-						error_html += '<p>Zip Code is invalid</p>';
-					}
-					if (result.valid_phone == 0) {
-						error_html += '<p>Phone Number is invalid</p>';
 					}
 					
 					error_html += '</div></div>';
 
 					$("#email_" + id).closest('.field').prepend(error_html);				
 				} else {
-					if (lc == "PM") {
-						$.post( "https://www.mdlab.com/questionnaire/ajaxHandler.php", {send_pm_email: "1", quaily_id:quaily_id, email: email, co:co}, function(response) {
-						});
-					} else if (lc == "F") {						
-						$.post( "https://www.mdlab.com/questionnaire/ajaxHandler.php", {send_hcf_email: "1", quaily_id:quaily_id, email: email, co:co}, function(response) {
-							
-						});						
-						
-						$.post( "https://www.mdlab.com/questionnaire/ajaxHandler.php", {update_hcf_provider_info: "1", quaily_id:quaily_id, practice_name:practice_name, physician_name:physician_name, address:address, city:city, state:state, zip:zip, phone:phone}, function(response) {
-							
-						});						
-					} else if (($.trim(email).length) > 0) {
-						$.post( "https://www.mdlab.com/questionnaire/ajaxHandler.php", {send_email: "1", quaily_id:quaily_id, email: email}, function(response) {
-						});						
-					}
-					if (id == "finish_later") {
-						var finish_later_np = $("#finish_later_np").val();
-					}
 					if (id == "finish_later") {
 						$("#fl_validated").val("1");
 						$("#app_wrap").submit();
