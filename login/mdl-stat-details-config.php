@@ -66,7 +66,7 @@ require_once ('navbar.php');
     <div class="box full visible ">
       
         <section id="palette_top" class="shorter_palette_top">
-            <h4>  
+            <h4 class = "mdl_details_palette_header">  
                 <ol class="breadcrumb">
                     <li><a href="<?php echo SITE_URL; ?>">Home</a></li>
                     <li class="active">MDL Status Details Configuration</li>                   

@@ -478,7 +478,7 @@ Author:Gabriela Johnson;
 
 
 #summary{
-  float:left;
+  /*float:left;*/
 }
 
 
@@ -929,6 +929,9 @@ Author:Gabriela Johnson;
 
 }
 
+.info-button{
+  float:left;
+}
 
 
 /*Stats Dropdown*/

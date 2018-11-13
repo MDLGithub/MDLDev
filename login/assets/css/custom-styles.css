@@ -1502,11 +1502,16 @@ and (orientation : portrait) {
         line-height: 17px;
     }
 
+    .mdl_details_palette_header{
+        margin-top: -15px;
+        width: 300px;
+        line-height: 21px;
+    }
+
     #form-option-table thead{
         position:relative;
         display:table;       
         width:100%;
-
     }
 
     #form-option-table tbody{
