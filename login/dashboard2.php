@@ -170,6 +170,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .info_block h1.hide {
         display: none;
     }
+    #calendar{ z-index: 1; }
+    .salesrep_list{ z-index: 999; }
     @media only screen and (min-device-width : 768px) and (max-width : 1024px) 
     and (orientation : portrait) { 
         .top-buttons { /*width: 65%;*/ }
@@ -230,9 +232,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         }else{
             cursource = 'eventload.php?salerepId='+salesrep;
         }
-
+        var clickEventType=((document.ontouchstart!==null)?'click':'touchstart');
         // when summary button is clicked
-        $('#summary').on('click touchstart', function () {
+        $('#summary').bind(clickEventType, function () {
             if(salesrep == 0)
                 var summarycursource = 'ajaxHandlerEvents.php';
             else
@@ -248,7 +250,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         });
 
         // when detail button is clicked
-        $('#detail').on('click touchstart', function () {
+        $('#detail').bind(clickEventType, function () {
             if(salesrep == 0)
                 var detailcursource = 'eventload.php';
             else

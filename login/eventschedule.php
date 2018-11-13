@@ -447,8 +447,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             },
             views: {
                 week: {
-                    titleFormat: '[Week of ] MMMM D, YYYY',
-                    titleRangeSeparator: ' to ',
+                    //titleFormat: '[Week of ] MMMM D, YYYY',
+                    //titleRangeSeparator: ' to ',
                 }
             },
             defaultView: 'basicWeek',
@@ -480,6 +480,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             },
             viewRender: function(view, element) {
                 //$("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
+                window.setTimeout(function(){
+                    $("#calendar").find('.fc-toolbar > div.fc-center > h2').empty().append(
+                        "Week of "+view.start.format('MMMM D, YYYY')
+                    );
+                },0);
                 
             },
             eventClick: function (event, jsEvent, view)
