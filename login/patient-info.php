@@ -557,25 +557,21 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             <tbody>
                                 <?php 
                                 $patientID=$_GET['patient'];
-                                $qStatusLog = 'SELECT sl.Guid_status_log,sl.Log_group, sl.Guid_user, sl.Guid_status,  '
+                                $qStatusLog = 'SELECT sl.Guid_status_log,sl.Log_group, sl.Guid_user, sl.Guid_status, sl.Loaded,  '
                                             . 'DATE(sl.Date) AS logDate, s.parent_id, s.access_roles '
                                             . 'FROM tbl_mdl_status_log sl '
                                             . 'LEFT JOIN tblpatient p ON sl.Guid_patient=p.Guid_user '
                                             . 'LEFT JOIN tbl_mdl_status s ON sl.Guid_status=s.Guid_status '
                                             . 'WHERE sl.Guid_user='.$patientID.'  AND s.parent_id="0" '
-                                            . 'ORDER BY logDate DESC, s.order_by DESC';
-                               
-                                $ststusLogs = $db->query($qStatusLog);
-                                
+                                            . 'ORDER BY logDate DESC, s.order_by DESC';                               
+                                $ststusLogs = $db->query($qStatusLog);                                
                                 foreach ($ststusLogs as $k=>$v){ 
-                                   
                                     if( $role=='Admin' || (isset($v['access_roles']) && $v['access_roles']!="")){
                                         $access_roles = unserialize($v['access_roles']);
                                         if($role=='Admin' || key_exists($roleID, $access_roles)){
-                                       
-                                       
+                                        $loadedClass = ($v['Loaded']=='Y')?"loadedStatus":"";
                                 ?>
-                                    <tr>
+                                    <tr class="<?php echo $loadedClass; ?>">
                                         <td><?php echo date("n/j/Y", strtotime($v['logDate'])); ?></td> 
                                         <td>
                                             <?php get_nested_statuses( $db, $v['Guid_status'], $v['Guid_user'], $v['Log_group'] ); ?>

@@ -2378,10 +2378,10 @@ function getPaientPerfectMatch($db,$firstname,$lastname,$Date_Of_Birth){
             . "AND LOWER(CONVERT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') USING 'utf8'))='".strtolower($firstname)."' "
             . "AND LOWER(CONVERT(AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') USING 'utf8'))='".strtolower($lastname)."' "
             . "AND dob='$dobConverted'";
-    var_dump("getPaientPerfectMatch Query");
-    var_dump($query);
+    //var_dump("getPaientPerfectMatch Query");
+    //var_dump($query);
     $getPatient = $db->query($query);
-    var_dump($getPatient);
+    //var_dump($getPatient);
     return $getPatient;
 }
 
@@ -2402,6 +2402,16 @@ function dmdl_refresh($db){
         trigger_error("SOAP Fault: (faultcode: {$e->faultcode}, faultstring: {$e->faultstring})", E_USER_ERROR);
         return;
     }    
+    //Process GET variables to get $start value for LIMIT
+    $per_page=50;
+    //getting total number of records 
+    $res=$db->row("SELECT count(Guid_mdl_dmdl) as count FROM tbl_mdl_dmdl WHERE ToUpdate='Y' AND Linked='N'");
+    $total_rows=$res['count'];
+
+    //Process GET variables to get $start value for LIMIT
+    if (isset($_GET['page'])) $CUR_PAGE=($_GET['page']); else $CUR_PAGE=1;
+    $start=abs(($CUR_PAGE-1)*$per_page);
+    
     //skip ToUpdate='N' 
     //select [toupdate = Y] and [time of now - updatedatetime > 1 hour or is null
     /* $dmdlResult = $db->query("SELECT * FROM tbl_mdl_dmdl "
@@ -2409,9 +2419,11 @@ function dmdl_refresh($db){
             . "AND UpdateDatetime IS NULL "
             . "OR UpdateDatetime = '' "
             . "OR UpdateDatetime < NOW() - INTERVAL 60 MINUTE "); */
-    $dmdlResult = $db->query("SELECT * FROM tbl_mdl_dmdl "
-                            ."WHERE ToUpdate='Y' AND Linked='N' ");
+    $dmdlResult = $db->query("SELECT * FROM tbl_mdl_dmdl WHERE ToUpdate='Y' AND Linked='N' LIMIT $start,$per_page");
     $content=""; $match=""; $possibleM ="";
+    
+    
+    
     
     $content .= "<form action='' method='POST'>";
     
@@ -2433,7 +2445,7 @@ function dmdl_refresh($db){
     $content .= "<th>MDL#</th>";
     $content .= "<th>Account#</th>";
     $content .= "<th>DOS</th>";
-    $content .= "<th class='tbl-borderR'>Possible Match</th>";
+    $content .= "<th class='possiblematchTh tbl-borderR'>Possible Match</th>";
     $content .= "<th>
                     <label class='switch'>
                         <input class='selectAllCheckboxes' type='checkbox'>
@@ -2444,27 +2456,21 @@ function dmdl_refresh($db){
                 </th>";
     $content .= "</tr></thead>";
     $content .= "<tbody>";
-    var_dump("dmdlResult => ");
-    var_dump($dmdlResult);
+    //var_dump("dmdlResult => ");
+    //var_dump($dmdlResult);
     foreach ( $dmdlResult as $dmdlKey=>$dmdlVal ){
         $param = array(
             "patientId" => $dmdlVal['PatientID'], 
             "physicianId" => $dmdlVal['PhysicianID']
         );
-        $result = (array)$client->GetCombinedResults($param);
-        var_dump("result => ");
-        var_dump($result);
+        $result = (array)$client->GetCombinedResults($param);       
         $domObj = new xmlToArrayParser($result['GetCombinedResultsResult']); 
         $domArr = $domObj->array; 
-        var_dump("Dom Array => ");
-        var_dump($domArr);
         if($domObj->parse_error){ 
             echo $domObj->get_xml_error();            
         } else {             
             $res = $domArr['CombinedResults']['GeneticResults'];
-            var_dump($res);
-            //admin db date format 1993-01-25           
-            
+           
             $Guid_MDLNumber = $res['Guid_MDLNumber'];
             $Date_Of_Birth = $res['Date_Of_Birth'];          
             $firstname = $res['Patient_FirstName'];
@@ -2499,7 +2505,7 @@ function dmdl_refresh($db){
                     //if there is not possible match it should create new records
                     $sContent .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Possible_Match]' value='create_new' />";
                 }
-                $possibleM = "<td class='tbl-borderR'>".$sContent."</td>";
+                $possibleM = "<td class='tbl-borderR possiblematchTh'>".$sContent."</td>";
             } else {                
                 if(count($getPatient)>1){ //duplicate records => status=duplicate                  
                     $match = "<td class='hasDuplicate'>"
@@ -2514,7 +2520,7 @@ function dmdl_refresh($db){
                     } else { //create new records if possibe match not found
                         $sContent .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Possible_Match]' value='create_new' />";
                     }
-                    $possibleM = "<td class='tbl-borderR'>".$sContent."</td>";
+                    $possibleM = "<td class='tbl-borderR possiblematchTh'>".$sContent."</td>";
                 }else{ 
                     //update mdl# for this perfect match => status=yes 
                     $matchedPatient = $getPatient['0'];
@@ -2602,7 +2608,7 @@ function dmdl_refresh($db){
                             . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][status]' value='yes' />"
                             . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Guid_patient]' value='".$getPatient['0']['Guid_patient']."' />"
                             . "Yes</td>";  
-                    $possibleM = "<td  class='tbl-borderR'>".$patientInfo."</td>";
+                    $possibleM = "<td class='tbl-borderR possiblematchTh'>".$patientInfo."</td>";
                 }
             }
             
@@ -2716,12 +2722,40 @@ function dmdl_refresh($db){
             }
             
             $content .= "</tr>";
-        }    
+        }
+        
+        
+        
+        
+        //Getting page URL without query string
+        $uri=strtok($_SERVER['REQUEST_URI'],"?")."?";
+        
+        //create a new query string without a page variable
+        if (isset($_GET['page'])) unset($_GET['page']);
+        if (count($_GET)) {
+          foreach ($_GET as $k => $v) {
+            if ($k != "page") $uri.=urlencode($k)."=".urlencode($v)."&";
+          }
+        }
+        //getting total number of pages and filling an array with links
+        $num_pages=ceil($total_rows/$per_page);
+        for($i=1;$i<=$num_pages;$i++) $PAGES[$i]=$uri.'page='.$i;
     }
     $content .= "</tbody>";
     $content .= "</table>";
     $content .= "</form>";
-  
+    
+    
+    $content .= "<div class='refreshPaging'>Pages: "; 
+    foreach ($PAGES as $i => $link){
+        if ($i == $CUR_PAGE){
+            $content .= "<span class='current'>".$i."</span>";
+        } else{ 
+            $content .= "<span><a href=".$link.">".$i."</a></span>";
+        }    
+    }
+    $content .= "</div>";
+    
     return $content;       
 }
 

@@ -298,7 +298,7 @@ $uploadMessage = "";
 if(isset($_POST['dmdlUpload'])){        
     $tmpName = $_FILES['dmdlCsvUpload']['tmp_name'];
     $csvArray = array_map('str_getcsv', file($tmpName));
-    $tableFields = $csvArray[0];
+    $tableFields = array('TestCode','TestName','MDLNumber','PatientID', 'PhysicianID');
     unset($csvArray[0]);        
     $data = array();
     $csvArrData = array();
@@ -481,7 +481,7 @@ $num_estimates = $qualify_requests;
     <div class="box full visible">
         <?php if($dataViewAccess){ ?>
         <section id="palette_top" class="shorter_palette_top">
-            <h4 class = "palette_results"><?php echo count($num_estimates) . " Results"; ?></h4>
+            <h4><?php echo count($num_estimates) . " Results"; ?></h4>
             <?php echo topNavLinks($role); ?>
         </section>
 
@@ -736,7 +736,7 @@ if(isset($_POST['dmdlUpdate'])){
                     $accountData['account'] = $data['account']['number'];
                 }
                 if(isset($data['account']['name'])){
-                    $accountData['account'] = $data['account']['name'];
+                    $accountData['name'] = $data['account']['name'];
                 }
                 if(isset($data['account']['addr1'])){
                     $accountData['address'] = $data['account']['addr1'];

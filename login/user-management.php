@@ -262,7 +262,7 @@ require_once ('navbar.php');
     <?php } ?> 
     <div class="box full visible ">  
         <section id="palette_top">
-            <h4 class="um_palette_header">  
+            <h4>  
                 <ol class="breadcrumb">
                     <li><a href="<?php echo SITE_URL; ?>">Home</a></li>
                     <li class="active">User Management</li>                   
@@ -332,11 +332,13 @@ require_once ('navbar.php');
                             <tr class="<?php echo $trClass;?>">
                                 <?php if($patientInfoLink!=''){ ?>
                                 <td><a href="<?php echo $patientInfoLink; ?>"><?php echo $user['Guid_user']; ?></a></td>
+                                <td><a href="<?php echo $patientInfoLink; ?>"><?php echo ucfirst(strtolower($user['first_name'])); ?></a></td>
+                                <td><a href="<?php echo $patientInfoLink; ?>"><?php echo formatLastName($user['last_name']); ?></a></td>
                                 <?php } else { ?>
                                 <td><?php echo $user['Guid_user']; ?></td>
-                                <?php } ?>
                                 <td><?php echo ucfirst(strtolower($user['first_name'])); ?></td>
                                 <td><?php echo formatLastName($user['last_name']); ?></td>
+                                <?php } ?>                                
                                 <td><?php echo $user['email']; ?></td>
                                 <td><?php echo isset($user['role'])?$user['role']:'Patient'; ?></td>
                                 <td class="text-center fs-20">

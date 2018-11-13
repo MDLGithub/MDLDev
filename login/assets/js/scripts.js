@@ -611,7 +611,7 @@ $(document).ready(function () {
     function updateAccountInfo(accountData, providers){
         var officeLogo = accountData['logo'];
         if(officeLogo){
-            setImage('#officeLogo', 'width="100"', officeLogo);
+            setImage('#officeLogo', 'width="100"', officeLogo, "");
         } else {
             setImage('#officeLogo', 'width="100"', "default.png", "assets/images/");
         }
@@ -723,7 +723,7 @@ $(document).ready(function () {
         setSelectedAttrByVal('#url-config-settings #location option', location);
         setSelectedAttrByVal('#url-config-settings #deviceId option', deviceId);
         if(officeLogo){
-            setImage('#officeLogo', 'width="100"', officeLogo);
+            setImage('#officeLogo', 'width="100"', officeLogo, "");
         } else {
             setImage('#officeLogo', 'width="100"', "default.png", "assets/images/");
         }
