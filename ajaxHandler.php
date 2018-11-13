@@ -16,7 +16,7 @@
 	} elseif (isset($_POST['send_hcf_email']) && ($_POST['send_hcf_email'] == '1')) {
 		generate_hcf_email($conn, $_POST['quaily_id'], trim($_POST['email']), $_POST['co'], HTTPS_SERVER);
 	} elseif (isset($_POST['send_email']) && ($_POST['send_email'] == '1')) {
-		generate_email($conn, $_POST['quaily_id'], trim($_POST['email'], HTTPS_SERVER));
+		generate_email($conn, $_POST['quaily_id'], trim($_POST['email']), HTTPS_SERVER);
 	} elseif (isset($_POST['update_hcf_provider_info']) && ($_POST['update_hcf_provider_info'] == '1')) {		
 		$result = $conn->query("SELECT * FROM tblqualify WHERE Guid_user = " . $_POST['quaily_id']);
 
@@ -183,7 +183,9 @@
 			<p>You can still finish!</p>
 			<p>You have recently used our questionnaire to determine if you meet <strong>clinical guidelines for hereditary cancer genetic testing</strong>.</p>
 			<p>Your progress in the questionnaire has been saved and you can continue at any time by clicking on the link below.</p>
-			<a href="' . $HTTPS_SERVER . 'forgot-password.php" style="color:#973737"><strong>Complete the questionnaire</strong></a>';
+			<a href="' . $HTTPS_SERVER . 'forgot-password.php" style="color:#973737"><strong>Complete the questionnaire</strong></a>
+			<p><strong>Click</strong><a href="http://www.mdlab.com/brca/" style="color:#973737"> here </a><strong>to learn more about BRCA testing</strong>';
+			
 		send_email($email, $message, $content, $logoalt, $logo);
 	}
 	function send_email($email, $message, $content, $logoalt, $logo) {
