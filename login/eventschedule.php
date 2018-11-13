@@ -1829,7 +1829,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
     <?php } ?>    
     <div class="box full visible ">  
         <section id="palette_top">
-            <h4>             
+            <h4 class = "es_palette_header">             
                 <ol class="breadcrumb">
                     <li><a href="<?php echo SITE_URL; ?>">Home</a></li>
                     <li class="active">Event Schedule</li>  
