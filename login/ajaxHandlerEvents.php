@@ -447,10 +447,14 @@ if(isset($_POST['action']) && $_POST['action'] == "getAccountSetup"){
 
 if(isset($_POST['action']) && $_POST['action'] == "getLogo")
 {
-    $id = $_POST['account_id']; 
-    $query = "SELECT logo FROM tblaccount WHERE Guid_account =:id ";
-    $result = $db->query($query, array("id"=>$id));
-    echo json_encode($result);
+    $id = (isset($_POST['account_id'])) ? $_POST['account_id'] : 0;
+    if($id != 0){ 
+        $query = "SELECT logo FROM tblaccount WHERE Guid_account =:id ";
+        $result = $db->query($query, array("id"=>$id));
+        echo json_encode($result);
+    }else{
+        echo json_encode(array('result'=>false));
+    }
 }
 
 

@@ -323,6 +323,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             e.preventDefault();
             $(".fc-today-button").trigger('click');
         });
+        var isSummary = false;
+        var isDetail = true;
 
         var salereps = $('#salerepid').val();
         if(salereps){
@@ -400,7 +402,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         // when summary button is clicked
         $('#summary').on('click touchstart', function () {
             var summarycursource = 'ajaxHandlerEvents.php';
-            
+            isSummary = true;
+            isDetail = false;
             if (localStorage.salesrepValue != 0 && localStorage.salesrepValue != undefined || localStorage.accountValue != 0 && localStorage.accountValue != undefined ) {
                 summarycursource = 'ajaxHandlerEvents.php?var=test&salerepId=' + localStorage.salesrepValue + '&accountId=' + localStorage.accountValue;
             }
@@ -414,6 +417,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
         // when detail button is clicked
         $('#detail').on('click touchstart', function () {
+            isSummary = false;
+            isDetail = true;
             var detailcursource = 'eventload.php';
             if (localStorage.salesrepValue != 0 || localStorage.accountValue != 0) {
                 detailcursource = 'eventload.php?salerepId=' + localStorage.salesrepValue + '&accountId=' + localStorage.accountValue;
@@ -447,8 +452,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             },
             views: {
                 week: {
-                    //titleFormat: '[Week of ] MMMM D, YYYY',
-                    //titleRangeSeparator: ' to ',
+                    titleFormat: '[Week of ] MMMM D, YYYY',
+                    titleRangeSeparator: ' to ',
                 }
             },
             defaultView: 'basicWeek',
@@ -480,11 +485,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             },
             viewRender: function(view, element) {
                 //$("#salesrepfilter").html('<option value="0">Genetic Consultant</option>');
-                window.setTimeout(function(){
-                    $("#calendar").find('.fc-toolbar > div.fc-center > h2').empty().append(
-                        "Week of "+view.start.format('MMMM D, YYYY')
-                    );
-                },0);
                 
             },
             eventClick: function (event, jsEvent, view)
@@ -630,9 +630,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     
                     cmts += '<div class="fc-logo" id="fc-logo-'+state_count+'">';
                     if(event.logo != '' || event.logo != null)
-                        cmts += '<img src="<?php echo SITE_URL; ?>/images/practice/'+event.logo+'" onerror="" /></div>';
+                        cmts += '<img src="<?php echo SITE_URL; ?>/../images/practice/'+event.logo+'" onerror="" /></div>';
                     else
-                        cmts += '<img src="<?php echo SITE_URL; ?>/images/practice/default.png" /></div>';
+                        cmts += '<img src="<?php echo SITE_URL; ?>/../images/practice/default.png" /></div>';
                     state_count = state_count+1;
                 }
 
@@ -734,12 +734,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     success:function(res){
                         if(isEmpty(res)) {
                             var res = JSON.parse(res);
-                            if(res.length > 0){
-                                logo = res[0];
-                                element[0].childNodes[2].innerHTML = '<img src = "images/practice/'+logo.logo+'" />';
-                            }
-                            else{   
-                                element[0].childNodes[2].innerHTML = '<img src = "images/logo-placeholder.png" />';    
+                            if(isSummary == false){
+                                if(res.length > 0){
+                                    logo = res[0];
+                                    element[0].childNodes[2].innerHTML = '<img src = "/../images/practice/'+logo.logo+'" />';
+                                }
+                                else{   
+                                    element[0].childNodes[2].innerHTML = '<img src = "images/logo-placeholder.png" />';    
+                                }
                             }
                         }
                     }
@@ -1606,12 +1608,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
     
 </script>
-<aside id="action_palette" class="action_palette_width">		
+<aside id="action_palette" class="action_palette_width">        
     <div class="box full">
         <h4 class="box_top">Add Event</h4>
         <?php //if ($dataViewAccess) { ?>
             <div class="boxtent scroller ">
-                <form id="filter_form" action="" method="post">	
+                <form id="filter_form" action="" method="post"> 
                     <?php
                     $date_error = "";
 
@@ -1640,7 +1642,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         <div class="group">
                             <?php if ($role == 'Admin' || $role == 'Sales Manager') { ?>
                                 <select id="salesrepopt" name="salesrepopt" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrepopt'])) && (strlen($_POST['salesrepopt']))) ? "" : "no-selection"; ?>" required>
-                                    <option value="">Genetic Consultant</option>							
+                                    <option value="">Genetic Consultant</option>                            
                                     <?php
                                     $salesreps = $db->query("SELECT * FROM tblsalesrep GROUP BY first_name  ORDER BY first_name, last_name");
 
@@ -1834,7 +1836,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
     <?php } ?>    
     <div class="box full visible ">  
         <section id="palette_top">
-            <h4 class = "es_palette_header">             
+            <h4>             
                 <ol class="breadcrumb">
                     <li><a href="<?php echo SITE_URL; ?>">Home</a></li>
                     <li class="active">Event Schedule</li>  
