@@ -1339,6 +1339,15 @@ and (orientation : landscape) {
         font-size:12px;
     }
 
+    table#refresh-log-table {
+        font-size:10px;
+        width: 100% !important;
+    }
+
+    .fc-content.evtcontent{
+        padding:0px 10px!important;
+    }
+
 }
 
 /*iPad portrait*/
@@ -1551,6 +1560,28 @@ and (orientation : portrait) {
         min-width: 110px;
     }
 
+    table#refresh-log-table {
+        font-size:10px;
+        width: 100% !important;
+    }
+
+    .numberCircleContainer{
+        padding: 10px;
+    }
+
+    .fc-content.evtcontent{
+        padding:10px !important;
+    }
+
+    .fc-content.evtcontent div{
+      display: block;
+      margin: auto;
+      text-align: center;
+    }
+
+    .fc-content.evtcontent div span{
+      float:none !important;
+    } 
 
 }
 
@@ -2467,11 +2498,11 @@ a.button.cancel.half{
     padding: 2px 10px;
     width: 400px;
     background: white;
-     word-wrap: break-word;      /* IE*/
-  white-space: -moz-pre-wrap; /* Firefox */
-  white-space: pre-wrap;      /* other browsers */
-  width:450px;
-  display:inline-block
+    word-wrap: break-word;      /* IE*/
+    white-space: -moz-pre-wrap; /* Firefox */
+    white-space: pre-wrap;      /* other browsers */
+    /*width:450px;*/
+    display:inline-block
 }
 
 
