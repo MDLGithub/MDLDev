@@ -334,7 +334,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <p><label>Event: </label><?php echo $qualifyResult['source']; ?></p>
                                 <?php } else { ?>
                                     <?php if($qualifyResult['user_loaded']=='Y'){ ?> 
-                                    <p><label>Event: </label> Loaded from dMDL</p>
+                                    <p><label>Event: </label> N/A</p>
                                     <?php }?>                                
                                     <?php if(isset($qualifyResult['no_submited_questionnaire'])){ ?> 
                                     <p><label>Questionnaire Submitted: </label> No</p>
@@ -526,6 +526,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                     </tr>
                                 <?php } ?>
                             </tbody>
+                                ------
                         </table>
                         </div>
                         <div id="statusLogs"  class="col-md-6">
@@ -552,6 +553,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                     </a>
                                     <?php } ?>
                                 </th>
+                                <th></th>
                                 <?php if($role=='Admin'){ ?><th class="text-center wh-100">Action</th><?php } ?>
                             </thead>
                             <tbody>
@@ -569,12 +571,15 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                     if( $role=='Admin' || (isset($v['access_roles']) && $v['access_roles']!="")){
                                         $access_roles = unserialize($v['access_roles']);
                                         if($role=='Admin' || key_exists($roleID, $access_roles)){
-                                        $loadedClass = ($v['Loaded']=='Y')?"loadedStatus":"";
+                                        $loadedStatus = ($v['Loaded']=='Y')?"A":"";
                                 ?>
-                                    <tr class="<?php echo $loadedClass; ?>">
+                                    <tr>
                                         <td><?php echo date("n/j/Y", strtotime($v['logDate'])); ?></td> 
                                         <td>
                                             <?php get_nested_statuses( $db, $v['Guid_status'], $v['Guid_user'], $v['Log_group'] ); ?>
+					</td>   
+                                        <td>
+                                            <?php echo $loadedStatus; ?>
 					</td>   
                                         <?php if($role=='Admin'){ ?>
                                         <td class="text-center">
