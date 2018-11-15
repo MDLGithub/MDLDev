@@ -526,7 +526,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                     </tr>
                                 <?php } ?>
                             </tbody>
-                                ------
+                                <!---------->
                         </table>
                         </div>
                         <div id="statusLogs"  class="col-md-6">
