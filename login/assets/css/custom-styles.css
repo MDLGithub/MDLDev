@@ -1759,6 +1759,10 @@ and (-webkit-min-device-pixel-ratio: 2) {
         min-width: 55px;
     }
 
+    a[title="Edit Statuses"] .fas.fa-pencil-alt{
+        margin: 0 0 0 -10px;
+    }
+
 }
 
 #accounts .actions h2{
