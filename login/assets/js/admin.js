@@ -82,6 +82,11 @@ function checkFields() {
 }
 
 $(document).ready(function () {
+
+	$("#user_window a, .homeIcon").click(function(){
+        localStorage.clear();
+        window.localStorage.clear();
+    })
     // $.ajax('ajaxHandler.php', {
     //     type: 'POST',
     //     data: {

@@ -1,11 +1,8 @@
-@charset "utf-8";
 
-
-@media print {
-	.exact, .form * {
+	/* .exact, .form * {
 		-webkit-print-color-adjust: exact;
         print-color-adjust: exact;
-	}
+	} */
 	
 	.c2 th:nth-of-type(2), .c2 td:nth-of-type(2), .c3 th:nth-of-type(3), .c3 td:nth-of-type(3),
 	.c4 th:nth-of-type(4), .c4 td:nth-of-type(4), .c5 th:nth-of-type(5), .c5 td:nth-of-type(5) {
@@ -373,4 +370,3 @@
 		bottom:0;
 		right: 11.5mm;
 	}
-}
