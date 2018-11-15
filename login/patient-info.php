@@ -86,7 +86,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     
     $sqlSSQualify = "SELECT ssq.* FROM tbl_ss_qualify ssq WHERE ssq.Guid_qualify=:Guid_qualify  ORDER BY Date_created DESC";
     $ssQualifyResult = $db->query($sqlSSQualify, array('Guid_qualify'=>$Guid_qualify));
-    
+
+    /*echo $Guid_qualify;
+    echo '<pre>';print_r($ssQualifyResult);echo '</pre>';
+    exit;*/
+
     $errorMsgMdlStats = "";
     if(isset($_POST['save'])){
        
@@ -497,6 +501,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                     </tr>
                                 <?php } ?>
                             </tbody>
+                                ------
                         </table>
                         </div>
                         <div id="statusLogs"  class="col-md-6">

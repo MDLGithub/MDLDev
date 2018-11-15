@@ -1715,8 +1715,10 @@ function dbDateFormat($date){
  * @param type $statusID
  * @return type array ('count'=>5, 'info'=>array())
  */
+
 function get_stats_info($db, $statusID, $hasChildren=FALSE, $searchData=array()){
-    
+    //print_r($searchData);
+
     //exclude test users
     $markedTestUserIds = getMarkedTestUserIDs($db);
     $testUserIds = getTestUserIDs($db);
@@ -1772,7 +1774,7 @@ function get_stats_info($db, $statusID, $hasChildren=FALSE, $searchData=array())
         $result['filterUrlStr'] = $filterUrlStr;
         $result['info'] = $stats;
     }  
-    
+
     return $result;
 }
 
@@ -2100,12 +2102,14 @@ function get_status_state($db, $parent = 0, $searchData=array(), $linkArr=array(
     foreach ($statuses as $key => $status) {
         $stats1 = get_stats_info($db, $key, FALSE, $searchData);
         $stats2 = get_stats_info_today($db, $key, FALSE, $searchData, $today);
+
         $content .= "<tr class='parent'>";
         $content .= "<td class='text-left'><span>".$status."</span></td>";            
         $content .= '<td><a>'.$stats2['count'].'</a></td>';
         $content .= '<td><a>'.$stats1['count'].'</a></td>';
         $content .= "</tr>";    
-    }    
+    }
+    //print_r($stats1);
     return $content;
 }
 
@@ -2116,14 +2120,20 @@ function get_stats_info_today($db, $statusID, $hasChildren=FALSE, $searchData=ar
     $testUserIds = getTestUserIDs($db);
     $filterUrlStr = "";
     //$testUserIds = '';
-    $q = "SELECT statuses.*, statuslogs.*,
+    $q = "SELECT patient.insurance_name,
+            statuses.*, statuslogs.*,            
             mdlnum.mdl_number as mdl_number
             FROM `tbl_mdl_status` statuses
             LEFT JOIN `tbl_mdl_status_log` statuslogs ON statuses.`Guid_status`= statuslogs.`Guid_status`
-            LEFT JOIN `tbl_mdl_number` mdlnum ON statuslogs.Guid_user=mdlnum.Guid_user ";
-    
-    $q .=  "WHERE  statuslogs.`currentstatus`='Y' AND DATE(statuslogs.`Date`) =:today ";
-    
+            LEFT JOIN `tbl_mdl_number` mdlnum ON statuslogs.Guid_user=mdlnum.Guid_user 
+            LEFT JOIN `tblpatient` patient ON patient.Guid_patient=statuslogs.Guid_patient ";
+
+    if(empty($searchData['from_date'])) {
+        $q .= "WHERE DATE(statuslogs.`Date`)=:today "; //=:today statuslogs.`currentstatus`='Y' `currentstatus`='Y' AND DATE(statuslogs.`Date`) =:today
+    } else {
+        $q .= "WHERE statuslogs.`currentstatus`  ";
+    }
+
     if(!empty($searchData)){ 
         if (isset($searchData['from_date']) && $searchData['from_date']!="" && isset($searchData['to_date']) && $searchData['to_date']!="") {
             if ($searchData['from_date'] == $searchData['to_date']) {
@@ -2148,17 +2158,20 @@ function get_stats_info_today($db, $statusID, $hasChildren=FALSE, $searchData=ar
         }
     }
   
-    $q .=  " AND statuslogs.`Guid_status_log`<>'' 
-            AND statuslogs.Guid_status=$statusID ";
+    $q .=  //" AND statuslogs.`Guid_status_log`<>''
+            " AND statuslogs.Guid_status=$statusID ";
     if($markedTestUserIds!=""){
-    $q .=  " AND statuslogs.Guid_user NOT IN(".$markedTestUserIds.") "; 
+    $q .=  " AND statuslogs.Guid_user NOT IN(".$markedTestUserIds.") ";
     }
     if($testUserIds!=""){
     $q .=  " AND statuslogs.Guid_user NOT IN(".$testUserIds.") ";   
     }
     $q .=  " AND statuslogs.Guid_patient<>'0' 
             ORDER BY statuslogs.`Date` DESC, statuses.`order_by` DESC";
-    
+
+    //echo $q;
+    //exit;
+
     $stats = $db->query($q, array('today'=>$today));
     $result['count'] = 0;
     if(!empty($stats)){
