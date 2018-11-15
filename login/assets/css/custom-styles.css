@@ -1630,6 +1630,11 @@ and (-webkit-min-device-pixel-ratio: 2) {
         left: 5%;
     }
 
+    .gc-table .dataTableFilterInput{
+        min-width:50px;
+    }
+
+
 }
 
 
@@ -1727,6 +1732,31 @@ and (-webkit-min-device-pixel-ratio: 2) {
         width: 1em;
         height: 1em;
         background-size: 100%;
+    }
+
+    .gc-table .dataTableFilterInput{
+        min-width:40px;
+    }
+
+    .accountsTable .dataTableFilterInput {
+        min-width: 70px;
+    }
+
+    .devicesTable .dataTableFilterInput{
+        min-width:53px;
+    }
+
+    .fc-content.evtcontent{
+        padding:0px 10px!important;
+        font-size:13px;
+    }
+
+    .fc-basicDay-view .fc-content.evtcontent{
+        text-align:center;
+    }
+
+    .user-table .dataTableFilterInput{
+        min-width: 55px;
     }
 
 }

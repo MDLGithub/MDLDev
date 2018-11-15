@@ -541,7 +541,7 @@ require_once ('navbar.php');
 	    </div>
 	    <div class="row">
 		<div class="col-md-12">
-		    <table id="dataTable" class="table">
+		    <table id="dataTable" class="table gc-table">
 			<thead>
 			    <tr>
 				<?php if(isFieldVisibleByRole($isFNameView, $roleID) || isFieldVisibleByRole($isLNameView, $roleID)) {?>

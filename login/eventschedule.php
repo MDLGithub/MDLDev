@@ -301,12 +301,39 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             width: 100%;
         }
     }
-    @media only screen 
-    and (min-device-width : 768px) 
-    and (max-device-width : 1024px) 
-    and (orientation : landscape) { 
 
+
+
+    @media only screen 
+    and (min-device-width: 768px) 
+    and (max-device-width: 1024px) 
+    and (orientation: landscape) { 
+        .show-stats{
+            font-size:10px;
+        }
     }
+
+
+    @media only screen
+    and (min-device-width: 1024px) 
+    and (max-device-width: 1367px) 
+    and (orientation: landscape){
+        .show-stats{
+            font-size:11px;
+        }
+    }
+
+    @media only screen
+    and (min-device-width: 1024px) 
+    and (max-device-width: 1366px) 
+    and (orientation: portrait){
+        .show-stats{
+            font-size: 11px;
+        }
+    }
+
+
+
 </style>
 <script>
     

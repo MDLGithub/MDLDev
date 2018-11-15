@@ -292,7 +292,7 @@ require_once ('navbar.php');
             </div>               
             <div class="row">
                 <div class="col-md-12">
-                    <table id="dataTable" class="display" style="width:100%">
+                    <table id="dataTable" class="display user-table" style="width:100%">
                         <thead>
                             <tr>
                                 <th class="actions">#</th>
