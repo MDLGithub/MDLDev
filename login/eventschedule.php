@@ -611,7 +611,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     
                     cmts += '<div class="fc-logo" id="fc-logo-'+state_count+'">';
                     if(event.logo != '' || event.logo != null)
-                        cmts += '<img src="<?php echo SITE_URL; ?>/assets/images/'+event.logo+'" onerror="imgError(this);" /></div>';
+                        cmts += '<img src="<?php echo SITE_URL; ?>/../images/practice/'+event.logo+'" onerror="imgError(this);" /></div>';
                     else
                         cmts += '<img src="<?php echo SITE_URL; ?>/assets/images/default.png" /></div>';
                     state_count = state_count+1;
@@ -716,7 +716,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                                 var res = JSON.parse(res);
                                 if(res.length > 0){
                                     logo = res[0];
-                                    element[0].childNodes[2].innerHTML = '<img src = "images/practice/'+logo.logo+'" />';
+                                    element[0].childNodes[2].innerHTML = '<img src = "../images/practice/'+logo.logo+'" />';
                                 }
                                 else{   
                                     element[0].childNodes[2].innerHTML = '<img src = "images/logo-placeholder.png" />';    
