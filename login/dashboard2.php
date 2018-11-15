@@ -1337,7 +1337,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                         <div class="col-lg-7 col-md-8 col-sm-7 top-buttons">
                         <button type="button" name="Detail" id="detail" class="col-lg-6 col-md-6 col-sm-3 col-md-offset-0 info-button activeButton" style="">Details</button>
                         <button type="button" name="Summary" id="summary" class="col-lg-6 col-md-6 col-sm-3 info-button" style="">Summary</button>
-                        <a href="eventschedule.php" class="col-md-12 col-sm-5 button submit"><strong>Full Calendar</strong></a>   
+                        <a href="eventschedule.php" class="col-md-12 col-sm-5 button submit fullCalendar"><strong>Full Calendar</strong></a>   
                         </div>    
                     </div>
                 </div>
@@ -1705,7 +1705,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
         }
 
         $(document).ready(function(){
-            $("#user_window a, .homeIcon").click(function(){
+            $("#user_window a, .homeIcon, .fullCalendar").click(function(){
                 localStorage.clear();
                 window.localStorage.clear();
             })

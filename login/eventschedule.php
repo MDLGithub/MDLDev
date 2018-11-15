@@ -2149,6 +2149,12 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
         var current_time = year + "-" + month + "-" + date + " " +hr + ":" + min + ":" + sec ;
         return current_time;
     }
+    $(document).ready(function(){
+        $("#user_window a, .homeIcon").click(function(){
+            localStorage.clear();
+            window.localStorage.clear();
+        })
+    })
 </script>
 <?php require_once 'scripts.php'; ?>
 <?php require_once 'footer.php'; ?>
