@@ -1,9 +1,8 @@
 <?php
-ob_start();
-require_once('config.php');
-require_once('settings.php');
-require_once('functions.php');
-
+	ob_start();
+	require_once('config.php');
+	require_once('settings.php');
+	require_once('functions.php');
 ?>
 <html>
 <head>
@@ -137,7 +136,6 @@ require_once('functions.php');
     }
 
     .ftable th {
-        color: #fff !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
         vertical-align: middle;

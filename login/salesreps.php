@@ -156,7 +156,7 @@ require_once ('navbar.php');
     <?php } ?>
     <div class="box full visible">
 	<section id="palette_top">
-	    <h4>
+	    <h4 class = "gc_palette_header">
 	    <?php if(isset($_GET['action']) && $_GET['action']=='edit'){ ?>
 		<ol class="breadcrumb">
 		    <li><a href="<?php echo SITE_URL; ?>">Home</a></li>

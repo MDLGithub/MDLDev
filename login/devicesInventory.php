@@ -74,7 +74,7 @@ if(isset($_GET['add_device']) && $_GET['add_device']=='1'){
 } else {
     $modalBoxClass = "hide";
 }
-
+$serialExistsMsg = '';
 if(isset($_POST['save_device_inv'])){
     
     $data = $_POST;
@@ -97,7 +97,7 @@ if(isset($_POST['save_device_inv'])){
             $update = updateTable($db,'tbldeviceinv', $data, array('id'=>$_POST['id']));
             Leave(SITE_URL.'/devicesInventory.php?update');
         } else {
-            $thisMessage = "Device ID <strong>".$_POST['serial_number']."</strong> Exists. Please choose another.";
+            $serialExistsMsg = "The serial number <strong>".$_POST['serial_number']."</strong> already exists. Please check the serial number and try again.";
             $accountFieldMsg = 'error';
         }        
     } else {
@@ -108,7 +108,7 @@ if(isset($_POST['save_device_inv'])){
                 Leave(SITE_URL.'/devicesInventory.php?insert');
             }
         }else {
-            $thisMessage = "Account ID <strong>".$_POST['serial_number']."</strong> Exists. Please choose another.";
+            $serialExistsMsg = "The serial number <strong>".$_POST['serial_number']."</strong> already exists. Please check the serial number and try again.";
             $accountFieldMsg = 'error';
         }
     }
@@ -136,7 +136,7 @@ require_once ('navbar.php');
     <?php } ?>  
     <div class="box full visible">
         <section id="palette_top">
-            <h4>
+            <h4 class = "device_palette_header">
                 <?php if(isset($_GET['action']) && $_GET['action']=='edit'){ ?>
                     <ol class="breadcrumb">
                         <li><a href="<?php echo SITE_URL; ?>">Home</a></li>
@@ -168,6 +168,13 @@ require_once ('navbar.php');
             <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
         </section>
         <div id="app_data" class="scroller">
+            <?php if($serialExistsMsg!=''){?>
+            <div class="row">
+                <div class="col-md-12 text-center color-red pB-15">
+                    <?php echo $serialExistsMsg; ?>
+                </div>
+            </div>
+            <?php } ?>
             <div class="row">
                 <?php 
                 if( isset($_GET['action']) && $_GET['action'] !='' ){
@@ -198,6 +205,7 @@ require_once ('navbar.php');
                     <div class="row">
                         <div class="col-md-2"></div>
                         <div class="col-md-8">
+                            <?php if($_GET['action']=='edit'){  ?>
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="status_chart">
@@ -240,6 +248,8 @@ require_once ('navbar.php');
                                     </div>
                                 </div>
                             </div>
+                            <?php }  ?>
+                            
                             <div class="row pB-30">
                                 <div class="col-md-6">
                                     <button name="save_device_inv" type="submit" class="btn-inline">Save</button>
@@ -285,7 +295,7 @@ require_once ('navbar.php');
                                     <?php } ?>
                                     <?php if(isFieldVisibleByRole($isDeviceNameView, $roleID)) {?>
                                     <div class="row">
-                                        <div class="col-md-10 padd-0 select_device_dropdown">
+                                        <div class="col-md-10 col-sm-10 select_device_dropdown">
                                           <div class="f2  <?php echo ($deviceid!="")?"valid show-label":"";?>">
                                             <label class="dynamic" for="deviceType"><span>Device Name</span></label>
                                             <div class="group">
@@ -304,7 +314,7 @@ require_once ('navbar.php');
                                             </div>
                                         </div>
                                         </div>
-                                        <div class="col-md-2 text-center addPlusIconBox">
+                                        <div class="col-md-2 col-sm-2 text-center addPlusIconBox">
                                           <a class="add-new-device wh-35" href="<?php echo $link; ?>&add_device=1">
                                               <span class="fas fa-plus-circle" aria-hidden="true"></span>
                                           </a>

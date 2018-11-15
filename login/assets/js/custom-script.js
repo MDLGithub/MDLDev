@@ -51,13 +51,11 @@ $(document).ready(function(){
 			type: 'POST',
 			data: { today: today, account: account, guid_account: guid_account, from_date: from_date, to_date: to_date },
 			success: function(res){
-                var toPrint = res;
-                var popupWin = window.open('', '_blank','width=1000,height=900,location=no,left=200px');
-                popupWin.document.open();
-                //popupWin.document.write('<html><link rel="stylesheet" type="text/css" href="assets/css/forms.css" media="screen"/></head><body">')
-                popupWin.document.write(toPrint);
-                //popupWin.document.write('</body></html>');
-                popupWin.document.close();
+        var toPrint = res;
+        var popupWin = window.open('', '_blank','width=1000,height=900,location=no,left=200px');
+        popupWin.document.open();
+        popupWin.document.write(toPrint);
+        popupWin.document.close();
 			}
 		})
 	});

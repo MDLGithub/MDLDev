@@ -135,8 +135,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .fc-basic-view .fc-comments{width: 90%;}
     .fc-comments{white-space: nowrap !important; overflow: hidden;text-overflow: ellipsis;}
 
-    .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px; pointer-events: visible;}
-    .rightCircleicon2{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_health_fair.png"); background-repeat: no-repeat;background-size: 20px 20px;}
+    .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 3px; top: 3px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px; pointer-events: visible;}
+    .rightCircleicon2{ position: absolute; width: 20px; height: 20px; right: 3px; top: 3px; background-image: url("assets/eventschedule/images/icon_health_fair.png"); background-repeat: no-repeat;background-size: 20px 20px;}
     
     select#sidebar_select { border: 1px solid #ccc; border-radius: 20px; width: 100%; padding: 5px 8px;   margin-bottom: 8px;}
     .modalaccounttype.hide { display: none; }
@@ -152,7 +152,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     .info_block h1 br:first-child {
         display: none;
     }
-    .activeButton{ background: #3f628a !important; color: #fff !important;    /*width: 45%;*/ padding: 0; box-shadow: none !important; float: left;}
+    .activeButton{ background: #3f628a !important; color: #fff !important;    /*width: 45%;*/ padding: 0; box-shadow: none !important; }
     tr:first-child > td > .fc-day-grid-event{ min-height: 50px; }
     #piechart svg > g > g:nth-child(4) > g text, #chart svg > g > g:nth-child(4) > g text {
         font-weight: 800 !important;
@@ -167,14 +167,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     #detail, #summary{ /*width: 48%;*/ padding: 2px; font-size: 15px;}
     .top-buttons button.info-button { background: linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%); }
     .sales-photo img { max-width: 100px; }
-    #calendar .fc-toolbar.fc-header-toolbar h2:after {
-        content: '"';
-        padding-left: 5px;
+    .info_block h1.hide {
+        display: none;
     }
-    #calendar .fc-toolbar.fc-header-toolbar h2:before {
-        content: '"';
-        padding-right: 5px;
-    }
+    #calendar{ z-index: 1; }
+    .salesrep_list{ z-index: 999; }
     @media only screen and (min-device-width : 768px) and (max-width : 1024px) 
     and (orientation : portrait) { 
         .top-buttons { /*width: 65%;*/ }
@@ -235,9 +232,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         }else{
             cursource = 'eventload.php?salerepId='+salesrep;
         }
-
+        var clickEventType=((document.ontouchstart!==null)?'click':'touchstart');
         // when summary button is clicked
-        $('#summary').on('click touchstart', function () {
+        $('#summary').bind(clickEventType, function () {
             if(salesrep == 0)
                 var summarycursource = 'ajaxHandlerEvents.php';
             else
@@ -253,7 +250,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         });
 
         // when detail button is clicked
-        $('#detail').on('click touchstart', function () {
+        $('#detail').bind(clickEventType, function () {
             if(salesrep == 0)
                 var detailcursource = 'eventload.php';
             else
@@ -270,12 +267,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         var d = new Date();
         var evtsDate = d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate();
         evtsDate = evtsDate.toString();
-        <?php /*if(isset($_GET['salerepId'])): ?>
+        <?php //if(isset($_GET['salerepId'])): ?>
             if (localStorage.evtsDate) {
                 evtsDate = (localStorage.evtsDate).toString();
             }
-        <?php endif;*/ ?>
-
+        <?php //endif; ?>
 
         var calendar = $('#calendar').fullCalendar({
             header: {
@@ -284,8 +280,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             },
             views: {
                 week: {
-                    titleFormat: '[Week of ] MMMM D, YYYY',
-                    titleRangeSeparator: ' to ',
+                    //titleFormat: '[Week of ] MMMM D, YYYY',
+                    //titleRangeSeparator: ' to ',
                 }
             },
             defaultView: 'basicWeek',
@@ -303,6 +299,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 $("#calendarmonth").html($.fullCalendar.formatDate(beginOfWeek,"MMMM DD"));
                 $("#calendaryear").html($.fullCalendar.formatDate(beginOfWeek,"YYYY"));
                 $(".salesrep_list").html("<ul><li><a href='<?php echo SITE_URL; ?>/dashboard2.php'>Select All</a></li></ul>");
+                window.setTimeout(function(){
+                    $("#calendar").find('.fc-toolbar > div.fc-center > h2').empty().append(
+                        "Week of "+view.start.format('MMMM D, YYYY')
+                    );
+                },0);
                 //top_stats();
             },
             dayRender: function (date, cell) {
@@ -589,8 +590,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var startdate = moment(event.start._d).format('YYYY-MM-DD');
                 var enddate = moment(event.end._d).format('YYYY-MM-DD');
                 
-                /*localStorage.setItem('evtsDate', startdate );
-                localStorage.setItem('evteDate', enddate );*/
+                localStorage.setItem('evtsDate', startdate );
+                localStorage.setItem('evteDate', enddate );
 
                 var events = $('#calendar').fullCalendar('getView');
                 var ele_events = events._props.currentEvents;
@@ -616,24 +617,31 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     data: chartParams,
                     dataType: 'json',
                     success: function(returndata){
-                        //returndata = JSON.parse(returndata);
-                        console.log(returndata);
+                        //console.log(returndata);
                         var chart = $("#chart").data("kendoChart");
-                        var catr = returndata.categories;
+                        //console.log(chart.options.series);
                         chart.setOptions({
-                            series: returndata.series,
-                            categoryAxis: {
-                                categories: catr},
+                            <?php if(isset($_GET['salerepId']) || $role == 'Sales Rep'): ?>
+                                dataSource: returndata.dataSource,
+                                series: returndata.series,
+                            <?php else: ?>
+                                series: returndata.series,
+                                categoryAxis: {
+                                    categories: returndata.categories
+                                },
+                            <?php endif; ?>
                             valueAxis:{
                                 max:returndata.yaxis
                             },
                         });
+                        var viewModel = kendo.observable({
+                          series: chart.options.series,
+                          markerColor: function(e) {
+                            return e.get("visible") ? e.color : "grey";
+                          }
+                        });
+                        kendo.bind($("#legend"), viewModel);
                         chart.refresh();
-                        /*firstSeries = chart.options.series;
-                        firstSeries[0].gap = 5;//parseFloat(5, 10);
-                        firstSeries[0].spacing = 5;
-                        chart.redraw();
-                        console.log(chart);*/
                     },
                 });
 
@@ -679,11 +687,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         url:'ajaxHandlerEvents.php', 
                         data:{ srepids:uniqueIds, action:'getconsultant' }, 
                         success: function(res){ 
-                            //console.log(res);
+                            console.log(res);
                             var result = JSON.parse(res);
                             var arrlen = result['names'].length;
-                            var i=0;
-                            for(i=0; i<arrlen;i++){
+                            var i = 0;
+                            for(i = 0; i < arrlen; i++){
                                 $('.salesrep_list ul').append('<li><a href="<?php echo SITE_URL ?>/dashboard2.php?salerepId='+result['ids'][i]+'">'+result['names'][i]+'</a></li>');
                             }
                         } 
@@ -1327,7 +1335,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                 </div>
                             </div>
                         <div class="col-lg-7 col-md-8 col-sm-7 top-buttons">
-                        <button type="button" name="Detail" id="detail" class="col-lg-6 col-md-6 col-sm-3 col-md-offset-0 col-sm-offset-1 info-button activeButton" style="">Details</button>
+                        <button type="button" name="Detail" id="detail" class="col-lg-6 col-md-6 col-sm-3 col-md-offset-0 info-button activeButton" style="">Details</button>
                         <button type="button" name="Summary" id="summary" class="col-lg-6 col-md-6 col-sm-3 info-button" style="">Summary</button>
                         <a href="eventschedule.php" class="col-md-12 col-sm-5 button submit"><strong>Full Calendar</strong></a>   
                         </div>    
@@ -1347,7 +1355,12 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
 
                     </div>
                     <div id="piechart"  class="col-md-6 col-sm-12" style="padding:0;"></div>
-                    <div id="chart" class="col-md-6 col-sm-12" style="padding:0;"></div>
+                    <!-- <div class="col-md-6 col-sm-12">
+                        <div id="legend"></div>
+                        <div id="chart" style="padding:0;"></div>
+                    </div> -->
+                    <div class="col-md-6 col-sm-12" id="chart" style="padding:0;"></div>
+                    
                     <!-- <div class="overlay"><div>No data available</div></div> -->
                     
                 </div>
@@ -1573,7 +1586,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 },
                 legend: {
                     position: "top",
-
+                    visible: true,
+                    template: chartTemplate,
                 },
                 seriesDefaults: {
                     type: "column",
@@ -1585,6 +1599,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     }
                 },
                 categoryAxis: {
+                    width: 25,
                     majorGridLines: {
                         visible: false
                     },
@@ -1594,7 +1609,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 },
                 tooltip: {
                     visible: true,
-                    template: "#= series.name #: #= value #"
+                    template: tooltipLabel//"#= dataSource.data.name #: #= value #"
                 },
                 chartArea: {
                     width: 580,
@@ -1633,6 +1648,18 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             });
         }
 
+        function chartTemplate(e){
+            console.log(e);
+        }
+
+        function tooltipLabel(e){
+            <?php if(isset($_GET['salerepId']) || $role == 'Sales Rep'): ?>
+                return e.category+": "+e.value;
+            <?php else: ?>
+                return "Submitted: "+e.value;
+            <?php endif; ?>
+
+        }
 
         function get_date(){
             var d = new Date();
@@ -1676,6 +1703,13 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             }
             return img;
         }
+
+        $(document).ready(function(){
+            $("#user_window a, .homeIcon").click(function(){
+                localStorage.clear();
+                window.localStorage.clear();
+            })
+        })
     </script>
 <?php require_once 'scripts.php'; ?>
 <?php require_once 'footer.php'; ?>

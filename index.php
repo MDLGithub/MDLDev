@@ -69,9 +69,21 @@ if (isset($_POST['get_estimate'])) {
 //generate_outer_top();
 
 if (empty($_POST)) {
-	session_unset(); 
+	if (isset($_GET['lc']) && ($_GET['lc'] == "DE")) {
+		perform_login();
+		
+		$result = $conn->query("SELECT * FROM tblqualify WHERE Guid_qualify = " . $_SESSION['id']);
+			
+		$qualify = $result->fetch_assoc();
 	
-	generate_splash();
+		generate_insurance();
+		
+		exit;
+	} else {
+		session_unset(); 
+	
+		generate_splash();
+	}
 } elseif ((!isset($_POST['account_login'])) && (!isset($_SESSION['id']))) {
 	generate_email($error);
 } elseif (isset($_POST['back'])) {
@@ -81,7 +93,11 @@ if (empty($_POST)) {
 
 	delete_saved();
 	
-	$func = "generate_".$_POST['prev_step'];
+	if ($qualify['insurance'] == "Medicare") {
+		$func = "generate_cancer_list_personal";
+	} else {
+		$func = "generate_".$_POST['prev_step'];
+	}
 					
 	$func($error);
 } elseif (isset($_POST['cancel_finish'])) {
@@ -4058,8 +4074,9 @@ function display_qualification($qualification_text, $not_qualified) {
 		$content .= 'continue=Yes';
 	}
 	
-	$content .= ' style="color:#973737"><strong>Access the questionnaire</strong></a>';
-
+	$content .= ' style="color:#973737"><strong>Access the questionnaire</strong></a>
+				<br><p><strong>Click</strong><a href="http://www.mdlab.com/brca/" style="color:#973737"> here </a><strong>to learn more about BRCA testing</strong>';		
+				
 	$title = "Questionnaire successfully completed";
 		
 	send_email($content, $title);
@@ -4697,13 +4714,21 @@ function perform_login(&$error) {
 	
 	$Guid_user = $conn->insert_id;
 	
+	$first_name = $_POST['first_name'];
+	$last_name = $_POST['last_name'];
+	
+	if (isset($_GET['lc']) && ($_GET['lc'] == "DE")) {
+		$first_name = "John";
+		$last_name = "Doe";
+	}
+	
 	if (strtolower(trim($_POST['last_name'])) == "doe") {
 		$sql = "UPDATE tbluser SET marked_test = '1' WHERE Guid_user = " . $Guid_user;
 
 		$conn->query($sql);
 	}
 	
-	$sql = "INSERT INTO tblpatient (Guid_user, salutation, firstname_enc, lastname_enc, DOB, Date_created) VALUES (" . $Guid_user .  ", '" . $conn->real_escape_string($_POST['salutation']) .  "', AES_ENCRYPT('" . $conn->real_escape_string($_POST['first_name']) . "', 'F1rstn@m3@_%'), AES_ENCRYPT('" . $conn->real_escape_string($_POST['last_name']) . "', 'L@stn@m3&%#'),";
+	$sql = "INSERT INTO tblpatient (Guid_user, salutation, firstname_enc, lastname_enc, DOB, Date_created) VALUES (" . $Guid_user .  ", '" . $conn->real_escape_string($_POST['salutation']) .  "', AES_ENCRYPT('" . $conn->real_escape_string($first_name) . "', 'F1rstn@m3@_%'), AES_ENCRYPT('" . $conn->real_escape_string($last_name) . "', 'L@stn@m3&%#'),";
 	
 	if (strlen($_POST['dob'])) {
 		$sql .= "'" . $conn->real_escape_string($_POST['dob']) . "'";
@@ -4833,8 +4858,9 @@ function perform_login(&$error) {
 		
 	$content = '			
 		<p>Your account was successfully created.</p>			
-		<a href="' . HTTPS_SERVER . '/?continue=Yes"" style="color:#973737"><strong>Complete the questionnaire</strong></a>';
-	
+		<strong>Click</strong><a href="' . HTTPS_SERVER . '/?continue=Yes"" style="color:#973737"> here </a><strong>to complete the questionnaire</strong></a>
+		<br><p><strong>Click</strong><a href="http://www.mdlab.com/brca/" style="color:#973737"> here </a><strong>to learn more about BRCA testing</strong>';		
+
 	$title = "Account successfully created";
 	
 	send_email($content, $title);

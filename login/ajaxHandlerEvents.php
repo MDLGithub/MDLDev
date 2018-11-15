@@ -285,23 +285,22 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart' && isset($_POST[
     if(isset($_POST['showtopPerformer']) && !empty($submit)){
     	array_push($regSalereps, $submit['topsubmittedName']);
 	    $data = array(
-	            'series' => array (
-	            		[
-		                    'name'=> ($role == 'Sales Rep') ? $username : 'Submitted',
-		                    'data'=> array($submitted[0]),
-		                    'color'=> "#3a8a5f",
-		                    'labels'=> array('visible' => true),
-		                    'gap'=> 3,
-		                ],
-		                [
-		                	'name'=> 'Top Performer',
-		                    'data'=> array($submit['topsubmittedcount']),
-		                    'color'=> "#b6942e",
-		                    'labels'=> array('visible' => true),
-		                ]
-	            ),
-	            'categories' => $regSalereps 
-	    );
+            'dataSource' => array(
+                'data' => array(
+                    ['key'=> $regSalereps[0], 'value'=> $submitted[0], 'color'=>"#3a8a5f", 'labname'=>"Submitted"],
+                    ['key'=> $regSalereps[1], 'value'=> $submit['topsubmittedcount'], 'color'=>"#b6942e", 'labname'=>"Top Performer"],
+                )
+            ),
+            'series' => array(
+                [
+                    'field' => 'value',
+                    'categoryField' => 'key',
+                    'labels' => array( 'visible' => 'true'),
+                    //'name' => array('Submitted', 'Top')//'labname'
+                ]
+
+            )
+        );
 	}else{
 		$data = array(
 	            'series' => array ([
@@ -526,7 +525,7 @@ if(isset($_POST['action']) && $_POST['action'] == 'tableStats'){
 
 /* ---------------------  Get Dynamic Consultant List --------------------- */
 if(isset($_GET['action']) && isset($_GET['srepids']) && $_GET['srepids'] != 0 && $_GET['action'] == 'getconsultant'){
-    $ids = $_GET['srepids'];
+    $ids = (isset($_GET['srepids'])) ? $_GET['srepids'] : 0;
     //print_r($ids);
     $q = "SELECT t.Guid_salesrep, CONCAT(t.first_name,' ',t.last_name) as sNames FROM tblsalesrep t WHERE t.Guid_salesrep IN ($ids)  ";
     $result = $db->query($q);
@@ -544,6 +543,7 @@ if(isset($_GET['action']) && isset($_GET['srepids']) && $_GET['srepids'] != 0 &&
 
 if(isset($_GET['_']) && isset($_GET['start'])){
     $result = getSummaryEvents($db);
+    echo json_encode($result); 
     foreach($result as $row)
     {
      $data[] = array(
@@ -557,7 +557,7 @@ if(isset($_GET['_']) && isset($_GET['start'])){
           'account' => $row['account']
           );
     }
-    echo json_encode($data);
+    //echo json_encode($data);
 }
 
 /* --------------------- Dshboard2 Setting Dropdown --------------------- */

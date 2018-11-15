@@ -1335,6 +1335,19 @@ and (orientation : landscape) {
         left:-32px;
     }
 
+    #accounts .addressContact{
+        font-size:12px;
+    }
+
+    table#refresh-log-table {
+        font-size:10px;
+        width: 100% !important;
+    }
+
+    .fc-content.evtcontent{
+        padding:0px 10px!important;
+    }
+
 }
 
 /*iPad portrait*/
@@ -1457,10 +1470,49 @@ and (orientation : portrait) {
 
     #palette_top > h4{
         font-size: 0.9em;
+       /* width: 50px;
+        margin-top: -6px;
+        line-height: 17px;*/
+        white-space:normal;
+    }
+
+    .palette_results{
+        width: 50px;
+        line-height: 17px;
+    }
+
+    .gc_palette_header{
+        margin-top: -10px;
+        width: 270px;
+    }
+
+    .device_palette_header{
+        width: 200px;
+        margin-top: -6px;
+        line-height: 17px;
+    }
+
+    .es_palette_header{
         width: 50px;
         margin-top: -6px;
         line-height: 17px;
-        white-space:normal;
+        padding-left: 0;
+    }
+
+    .um_palette_header{
+        width: 50px;
+        line-height: 17px;
+    }
+
+    .um_palette_header li:nth-child(2){
+        width: 50px;
+        line-height: 17px;
+    }
+
+    .mdl_details_palette_header{
+        margin-top: -15px;
+        width: 300px;
+        line-height: 21px;
     }
 
     #form-option-table thead{
@@ -1487,9 +1539,49 @@ and (orientation : portrait) {
     }
 
 	#add-account-provider-box .contentBlock {
-	    width: 45%;
-	    left: 28%;
+	        width: 55%;
+            left: 24%;
 	}
+
+    .salesrepInfoBlock .imageBox{
+        padding: 7% 0px;
+    }
+
+    .salesrepInfoBlock label{
+        padding-top: 7%;
+        padding-bottom: 7%;
+    }
+
+    #accounts .addressContact{
+        font-size:12px;
+    }
+
+    select.dataTableFilterInput{
+        min-width: 110px;
+    }
+
+    table#refresh-log-table {
+        font-size:10px;
+        width: 100% !important;
+    }
+
+    .numberCircleContainer{
+        padding: 10px;
+    }
+
+    .fc-content.evtcontent{
+        padding:10px !important;
+    }
+
+    .fc-content.evtcontent div{
+      display: block;
+      margin: auto;
+      text-align: center;
+    }
+
+    .fc-content.evtcontent div span{
+      float:none !important;
+    } 
 
 }
 
@@ -2400,13 +2492,18 @@ a.button.cancel.half{
     color: #ff930d;
     font-weight: bold;
 }
-
+#refresh-log-table{
+    width: 100%!important;
+}
 #refresh-log-table select{
     border: 1px solid #8fa2ba;
     padding: 2px 10px;
     width: 100%;
-    max-width: 450px;
     background: white;
+    word-wrap: break-word;      /* IE*/
+    white-space: -moz-pre-wrap; /* Firefox */
+    white-space: pre-wrap;      /* other browsers */
+    display:inline-block
 }
 
 
@@ -2422,11 +2519,11 @@ a.button.cancel.half{
     background-image: linear-gradient( 360deg, rgb(172, 172, 172) 0%, rgb(255,255,255) 93%, rgb(255, 255, 255) 100%);
 }
 
-#refresh-log-table tbody tr.even td:nth-child(7), #refresh-log-table tbody tr.even td:nth-child(8) {
+#refresh-log-table tbody tr.even td:nth-child(8), #refresh-log-table tbody tr.even td:nth-child(9) {
     background: #e2e2e2;
 }
 
-#refresh-log-table tbody tr.odd td:nth-child(7), #refresh-log-table tbody tr.odd td:nth-child(8) {
+#refresh-log-table tbody tr.odd td:nth-child(8), #refresh-log-table tbody tr.odd td:nth-child(9) {
     background: #f1f1f1;
 }
 
@@ -2490,4 +2587,32 @@ table#refresh-log-table {
 }
 .tbl-borderR{
     border-left: 1.5px solid #1c2d6b;
+}
+.possiblematchTh{
+    width: 400px!important;
+}
+.refreshPaging{
+    margin:20px 10px;
+    font-size: 20px;
+    font-weight: bold;
+}
+.refreshPaging span{
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    background: #000000;
+    text-align: center;
+    line-height: 1.5;
+    margin-right: 3px;
+    font-weight: normal;
+}
+.refreshPaging span a{
+    color: #fff;
+}
+.refreshPaging span.current{
+    background: #773434;
+    color: #fff;
+}
+tr.loadedStatus{
+    background: #ffc4c4;
 }

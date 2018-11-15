@@ -370,12 +370,15 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         var d = new Date();
         var evtsDate = d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate();
         evtsDate = evtsDate.toString();
-        <?php if(isset($_GET['salerepId']) || isset($_GET['accountId'])): ?>
-            if (localStorage.evtsDate) {
-                evtsDate = (localStorage.evtsDate).toString();
-            }
-        <?php endif; ?>
-
+        <?php //if(isset($_GET['salerepId']) || isset($_GET['accountId'])): ?>
+        if (localStorage.evtsDate) {
+            evtsDate = (localStorage.evtsDate).toString();
+        }
+        <?php //endif; ?>
+        var calView = "basicWeek";
+        if(window.localStorage.calView){
+            calView = window.localStorage.calView;
+        }
         if (localStorage.salesrepValue != 0) {
             cursource += '&salerepId=' + localStorage.salesrepValue; 
         }if(localStorage.accountValue != 0){
@@ -426,8 +429,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             },
             views: {
                 week: {
-                    titleFormat: '[Week of ] MMMM D, YYYY',
-                    titleRangeSeparator: ' to ',
+                    /*titleFormat: '[Week of ] MMMM D, YYYY',
+                    titleRangeSeparator: ' to ',*/
                 }
             },
             defaultView: 'basicWeek',
@@ -438,6 +441,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             eventOverlap: false,
             contentHeight: 'auto',
             defaultDate: evtsDate,
+            defaultView: calView,
             dayRender: function (date, cell) {
                 var today = new Date();
                 var dd = today.getDate();
@@ -460,6 +464,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             viewRender: function(view, element) {
                 $("#salesrepfilter").html("<option value='0'>Generic Consultant</option>");
                 $("#accountfilter").html("<option value='0'>Account</option>");
+                if(view.type == "basicWeek"){
+                    window.setTimeout(function(){
+                        $("#calendar").find('.fc-toolbar > div.fc-center > h2').empty().append(
+                            "Week of "+moment(view.start._d).format('MMMM D, YYYY'));
+                    },0);
+                }
             },
             eventClick: function (event, jsEvent, view)
             {
@@ -720,34 +730,34 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var today = new Date();
                 var parsedNow =  new Date(today).getUnixTime();
                 var parsedEventTime = new Date(event.start).getUnixTime();  
-                if(event.title == 'BRCA Day'){
-                    $.ajax({
-                        url: "ajaxHandlerEvents.php",
-                        type: "POST",
-                        data: eventData,
-                        success: function (res)
-                        {
-                            if(res){
-                                var res = JSON.parse(res);
-                                var regHTML = res.reg;
-                                var comHTML = res.com;
-                                var subHTML = res.sub;
-                                var quaHTML = res.qua;
-                                if(view.name != 'basicDay' && parsedEventTime < parsedNow){
-                                    element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[0].childNodes[0].innerHTML = regHTML;
-                                    element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[2].childNodes[0].innerHTML = comHTML;
-                                    element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].childNodes[0].innerHTML = quaHTML;
-                                    element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[6].childNodes[0].innerHTML = subHTML;
-                                }else if(view.name == 'basicDay' && parsedEventTime < parsedNow){
-                                    element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[0].childNodes[0].innerHTML = regHTML;
-                                    element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[2].childNodes[0].innerHTML = comHTML;
-                                    element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].childNodes[0].innerHTML = quaHTML;
-                                    element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[6].childNodes[0].innerHTML = subHTML;
-                                }
+                //if(event.title == 'BRCA Day'){
+                $.ajax({
+                    url: "ajaxHandlerEvents.php",
+                    type: "POST",
+                    data: eventData,
+                    success: function (res)
+                    {
+                        if(res){
+                            var res = JSON.parse(res);
+                            var regHTML = res.reg;
+                            var comHTML = res.com;
+                            var subHTML = res.sub;
+                            var quaHTML = res.qua;
+                            if(view.name != 'basicDay' && parsedEventTime < parsedNow){
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[0].childNodes[0].innerHTML = regHTML;
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[2].childNodes[0].innerHTML = comHTML;
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].childNodes[0].innerHTML = quaHTML;
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[6].childNodes[0].innerHTML = subHTML;
+                            }else if(view.name == 'basicDay' && parsedEventTime < parsedNow){
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[0].childNodes[0].innerHTML = regHTML;
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[2].childNodes[0].innerHTML = comHTML;
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].childNodes[0].innerHTML = quaHTML;
+                                element[0].childNodes[0].childNodes[2].childNodes[0].childNodes[6].childNodes[0].innerHTML = subHTML;
                             }
                         }
-                    });
-                }             
+                    }
+                });
+                //}             
             },
             eventAfterAllRender: function(view) {
                 var events = $('#calendar').fullCalendar('getView');
@@ -781,6 +791,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     evtdata = {salesreps:null, acc: uniqueAccString, startdate: startdate, enddate:enddate, action:'eventStats'};
                 }
                 localStorage.setItem('evtsDate', startdate );
+                window.localStorage.setItem('calView', view.name );
                 $.ajax({
                     type : 'POST',
                     data : evtdata,
@@ -876,6 +887,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     return self.indexOf(value) === index;
                 }
             },
+           
         });
 
 /*--------------------------------------------------------------------------------*/

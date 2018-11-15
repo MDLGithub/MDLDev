@@ -10,7 +10,7 @@ Author:Gabriela Johnson;
 
 **************************************************/
 
-@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600');
 
 
 @font-face {
@@ -309,8 +309,6 @@ Author:Gabriela Johnson;
 
   color: rgb(70, 106, 147);
 
-  font-weight: bold;
-
   line-height: 1;
 
   background: none;
@@ -478,7 +476,7 @@ Author:Gabriela Johnson;
 
 
 #summary{
-  float:left;
+  /*float:left;*/
 }
 
 
@@ -856,6 +854,7 @@ Author:Gabriela Johnson;
 
     padding-top:20px;
 
+
 }
 
 
@@ -929,6 +928,9 @@ Author:Gabriela Johnson;
 
 }
 
+.info-button{
+  float:left;
+}
 
 
 /*Stats Dropdown*/
@@ -1277,7 +1279,6 @@ Author:Gabriela Johnson;
 
 
 }
-
 
 
 #calendar .fc-content-skeleton{
@@ -1769,7 +1770,7 @@ g g g text{
       background: grey;
       width: 100%;
       height: 20px;
-      top: 128px;
+      top: 124px;
       border-bottom-left-radius: 10px;
       border-bottom-right-radius: 10px;
     }
@@ -1847,12 +1848,10 @@ g g g text{
 /*iPad Pro Landscape*/
 
 @media only screen 
-
-  and (min-device-width: 64em)
-
-  and (max-device-height: 86em) 
-
-  and (orientation: landscape) {
+  and (min-device-width: 1024px) 
+  and (max-device-width: 1366px) 
+  and (orientation: landscape) 
+  and (-webkit-min-device-pixel-ratio: 2) {
 
     .info_block_row{
 
@@ -1890,6 +1889,15 @@ g g g text{
 
     .box.full.visible.dashboard {
         padding-left: 0.9em;
+    }
+
+    #performance_chart .row{
+      height:50px;
+    }
+
+    #performance_chart .col-md-2{
+      text-align:center;
+      flex-grow: initial;
     }
 
   }
@@ -2083,7 +2091,7 @@ and (orientation : landscape) {
 
     .info_block .button strong {
 
-        font-size:10px;
+        font-size: 1.3em !important;
 
         text-indent:10px;
 
@@ -2225,10 +2233,9 @@ and (orientation : landscape) {
 
 
 
-    .chart_header p{
-
-      font-size:22px;
-
+    .chart_header .stats_date {
+        
+        font-size: 22px !important;
     }
 
 
@@ -2396,8 +2403,6 @@ and (orientation : portrait) {
 
     .info_block .button strong{
 
-      font-size:11px;
-
       text-indent:22px;
 
     }
@@ -2476,6 +2481,6 @@ and (orientation : portrait) {
 
     .below_avg:before, .above_avg:before, .top_performer_avg:before{
       left:33px;
-    }
+    } 
 
 }
