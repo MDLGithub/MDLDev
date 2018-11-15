@@ -88,6 +88,25 @@ if(isset($_GET['patientId'])&&isset( $_GET['physicianId'])){
                 echo loadTableData($db, $_GET['loadTable'], 'table', 'dataTable');
             }
             ?>
+            <?php
+            if(isset($_GET['deleteLoadedData'])&&$_GET['deleteLoadedData']=='1'){
+                $loadedDataTables = array('tbluser','tblpatient', 'tblaccount', 
+                                            'tblprovider', 'tbl_mdl_number', 'tbl_mdl_status_log', 
+                                            'tbl_mdl_payors', 'tbl_revenue', 'tbl_mdl_cpt_code'
+                                        );
+                foreach ($loadedDataTables as $k=>$tableName){
+                    $db->query("DELETE FROM $tableName WHERE Loaded='Y'");
+                }                
+            }
+            ?>
+            <?php
+            if(isset($_GET['restLinkedData'])&&$_GET['restLinkedData']=='1'){
+                $linkedDataTables = array('tbl_mdl_dmdl','tblpatient');
+                foreach ($linkedDataTables as $k=>$tableName){
+                    $db->query("UPDATE $tableName SET Linked='N' WHERE Linked='Y'");
+                }                
+            }
+            ?>
         </div>
     </div>
 </main>

@@ -2170,51 +2170,101 @@ function get_stats_info_today($db, $statusID, $hasChildren=FALSE, $searchData=ar
     return $result;
 }
 
-function checkedAccountData($db, $accountNum){
-    $checkAccount = $db->row("SELECT * FROM tblaccount WHERE account=:account", array('account'=>$accountNum));
-    $accountData = array();
+function updateOrInsertAccount($db, $apiData){
+   
+    $checkAccount = $db->row("SELECT * FROM tblaccount WHERE account=:account", array('account'=>$apiData['number']));
+    
     if(!empty($checkAccount)){ 
+        //update account for empty values only
+        //check if it already has value don't update
         $Guid_account = $checkAccount['Guid_account'];
-        $whereAccount = array('Guid_account'=>$Guid_account);
+
         if(isset($checkAccount['account']) && $checkAccount['account']==''){
-            if(isset($checkAccount['account'])){
-                $accountData['account'] = $accountNum;
+            if(isset($apiData['number'])){
+                $accountData['account'] = $apiData['number'];
             }
         }
         if(isset($checkAccount['name']) && $checkAccount['name']==''){
-            if(isset($data['account']['name'])){
-                $accountData['account'] = $data['account']['name'];
+            if(isset($apiData['name'])){                
+                $accountData['name'] = $apiData['name'];
             }
         }
         if(isset($checkAccount['address']) && $checkAccount['address']==''){
-             if(isset($data['account']['addr1'])){
-                $accountData['address'] = $data['account']['addr1'];
-            }  
-        }
-        if(isset($checkAccount['address2']) && $checkAccount['address2']==''){
-            if(isset($data['account']['addr2'])){
-                $accountData['address2'] = $data['account']['addr2'];
+            if(isset($apiData['address'])){        
+                $accountData['address'] = $apiData['address'];
             }
         }
-        if(isset($checkAccount['city']) && $checkAccount['city']==''){
-            if(isset($data['account']['city'])){
-                $accountData['city'] = $data['account']['city'];
+        if(isset($checkAccount['address1']) && $checkAccount['address1']==''){ 
+            if(isset($apiData['address1'])){              
+                $accountData['address1'] = $apiData['address1'];
             }
         }
+        if(isset($checkAccount['city']) && $checkAccount['city']==''){ 
+            if(isset($apiData['city'])){              
+                $accountData['city'] = $apiData['city'];
+            }
+        }    
         if(isset($checkAccount['state']) && $checkAccount['state']==''){
-            if(isset($data['account']['state'])){
-                $accountData['state'] = $data['account']['state'];
+            if(isset($apiData['state'])){            
+                $accountData['state'] = $apiData['state'];
             }
         }
         if(isset($checkAccount['zip']) && $checkAccount['zip']==''){
-            if(isset($data['account']['zip'])){
-                $accountData['zip'] = $data['account']['zip'];
+            if(isset($apiData['zip'])){            
+                $accountData['zip'] = $apiData['zip'];
             }
         }
-        return $accountData;
+        if(isset($checkAccount['phone_number']) && $checkAccount['phone_number']==''){
+            if(isset($apiData['phone_number'])){        
+                $accountData['phone_number'] = $apiData['phone_number'];
+            }
+        }
+        if(isset($checkAccount['fax']) && $checkAccount['fax']==''){
+            if(isset($apiData['fax'])){
+                $accountData['fax'] = $apiData['fax'];
+            }
+        } 
+        if(!empty($accountData)){
+            $whereAccount = array('Guid_account'=>$Guid_account);
+            $updateAccount = updateTable($db, 'tblaccount', $accountData, $whereAccount);
+        }        
+    } else {
+    //insert new account
+        if(isset($apiData['number'])){
+            $accountData['account'] = $apiData['number'];
+        }
+        if(isset($apiData['name'])){                
+            $accountData['name'] = $apiData['name'];
+        }
+        if(isset($apiData['address'])){        
+            $accountData['address'] = $apiData['address'];
+        }
+        if(isset($apiData['address1'])){              
+            $accountData['address1'] = $apiData['address1'];
+        }
+        if(isset($apiData['city'])){              
+            $accountData['city'] = $apiData['city'];
+        }
+        if(isset($apiData['state'])){            
+            $accountData['state'] = $apiData['state'];
+        }
+        if(isset($apiData['zip'])){            
+            $accountData['zip'] = $apiData['zip'];
+        }
+        if(isset($apiData['phone_number'])){        
+            $accountData['phone_number'] = $apiData['phone_number'];
+        }
+        if(isset($apiData['fax'])){
+            $accountData['fax'] = $apiData['fax'];
+        }
+        if(!empty($accountData)){
+            $accountData['Loaded']='Y';
+            $insertAccount = insertIntoTable($db, 'tblaccount', $accountData);
+            $Guid_account = $insertAccount['insertID'];
+        }
     }
     
-    return $accountData;
+    return $Guid_account;    
 }
 
 function updateOrInsertProvider($db,$accountNum, $Guid_account, $Guid_user, $apiProviderData){    
@@ -2224,6 +2274,9 @@ function updateOrInsertProvider($db,$accountNum, $Guid_account, $Guid_user, $api
         
         $Guid_provider = $checkProvider['Guid_provider'];
         
+        if(isset($checkProvider['npi']) && $checkProvider['npi']==''){
+            $providerData['npi'] = $apiProviderData['npi'];
+        }
         if(isset($checkProvider['first_name']) && $checkProvider['first_name']==''){
             $providerData['first_name'] = $apiProviderData['FirstName'];
         }
@@ -2240,11 +2293,14 @@ function updateOrInsertProvider($db,$accountNum, $Guid_account, $Guid_user, $api
             'account_id'=>$accountNum,
             'Loaded'=>'Y'
         );
-        if(isset($data['Physician']['FirstName'])){
+        if(isset($apiProviderData['FirstName'])){
             $providerData['first_name'] = $apiProviderData['FirstName'];
         }
-        if(isset($data['Physician']['LastName'])){
+        if(isset($apiProviderData['LastName'])){
             $providerData['last_name'] = $apiProviderData['LastName'];
+        }
+        if(isset($apiProviderData['npi'])){
+            $providerData['npi'] = $apiProviderData['npi'];
         }
         $insertProvider = insertIntoTable($db, 'tblprovider', $providerData);
         $Guid_provider = $insertProvider['insertID'];
@@ -2422,9 +2478,6 @@ function dmdl_refresh($db){
     $dmdlResult = $db->query("SELECT * FROM tbl_mdl_dmdl WHERE ToUpdate='Y' AND Linked='N' LIMIT $start,$per_page");
     $content=""; $match=""; $possibleM ="";
     
-    
-    
-    
     $content .= "<form action='' method='POST'>";
     
     $content .= "<div class='pB-15 text-right'>";
@@ -2503,6 +2556,7 @@ function dmdl_refresh($db){
                     $sContent .= getMatchedPatientsDropdown($db, $Guid_MDLNumber, $SGetPatient);
                 } else {
                     //if there is not possible match it should create new records
+                    $sContent .= "Create New";
                     $sContent .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Possible_Match]' value='create_new' />";
                 }
                 $possibleM = "<td class='tbl-borderR possiblematchTh'>".$sContent."</td>";
@@ -2518,6 +2572,7 @@ function dmdl_refresh($db){
                     if(!empty($SGetPatient)){
                         $sContent .= getMatchedPatientsDropdown($db, $Guid_MDLNumber, $SGetPatient);
                     } else { //create new records if possibe match not found
+                        $sContent .= "Create New";
                         $sContent .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Possible_Match]' value='create_new' />";
                     }
                     $possibleM = "<td class='tbl-borderR possiblematchTh'>".$sContent."</td>";
@@ -2642,20 +2697,53 @@ function dmdl_refresh($db){
             if(isset($dmdlVal['Guid_mdl_dmdl']) && !empty($dmdlVal['Guid_mdl_dmdl'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Guid_mdl_dmdl]' value='". $dmdlVal['Guid_mdl_dmdl']."' />";
             }
+            //patient info
+            if(isset($res['Guid_PatientId']) && !empty($res['Guid_PatientId'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Guid_PatientId]' value='".$res['Guid_PatientId']."' />";
+            }
             if(isset($res['Patient_FirstName']) && !empty($res['Patient_FirstName'])){
                 $content .=  "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][firstname]' value='".$res['Patient_FirstName']."' />";
             }
             if(isset($res['Patient_LastName']) && !empty($res['Patient_LastName'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][lastname]' value='".$res['Patient_LastName']."' />";
             }
+            if(isset($res['Patient_Ethnicity']) && !empty($res['Patient_Ethnicity'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][ethnicity]' value='".$res['Patient_Ethnicity']."' />";
+            }
             if(isset($res['Date_Of_Birth'])&&!empty($res['Date_Of_Birth'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][dob]' value='".convertDmdlDate($Date_Of_Birth)."' />";
             }
-            if(isset($res['Guid_PatientId']) && !empty($res['Guid_PatientId'])){
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Guid_PatientId]' value='".$res['Guid_PatientId']."' />";
+            if(isset($res['Patient_CellPhone'])&&!empty($res['Patient_CellPhone'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][phone_number]' value='".$res['Patient_CellPhone']."' />";
             }
+            if(isset($res['Patient_Homephone'])&&!empty($res['Patient_Homephone'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][phone_number_home]' value='".$res['Patient_Homephone']."' />";
+            }
+            if(isset($res['Patient_Gender'])&&!empty($res['Patient_Gender'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][gender]' value='".$res['Patient_Gender']."' />";
+            }
+            if(isset($res['Patient_Address1'])&&!empty($res['Patient_Address1'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][address]' value='".$res['Patient_Address1']."' />";
+            }
+            if(isset($res['Patient_Address2'])&&!empty($res['Patient_Address2'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][address1]' value='".$res['Patient_Address2']."' />";
+            }
+            if(isset($res['Patient_City'])&&!empty($res['Patient_City'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][city]' value='".$res['Patient_City']."' />";
+            }
+            if(isset($res['Patient_State'])&&!empty($res['Patient_State'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][state]' value='".$res['Patient_State']."' />";
+            }
+            if(isset($res['Patient_Zip'])&&!empty($res['Patient_Zip'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][zip]' value='".$res['Patient_Zip']."' />";
+            }
+            
+            //Physician Info
             if(isset($res['GUID_PhysicianID'])&&!empty($res['GUID_PhysicianID'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Physician][GUID_PhysicianID]' value='".$res['GUID_PhysicianID']."' />";
+            }
+            if(isset($res['Physician_NPI'])&&!empty($res['Physician_NPI'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Physician][npi]' value='".$res['Physician_NPI']."' />";
             }
             if(isset($res['Physician_FirstName'])&&!empty($res['Physician_FirstName'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Physician][FirstName]' value='".$res['Physician_FirstName']."' />";
@@ -2663,6 +2751,8 @@ function dmdl_refresh($db){
             if(isset($res['Physician_LastName'])&&!empty($res['Physician_LastName'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Physician][LastName]' value='".$res['Physician_LastName']."' />";
             }
+            
+            //Account Info
             if(isset($res['ClientID']) && !empty($res['ClientID'])){ //account number
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][number]' value='".$res['ClientID']."' />";
             }
@@ -2670,10 +2760,10 @@ function dmdl_refresh($db){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][name]' value='".$res['ClientName']."' />";
             }
             if(isset($res['ClientAddress1'])&&!empty($res['ClientAddress1'])){
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][addr1]' value='".$res['ClientAddress1']."' />";
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][address]' value='".$res['ClientAddress1']."' />";
             }
             if(isset($res['ClientAddress2']) && !empty($res['ClientAddress2'])){
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][addr2]' value='".$res['ClientAddress2']."' />";
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][address1]' value='".$res['ClientAddress2']."' />";
             }
             if(isset($res['ClientCity']) && !empty($res['ClientCity'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][city]' value='".$res['ClientCity']."' />";
@@ -2684,9 +2774,52 @@ function dmdl_refresh($db){
             if(isset($res['ClientZip'])&&!empty($res['ClientZip'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][zip]' value='".$res['ClientZip']."' />";
             }
-            if(isset($res['Insurance_Company']) && !empty($res['Insurance_Company'])){
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][insurance_full]' value='".$res['Insurance_Company']."' />";
+            if(isset($res['ClientPhone'])&&!empty($res['ClientPhone'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][phone_number]' value='".$res['ClientPhone']."' />";
             }
+            if(isset($res['ClientFax'])&&!empty($res['ClientFax'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][fax]' value='".$res['ClientFax']."' />";
+            }
+            
+            //payor details
+            if(isset($res['Insurance_Company']) && !empty($res['Insurance_Company'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][payor][name]' value='".$res['Insurance_Company']."' />";
+            }
+            if(isset($res['Payer']) && !empty($res['Payer'])){ //abbreviation of ayor name
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][payor][PayID]' value='".$res['Payer']."' />";
+            }
+            
+            //BillingDetail
+            if(isset($res['BillingDetail']['invoiceDetail']) && !empty($res['BillingDetail']['invoiceDetail'])){
+                foreach ($res['BillingDetail']['invoiceDetail'] as $invKey => $invDetail){
+                    if(isset($invDetail['InvoiceID'])){
+                        $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][invoiceDetail][".$invKey."][InvoiceID]' value='".$invDetail['InvoiceID']."' />";
+                    }
+                    if(isset($invDetail['PayID'])){
+                        $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][invoiceDetail][".$invKey."][PayID]' value='".$invDetail['PayID']."' />";
+                    }
+                    if(isset($invDetail['TestCode'])){
+                        $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][invoiceDetail][".$invKey."][TestCode]' value='".$invDetail['TestCode']."' />";
+                    }
+                    if(isset($invDetail['CPT'])){
+                        $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][invoiceDetail][".$invKey."][CPT]' value='".$invDetail['CPT']."' />";
+                    }
+                    if(isset($invDetail['DatePaid'])){
+                        $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][invoiceDetail][".$invKey."][DatePaid]' value='".$invDetail['DatePaid']."' />";
+                    }
+                    
+                    $amount = 0;
+                    if(isset($invDetail['Total_PtPaid'])){
+                        $amount += $invDetail['Total_PtPaid'];
+                    }
+                    if(isset($invDetail['Total_InsPaid'])){
+                        $amount += $invDetail['Total_InsPaid'];
+                    }
+                    $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][invoiceDetail][".$invKey."][amount]' value='".$amount."' />";
+                    
+                }
+            }
+            
             //statuses
             if(isset($res['DOS']) && !empty($res['DOS'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][SpecimenCollected][Date]' value='".convertDmdlDate($res['DOS'])."' />";
@@ -2722,11 +2855,7 @@ function dmdl_refresh($db){
             }
             
             $content .= "</tr>";
-        }
-        
-        
-        
-        
+        }        
         //Getting page URL without query string
         $uri=strtok($_SERVER['REQUEST_URI'],"?")."?";
         
@@ -2758,10 +2887,86 @@ function dmdl_refresh($db){
     
     return $content;       
 }
+/**
+ * Update or insert new payor
+ * Used in dmdl refresh screen
+ * @param type $db
+ * @param type $Guid_user
+ * @param type $dataPayor
+ * @return type number => $Guid_payor 
+ */
+function updateOrInsertPayor($db,$Guid_user,$dataPayor){
+    //tbl_mdl_payors
+    //check is payor exists by name or PayID
+    $name = $dataPayor['name'];
+    $PayID = $dataPayor['PayID'];
+    
+    $checkPayor = $db->row("SELECT * FROM `tbl_mdl_payors` WHERE name=:name OR PayID=:PayID", array('name'=>$name, 'PayID'=>$PayID));
+    $thisPayorData = array();
+    if(!empty($checkPayor)){ //update empty fields
+        $Guid_payor = $checkPayor['Guid_payor'];
+        //check if there are empty filds then fill them
+        if($checkPayor['PayID']==''){
+            if(isset($dataPayor['PayID'])){
+                $thisPayorData['PayID'] = $dataPayor['PayID'];
+            }
+        }
+        if(!empty($thisPayorData)){
+            updateTable($db, 'tbl_mdl_payors', $thisPayorData, array('Guid_payor'=>$Guid_payor));
+        }
+    } else { //insert new row
+        if(isset($dataPayor['name'])){
+            $thisPayorData['name'] = $dataPayor['name'];
+        }
+        if(isset($dataPayor['PayID'])){
+            $thisPayorData['PayID'] = $dataPayor['PayID'];
+        }
+        if(!empty($thisPayorData)){
+            $thisPayorData['Loaded'] = 'Y';
+            $insertPayor = insertIntoTable($db, 'tbl_mdl_payors', $thisPayorData);
+            $Guid_payor = $insertPayor['insertID'];
+        }
+    }       
+    return $Guid_payor;
+}
+
+function updateOrInsertRevenue($db, $Guid_user, $Guid_payor, $invoiceDetails){
+    
+    foreach ($invoiceDetails as $k=>$invoiceDetail) {        
+        if(isset($invoiceDetail['CPT'])&&$invoiceDetail['CPT']!=''){
+            //check CPT
+            $checkCPT = $db->row("SELECT * FROM `tbl_mdl_cpt_code` WHERE code=:code",array('code'=>$invoiceDetail['CPT']));
+            if(!empty($checkCPT)){
+                $Guid_cpt = $checkCPT['Guid_cpt'];
+            }else{ //insert new CPT code
+                $newCpt = insertIntoTable($db, 'tbl_mdl_cpt_code', array('code'=>$invoiceDetail['CPT'], 'Loaded'=>'Y'));
+                $Guid_cpt = $newCpt['insertID'];
+            }        
+            $revenueData['Guid_cpt'] = $Guid_cpt;
+        }        
+        if($Guid_user && $Guid_user!=''){
+            $revenueData['Guid_user'] = $Guid_user;
+        }
+        if($Guid_payor && $Guid_payor!=''){
+            $revenueData['Guid_payor'] = $Guid_payor;
+        }
+        if(isset($invoiceDetail['amount'])){
+            $revenueData['amount'] = $invoiceDetail['amount'];
+        }
+        if(isset($invoiceDetail['DatePaid'])&&$invoiceDetail['DatePaid']!=''){
+            $date_paid = date('Y-m-d h:i:s', strtotime($invoiceDetail['DatePaid']));
+            $revenueData['date_paid'] = $date_paid;
+        }        
+        if(!empty($revenueData)){
+            $revenueData['Loaded'] = 'Y';
+            $insertRevenue = insertIntoTable($db, 'tbl_revenue', $revenueData);
+        }
+    }
+    
+}
 
 function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl){    
-    //update tbl_mdl_dmdl UpdateDatetime   
-    updateTable($db, 'tbl_mdl_dmdl', array('UpdateDatetime'=> date('Y-m-d h:i:s'),'Linked'=>'Y'), array('Guid_mdl_dmdl'=>$Guid_mdl_dmdl));
+    
     //var_dump($data);
     $statusLogData = array(
         'Loaded' => 'Y',
