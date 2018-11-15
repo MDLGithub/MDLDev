@@ -1723,6 +1723,12 @@ and (-webkit-min-device-pixel-ratio: 2) {
         padding-right: 0px !important;
     }
 
+    .top-buttons .submit:before{
+        width: 1em;
+        height: 1em;
+        background-size: 100%;
+    }
+
 }
 
 #accounts .actions h2{
