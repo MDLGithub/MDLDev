@@ -262,7 +262,7 @@ require_once ('navbar.php');
     <?php } ?> 
     <div class="box full visible ">  
         <section id="palette_top">
-            <h4>  
+            <h4  class="um_palette_header">  
                 <ol class="breadcrumb">
                     <li><a href="<?php echo SITE_URL; ?>">Home</a></li>
                     <li class="active">User Management</li>                   
@@ -292,7 +292,7 @@ require_once ('navbar.php');
             </div>               
             <div class="row">
                 <div class="col-md-12">
-                    <table id="dataTable" class="display" style="width:100%">
+                    <table id="dataTable" class="display user-table" style="width:100%">
                         <thead>
                             <tr>
                                 <th class="actions">#</th>

@@ -684,20 +684,22 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                 <div class="f2">
                     <label class="" for="account"><span>Start Date</span></label>
                     <div class="group">
-                        <input type="date" name="start_date" value="<?php echo date('Y-m-d') ?>" id="start_date" >
+                        <input readonly="" class="datepicker" type="text" id="from_date" name="from_date" value="" placeholder="From Date">
+                        <!-- <input type="date" name="start_date" value="<?php echo date('Y-m-d') ?>" id="start_date" > -->
                     </div>
                 </div>
                 <div class="f2">
                     <label class="" for="account"><span>End Date</span></label>
                     <div class="group">
-                        <input type="date" value="<?php echo date('Y-m-d') ?>" name="end_date" id="end_date">
+                        <input readonly="" class="datepicker" type="text" id="to_date" name="to_date" value="" placeholder="To Date" max="2018-11-13">
+                        <!-- <input type="date" value="<?php echo date('Y-m-d') ?>" name="end_date" id="end_date"> -->
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <button id="today_date" value="" name="submit_account" type="button" class="btn-inline">Reset</button>
+                    <button id="reset_date" value="2018-08-01" name="submit_account" type="button" class="btn-inline">Reset</button>
                 </div>
                 <div class="col-md-6">
-                    <button id="print" name="submit_account" type="submit" class="btn-inline">Continue</button>
+                    <button id="print" name="submit_account" type="submit" class="btn-inline">Print</button>
                 </div>
                 
                 <input type="hidden" name="account" value="<?php echo $accountActive['account']; ?>">

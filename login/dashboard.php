@@ -481,7 +481,7 @@ $num_estimates = $qualify_requests;
     <div class="box full visible">
         <?php if($dataViewAccess){ ?>
         <section id="palette_top" class="shorter_palette_top">
-            <h4><?php echo count($num_estimates) . " Results"; ?></h4>
+            <h4  class = "palette_results" ><?php echo count($num_estimates) . " Results"; ?></h4>
             <?php echo topNavLinks($role); ?>
         </section>
 
@@ -731,37 +731,34 @@ if(isset($_POST['dmdlUpdate'])){
             
             if( isset($_POST["dmdl"]["selected"][$mdlNum])) { //ceckbosx is checked
                 
-                $accountData = array();
-                if(isset($data['account']['number'])){
-                    $accountData['account'] = $data['account']['number'];
+                $Guid_mdl_dmdl = $data['Guid_mdl_dmdl'];
+                
+                //patient data
+                $Guid_dmdl_patient= isset($data['Guid_PatientId'])?$data['Guid_PatientId']:'';
+                $Guid_dmdl_physician=isset($data['Physician']['GUID_PhysicianID'])?$data['Physician']['GUID_PhysicianID']:'';
+                $account_number = isset($data['account']['number'])?$data['account']['number']:'';
+                $firstname_enc = isset($data['firstname'])?$data['firstname']:'';
+                $lastname_enc = isset($data['lastname'])?$data['lastname']:'';
+                $dob = isset($data['dob'])?$data['dob']:'';
+                $ethnicity = isset($data['ethnicity'])?$data['ethnicity']:'';                
+                $phone_number = isset($data['phone_number'])?$data['phone_number']:'';
+                $phone_number_home = isset($data['phone_number_home'])?$data['phone_number_home']:'';
+                $gender = isset($data['gender'])?$data['gender']:'';
+                $address = isset($data['address'])?$data['address']:'';
+                $address1 = isset($data['address1'])?$address1:'';
+                $city = isset($data['city'])?$data['city']:'';
+                $state = isset($data['state'])?$data['state']:'';
+                $zip = isset($data['zip'])?$data['zip']:'';
+                
+                if(isset($data['Physician']['FirstName'])){
+                    $physician_name = $data['Physician']['FirstName'];
                 }
-                if(isset($data['account']['name'])){
-                    $accountData['name'] = $data['account']['name'];
+                if(isset($data['Physician']['LastName'])){
+                    $physician_name .= " ".$data['Physician']['LastName'];
                 }
-                if(isset($data['account']['addr1'])){
-                    $accountData['address'] = $data['account']['addr1'];
-                }   
-                if(isset($data['account']['addr2'])){
-                    $accountData['address2'] = $data['account']['addr2'];
-                }   
-                if(isset($data['account']['city'])){
-                    $accountData['city'] = $data['account']['city'];
-                }   
-                if(isset($data['account']['state'])){
-                    $accountData['state'] = $data['account']['state'];
-                }   
-                if(isset($data['account']['zip'])){
-                    $accountData['zip'] = $data['account']['zip'];
-                }
-                $Guid_dmdl_patient=$data['Guid_PatientId'];
-                $firstname_enc = $data['firstname'];
-                $lastname_enc = $data['lastname'];
-                $dob = $data['dob'];
-                $physician_name = $data['Physician']['FirstName']." ".$data['Physician']['LastName'];
+                
                 $insurance_name = isset($data['insurance_full'])?$data['insurance_full']:'';
                 $dmdl_mdl_num = $data['mdlnumber'];
-                
-                
                 
                 if(isset($dmdlItem['Possible_Match']) && $dmdlItem['Possible_Match']!=''){
 
@@ -779,11 +776,19 @@ if(isset($_POST['dmdlUpdate'])){
                         if($insertUser['insertID'] && $insertUser['insertID']!=''){
                             $Guid_user = $insertUser['insertID'];
                             //insert into patients
-                            $insertPatient = $db->query("INSERT INTO `tblpatient` (Guid_dmdl_patient,Guid_user,firstname_enc,lastname_enc,dob,Loaded,Linked,physician_name,insurance_name,Date_created) "
-                                    . "VALUES ('$Guid_dmdl_patient','$Guid_user', "
-                                    . "AES_ENCRYPT('$firstname_enc', 'F1rstn@m3@_%'), "
-                                    . "AES_ENCRYPT('$lastname_enc', 'L@stn@m3&%#'), "
-                                    . "'$dob','Y','Y', '$physician_name','$insurance_name', NOW())");
+                            $insertPatient = $db->query("INSERT INTO `tblpatient` ("
+                                    . "Guid_dmdl_patient,Guid_dmdl_physician,Guid_user,account_number,"
+                                    . "firstname_enc,lastname_enc,"
+                                    . "ethnicity,dob,gender,"
+                                    . "address,address1,city,state,zip,"
+                                    . "phone_number,phone_number_home,"
+                                    . "Loaded,Linked,physician_name,insurance_name,Date_created) "
+                                    . "VALUES ('$Guid_dmdl_patient','$Guid_dmdl_physician','$Guid_user','$account_number', "
+                                    . "AES_ENCRYPT('$firstname_enc', 'F1rstn@m3@_%'),AES_ENCRYPT('$lastname_enc', 'L@stn@m3&%#'), "
+                                    . "'$ethnicity','$dob','$gender',"
+                                    . "'$address','$address1','$city','$state','$zip',"
+                                    . "'$phone_number','$phone_number_home', "
+                                    . "'Y','Y', '$physician_name','$insurance_name', NOW())");
                             $Guid_patient = $db->lastInsertId();
                             
                             //update mdl number
@@ -796,22 +801,25 @@ if(isset($_POST['dmdlUpdate'])){
 
                             //update OR insert account
                             $accountNum = $data['account']['number'];                            
-                            $checkAccount = checkedAccountData($db, $accountNum);
-                            if(!empty($checkAccount)){ //update   
-                                $Guid_account = $checkAccount['Guid_account'];
-                                $whereAccount = array('Guid_account'=>$Guid_account);
-                                $updateAccount = updateTable($db, 'tblaccount', $accountData, $whereAccount);
-                            } else { //insert 
-                                $accountData['Loaded'] = 'Y';
-                                $insertAccount = insertIntoTable($db, 'tblaccount', $accountData);
-                                $Guid_account = $insertAccount['insertID'];
-                            }
+                            $Guid_account = updateOrInsertAccount($db, $data['account']);
 
                             //update OR insert provider
                             if(isset($Guid_account) && $Guid_account!=''){
                                 $apiProviderData = $data['Physician'];
                                 $Guid_provider = updateOrInsertProvider($db,$accountNum,$Guid_account,$Guid_user,$apiProviderData);
                             }
+                            
+                            //update or insert payor and revenue data
+                            if(isset($data['payor']) && !empty($data['payor'])){
+                                $Guid_payor = updateOrInsertPayor($db, $Guid_user,$data['payor']);                            
+                                //update or insert add revenue
+                                if(isset($Guid_payor)&&$Guid_payor!=''){
+                                    if(isset($data['invoiceDetail']) && !empty($data['invoiceDetail'])){
+                                        updateOrInsertRevenue($db, $Guid_user, $Guid_payor, $data['invoiceDetail']);
+                                    }
+                                }
+                            }
+                            
 
                             $statuses = $_POST["dmdl"]["$mdlNum"]["statuses"];
 
@@ -838,6 +846,9 @@ if(isset($_POST['dmdlUpdate'])){
                                 $statusLogData['salesrep_fname'] = $getSalesrep['first_name'];
                                 $statusLogData['salesrep_lname'] = $accountInfo['last_name'];
                             }
+                            //update tbl_mdl_dmdl UpdateDatetime   
+                            updateTable($db, 'tbl_mdl_dmdl', array('UpdateDatetime'=> date('Y-m-d h:i:s'),'Linked'=>'Y'), array('Guid_mdl_dmdl'=>$Guid_mdl_dmdl));
+    
                             $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum,$data['Guid_mdl_dmdl']);
 
                         } 
@@ -854,7 +865,10 @@ if(isset($_POST['dmdlUpdate'])){
                             $patientData['Guid_dmdl_patient'] = $data['Guid_PatientId'];
                         }
                         if($thisPatient['Guid_dmdl_physician']==''){
-                            $patientData['Guid_dmdl_physician'] = $data['Guid_PatientId'];
+                            $patientData['Guid_dmdl_physician'] = $data['Physician']['GUID_PhysicianID'];
+                        }
+                        if($thisPatient['account_number']==''){
+                            $patientData['account_number'] = $data['account']['number'];
                         }
                         if($thisPatient['firstname_enc']==''){
                             $patientData['firstname_enc'] = $data['firstname'];
@@ -862,12 +876,40 @@ if(isset($_POST['dmdlUpdate'])){
                         if($thisPatient['lastname_enc']==''){
                             $patientData['lastname_enc'] = $data['lastname'];
                         }
+                        if($thisPatient['ethnicity']==''){
+                            $patientData['ethnicity'] = $data['ethnicity'];
+                        }
                         if($thisPatient['dob']==''){
                             $patientData['dob'] = $data['dob'];
                         }
+                        if($thisPatient['phone_number']==''){
+                            $patientData['phone_number'] = $data['phone_number'];
+                        }
+                        if($thisPatient['phone_number_home']==''){
+                            $patientData['phone_number_home'] = $data['phone_number_home'];
+                        }
+                        if($thisPatient['gender']==''){
+                            $patientData['gender'] = $data['gender'];
+                        }
+                        if($thisPatient['address']==''){
+                            $patientData['address'] = $data['address'];
+                        }
+                        if($thisPatient['address1']==''){
+                            $patientData['address1'] = $data['address1'];
+                        }
+                        if($thisPatient['city']==''){
+                            $patientData['city'] = $data['city'];
+                        }
+                        if($thisPatient['state']==''){
+                            $patientData['state'] = $data['state'];
+                        }
+                        if($thisPatient['zip']==''){
+                            $patientData['zip'] = $data['zip'];
+                        }                        
                         if($thisPatient['physician_name']==''){
                             $patientData['physician_name'] = $data['Physician']['FirstName']." ".$data['Physician']['LastName'];
                         }
+                                               
                         if($thisPatient['insurance_name']==''){
                             $patientData['insurance_name'] = $data['insurance_full'];
                         }
@@ -901,17 +943,8 @@ if(isset($_POST['dmdlUpdate'])){
                         }
 
                         //update OR insert account
-                        $accountNum = $data['account']['number'];                            
-                        $checkAccount = checkedAccountData($db,$accountNum);
-                        if(!empty($checkAccount)){ //update
-                            $Guid_account = $checkAccount['account'];
-                            $whereAccount = array('Guid_account'=>$Guid_account);
-                            $updateAccount = updateTable($db, 'tblaccount', $accountData, $whereAccount);
-                        } else { //insert 
-                            $accountData['Loaded']='Y';
-                            $insertAccount = insertIntoTable($db, 'tblaccount', $accountData);
-                            $Guid_account = $insertAccount['insertID'];
-                        }
+                        $accountNum = $data['account']['number']; 
+                        $Guid_account = updateOrInsertAccount($db, $data['account']);                       
 
                         //update OR insert provider
                         if(isset($Guid_account) && $Guid_account!=''){
@@ -944,6 +977,9 @@ if(isset($_POST['dmdlUpdate'])){
                                 $statusLogData['salesrep_lname'] = $accountInfo['last_name'];
                             }
                             //var_dump($statusLogData);
+                            //update tbl_mdl_dmdl UpdateDatetime   
+                            updateTable($db, 'tbl_mdl_dmdl', array('UpdateDatetime'=> date('Y-m-d h:i:s'),'Linked'=>'Y'), array('Guid_mdl_dmdl'=>$Guid_mdl_dmdl));
+                            
                             $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum,$data['Guid_mdl_dmdl']);
                         }
                     }                        

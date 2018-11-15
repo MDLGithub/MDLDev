@@ -264,22 +264,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             
         });
         var state_count1 = 0, count1 = 0;
-        /*var d = new Date();
-        var evtsDate = d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate();
-        evtsDate = evtsDate.toString();*/
-        <?php /*if(isset($_GET['salerepId'])): ?>
-            if (localStorage.evtsDate) {
-                evtsDate = (localStorage.evtsDate).toString();
-            }
-        <?php endif;*/ ?>
         var d = new Date();
         var evtsDate = d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate();
         evtsDate = evtsDate.toString();
-        <?php if(isset($_GET['salerepId'])): ?>
+        <?php //if(isset($_GET['salerepId'])): ?>
             if (localStorage.evtsDate) {
                 evtsDate = (localStorage.evtsDate).toString();
             }
-        <?php endif; ?>
+        <?php //endif; ?>
 
         var calendar = $('#calendar').fullCalendar({
             header: {
@@ -627,6 +619,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     success: function(returndata){
                         //console.log(returndata);
                         var chart = $("#chart").data("kendoChart");
+                        //console.log(chart.options.series);
                         chart.setOptions({
                             <?php if(isset($_GET['salerepId']) || $role == 'Sales Rep'): ?>
                                 dataSource: returndata.dataSource,
@@ -641,6 +634,13 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                                 max:returndata.yaxis
                             },
                         });
+                        var viewModel = kendo.observable({
+                          series: chart.options.series,
+                          markerColor: function(e) {
+                            return e.get("visible") ? e.color : "grey";
+                          }
+                        });
+                        kendo.bind($("#legend"), viewModel);
                         chart.refresh();
                     },
                 });
@@ -687,11 +687,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         url:'ajaxHandlerEvents.php', 
                         data:{ srepids:uniqueIds, action:'getconsultant' }, 
                         success: function(res){ 
-                            //console.log(res);
+                            console.log(res);
                             var result = JSON.parse(res);
                             var arrlen = result['names'].length;
-                            var i=0;
-                            for(i=0; i<arrlen;i++){
+                            var i = 0;
+                            for(i = 0; i < arrlen; i++){
                                 $('.salesrep_list ul').append('<li><a href="<?php echo SITE_URL ?>/dashboard2.php?salerepId='+result['ids'][i]+'">'+result['names'][i]+'</a></li>');
                             }
                         } 
@@ -1337,7 +1337,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                         <div class="col-lg-7 col-md-8 col-sm-7 top-buttons">
                         <button type="button" name="Detail" id="detail" class="col-lg-6 col-md-6 col-sm-3 col-md-offset-0 info-button activeButton" style="">Details</button>
                         <button type="button" name="Summary" id="summary" class="col-lg-6 col-md-6 col-sm-3 info-button" style="">Summary</button>
-                        <a href="eventschedule.php" class="col-md-12 col-sm-5 button submit"><strong>Full Calendar</strong></a>   
+                        <a href="eventschedule.php" class="col-md-12 col-sm-5 button submit fullCalendar"><strong>Full Calendar</strong></a>   
                         </div>    
                     </div>
                 </div>
@@ -1355,7 +1355,12 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
 
                     </div>
                     <div id="piechart"  class="col-md-6 col-sm-12" style="padding:0;"></div>
-                    <div id="chart" class="col-md-6 col-sm-12" style="padding:0;"></div>
+                    <!-- <div class="col-md-6 col-sm-12">
+                        <div id="legend"></div>
+                        <div id="chart" style="padding:0;"></div>
+                    </div> -->
+                    <div class="col-md-6 col-sm-12" id="chart" style="padding:0;"></div>
+                    
                     <!-- <div class="overlay"><div>No data available</div></div> -->
                     
                 </div>
@@ -1581,7 +1586,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 },
                 legend: {
                     position: "top",
-                    visible: false,
+                    visible: true,
                     template: chartTemplate,
                 },
                 seriesDefaults: {
@@ -1698,6 +1703,13 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             }
             return img;
         }
+
+        $(document).ready(function(){
+            $("#user_window a, .homeIcon, .fullCalendar").click(function(){
+                localStorage.clear();
+                window.localStorage.clear();
+            })
+        })
     </script>
 <?php require_once 'scripts.php'; ?>
 <?php require_once 'footer.php'; ?>
