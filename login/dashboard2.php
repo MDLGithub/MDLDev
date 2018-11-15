@@ -1703,6 +1703,13 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             }
             return img;
         }
+
+        $(document).ready(function(){
+            $("#user_window a, .homeIcon").click(function(){
+                localStorage.clear();
+                window.localStorage.clear();
+            })
+        })
     </script>
 <?php require_once 'scripts.php'; ?>
 <?php require_once 'footer.php'; ?>
