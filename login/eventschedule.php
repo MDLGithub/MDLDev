@@ -181,7 +181,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     }
 
     .fc-comments .day-comments{
-        background: rgb(1,1,1,0.1);
+        background: rgba(1,1,1,0.1);
         height: 100%;
         width: 80%;
         text-align: left;
@@ -311,6 +311,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         .show-stats{
             font-size:10px;
         }
+
+        .fc-basicDay-view .fc-content {
+            padding: 1% 0 1% 1% !important;
+        }
     }
 
 
@@ -327,9 +331,18 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     and (min-device-width: 1024px) 
     and (max-device-width: 1366px) 
     and (orientation: portrait){
+        .fc-basicDay-view .fc-comments{
+            width:auto;
+        }
+
         .show-stats{
             font-size: 11px;
         }
+
+        .fc-comments .day-comments{
+            padding: 40px;
+        }
+
     }
 
 
@@ -918,11 +931,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         });
 
 /*--------------------------------------------------------------------------------*/
-
     var url = "<?php echo SITE_URL ?>/eventschedule.php?type=search";
     $('#salesrepfilter').on('change', function(){
+        var moment = $('#calendar').fullCalendar('getDate');
+        localStorage.setItem('evtsDate',moment.format())
         var salesID = $(this).val();
-        //localStorage.setItem('salesrepValue', salesID);
         if(salesID != 0)
             url += "&salerepId="+salesID;
         if(localStorage.getItem('accountValue') !== null && localStorage.accountValue != 0)
@@ -930,9 +943,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         window.location.href = url;
     });
     $('#accountfilter').on('change', function(){
+        var moment = $('#calendar').fullCalendar('getDate');
+        localStorage.setItem('evtsDate',moment.format())
         var accID = $(this).val();
-        //alert(localStorage.salesrepValue);
-        //localStorage.setItem('accountValue', accID);
         if(localStorage.getItem('salesrepValue') !== null && localStorage.salesrepValue != 0)
             url += "&salerepId="+localStorage.salesrepValue;
         if(accID != 0)
@@ -1544,12 +1557,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
     
 </script>
-<aside id="action_palette" class="action_palette_width">		
+<aside id="action_palette" class="action_palette_width">        
     <div class="box full">
         <h4 class="box_top">Add Event</h4>
         <?php //if ($dataViewAccess) { ?>
             <div class="boxtent scroller ">
-                <form id="filter_form" action="" method="post">	
+                <form id="filter_form" action="" method="post"> 
                     <?php
                     $date_error = "";
 
@@ -1578,7 +1591,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         <div class="group">
                             <?php if ($role == 'Admin' || $role == 'Sales Manager') { ?>
                                 <select id="salesrepopt" name="salesrepopt" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrepopt'])) && (strlen($_POST['salesrepopt']))) ? "" : "no-selection"; ?>" required>
-                                    <option value="">Genetic Consultant</option>							
+                                    <option value="">Genetic Consultant</option>                            
                                     <?php
                                     $salesreps = $db->query("SELECT * FROM tblsalesrep GROUP BY first_name  ORDER BY first_name, last_name");
 
@@ -1835,7 +1848,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <button type="button" name="Detail" id="detail" class="info-button" style="float:left; margin-right: 20px; background: #1c487b; color: #fff;">Detail</button>
                                         <button type="button" name="Summary" id="summary" class="info-button" style="background: linear-gradient(to bottom, rgba(255,255,255,1) 46%,rgba(224,224,224,1) 64%,rgba(243,243,243,1) 100%);">Summary</button>
                                     </div>

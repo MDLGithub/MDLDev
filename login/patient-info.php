@@ -348,7 +348,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <?php } ?>
                             </div>
                         
-                            <div class="col-md-1">
+                            <div class="col-lg-1 col-md-12">
                                 <a title="Edit Patient Info" href="<?php echo $patientInfoUrl."&edit_patient_info=1";?>">
                                     <span class="fas fa-cogs fs-20" aria-hidden="true"></span>
                                 </a>
@@ -601,7 +601,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     </div>
                     <?php if($role!="Physician"){ ?>   
                     <div id="pLogs" class="row <?php echo (!$qualifyResult['specimen_collected'] || $qualifyResult['specimen_collected']=='No')?"hidden":"";?>">
-                        <div id="deductable-log" class="col-md-6">
+                        <div id="deductable-log" class="col-lg-6 col-md-12">
                             <?php 
                                 $whereUser = array('Guid_user'=>$_GET['patient']);
                                 $deductableLogs = $db->query('SELECT * FROM tbl_deductable_log WHERE Guid_user=:Guid_user', $whereUser); 
@@ -681,7 +681,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         </div>
                          
                         
-                        <div id="revenue" class="col-md-6">
+                        <div id="revenue" class="col-lg-6 col-md-12">
                             <h5>
                                 Revenue:
                                 <?php if($role=='Admin'){ ?>
