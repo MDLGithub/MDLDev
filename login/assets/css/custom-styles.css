@@ -491,7 +491,7 @@ th.zip input{
     margin-top: 15px;
     font-size: 18px;
     background: linear-gradient(#ebebeb,#f4f4f4,#ebebeb);
-    box-shadow: 0px 0px 3px #8a8a8a;
+    box-shadow: 0px -1px 1px #d3d3d3;
     border-radius: 10px 10px 0px 0px;
 }
 
@@ -1348,6 +1348,14 @@ and (orientation : landscape) {
         padding:0px 10px!important;
     }
 
+    #accounts .col-md-8{
+    	padding:0;
+    }
+
+    .genevedaLogo .image {
+        height: 16px;
+    }
+
 }
 
 /*iPad portrait*/
@@ -1596,6 +1604,7 @@ and (orientation : portrait) {
     	min-width: 28px;
     }
 
+
 }
 
 /* iPad Pro Landscape */
@@ -1613,7 +1622,7 @@ and (-webkit-min-device-pixel-ratio: 2) {
     }
 
     #dataTableHome tbody{
-        margin-top: 62px;
+        margin-top: 60px;
     }
 
     #dataTableHome_info{
@@ -1670,7 +1679,7 @@ and (-webkit-min-device-pixel-ratio: 2) {
 
     #dataTableHome tbody{
 
-        margin-top: 65px;
+        margin-top: 62px;
 
     }
 
@@ -1776,6 +1785,14 @@ and (-webkit-min-device-pixel-ratio: 2) {
 
     a[title="Edit Statuses"] .fas.fa-pencil-alt{
         margin: 0 0 0 -10px;
+    }
+
+    #accounts .col-md-8{
+    	padding:0;
+    }
+
+    .genevedaLogo .image {
+        height: 16px;
     }
 
 }

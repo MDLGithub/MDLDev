@@ -1897,7 +1897,11 @@ g g g text{
 
     #performance_chart .col-md-2{
       text-align:center;
-      flex-grow: initial;
+      flex-grow: initial;padding:0 35px;
+    }
+    
+    #performance_chart .col-md-2 span{
+      margin:auto;
     }
 
   }

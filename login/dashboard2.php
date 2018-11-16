@@ -188,6 +188,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             left: 39px;
            
         }
+
+        #detail, #summary {
+            font-size: 14px;
+        }
     }
 </style>
 <script>
