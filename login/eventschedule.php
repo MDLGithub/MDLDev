@@ -918,11 +918,11 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         });
 
 /*--------------------------------------------------------------------------------*/
-
     var url = "<?php echo SITE_URL ?>/eventschedule.php?type=search";
     $('#salesrepfilter').on('change', function(){
+        var moment = $('#calendar').fullCalendar('getDate');
+        localStorage.setItem('evtsDate',moment.format())
         var salesID = $(this).val();
-        //localStorage.setItem('salesrepValue', salesID);
         if(salesID != 0)
             url += "&salerepId="+salesID;
         if(localStorage.getItem('accountValue') !== null && localStorage.accountValue != 0)
@@ -930,9 +930,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         window.location.href = url;
     });
     $('#accountfilter').on('change', function(){
+        var moment = $('#calendar').fullCalendar('getDate');
+        localStorage.setItem('evtsDate',moment.format())
         var accID = $(this).val();
-        //alert(localStorage.salesrepValue);
-        //localStorage.setItem('accountValue', accID);
         if(localStorage.getItem('salesrepValue') !== null && localStorage.salesrepValue != 0)
             url += "&salerepId="+localStorage.salesrepValue;
         if(accID != 0)
@@ -1544,12 +1544,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
     
 </script>
-<aside id="action_palette" class="action_palette_width">		
+<aside id="action_palette" class="action_palette_width">        
     <div class="box full">
         <h4 class="box_top">Add Event</h4>
         <?php //if ($dataViewAccess) { ?>
             <div class="boxtent scroller ">
-                <form id="filter_form" action="" method="post">	
+                <form id="filter_form" action="" method="post"> 
                     <?php
                     $date_error = "";
 
@@ -1578,7 +1578,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         <div class="group">
                             <?php if ($role == 'Admin' || $role == 'Sales Manager') { ?>
                                 <select id="salesrepopt" name="salesrepopt" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['salesrepopt'])) && (strlen($_POST['salesrepopt']))) ? "" : "no-selection"; ?>" required>
-                                    <option value="">Genetic Consultant</option>							
+                                    <option value="">Genetic Consultant</option>                            
                                     <?php
                                     $salesreps = $db->query("SELECT * FROM tblsalesrep GROUP BY first_name  ORDER BY first_name, last_name");
 

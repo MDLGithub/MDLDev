@@ -755,6 +755,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             return self.indexOf(value) === index;
         }
 
+        $(".salesrep_list a").click(function(){
+            var moment = $('#calendar').fullCalendar('getDate');
+            localStorage.setItem('evtsDate',moment.format())
+            alert(localStorage.evtsDate);
+        })
+
         // Whenever the user clicks on the "save" button
         var clickEventType=((document.ontouchstart!==null)?'click':'touchstart');
         $('#eventsave').bind(clickEventType, function () {
