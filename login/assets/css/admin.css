@@ -126,7 +126,7 @@ input:focus, select:focus, textarea:focus, button:focus {
 }
 
 #action_palette .box_top {
-    padding: 1em 0;
+    padding: 1.09em 0;
     position: absolute;
     z-index: 2;
     left: 0;

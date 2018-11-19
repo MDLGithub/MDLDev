@@ -230,8 +230,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     #home form{ padding: 20px; }
     .fc-salesrep a{ margin-bottom: 5px; }
     .show-stats, .evttitle a, .fc-salesrep a { pointer-events: visible; }
-    #action_palette{ padding-top: 4.5em; }
-    main{ padding-top: 6.9em; }
+    /*#action_palette{ padding-top: 4.5em; }*/
+    /*main{ padding-top: 6.9em; }*/
     .summary_brca_icon {
         height: 50px;
     }
