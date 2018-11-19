@@ -30,7 +30,8 @@ if(isset($_GET['patientId'])&&isset( $_GET['physicianId'])){
     ini_set("soap.wsdl_cache_enabled", 0);
     try {
         $opts = array('ssl' => array('ciphers'=>'RC4-SHA'));
-        $client = new SoapClient('https://patientpayment.mdlab.com/MDL.WebService/BillingWebService?wsdl',
+        $client = new SoapClient(
+        'https://patientpayment.mdlab.com/MDL.WebService/BillingWebService?wsdl',
         array ('stream_context' => stream_context_create($opts),"exceptions"=>0));
     } catch (Exception $e) { 
         $headers = "MIME-Version: 1.0\r\n";
@@ -47,7 +48,7 @@ if(isset($_GET['patientId'])&&isset( $_GET['physicianId'])){
         "physicianId" => $_GET['physicianId'],
         "mdlNumber" => $_GET['mdlNumber']
     );
-    $result = (array)$client->GetCombinedResults($param);
+    $result = (array)$client->GetGeneticResultsMDL($param);
 
     $domObj = new xmlToArrayParser($result['GetCombinedResultsResult']); 
     $domArr = $domObj->array; 
@@ -78,10 +79,7 @@ if(isset($_GET['patientId'])&&isset( $_GET['physicianId'])){
                     echo $domObj->get_xml_error();            
                 } else {
                     var_dump($result);
-                    $res = $domArr['CombinedResults'];
-                    echo "<pre>";
-                    unset($res['PathResults']);
-                    print_r($res);
+                    
                 }
             }
             ?>
