@@ -1900,7 +1900,8 @@ table.dataTable thead .sorting {
 }
 
 #deductable-log input[type="text"]{
-    width: 90%;
+    width: 100%;
+    max-width:initial;
 }
 
 #deductable-log input[type="number"]{
