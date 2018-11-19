@@ -2183,6 +2183,7 @@ button[name="search"] > strong{
 .edit-status-form th.status_name{
     width: 70%;
 }
+.editStausesModal input[type='text'],
 .edit-status-form input[type='text'],
 .edit-status-form input[type='number'],
 .edit-status-form select{

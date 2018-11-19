@@ -15,7 +15,7 @@ ALTER TABLE `tbluser` DROP COLUMN Loaded
 ALTER TABLE `tbluser` ADD COLUMN Loaded ENUM('Y','N') DEFAULT 'N' AFTER marked_test
 ALTER TABLE `tbluser` ADD COLUMN Updated ENUM('Y','N') DEFAULT 'N' AFTER Loaded
 
-//november 8
+//november 15 ------------------------------------------------
 ALTER TABLE `tblpatient` ADD COLUMN `ethnicity` varchar(255) AFTER lastname_enc
 ALTER TABLE `tblpatient` ADD COLUMN `address1` varchar(255) AFTER address
 ALTER TABLE `tblpatient` ADD COLUMN `account_number` VARCHAR(32) AFTER Guid_user
@@ -31,6 +31,20 @@ ALTER TABLE `tbl_mdl_cpt_code` ADD COLUMN Loaded ENUM('Y','N') DEFAULT 'N' AFTER
 ALTER TABLE `tbl_revenue` ADD COLUMN Loaded ENUM('Y','N') DEFAULT 'N' AFTER amount
 
 
+
+//november 19
+INSERT INTO `tblstate` VALUES ('PR', 'Puerto Rico')
+
+CREATE TABLE `tbl_mdl_category` (
+  `Guid_category` INT(11) NOT NULL AUTO_INCREMENT,
+  `slug` VARCHAR(60) DEFAULT NULL,
+  `name` VARCHAR(255) DEFAULT NULL,
+  PRIMARY KEY (`Guid_category`)
+)
+
+INSERT INTO `tbl_mdl_category` (`slug`,`name`) VALUES  ('corporate', 'Corporate'), ('geneveda ', 'Geneveda ')
+
+ALTER TABLE `tblaccount` ADD COLUMN `Guid_category` INT(11) DEFAULT '1' AFTER `Guid_account`;
 
 /*Updated Files*/
 

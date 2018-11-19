@@ -736,10 +736,12 @@ function getAccountAndSalesrep($db, $accountGuid=NULL, $getRow=NULL){
             . "tblsalesrep.email AS salesrepEmail, tblsalesrep.phone_number AS salesrepPhone , "
             . "tblsalesrep.region AS salesrepRegion, tblsalesrep.title AS salesrepTitle, "
             . "tblsalesrep.address AS salesrepAddress, tblsalesrep.city AS salesrepCity, "
-            . "tblsalesrep.state AS salesrepState, tblsalesrep.zip AS salesrepZip, tblsalesrep.photo_filename AS salesrepPhoto "
+            . "tblsalesrep.state AS salesrepState, tblsalesrep.zip AS salesrepZip, tblsalesrep.photo_filename AS salesrepPhoto, "
+            . "tbl_mdl_category.slug AS category_slug, tbl_mdl_category.name AS category_name "
             . "FROM tblaccount "
             . "LEFT JOIN tblaccountrep ON tblaccount.Guid_account = tblaccountrep.Guid_account "
-            . "LEFT JOIN tblsalesrep ON tblsalesrep.Guid_salesrep=tblaccountrep.Guid_salesrep ";         
+            . "LEFT JOIN tblsalesrep ON tblsalesrep.Guid_salesrep=tblaccountrep.Guid_salesrep "         
+            . "LEFT JOIN tbl_mdl_category ON tblaccount.Guid_category=tbl_mdl_category.Guid_category ";         
    
     if($accountGuid){
         $query .= " WHERE tblaccount.Guid_account=:id";
@@ -750,7 +752,8 @@ function getAccountAndSalesrep($db, $accountGuid=NULL, $getRow=NULL){
     }else{
         $query .= " GROUP BY tblaccount.Guid_account"; 
         $result = $db->query($query);
-    }    
+    }   
+    
     return $result;
 }
 function getSalesrepAccounts($db, $Guid_user){
@@ -1660,6 +1663,30 @@ function get_nested_ststus_editable_rows($db, $parent = 0, $level = '') {
    
     return $content;
 }
+function getDmdlEditableCategories($db) {
+    $categories = $db->query("SELECT * FROM tbl_mdl_category");
+   
+    $content = "";
+    if ( !empty($categories) ) {
+        
+        foreach ( $categories as $k=>$category ) {  
+            $content .= "<tr>";
+            $content .= "<td>".$category['Guid_category'];
+            $content .= "<input type='hidden' name=category[".$category['Guid_category']."][Guid_category] value='".$category['Guid_category']."' />";
+            $content .= "</td>";            
+            $content .= "<td>";
+            $content .= "<input name=category[".$category['Guid_category']."][slug] type='text' value='".$category['slug']."'/>";
+            $content .= "</td>";            
+            $content .= "<td>";
+            $content .= "<input name=category[".$category['Guid_category']."][name] type='text' value='".$category['name']."' />";
+            $content .= "</td>";
+            $content .= "</tr>";
+        }
+        
+    }
+   
+    return $content;
+}
 
 /**
  * Get Mark as test user ids
@@ -2269,6 +2296,7 @@ function updateOrInsertAccount($db, $apiData){
         }
         if(!empty($accountData)){
             $accountData['Loaded']='Y';
+            $accountData['Guid_category']='1';
             $insertAccount = insertIntoTable($db, 'tblaccount', $accountData);
             $Guid_account = $insertAccount['insertID'];
         }
@@ -2293,9 +2321,12 @@ function updateOrInsertProvider($db,$accountNum, $Guid_account, $Guid_user, $api
         if(isset($checkProvider['last_name']) && $checkProvider['last_name']==''){
             $providerData['last_name'] = $apiProviderData['LastName'];
         }
+        if(isset($checkProvide['title']) && !empty($checkProvider['title'])){
+            $providerData['title'] = $apiProviderData['Physician_Title'];
+        }
         if(isset($Guid_provider) && !empty($providerData)){
             $updateProvider = updateTable($db, 'tblprovider', $providerData, array('Guid_provider'=>$Guid_provider));
-        }                                
+        }                               
     } else { //insert
         $providerData = array(
             'Guid_user'=>$Guid_user,
@@ -2311,6 +2342,9 @@ function updateOrInsertProvider($db,$accountNum, $Guid_account, $Guid_user, $api
         }
         if(isset($apiProviderData['npi'])){
             $providerData['npi'] = $apiProviderData['npi'];
+        }
+        if(isset($apiProviderData['Physician_Title'])){
+            $providerData['title'] = $apiProviderData['Physician_Title'];
         }
         $insertProvider = insertIntoTable($db, 'tblprovider', $providerData);
         $Guid_provider = $insertProvider['insertID'];
@@ -2761,6 +2795,9 @@ function dmdl_refresh($db){
             }
             if(isset($res['Physician_LastName'])&&!empty($res['Physician_LastName'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Physician][LastName]' value='".$res['Physician_LastName']."' />";
+            }
+			if(isset($res['Physician_Title'])&&!empty($res['Physician_Title'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Physician][Physician_Title]' value='".$res['Physician_Title']."' />";
             }
             
             //Account Info

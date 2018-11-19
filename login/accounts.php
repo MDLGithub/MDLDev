@@ -365,8 +365,14 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                         <img class="" src="<?php echo SITE_URL.$logo; ?>" />
                     </div>
                     <div class="addressInfoBlock">
-                        <!-- <label >Account Address</label>-->
+                        
                         <div id="officeAddress">
+                            <div>
+                                <label >Category</label><br/>
+                                <?php if(isset($category_name) && $category_name!=''){
+                                    echo $category_name;
+                                }?>
+                            </div>
                             <div>
                                 <?php 
                                 if($address){
