@@ -2561,8 +2561,8 @@ function dmdl_refresh($db){
             "physicianId" => $dmdlVal['PhysicianID'],
             "mdlNumber"=>$dmdlVal['MDLNumber']
         );
-        $result = (array)$client->GetCombinedResults($param);       
-        $domObj = new xmlToArrayParser($result['GetCombinedResultsResult']); 
+        $result = (array)$client->GetGeneticResultsMDL($param);       
+        $domObj = new xmlToArrayParser($result['GetGeneticResultsMDLResult']); 
         $domArr = $domObj->array; 
         if($domObj->parse_error){ 
             echo $domObj->get_xml_error();            

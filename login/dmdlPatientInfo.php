@@ -50,10 +50,10 @@ if(isset($_GET['patientId'])&&isset( $_GET['physicianId'])){
     );
     $result = (array)$client->GetGeneticResultsMDL($param);
 
-    $domObj = new xmlToArrayParser($result['GetCombinedResultsResult']); 
+    $domObj = new xmlToArrayParser($result['GetGeneticResultsMDLResult']); 
     $domArr = $domObj->array; 
     
-    $pageTitle = 'DMdl Patient API Data';
+    $pageTitle = 'dMDL Patient API Data';
 }
 ?>
 
@@ -79,7 +79,8 @@ if(isset($_GET['patientId'])&&isset( $_GET['physicianId'])){
                     echo $domObj->get_xml_error();            
                 } else {
                     var_dump($result);
-                    
+                    echo "<pre>";
+                    print_r($domArr);                    
                 }
             }
             ?>
@@ -105,6 +106,12 @@ if(isset($_GET['patientId'])&&isset( $_GET['physicianId'])){
                 foreach ($linkedDataTables as $k=>$tableName){
                     $db->query("UPDATE $tableName SET Linked='N' WHERE Linked='Y'");
                 }                
+            }
+            ?>
+            <?php
+            if(isset($_GET['truncate_dmdltable'])&&$_GET['truncate_dmdltable']=='1'){
+                $db->query("TRUNCATE TABLE tbl_mdl_dmdl");
+                                
             }
             ?>
         </div>
