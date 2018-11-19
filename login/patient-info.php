@@ -600,7 +600,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     </div>
                     <?php if($role!="Physician"){ ?>   
                     <div id="pLogs" class="row <?php echo (!$qualifyResult['specimen_collected'] || $qualifyResult['specimen_collected']=='No')?"hidden":"";?>">
-                        <div id="deductable-log" class="col-lg-6 col-md-12">
+                        <div id="deductable-log" class="col-lg-6 col-md-6">
                             <?php 
                                 $whereUser = array('Guid_user'=>$_GET['patient']);
                                 $deductableLogs = $db->query('SELECT * FROM tbl_deductable_log WHERE Guid_user=:Guid_user', $whereUser); 
@@ -680,7 +680,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         </div>
                          
                         
-                        <div id="revenue" class="col-lg-6 col-md-12">
+                        <div id="revenue" class="col-lg-6 col-md-6">
                             <h5>
                                 Revenue:
                                 <?php if($role=='Admin'){ ?>

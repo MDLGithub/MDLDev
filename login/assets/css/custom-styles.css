@@ -1324,13 +1324,13 @@ and (orientation : landscape) {
         margin-left: -10px;
     }
 
-    #deductable-log {
+    /*#deductable-log {
         width: 100%;
     }
 
     #revenue {
         width: 100%;
-    }
+    }*/
 
     #refresh-log-table .switch #switchLabel{
         left:-32px;
@@ -1898,6 +1898,15 @@ table.dataTable thead .sorting {
     margin-left: 4px;
     height: 23px;
 }
+
+#deductable-log input[type="text"]{
+    width: 90%;
+}
+
+#deductable-log input[type="number"]{
+    width:85%;
+}
+
 #total-deductible{
     text-align: right;
     font-weight: normal;
