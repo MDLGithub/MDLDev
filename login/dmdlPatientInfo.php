@@ -44,7 +44,8 @@ if(isset($_GET['patientId'])&&isset( $_GET['physicianId'])){
     }
     $param = array(
         "patientId" => $_GET['patientId'], 
-        "physicianId" => $_GET['physicianId']
+        "physicianId" => $_GET['physicianId'],
+        "mdlNumber" => $_GET['mdlNumber']
     );
     $result = (array)$client->GetCombinedResults($param);
 
@@ -77,8 +78,9 @@ if(isset($_GET['patientId'])&&isset( $_GET['physicianId'])){
                     echo $domObj->get_xml_error();            
                 } else {
                     var_dump($result);
-                   $res = $domArr['CombinedResults'];
+                    $res = $domArr['CombinedResults'];
                     echo "<pre>";
+                    unset($res['PathResults']);
                     print_r($res);
                 }
             }
