@@ -374,7 +374,7 @@ require_once ('navbar.php');
                         </div>
                     </div>     
                     <?php } ?>
-                    <table id="dataTable" class="table devicesTable">
+                    <table id="dataTable" class="table">
                         <thead>
                             <tr>                                
                                 <?php if(isFieldVisibleByRole($isSalesRepView, $roleID)) {?>

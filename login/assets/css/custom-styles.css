@@ -2153,11 +2153,11 @@ button[name="search"] > strong{
     font-size: 15px;
     color: #000;
 }
-.modalBlock .contentBlock.manageStatsModal, 
-.modalBlock.editStausesModal .contentBlock {
+.modalBlock .contentBlock.manageStatsModal,
+.modalBlock.editStausesModal .contentBlock{
     width: 60%;
     left: 20%;
-}
+} 
 #statuses-dropdowns-box,
 #roles-dropdown-box{
     height: 300px;
