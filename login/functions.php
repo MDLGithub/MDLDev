@@ -3204,15 +3204,23 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     if(isset($statuses['SpecimenAccessioned']['Date'])){
         $statusLogData['Date'] = $statuses['SpecimenAccessioned']['Date'];
         $statusSAccIDs[] = '2';        
-        if(isset($statuses['SpecimenAccessioned']['Test_Ordered'])){ //checking for test codes
-            $statusName = $statuses['SpecimenAccessioned']['Test_Ordered']; //1221, 1222, 1223, 1224, 1235, 1241, 1243, 1268, 1279
-            $getGuidStatusRow = $db->row("SELECT Guid_status FROM tbl_mdl_status WHERE `parent_id`='2' AND `status`='$statusName'");
-             if(!empty($getGuidStatusRow)){
-                $statusSAccIDs[] = $getGuidStatusRow['Guid_status'];
+        if(isset($statuses['SpecimenAccessioned']['Test_Ordered']) && $statuses['SpecimenAccessioned']['Test_Ordered']!=''){ 
+            //checking for test codes
+            $apiTestCodes = explode(',', $statuses['SpecimenAccessioned']['Test_Ordered']);
+            $allowedTestCodes = array('1221', '1222', '1223', '1224', '1235', '1241', '1243', '1268', '1279');
+            
+            foreach ($apiTestCodes as $key => $value) {
+                if(in_array($value, $allowedTestCodes)){
+                    $getGuidStatusRow = $db->row("SELECT Guid_status FROM tbl_mdl_status WHERE `parent_id`='2' AND `status`='$value'");
+                    if(!empty($getGuidStatusRow)){
+                        $statusSAccIDs[] = $getGuidStatusRow['Guid_status'];
+                        saveStatusLog($db, $statusSAccIDs, $statusLogData);
+                        updateCurrentStatusID($db, $data['Guid_patient']);
+                    }
+                }
             }
         }
-        saveStatusLog($db, $statusSAccIDs, $statusLogData);
-        updateCurrentStatusID($db, $data['Guid_patient']);
+        
     }
     //3.1 Insurance Preauthorization: Pending: Eligibility Review
     if(isset($statuses['IPP_EligibilityReview']['Date'])){
