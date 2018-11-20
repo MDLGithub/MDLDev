@@ -39,6 +39,7 @@ $tables = array(
         'account' => 'Account',
         'name' => 'Name',
         'Guid_salesrep'=>'Genetic Consultant',
+        'Guid_category'=>'Category',
         'logo'=>'Logo',
         'address'=>'Address',
         'city'=>'City',

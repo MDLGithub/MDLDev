@@ -28,6 +28,7 @@ $isZipView = isset($roleIDs['zip']['view'])?$roleIDs['zip']['view']:"";
 $isPhoneView = isset($roleIDs['phone_number']['view'])?$roleIDs['phone_number']['view']:"";
 $isFaxView = isset($roleIDs['fax']['view'])?$roleIDs['fax']['view']:"";
 $isSalesrepView = isset($roleIDs['Guid_salesrep']['view'])?$roleIDs['Guid_salesrep']['view']:"";
+$isCategoryView = isset($roleIDs['Guid_category']['view'])?$roleIDs['Guid_category']['view']:"";
 $isLogoView = isset($roleIDs['logo']['view'])?$roleIDs['logo']['view']:"";
 $isWebsiteView = isset($roleIDs['website']['view'])?$roleIDs['website']['view']:"";
 $isActionAdd = isset($roleIDs['actions']['add'])?$roleIDs['actions']['add']:"";
@@ -132,6 +133,8 @@ if($role=='Physician'){
 $tblproviders = $db->selectAll('tblprovider');
 $states = $db->selectAll('tblstates');
 
+$accountConfigUrl = SITE_URL."/account-config.php";
+
 require_once ('navbar.php');
 ?>
 
@@ -155,7 +158,7 @@ require_once ('navbar.php');
                 ?>
                 <ol class="breadcrumb">
                     <li><a href="<?php echo SITE_URL; ?>">Home</a></li>
-                    <li><a href="<?php echo SITE_URL; ?>/account-config.php">Accounts</a></li>
+                    <li><a href="<?php echo $accountConfigUrl; ?>">Accounts</a></li>
                     <li class="active">
                         Edit Account
                     </li>
@@ -163,7 +166,7 @@ require_once ('navbar.php');
                 <?php } elseif(isset($_GET['action']) && $_GET['action']=='add') { ?>
                 <ol class="breadcrumb">
                     <li><a href="<?php echo SITE_URL; ?>">Home</a></li>
-                    <li><a href="<?php echo SITE_URL; ?>/account-config.php">Accounts</a></li>
+                    <li><a href="<?php echo $accountConfigUrl; ?>">Accounts</a></li>
                     <li class="active">Add New Account</li>
                 </ol>
                 <?php    } else { ?>
@@ -180,6 +183,7 @@ require_once ('navbar.php');
             if( isset($_GET['action']) && $_GET['action'] !='' ){ 
                 if($_GET['action'] =='edit'){
                     $thisAccountID =  $_GET['id'];
+                    $accountConfigUrl .= "?action=edit&id=".$thisAccountID;
                     if($role=='Physician'){ 
                         $thisAccountID = $thisProvider['Guid_account'];
                     }
@@ -309,6 +313,40 @@ require_once ('navbar.php');
                                         </div>
                                     </div>                               
                                     <?php } ?>
+                                    
+                                    <?php if(isFieldVisibleByRole($isCategoryView, $roleID)) {?>
+                                    <?php $categories = $db->query("SELECT * FROM tbl_mdl_category"); ?>
+                                    <div class="row">
+                                        <div class="col-md-9 col-sm-10 padd-0">
+                                            <div class="f2  <?php echo ($Guid_category!="")?"valid show-label":"";?>">
+                                                <label class="dynamic" for="Guid_category"><span>Category</span></label>
+                                                <div class="group">
+                                                    <select class="<?php echo $noSelection; ?>" name="Guid_category" id="Guid_category">
+                                                        <option value="">Category</option>
+                                                        <?php 
+                                                        foreach ($categories as $key => $v) { 
+                                                            $selected = ($Guid_category == $v['Guid_category']) ? ' selected' : '';
+                                                        ?>
+                                                        <option <?php echo $selected; ?> value="<?php echo $v['Guid_category']; ?>"><?php echo $v['name']; ?></option>     
+                                                        <?php }?>
+                                                    </select>
+                                                    <p class="f_status">
+                                                        <span class="status_icons"><strong></strong></span>
+                                                    </p>
+                                                </div>
+                                            </div>  
+                                            
+                                        </div>
+                                        <div class="col-md-3 col-sm-2 text-center pT-20">
+                                            <a href="<?php echo $accountConfigUrl; ?>&manageCategories=1" class="add-new-account fs-28">
+                                                <span class="fas fa-pencil-alt"></span>
+                                            </a>
+                                            <a href="<?php echo $accountConfigUrl; ?>&addCategory=1" class="add-new-account fs-28">
+                                                <span class="fas fa-plus-circle"></span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <?php } ?> 
                                     
                                     <?php if(isFieldVisibleByRole($isSalesrepView, $roleID)) {?>
                                     <div class="row">
@@ -486,7 +524,9 @@ require_once ('navbar.php');
                                 <?php if(isFieldVisibleByRole($isNameView, $roleID)) {?>
                                     <th>Account Name</th>
                                 <?php } ?>    
-
+                                <?php if(isFieldVisibleByRole($isCategoryView, $roleID)) {?>
+                                    <th class="dropdownFilter">Category</th>
+                                <?php } ?>    
                                 <?php if(isFieldVisibleByRole($isCityView, $roleID)) {?>
                                     <th class="">City</th>
                                 <?php } ?>    
@@ -521,6 +561,9 @@ require_once ('navbar.php');
                                 <?php if(isFieldVisibleByRole($isNameView, $roleID)) {?>
                                     <td><?php echo formatAccountName($v['name']); ?></td>
                                 <?php } ?> 
+                                <?php if(isFieldVisibleByRole($isCategoryView, $roleID)) {?>
+                                    <td><?php echo $v['category_name']; ?></td>
+                                <?php } ?>    
                                 <?php if(isFieldVisibleByRole($isCityView, $roleID)) {?>
                                     <td><?php echo $v['city']; ?></td>
                                 <?php } ?>    
@@ -587,6 +630,115 @@ require_once ('navbar.php');
      </div>
     <?php } ?>
 </main>
+
+<?php 
+if(isset($_POST['edit_categories'])){    
+    if(isset($_POST['category'])){        
+        $categories = $_POST['category'];
+        foreach ($categories as $k => $cat) {            
+            $whereEditCat = array('Guid_category'=>$cat['Guid_category']);
+            $editCatData = array(
+                'name' => $cat['name'],
+                'slug' => $cat['slug']
+            );    
+            //var_dump($editCatData);
+            updateTable($db, 'tbl_mdl_category', $editCatData, $whereEditCat);
+        }
+        $message = "All data saved.";
+    }
+} 
+?>
+
+<?php if( (isset($_GET['manageCategories'])) && $_GET['manageCategories']=="1" ){ ?>
+<div id="manage-status-modal" class="modalBlock editStausesModal">
+    <div class="contentBlock ">
+        <a class="close" href="<?php echo $accountConfigUrl; ?>">X</a> 
+        <h5 class="title">
+            Edit Categories
+        </h5>
+        <div class="content">
+            <div class="edit-status-form">
+                <form action="" method="POST">
+                    <?php if(isset($message)){ ?>
+                        <div class="text-center success-text"><?php echo $message; ?></div>
+                    <?php } ?>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="w-50">Category#</th>
+                                <th class="">Slug</th>
+                                <th class="">Name</th>                               
+                            </tr>
+                        </thead>
+                        <tbody>                            
+                            <?php  echo getDmdlEditableCategories($db); ?>                            
+                        </tbody>
+                    </table>
+                    <div class="text-right pT-10">
+                       <button class="button btn-inline" name="edit_categories" type="submit" >Save</button>
+                       <a href="<?php echo $accountConfigUrl; ?>" class="btn-inline btn-cancel">Cancel</a>                   
+                   </div>
+                </form>
+            </div>           
+        </div>
+    </div>
+</div>
+<?php } ?>
+
+<?php 
+
+if(isset($_POST['add_new_category'])){  
+    $categoryData = array(
+        'name'=>$_POST['category_name'],
+        'slug'=>$_POST['category_slug']
+    );
+    
+    $insert = insertIntoTable($db,'tbl_mdl_category', $categoryData); 
+    if($insert['status']=='1'){
+        Leave($accountConfigUrl);
+    }
+} 
+
+?>
+<?php if( (isset($_GET['addCategory'])) && $_GET['addCategory']=="1" ){ ?>
+<div id="manage-status-modal" class="modalBlock ">
+    <div class="contentBlock ">
+        <a class="close" href="<?php echo $accountConfigUrl; ?>">X</a> 
+        <h5 class="providersTitle">Add New Category</h5>
+        <div class="content">
+                    
+            <form action="" method="POST">            
+                <div class="f2">
+                    <label class="dynamic" for="category_name"><span>Category Name</span></label>
+                    <div class="group">
+                        <input required="" name="category_name" value="" type="text" class="form-control" id="category_name" placeholder="Category Name">
+                        <p class="f_status">
+                            <span class="status_icons"><strong>*</strong></span>
+                        </p>
+                    </div>
+                </div>
+                <div class="f2">
+                    <label class="dynamic" for="category_slug"><span>Category Slug</span></label>
+                    <div class="group">
+                        <input required="" name="category_slug" value="" type="text" class="form-control" id="category_slug" placeholder="Category Slug">
+                        <p class="f_status">
+                            <span class="status_icons"><strong>*</strong></span>
+                        </p>
+                    </div>
+                </div>               
+
+                <button name="add_new_category" type="submit" class="btn-inline">Save</button>
+                <button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>                   
+                <!--<a href="<?php echo SITE_URL."/devicesInventory.php".$link;?>" class="btn-inline btn-cancel">Cancel</a>-->
+            </form>           
+        </div>
+    </div>
+</div>
+<?php } ?>
+
+
+
+
 <?php require_once('scripts.php');?>
 <script type="text/javascript">  
     if ($('#dataTable').length ) {

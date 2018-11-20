@@ -30,7 +30,8 @@ if(isset($_GET['patientId'])&&isset( $_GET['physicianId'])){
     ini_set("soap.wsdl_cache_enabled", 0);
     try {
         $opts = array('ssl' => array('ciphers'=>'RC4-SHA'));
-        $client = new SoapClient('https://patientpayment.mdlab.com/MDL.WebService/BillingWebService?wsdl',
+        $client = new SoapClient(
+        'https://patientpayment.mdlab.com/MDL.WebService/BillingWebService?wsdl',
         array ('stream_context' => stream_context_create($opts),"exceptions"=>0));
     } catch (Exception $e) { 
         $headers = "MIME-Version: 1.0\r\n";
@@ -44,14 +45,15 @@ if(isset($_GET['patientId'])&&isset( $_GET['physicianId'])){
     }
     $param = array(
         "patientId" => $_GET['patientId'], 
-        "physicianId" => $_GET['physicianId']
+        "physicianId" => $_GET['physicianId'],
+        "mdlNumber" => $_GET['mdlNumber']
     );
-    $result = (array)$client->GetCombinedResults($param);
+    $result = (array)$client->GetGeneticResultsMDL($param);
 
-    $domObj = new xmlToArrayParser($result['GetCombinedResultsResult']); 
+    $domObj = new xmlToArrayParser($result['GetGeneticResultsMDLResult']); 
     $domArr = $domObj->array; 
     
-    $pageTitle = 'DMdl Patient API Data';
+    $pageTitle = 'dMDL Patient API Data';
 }
 ?>
 
@@ -77,9 +79,8 @@ if(isset($_GET['patientId'])&&isset( $_GET['physicianId'])){
                     echo $domObj->get_xml_error();            
                 } else {
                     var_dump($result);
-                   $res = $domArr['CombinedResults'];
                     echo "<pre>";
-                    print_r($res);
+                    print_r($domArr);                    
                 }
             }
             ?>
@@ -105,6 +106,12 @@ if(isset($_GET['patientId'])&&isset( $_GET['physicianId'])){
                 foreach ($linkedDataTables as $k=>$tableName){
                     $db->query("UPDATE $tableName SET Linked='N' WHERE Linked='Y'");
                 }                
+            }
+            ?>
+            <?php
+            if(isset($_GET['truncate_dmdltable'])&&$_GET['truncate_dmdltable']=='1'){
+                $db->query("TRUNCATE TABLE tbl_mdl_dmdl");
+                                
             }
             ?>
         </div>

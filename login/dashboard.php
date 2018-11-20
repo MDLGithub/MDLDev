@@ -475,6 +475,26 @@ $qualify_requests = $db->query($sqlTbl);
 $num_estimates = $qualify_requests;
 
 
+if(isset($_GET['resetDmdlData']) && $_GET['resetDmdlData']=='1'){
+    if($role=='Admin'){
+        //remove Loaded Data
+        $loadedDataTables = array('tbluser','tblpatient', 'tblaccount', 
+                                    'tblprovider', 'tbl_mdl_number', 'tbl_mdl_status_log', 
+                                    'tbl_mdl_payors', 'tbl_revenue', 'tbl_mdl_cpt_code'
+                                );
+        foreach ($loadedDataTables as $k=>$tableName){
+            $db->query("DELETE FROM $tableName WHERE Loaded='Y'");
+        } 
+        //Reset Linked Flags
+        $linkedDataTables = array('tbl_mdl_dmdl','tblpatient');
+        foreach ($linkedDataTables as $k=>$tableName){
+            $db->query("UPDATE $tableName SET Linked='N' WHERE Linked='Y'");
+        } 
+        
+        Leave(SITE_URL."/dashboard.php");
+    }
+}
+
 ?>
 
 <main class="">
@@ -539,10 +559,13 @@ $num_estimates = $qualify_requests;
                         <span class="dmdlCsvUpload">  
                             <input type="file" name="dmdlCsvUpload" />
                         </span> 
-                        <button class="upload" type="submit" name="dmdlUpload">Upload</button>                        
+                        <button class="upload" type="submit" name="dmdlUpload">Upload</button>  
                         <span class="dmdlRefresh">  
-                            <a href="<?php echo SITE_URL.'/dashboard.php?refresh=1'; ?>" class="refresh" type="submit" name="dmdlRefresh"><i class="fas fa-sync-alt"></i></a>
-                        </span>                        
+                            <a title="Open dMDL Screen." href="<?php echo SITE_URL.'/dashboard.php?refresh=1'; ?>" class="refresh" type="submit" name="dmdlRefresh"><i class="fas fa-sync-alt"></i></a>
+                        </span>     
+                        <span class="dmdlRefresh">  
+                            <a title="Reset dMDL Loaded Data." href="<?php echo SITE_URL.'/dashboard.php?resetDmdlData=1'; ?>" class="refresh" type="submit" name="dmdlRefresh"><i class="fa fa-clock"></i></a>
+                        </span>  
                     </form>
                     <div class="uploadMsg">
                     <?php if($uploadMessage!=""){ echo $uploadMessage; }?>
