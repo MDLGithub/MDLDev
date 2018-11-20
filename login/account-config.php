@@ -337,7 +337,7 @@ require_once ('navbar.php');
                                             </div>  
                                             
                                         </div>
-                                        <div class="col-md-3 col-sm-2 text-center pT-20">
+                                        <div class="col-md-3 col-sm-2 text-center pT-20 category-icons">
                                             <a href="<?php echo $accountConfigUrl; ?>&manageCategories=1" class="add-new-account fs-28">
                                                 <span class="fas fa-pencil-alt"></span>
                                             </a>

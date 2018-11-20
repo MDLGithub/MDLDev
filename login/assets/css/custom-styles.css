@@ -1363,6 +1363,10 @@ and (orientation : landscape) {
         background: white;
     }
 
+    .category-icons{
+        padding-top:0 !important;
+    }
+
 }
 
 /*iPad portrait*/
