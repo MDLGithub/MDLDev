@@ -46,6 +46,13 @@ INSERT INTO `tbl_mdl_category` (`slug`,`name`) VALUES  ('corporate', 'Corporate'
 
 ALTER TABLE `tblaccount` ADD COLUMN `Guid_category` INT(11) DEFAULT '1' AFTER `Guid_account`;
 
+
+//November 20
+TRUNCATE TABLE `tbl_mdl_category`;
+ALTER TABLE `tbl_mdl_category` ADD COLUMN `description` TEXT AFTER `name`;
+INSERT INTO `tbl_mdl_category` (`slug`,`name`,`description`) VALUES  ('geneveda ', 'Geneveda', 'Default Category For manually created accounts.'), ('corporate', 'Corporate', 'Category for automatically loaded accounts.')
+
+
 /*Updated Files*/
 
 

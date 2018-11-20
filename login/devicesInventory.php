@@ -464,10 +464,20 @@ require_once ('navbar.php');
      </div>
     <?php } ?>
 </main>
+<?php 
+$closeNewDeviceLink = SITE_URL.'/devicesInventory.php';
+if($_GET['action']){
+    $closeNewDeviceLink .= '?action='.$_GET['action'];
+    if(isset($_GET['id'])){
+        $closeNewDeviceLink .= '&id='.$_GET['id'];
+    }
+}
 
+?>
 
 <div id="add-account-provider-box" class="modalBlock <?php echo $modalBoxClass; ?>">
     <div class="contentBlock">        
+        <a class="close" href="<?php echo $closeNewDeviceLink; ?>">X</a>
         <h5 class="providersTitle">Add New Device</h5>        
         <form action="" method="POST">            
             <div class="f2">
@@ -491,7 +501,7 @@ require_once ('navbar.php');
             </div>
 
             <button name="add_new_device" type="submit" class="btn-inline">Save</button>
-            <button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>                   
+            <!--<button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>-->                   
             <!--<a href="<?php echo SITE_URL."/devicesInventory.php".$link;?>" class="btn-inline btn-cancel">Cancel</a>-->
         </form>          
     </div>    

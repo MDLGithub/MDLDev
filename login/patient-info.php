@@ -18,6 +18,7 @@ $roleID = $roleInfo['Guid_role'];
 $role = $roleInfo['role'];
 $default_account = "";
 $uploadMessage = "";
+$xmlLink = "";
 //check if patient (the same as Guid_user) empty 
 if(!isset($_GET['patient']) || $_GET['patient']==''){
     Leave(SITE_URL);
@@ -42,7 +43,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     q.other_insurance,q.account_number,q.Date_created as qDate,
                     q.provider_id, q.deviceid, q.source, 
                     CONCAT(prov.first_name,' ',prov.last_name) provider, prov.title,
-                    p.*, aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname, 
+                    p.*, p.Loaded As dmdlPatient,
+                    aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname, 
                     aes_decrypt(lastname_enc, 'L@stn@m3&%#') as lastname, 
                     u.email, u.marked_test ";
     
@@ -78,7 +80,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     if(!$qualifyResult){
         //Leave(SITE_URL);
         $getPatientInfoQ = "SELECT 
-                            p.*, aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname, 
+                            p.*, p.Loaded As dmdlPatient,
+                            aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname, 
                             aes_decrypt(lastname_enc, 'L@stn@m3&%#') as lastname, 
                             u.email, u.marked_test, u.Loaded as user_loaded
                             FROM tblpatient p
@@ -223,6 +226,15 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     } else {
         $accountInfo = FALSE;
     }
+    //creating xml link for loaded patients
+    if(isset($qualifyResult['dmdlPatient'])&&$qualifyResult['dmdlPatient']=='Y'){      
+        if( $qualifyResult['Guid_dmdl_patient']!='' && $qualifyResult['Guid_dmdl_physician']!='' && $mdlInfo['mdl_number']!=''){
+            $patientId = $qualifyResult['Guid_dmdl_patient'];
+            $physicianId = $qualifyResult['Guid_dmdl_physician'];
+            $mdlNumber = $mdlInfo['mdl_number'];
+            $xmlLink = SITE_URL."/dmdlPatientInfo.php?patientId=$patientId&physicianId=$physicianId&mdlNumber=$mdlNumber";
+        }
+    }
 ?>
 
 <link rel="stylesheet" href="assets/css/brca_forms.css">
@@ -271,6 +283,12 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     <img src="./images/icon_forms.png" />
                     <p>Forms</p>
                 </a>
+                <?php if($role=='Admin' && $xmlLink!=''){ ?>
+                <a class="xmlLink" href="<?php echo $xmlLink; ?>">
+                    <img src="./images/xmlIcon.png" />
+                    <p>XML</p>
+                </a>
+                <?php } ?>
                 <div class="row">
                      <div id="message" class="error-text text-center">
                         <?php if($errorMsgMdlStats){ ?>   

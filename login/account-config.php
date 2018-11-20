@@ -524,7 +524,9 @@ require_once ('navbar.php');
                                 <?php if(isFieldVisibleByRole($isNameView, $roleID)) {?>
                                     <th>Account Name</th>
                                 <?php } ?>    
-
+                                <?php if(isFieldVisibleByRole($isCategoryView, $roleID)) {?>
+                                    <th class="dropdownFilter">Category</th>
+                                <?php } ?>    
                                 <?php if(isFieldVisibleByRole($isCityView, $roleID)) {?>
                                     <th class="">City</th>
                                 <?php } ?>    
@@ -559,6 +561,9 @@ require_once ('navbar.php');
                                 <?php if(isFieldVisibleByRole($isNameView, $roleID)) {?>
                                     <td><?php echo formatAccountName($v['name']); ?></td>
                                 <?php } ?> 
+                                <?php if(isFieldVisibleByRole($isCategoryView, $roleID)) {?>
+                                    <td><?php echo $v['category_name']; ?></td>
+                                <?php } ?>    
                                 <?php if(isFieldVisibleByRole($isCityView, $roleID)) {?>
                                     <td><?php echo $v['city']; ?></td>
                                 <?php } ?>    

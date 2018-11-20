@@ -1374,6 +1374,8 @@ function formatAccountName($accountName){
     $accountName = ucwords(strtolower($accountName));
     $accountName = str_replace("Ob/gyn","OB/GYN",$accountName);
     $accountName = str_replace("Obgyn","OB/GYN",$accountName);
+    $accountName = str_replace(" md"," MD",$accountName);
+    $accountName = str_replace(" Md"," MD",$accountName);
     return $accountName;
 }
 
@@ -2296,7 +2298,7 @@ function updateOrInsertAccount($db, $apiData){
         }
         if(!empty($accountData)){
             $accountData['Loaded']='Y';
-            $accountData['Guid_category']='1';
+            $accountData['Guid_category']='2'; //Guid for Corporate category
             $insertAccount = insertIntoTable($db, 'tblaccount', $accountData);
             $Guid_account = $insertAccount['insertID'];
         }

@@ -1472,11 +1472,14 @@ and (-webkit-min-device-pixel-ratio: 2) {
     width: 100px;
 }
 
-.patient_forms {
+.patient_forms, .xmlLink {
     text-align: center;
     width: 100px;
     float: right;
     margin-top: -65px;
+}
+.xmlLink{
+    margin-right: 70px;
 }
 
 .export_matrix img {
@@ -1485,7 +1488,7 @@ and (-webkit-min-device-pixel-ratio: 2) {
     display: block;
 }
 
-.patient_forms img {
+.patient_forms img, .xmlLink img {
     height: 30px;
     margin-left: 36%;
     display: block;

@@ -333,6 +333,7 @@ td{
 }
 select.dataTableFilterInput{
     min-width:190px;
+    font-size:inherit;
 }
 
 .url_config_box h4{
