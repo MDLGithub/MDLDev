@@ -1759,21 +1759,10 @@ g g g text{
       z-index:10;
     }
 
-
     .salesrep_list{
       height:100px;
     }
 
-    .salesrep_list::after {
-      content: '';
-      position: absolute;
-      background: grey;
-      width: 100%;
-      height: 20px;
-      top: 124px;
-      border-bottom-left-radius: 10px;
-      border-bottom-right-radius: 10px;
-    }
 
     .top-buttons.col-md-5{
 
@@ -1839,6 +1828,10 @@ g g g text{
         display:flex;
         align-items:center;
         padding-right: 0;
+    }
+
+    .fc-content.evtcontent div span{
+        left:0;
     }
 
   }
@@ -2432,6 +2425,10 @@ and (orientation : portrait) {
 
     }
 
+    .fc-content.evtcontent div span{
+      left:0;
+    }
+
 
 
     #chart_stats{
@@ -2486,5 +2483,16 @@ and (orientation : portrait) {
     .below_avg:before, .above_avg:before, .top_performer_avg:before{
       left:33px;
     } 
+
+    
+    .salesrep_list ul::after {
+      content: '';
+      position: absolute;
+      background: grey;
+      width: 100%;
+      height: 20px;
+      border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 10px;
+    }
 
 }

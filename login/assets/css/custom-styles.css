@@ -333,6 +333,7 @@ td{
 }
 select.dataTableFilterInput{
     min-width:190px;
+    font-size:inherit;
 }
 
 .url_config_box h4{
@@ -847,6 +848,7 @@ input:checked + .slider:before {
     width:50px;
     border-radius:50%;
     box-shadow: 2px 2px 2px 2px grey;
+    z-index:10;
 }
 .action_palette_width{
     -webkit-transform: translateX(-93%);
@@ -1323,13 +1325,13 @@ and (orientation : landscape) {
         margin-left: -10px;
     }
 
-    #deductable-log {
+    /*#deductable-log {
         width: 100%;
     }
 
     #revenue {
         width: 100%;
-    }
+    }*/
 
     #refresh-log-table .switch #switchLabel{
         left:-32px;
@@ -1897,6 +1899,16 @@ table.dataTable thead .sorting {
     margin-left: 4px;
     height: 23px;
 }
+
+#deductable-log input[type="text"]{
+    width: 100%;
+    max-width:initial;
+}
+
+#deductable-log input[type="number"]{
+    width:85%;
+}
+
 #total-deductible{
     text-align: right;
     font-weight: normal;
@@ -2152,11 +2164,11 @@ button[name="search"] > strong{
     font-size: 15px;
     color: #000;
 }
-.modalBlock .contentBlock.manageStatsModal, 
-.modalBlock.editStausesModal .contentBlock {
+.modalBlock .contentBlock.manageStatsModal,
+.modalBlock.editStausesModal .contentBlock{
     width: 60%;
     left: 20%;
-}
+} 
 #statuses-dropdowns-box,
 #roles-dropdown-box{
     height: 300px;
@@ -2172,6 +2184,7 @@ button[name="search"] > strong{
 .edit-status-form th.status_name{
     width: 70%;
 }
+.editStausesModal input[type='text'],
 .edit-status-form input[type='text'],
 .edit-status-form input[type='number'],
 .edit-status-form select{
