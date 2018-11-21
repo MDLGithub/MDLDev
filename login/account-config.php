@@ -119,6 +119,19 @@ if(isset($_POST['submit_account'])){
 }
 $salesreps = $db->selectAll('tblsalesrep');
 $accounts = $db->selectAll('tblaccount', ' ORDER BY name ASC');
+if($role == "Sales Manager"){
+    $userCategories = $db->query("SELECT Guid_category FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$_SESSION['user']['id'])); 
+    $userLinks = '';
+    if(!empty($userCategories)){
+        foreach ($userCategories as $k=>$v){
+            $userLinks .= $v['Guid_category'].', ';
+        }
+        $userLinks = rtrim($userLinks, ', ');
+    }    
+    if($userLinks != ''){
+        $accounts = $db->query("SELECT * FROM tblaccount WHERE Guid_category IN (" . $userLinks . ") ORDER BY `name` ASC" );
+    } 
+}
 
 if($role=='Physician'){ 
     //get the Guid_account for that Physician   

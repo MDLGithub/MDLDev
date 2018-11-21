@@ -624,14 +624,13 @@ function moveUserData($db, $Guid_user, $userDetails, $thisRole, $prevRole){
  * @param type $Guid_user
  * @param type $catIDs
  */
-function saveCategoryUserLinks($db, $Guid_user, $catIDs){    
-    if(!empty($catIDs)){
-        
-        //delete old data
-        $db->query("DELETE FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$Guid_user));
+function saveCategoryUserLinks($db, $Guid_user, $catIDs){  
+    //delete old links
+    $db->query("DELETE FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$Guid_user));
+    if(!empty($catIDs)){  
         foreach ($catIDs as $k=>$Guid_category){
             $userCatData = array('Guid_category'=>$Guid_category, 'Guid_user'=>$Guid_user);
-            //insert new data
+            //insert new links
             insertIntoTable($db,'tbl_mdl_category_user_link', $userCatData);            
         }
     }
@@ -760,9 +759,28 @@ function getAccountAndSalesrep($db, $accountGuid=NULL, $getRow=NULL){
             . "LEFT JOIN tblaccountrep ON tblaccount.Guid_account = tblaccountrep.Guid_account "
             . "LEFT JOIN tblsalesrep ON tblsalesrep.Guid_salesrep=tblaccountrep.Guid_salesrep "         
             . "LEFT JOIN tbl_mdl_category ON tblaccount.Guid_category=tbl_mdl_category.Guid_category ";         
-   
+    $thisUserID = $_SESSION['user']['id'];
+    $roleInfo = getRole($db, $thisUserID);
+    $thisUserRole = $roleInfo['role'];
+    
+    if($thisUserRole == "Sales Manager"){
+        $userCategories = $db->query("SELECT Guid_category FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$thisUserID)); 
+        $userLinks = '';
+        if(!empty($userCategories)){
+            foreach ($userCategories as $k=>$v){
+                $userLinks .= $v['Guid_category'].', ';
+            }
+            $userLinks = rtrim($userLinks, ', ');
+        }    
+        if($userLinks != ''){
+            $wherAccount = strpos($query, 'WHERE') ? " AND " : " WHERE ";
+            $query .= $wherAccount . " tblaccount.Guid_category IN (" . $userLinks . ") ";
+        } 
+    }
+    
     if($accountGuid){
-        $query .= " WHERE tblaccount.Guid_account=:id";
+        $wherAccount = strpos($query, 'WHERE') ? " AND " : " WHERE ";
+        $query .= $wherAccount . " tblaccount.Guid_account=:id";
         $result = $db->query($query, array("id"=>$accountGuid));
     }
     elseif ($getRow) {
@@ -1763,18 +1781,19 @@ function dbDateFormat($date){
  * @return type array ('count'=>5, 'info'=>array())
  */
 
-function get_stats_info($db, $statusID, $hasChildren=FALSE, $searchData=array()){
-    
+function get_stats_info($db, $statusID, $hasChildren=FALSE, $searchData=array()){    
     //exclude test users
     $markedTestUserIds = getMarkedTestUserIDs($db);
     $testUserIds = getTestUserIDs($db);
     $filterUrlStr = "";
     //$testUserIds = '';
-    $q = "SELECT statuses.*, statuslogs.*,
+    $q = "SELECT statuses.*, statuslogs.*, 
+            account.Guid_category,
             mdlnum.mdl_number as mdl_number
             FROM `tbl_mdl_status` statuses
             LEFT JOIN `tbl_mdl_status_log` statuslogs ON statuses.`Guid_status`= statuslogs.`Guid_status`
-            LEFT JOIN `tbl_mdl_number` mdlnum ON statuslogs.Guid_user=mdlnum.Guid_user ";
+            LEFT JOIN `tbl_mdl_number` mdlnum ON statuslogs.Guid_user=mdlnum.Guid_user 
+            LEFT JOIN `tblaccount` account ON account.Guid_account=statuslogs.Guid_account ";
     
     $q .=  "WHERE  statuslogs.`currentstatus`='Y' ";
     
@@ -1810,6 +1829,26 @@ function get_stats_info($db, $statusID, $hasChildren=FALSE, $searchData=array())
     if($testUserIds!=""){
     $q .=  " AND statuslogs.Guid_user NOT IN(".$testUserIds.") ";   
     }
+    
+    $thisUserID = $_SESSION['user']['id'];
+    $roleInfo = getRole($db, $thisUserID);
+    $thisUserRole = $roleInfo['role'];
+    
+    if($thisUserRole == "Sales Manager"){
+        $userCategories = $db->query("SELECT Guid_category FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$thisUserID)); 
+        $userLinks = '';
+        if(!empty($userCategories)){
+            foreach ($userCategories as $catK=>$catV){
+                $userLinks .= $catV['Guid_category'].', ';
+            }
+            $userLinks = rtrim($userLinks, ', ');
+        }    
+        if($userLinks != ''){
+            $q .= " AND account.Guid_category IN (" . $userLinks . ") ";
+        } 
+    }
+    
+    
     $q .=  " AND statuslogs.Guid_patient<>'0' 
             ORDER BY statuslogs.`Date` DESC, statuses.`order_by` DESC";
     

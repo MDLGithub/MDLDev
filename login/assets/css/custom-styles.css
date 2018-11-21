@@ -2724,3 +2724,20 @@ table#refresh-log-table {
 tr.loadedStatus{
     background: #ffc4c4;
 }
+.selectCategory{
+    border: 2px solid #b9b9b9;
+    padding: 5px 10px;
+    height: 100px;
+    overflow-y: scroll;
+    margin-bottom: 10px;
+}
+.selectCategory label.title{
+    display: block;
+    font-weight: bold;
+}
+.selectCategory input[type='checkbox']{
+    margin: 0 10px 10px 0;
+}
+.selectCategory label{
+    font-weight: normal;
+}
