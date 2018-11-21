@@ -748,10 +748,19 @@ input:checked + .slider:before {
     background-position: right;
     background-repeat: no-repeat;
 }*/
-#followup img{ max-width: 20px; }
+#followup img{ 
+    height: 30px;
+    margin-left: 20%;
+    display: block;
+ }
 a#followup {
-    width: 5%;
-    padding-top: 8px;
+    float: right;
+    text-align: center;
+    width: 60px;
+}
+#followup p {
+    font-size: 12px;
+    position: absolute;
 }
 
 .add-new-device.export_matrix{

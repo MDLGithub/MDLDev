@@ -332,7 +332,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                         <?php if($role!='Physician') { ?>
                     <div class="selectAccountBlock row ">
                         
-                        <div class="col-md-8 padd-0">
+                        <div class="col-md-12 padd-0">
                             
                             <label >Select Account</label><br/>
                             <select class="form-control" id="selectAccount">
@@ -352,6 +352,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                             </a>
                             <a class="followup" id="followup" href="#ex1" title="Follow">
                                 <img src="assets/images/icon_forms.png">
+                                <p>Follow Up</p>
                             </a>
                             
                         </div>

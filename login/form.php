@@ -491,13 +491,32 @@
                     $sql = "SELECT `firstname_delete`,`lastname_delete`,`dob` FROM `tblpatient` WHERE `Guid_patient`=$patient_id";
                     $test = $db->query($sql, array('patient_id' => $value['Guid_patient']));
 
+                    $Guid_user = $value['Guid_user'];
+                    $Qqualify = "SELECT * FROM `tblqualify` WHERE `Guid_user`=$Guid_user";
+                    $Rqualify = $db->query($Qqualify);
+                    $Guid_qualify = $Rqualify[0]['Guid_qualify'];
+
+                    $insurance = $db->query(
+                        "SELECT 
+                          `insurance`, `Guid_qualify`, `guideline_met` 
+                        FROM 
+                          `tblcancerquestion` req 
+                        LEFT JOIN 
+                          `tblunknownans` wnans 
+                        ON 
+                          wnans.Guid_question=req.Guid_question 
+                        AND 
+                          `Guid_qualify`='$Guid_qualify' 
+                        ORDER BY 
+                          `Date_created` DESC LIMIT 0,1"
+                    );
 
                     echo "<tr>";
                     echo "<td>".$test[0]['firstname_delete']."</td>";
                     echo "<td>".$test[0]['lastname_delete']."</td>";
                     echo "<td>".$test[0]['dob']."</td>";
-                    echo "<td>".$value['insurance_name']."</td>";
-                    echo "<td></td>";
+                    echo "<td>".$insurance[0]['insurance']."</td>";
+                    echo "<td>".$insurance[0]['guideline_met']."</td>";
                     echo "<td>".$value['Date_created']."</td>";
                     echo "</tr>";
                 }
@@ -559,6 +578,7 @@
                         //$queryPers = "SELECT * FROM `tbl_ss_qualifypers` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created";
                         //$qPers = $db->query($queryPers, array('Guid_qualify'=>$Guid_qualify, 'Date_created'=>$Date_created));
                         $qAns = $db->query("SELECT * FROM `tbl_ss_qualifyans` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created", array('Guid_qualify'=>$Guid_qualify, 'Date_created'=>$Date_created));
+
                         $qualifyedClass = "";
                         if($v['qualified'] == 'No'){
                             $qualifyedClass = "mn no";
@@ -743,4 +763,3 @@
 </section>
 </body>
 </html>
-
