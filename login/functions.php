@@ -3144,7 +3144,7 @@ function dmdl_refresh($db){
     $content .= "</table>";
     $content .= "</form>";
     
-    
+    if(isset($PAGES)){
     $content .= "<div class='refreshPaging'>Pages: "; 
     foreach ($PAGES as $i => $link){
         if ($i == $CUR_PAGE){
@@ -3154,6 +3154,7 @@ function dmdl_refresh($db){
         }    
     }
     $content .= "</div>";
+    }
     
     return $content;       
 }
