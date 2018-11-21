@@ -390,7 +390,7 @@ $accountProviders = '';
               </div>
               <div class="col-md-6">
                   <div class="row">
-                      <div class="col-lg-4 col-md-12">
+                      <div class="col-lg-12 col-md-12">
                           <p id="officeLogo">
                               <?php 
                                 if( isset($_POST['an']) && $_POST['an'] != "0"){
@@ -406,7 +406,7 @@ $accountProviders = '';
                               ?>
                           </p>
                       </div>
-                      <div class="col-lg-8 col-md-12">
+                      <div class="col-lg-12 col-md-12">
                               <?php 
                                 $addressInfo = "";
                                 $accountInfo = "";                                
@@ -455,7 +455,7 @@ $accountProviders = '';
                   <h5 id="physiciansListLabel">
                       <?php  if(isset($accountActive) && $accountActive!=''){ echo '<p class="providersTitle">Health Care Providers</p>'; }?>
                   </h5>
-                  <div id="physiciansList">
+                  <div id="physiciansList" class = "col-lg-12">
                     <?php 
                         if(isset($accountActive) && $accountActive!=''){
                             $accountProviders = get_active_providers($db, 'account_id', $thisAccount['account']);
