@@ -88,7 +88,9 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             LEFT JOIN tbluser u ON u.Guid_user = p.Guid_user
                             WHERE p.Guid_user=:Guid_user";
         $qualifyResult = $db->row($getPatientInfoQ, array('Guid_user'=>$Guid_user)); 
-        $qualifyResult['no_submited_questionnaire'] = '1';
+        if(!empty($qualifyResult)){
+            $qualifyResult['no_submited_questionnaire'] = '1';
+        }
     }
         
     $mdlInfoQ = "SELECT * FROM tbl_mdl_number WHERE Guid_user=:Guid_user";
@@ -272,7 +274,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         </section>
 
         <div id="app_data" class="scroller">
-            <?php if(isset($ssQualifyResult) && !empty($ssQualifyResult)){ ?>
+            <?php if($qualifyResult){ ?>
             <div class="row" id="patient-info-box">   
                 <div class="col-md-12">
                 <?php if(isset($message)){ ?>
