@@ -41,8 +41,11 @@ if(isset($_GET['account_id']) && $role!='Physician'){
     }
 }
 $accountInfo = getAccountAndSalesrep($db, $thisAccountID);
-$accountActive = $accountInfo['0'];
-extract($accountActive);
+
+if(isset($accountInfo['0'])){
+    $accountActive = $accountInfo['0'];
+    extract($accountActive);
+}
 
 if (isset($_GET['delete']) && $_GET['delete'] != '') {
    //deleteRowByField($db, 'tblprovider', array('Guid_provider'=>$_GET['delete'])); 
@@ -279,11 +282,11 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
             </h4>
             <?php echo topNavLinks($role); ?>
         </section>        
-        <div id="app_data" class="scroller">            
+        <div id="app_data" class="scroller"> 
+            <?php if(isset($accountActive) && !empty($accountActive)) {?>
             <div id="accounts">
                 <div class="row">
-                    <div class="col-md-8">
-                       
+                    <div class="col-md-8">                       
                         <div id = "physician-header">
                             <h2><?php echo $accountActive['account']." - ". strtoupper($accountActive['name']); ?></h2>
                         </div>
@@ -326,7 +329,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                                 </div>
                             </div>
                         </div>
-                    <?php if($role!='Physician') { ?>
+                        <?php if($role!='Physician') { ?>
                     <div class="selectAccountBlock row ">
                         
                         <div class="col-md-8 padd-0">
@@ -352,54 +355,49 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                             </a>
                             
                         </div>
-                        <!-- <div class="col-md-6 padd-0 pT-20">
-                            
-                        </div> -->
                     </div>
                     <?php }  ?>
                     
-                    <div class = "address-container">
+                        <div class="address-container">
+                            <div id="accountLogo">
+                                <?php $logo = $logo ? "/../images/practice/".$logo : "/assets/images/default.png"; ?>
+                                <img class="" src="<?php echo SITE_URL.$logo; ?>" />
+                                <div>
+                                    <label >Category: </label>
+                                    <?php if(isset($category_name) && $category_name!=''){
+                                        echo $category_name;
+                                    }?>
+                                </div>
+                            </div>
+                            <div class="addressInfoBlock">                        
+                            <div id="officeAddress">                                
+                                <div>
+                                    <?php 
+                                    if($address){
+                                        echo $address."<br/>";
+                                        if($city !=""){ echo $city.", "; }
+                                        if($state !=""){ echo $state." "; }
+                                        if($zip !="" ){ echo $zip ."<br/>"; } 
+                                    }
+                                    ?>
+                                </div>
 
-                    <div id="accountLogo">
-                        <?php $logo = $logo ? "/../images/practice/".$logo : "/assets/images/default.png"; ?>
-                        <img class="" src="<?php echo SITE_URL.$logo; ?>" />
-                    </div>
-                    <div class="addressInfoBlock">
-                        
-                        <div id="officeAddress">
-                            <div>
-                                <label >Category</label><br/>
-                                <?php if(isset($category_name) && $category_name!=''){
-                                    echo $category_name;
-                                }?>
-                            </div>
-                            <div>
-                                <?php 
-                                if($address){
-                                    echo $address."<br/>";
-                                    if($city !=""){ echo $city.", "; }
-                                    if($state !=""){ echo $state." "; }
-                                    if($zip !="" ){ echo $zip ."<br/>"; } 
-                                }
-                                ?>
-                            </div>
-                            
-                            <div class = "addressContact">
-                            <?php if($phone_number) { ?>
-                                <div><i class="fas fa-phone"></i> <a class="phone_us" href="tel:<?php echo $phone_number; ?>"><?php echo $phone_number; ?></a></div>
-                            <?php } ?>
-                            <?php if($fax) { ?>
-                                <div><i class="fas fa-fax"></i> <a class="phone_us" href="tel:<?php echo $fax; ?>"><?php echo $fax; ?></a></div>
-                            <?php } ?>
-                            <?php if($website) { ?>
-                                <div><i class="fas fa-globe"></i> <a target="_blank" href="<?php echo $website; ?>"><?php echo $website; ?></a></div>                   
-                            <?php } ?>
+                                <div class = "addressContact">
+                                <?php if($phone_number) { ?>
+                                    <div><i class="fas fa-phone"></i> <a class="phone_us" href="tel:<?php echo $phone_number; ?>"><?php echo $phone_number; ?></a></div>
+                                <?php } ?>
+                                <?php if($fax) { ?>
+                                    <div><i class="fas fa-fax"></i> <a class="phone_us" href="tel:<?php echo $fax; ?>"><?php echo $fax; ?></a></div>
+                                <?php } ?>
+                                <?php if($website) { ?>
+                                    <div><i class="fas fa-globe"></i> <a target="_blank" href="<?php echo $website; ?>"><?php echo $website; ?></a></div>                   
+                                <?php } ?>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    </div>
+                        </div>
 
-                    <div class="providersTable">
+                        <div class="providersTable">
                         <?php if($role!='Physician'){ ?>                        
                         <h4 id="physiciansListLabel" class="accounts">
                             Physicians       
@@ -474,22 +472,22 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                             </tbody>
                         </table>
                     </div>  <!-- /.providersTable -->
-                    <div class="accountStats">
-                        <table class="table stats-table">
-                            <thead>
-                                <tr>
-                                    <th>Status</th>
-                                    <th class="wh-100">Quantity</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php echo get_status_table_rows($db, '0', array('Guid_account'=>$accountActive['Guid_account']), array('account_id'=>$accountActive['Guid_account'],'status_table'=>'1'));?>
-                            </tbody>
-                        </table>
-                    </div>
+                        <div class="accountStats">
+                            <table class="table stats-table">
+                                <thead>
+                                    <tr>
+                                        <th>Status</th>
+                                        <th class="wh-100">Quantity</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php echo get_status_table_rows($db, '0', array('Guid_account'=>$accountActive['Guid_account']), array('account_id'=>$accountActive['Guid_account'],'status_table'=>'1'));?>
+                                </tbody>
+                            </table>
+                        </div>
                   
-                </div>
-                <div class="col-md-4">
+                    </div>
+                    <div class="col-md-4">
                     <div class="salesrepInfoBlock">
                       <div id = "physician-gc" class="row">
                         <label class = "col-md-12 col-sm-4"><?php echo $salesrepTitle; ?></label>
@@ -522,7 +520,6 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                     </div>
                 </div>
                 </div> <!-- /.row -->  
-                
                 <div class="row">
                     <div class="col-md-12">
                           <?php if(isset($_GET['status_table'])){ ?>
@@ -680,9 +677,6 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                                 <?php } ?>
                     </div>
                 </div>
-                
-
-
             </div>
 
             <div id="setDate" class="modal" style="position: absolute; top: 5%; left: 35%;">
@@ -711,8 +705,11 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                 <input type="hidden" name="account" value="<?php echo $accountActive['account']; ?>">
                 <input type="hidden" name="guid_account" value="<?php echo $accountActive['Guid_account'] ?>">
             </div>
-
-            
+            <?php } else {?>
+            <div class="full visible ">  
+                <h4> Sorry! This account is not exist. </h4>
+            </div>
+            <?php } ?>
         </div><!-- /. mainContent-->
     </div> <!-- /. full box visible-->       
     <?php } else { ?>

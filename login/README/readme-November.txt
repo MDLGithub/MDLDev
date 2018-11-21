@@ -33,7 +33,7 @@ ALTER TABLE `tbl_revenue` ADD COLUMN Loaded ENUM('Y','N') DEFAULT 'N' AFTER amou
 
 
 //november 19
-INSERT INTO `tblstate` VALUES ('PR', 'Puerto Rico')
+INSERT INTO `tblstate` VALUES ('PR', 'Puerto Rico');
 
 CREATE TABLE `tbl_mdl_category` (
   `Guid_category` INT(11) NOT NULL AUTO_INCREMENT,
@@ -52,8 +52,14 @@ TRUNCATE TABLE `tbl_mdl_category`;
 ALTER TABLE `tbl_mdl_category` ADD COLUMN `description` TEXT AFTER `name`;
 INSERT INTO `tbl_mdl_category` (`slug`,`name`,`description`) VALUES  ('geneveda ', 'Geneveda', 'Default Category For manually created accounts.'), ('corporate', 'Corporate', 'Category for automatically loaded accounts.')
 
+CREATE TABLE `tbl_mdl_category_user_link` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `Guid_user` VARCHAR(60) DEFAULT NULL,
+  `Guid_category` VARCHAR(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+);
 
-/*Updated Files*/
+
 
 
 

@@ -272,6 +272,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         </section>
 
         <div id="app_data" class="scroller">
+            <?php if(isset($ssQualifyResult) && !empty($ssQualifyResult)){ ?>
             <div class="row" id="patient-info-box">   
                 <div class="col-md-12">
                 <?php if(isset($message)){ ?>
@@ -805,10 +806,14 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 </form>                
             </div>
         </div> 
-            
-        
-          
+            <?php } else { ?>
+            <div class="full visible ">  
+                <h4>Sorry! This patient is not exist.</h4>
+            </div>
+            <?php } ?>
         </div>
+        
+        
         <?php } else { ?>
             <p>Sorry! You don't have access to this page content. </p>
         <?php } ?>

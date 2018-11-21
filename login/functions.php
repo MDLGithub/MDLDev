@@ -618,6 +618,24 @@ function moveUserData($db, $Guid_user, $userDetails, $thisRole, $prevRole){
     }
     return FALSE;
 }
+/**
+ * save Category-User Links
+ * @param type $db
+ * @param type $Guid_user
+ * @param type $catIDs
+ */
+function saveCategoryUserLinks($db, $Guid_user, $catIDs){    
+    if(!empty($catIDs)){
+        
+        //delete old data
+        $db->query("DELETE FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$Guid_user));
+        foreach ($catIDs as $k=>$Guid_category){
+            $userCatData = array('Guid_category'=>$Guid_category, 'Guid_user'=>$Guid_user);
+            //insert new data
+            insertIntoTable($db,'tbl_mdl_category_user_link', $userCatData);            
+        }
+    }
+}
 
 function verify_input(&$error) {	
 	if (strlen($_POST['from_date']) && (!strlen($_POST['to_date']))) {
