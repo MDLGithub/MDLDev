@@ -3042,9 +3042,9 @@ function dmdl_refresh($db){
             if (isset($res['TC_MDLOON']) && !empty($res['TC_MDLOON'])) {
                 $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_MDLOON][Date]' value='" . $res['TC_MDLOON'] . "' />";
             }
-			//6.2 Test Cancelled: MDL In-Network/High 
-			if(isset($res['TC_MDLIN']) && !empty($res['TC_MDLIN'])){
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][statuses][TC_MDLIN][Date]' value='".$res['TC_MDLIN']."' />";
+            //6.2 Test Cancelled: MDL In-Network/High 
+            if (isset($res['TC_MDLIN']) && !empty($res['TC_MDLIN'])) {
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_MDLIN][Date]' value='" . $res['TC_MDLIN'] . "' />";
             }
             //6.3 Test Cancelled: Physician Cancelled Testing 
             if (isset($res['TC_PhysicianCancelled']) && !empty($res['TC_PhysicianCancelled'])) {
