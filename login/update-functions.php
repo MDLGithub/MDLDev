@@ -47,6 +47,7 @@ function update_v2($db, $function){
                 $data = array();
                 if($ssTable['account_number']!=''){
                     $data['account'] = $ssTable['account_number'];
+                    $data['deviceid'] = $ssTable['deviceid'];
                     $accountQ = "SELECT a.Guid_account, a.account, provider.Guid_provider, "
                                 . "sr.Guid_salesrep, sr.first_name AS salesrep_fname, sr.last_name AS salesrep_lname "
                                 . "FROM tblaccount a "
@@ -60,7 +61,6 @@ function update_v2($db, $function){
                         $data['Guid_salesrep'] = $accountInfo['Guid_salesrep'];
                         $data['salesrep_fname'] = $accountInfo['salesrep_fname'];
                         $data['salesrep_lname'] = $accountInfo['salesrep_lname'];
-                        $data['deviceid'] = $accountInfo['Guid_salesrep'];
                         $data['provider_id'] = $accountInfo['Guid_provider'];
                     }                    
                 }

@@ -1279,7 +1279,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     <input type="text" name="other_insurance" value="<?php echo $qualifyResult['other_insurance']; ?>" autocomplete="off" />
                 </p>
                 <?php } ?>
-                <?php if(isset($qualifyResult['account_number'])){  ?>
+                <?php if(isset($qualifyResult['qAccountNumber'])){  ?>
                     <?php if($role!='Physician'){  ?>
                     <p>
                         <label>Account: </label>                    
@@ -1291,7 +1291,6 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             LEFT JOIN `tblaccountrep` ON  tblsalesrep.Guid_salesrep = tblaccountrep.Guid_salesrep
                             LEFT JOIN `tblaccount` ON tblaccountrep.Guid_account = tblaccount.Guid_account                    
                             WHERE tblsalesrep.Guid_user=";
-
                             if (isset($_POST['salesrep']) && strlen($_POST['salesrep'])) {
                                 $query .= $_POST['salesrep'];
                             } else {
@@ -1308,7 +1307,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             <?php 
 
                             foreach ($accounts as $k=>$v){ 
-                            $selected = $qualifyResult['account_number']==$v['account'] ? ' selected' : '';
+                            $selected = $qualifyResult['qAccountNumber']==$v['account'] ? ' selected' : '';
                             ?>
                             <option <?php echo $selected; ?> value="<?php echo $v['account']; ?>" ><?php echo $v['account'] .'-'. ucwords(strtolower($v['name'])); ?></option>
                             <?php } ?>
@@ -1325,14 +1324,20 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         <option value="">Select Provider</option>
                         <?php 
                         //$tblproviders = $db->query('SELECT * FROM tblprovider WHERE account_id='.$qualifyResult['account_number']);
-                        if(isset($qualifyResult['account_number'])&&$qualifyResult['account_number']!=""){
-                        $tblproviders = $db->query('SELECT pr.* FROM tblprovider pr '                                
-                                                . 'LEFT JOIN tbluser u ON u.`Guid_user`=pr.`Guid_user`'
-                                                . ' WHERE account_id='.$qualifyResult['account_number'].' AND u.status="1" ');
+                        if(isset($qualifyResult['qAccountNumber'])&&$qualifyResult['qAccountNumber']!=""){
+                            $providerQ =  'SELECT pr.* FROM tblprovider pr '                                
+                                        . 'LEFT JOIN tbluser u ON u.`Guid_user`=pr.`Guid_user`'
+                                        . ' WHERE account_id='.$qualifyResult['qAccountNumber'];
+                            $tblproviders = $db->query($providerQ);
+                            
                         foreach ($tblproviders as $k=>$v){ 
                         $selected = $qualifyResult['provider_id']==$v['Guid_provider'] ? ' selected' : '';
+                        $providerTitle = '';
+                        if(isset($v['title']) && $v['title']!=''){
+                            $providerTitle = ', '.strtoupper($v['title']);
+                        }
                         ?>
-                        <option <?php echo $selected; ?> value="<?php echo $v['Guid_provider']; ?>" ><?php echo $v['first_name'].' '.$v['last_name']; ?></option>
+                        <option <?php echo $selected; ?> value="<?php echo $v['Guid_provider']; ?>" ><?php echo $v['first_name'].' '.$v['last_name'].$providerTitle; ?></option>
                         <?php }} ?>
                     </select> 
                 </p>
@@ -1360,8 +1365,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 
                     
                 <div class="text-right pT-10">
-                    <button class="button btn-inline" name="save_patient_info" type="submit">Save</button>
-                    <a href="<?php echo $patientInfoUrl; ?>" class="btn-inline btn-cancel">Cancel</a>                   
+                    <button class="button btn-inline" name="save_patient_info" type="submit">Save</button>                
                 </div>                
             </form> 
         </div>
