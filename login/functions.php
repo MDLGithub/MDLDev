@@ -2148,8 +2148,8 @@ function get_status_state($db, $parent = 0, $searchData=array(), $linkArr=array(
     foreach ($statuses as $key => $status) {
         $stats1 = get_stats_info($db, $key, FALSE, $searchData);
         $stats2 = get_stats_info_today($db, $key, FALSE, $searchData, $today);
-        $content .= "<tr class='parent'>";
-        $content .= "<td class='text-left'><span>".$status."</span></td>";            
+        $content .= "<tr>";
+        $content .= "<td><span>".$status."</span></td>";
         $content .= '<td><a>'.$stats2['count'].'</a></td>';
         $content .= '<td><a>'.$stats1['count'].'</a></td>';
         $content .= "</tr>";    

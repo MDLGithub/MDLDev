@@ -696,11 +696,11 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                         <!-- <input type="date" value="<?php echo date('Y-m-d') ?>" name="end_date" id="end_date"> -->
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <button id="reset_date" value="2018-08-01" name="submit_account" type="button" class="btn-inline">Reset</button>
+                <div class="col-md-6 center">
+                    <button id="reset_date" value="2018-08-01" name="submit_account" type="submit" class="button btn-inline">Reset</button>
                 </div>
-                <div class="col-md-6">
-                    <button id="print" name="submit_account" type="submit" class="btn-inline">Print</button>
+                <div class="col-md-6 center">
+                    <button id="print" name="submit_account" type="submit" class="button btn-inline">Continue</button>
                 </div>
                 
                 <input type="hidden" name="account" value="<?php echo $accountActive['account']; ?>">

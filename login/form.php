@@ -6,405 +6,415 @@
 ?>
 <html>
 <head>
+    <style>
+
+        /* .exact, .form * {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        } */
+        table{
+            border-spacing: 0px 0px;
+        }
+
+        .c2 th:nth-of-type(2), .c2 td:nth-of-type(2), .c3 th:nth-of-type(3), .c3 td:nth-of-type(3),
+        .c4 th:nth-of-type(4), .c4 td:nth-of-type(4), .c5 th:nth-of-type(5), .c5 td:nth-of-type(5) {
+            text-align: center;
+        }
+
+        .sf4 td:nth-of-type(4) {
+            font-size: 2.47mm;
+            font-weight: normal;
+            max-width: 50mm;
+        }
+
+        .columns {
+            display: flex;
+        }
+
+        .columns > .col {
+            flex-grow:1;
+        }
+
+        .columns.two > .col {
+            width: 50%;
+        }
+
+        .dashed {
+            border: .42 dashed #000; border-top:0; border-bottom:0;
+        }
+
+        .geneveda .dashed {
+            border-color: #7a68ae;
+        }
+
+        .follow-up p {
+            font-size: 3.53mm;
+            line-height: 5.29mm;
+            margin-top: 7.95mm;
+            color: #242424 !important;
+        }
+
+        .follow-up .account_logo {
+            max-width: 54.18mm;
+        }
+
+        .follow-up .lab {
+            text-align: right;
+            margin-bottom: 10.16mm;
+        }
+
+        .follow-up .lab > img {
+            max-width: 44.36mm;
+            display: inline-block;
+        }
+
+        .follow-up .header {
+            display: flex;
+            padding-bottom: 7.19mm;
+        }
+
+        .follow-up .header .col.one {
+            width: 76.2mm;
+        }
+
+        .follow-up .header .col.two {
+            flex-grow: 1;
+            text-align: right;
+        }
+
+        .follow-up .main {
+            border: .67mm solid #cbcbcb; border-left:0; border-right: 0;
+            padding-bottom: 7.62mm;
+        }
+
+        .form p > .labColor, .lC5 td:nth-of-type(5) {
+            color: #7a68ae !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .geneveda .ftable > th {
+            background: #7a68ae;
+        }
+
+        .pBG_size {
+            position: relative;
+        }
+
+        .pBG {
+            width: 100%;
+            height:100%;
+            position: absolute;
+            left:0;
+            top:0;
+            z-index:-1;
+        }
+
+        .ftable {
+            position: relative;
+            width: 100%;
+            font-size: 2.82mm;
+            margin-top: 4.23mm;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        .ftable th, .ftable .pBG {
+            height: 5.24mm;
+        }
+
+        .ftable th {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            vertical-align: middle;
+            width: 28.61mm;
+        }
+
+        .ftable tr {
+            /*min-height: 5.24mm;*/
+        }
+
+        .ftable td {
+            border-bottom: .16mm solid #4c4c4c;
+            padding: 1.35mm 0;
+            color: #2b2b2b !important;
+        }
+
+        .ftable th:first-child, .ftable td:first-child {
+            padding-left: 4.23mm;
+        }
+
+        #testing_recommended th:last-child, #testing_recommended td:last-child {
+            text-align: center;
+            width: 28.61mm;
+        }
+
+        #testing_recommended td:last-child {
+            border-left: .42mm dashed #7a68ae; border-right: .42mm dashed #7a68ae;
+            text-align: center;
+        }
+
+        .sTable {
+            text-align: left;
+            width: 100%;
+            table-layout: fixed;
+            margin-top: 3.81mm;
+        }
+
+        .sTable td, .sTable th  {
+            border: .16mm solid #4c4c4c; border-top:0; border-left:0;
+            width: 100%;
+            font-size: 2.82mm;
+            padding-left: 3.13mm;
+        }
+
+        .sTable td:last-child, .sTable th:last-child {
+            border-right:0;
+        }
+
+        .sTable th {
+            font-weight: bold;
+            padding-top: 2.03mm; padding-bottom: 2.03mm;
+        }
+
+        .geneveda .sTable th {
+            color: #7a68ae !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .sTable td {
+            font-weight: 600;
+            color: #2b2b2b !important;
+            max-width: 33%;
+            padding-top: 1.69mm; padding-bottom: 1.69mm;
+        }
+
+        .sTable td:first-child, .sTable th:first-child {
+            max-width: 28.36mm;
+        }
+
+        #not_completed {
+            padding-left: 6.77mm;
+        }
+
+        #not_completed .sTable {
+            margin-top: 9mm;
+        }
+
+        #not_recommended .sTable {
+            width: calc(100% - 7.62mm);
+        }
+
+        #not_completed th:last-child, #not_recommended th:last-child {
+            max-width: 21mm;
+        }
+
+        .form footer {
+            padding-top: 6.94mm;
+            font-size: 8pt;
+        }
+
+        .gc_title {
+            padding-bottom: 5.41mm;
+        }
+
+        .gc_title > h4 {
+            font-weight: bold;
+            font-size: 10pt;
+            padding-bottom: 1.27mm;
+        }
+
+        .gc_title > em {
+            font-size: 8pt;
+            color: #242424 !important;
+        }
+
+        .columns .foogo {
+            flex-grow: 0;
+            padding-right: 4.23mm;
+        }
+
+        .foogo > img {
+            width: 13.88mm;
+        }
+
+        .gc_contact {
+            border-top: 0.25mm solid #1c1c1c;
+            flex-grow: 1;
+            display: flex;
+            margin-top: 2.11mm;
+            position: relative;
+            padding-top: 1.86mm;
+        }
+
+        .gc_contact > section {
+            flex-grow: 1;
+            padding-left: 3.81mm;
+        }
+
+        .gc_contact::before {
+            content:"";
+            position: absolute;
+            left:-3.72mm; top:-.2mm;
+            z-index:1;
+            font-size: inherit;
+            display: inline-block;
+            width: 3.72mm;
+            height: .25mm;
+            border-top: 0.25mm solid #1c1c1c;
+            transform-origin: bottom right;
+            transform: rotate(45deg);
+        }
+
+        .gc_contact::after, .gc_contact > section::after {
+            content:"";
+            position: absolute;
+            border-radius: 50%;
+            width: 0.84mm;
+            height: 0.84mm;
+            border: .33mm solid #1c1c1c;
+            overflow: hidden;
+            right:0;
+            top: -.5mm;
+        }
+
+        .gc_contact > section::after {
+            right: auto;
+            left:-2.8mm;
+            top:-2.8mm;
+        }
+
+        .gc_contact h5 {
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .gc_contact span {
+            padding-left: 3.38mm;
+        }
+
+        .gc_contact > * {
+            line-height: 11pt;
+        }
+
+        .gc_contact li {
+            position: relative;
+        }
+
+        .gc_contact > ul:last-child {
+            margin-left: 12.63mm;
+            font-weight: 600;
+        }
+
+        .gc_contact img {
+            position: absolute;
+            max-width: 2.62mm;
+            max-height: 2.62mm;
+            left: -4mm;
+            top: .9mm;
+        }
+
+        .gc_contact .gc_email {
+            left:-4.8mm;
+        }
+
+        .sb {
+            font-weight: 600;
+        }
+
+        .stat_table {
+            text-align: left;
+            position: relative;
+            font-size: 8pt;
+            font-weight: 600;
+            color: #242424 !important;
+        }
+
+        .follow-up .stat_table {
+            display: inline-block;
+        }
+
+        .stat_table th {
+            border-right: .42mm solid #000;
+            padding: 1.69mm 2.03mm;
+        }
+
+        .stat_table td {
+            border-left: .42mm solid #000;
+            border-bottom: .25mm solid #000;
+            padding: 2.03mm 0;
+        }
+
+        .stat_table td:first-child {
+            padding-right: 3.55mm; padding-left: 3.55mm;
+        }
+
+        .stat_table tr:last-child > td {
+            border-bottom: 0;
+        }
+
+        .stat_table td:last-child {
+            border-right: .42mm solid #000;
+            color: #7a68ae !important;
+        }
+
+        .geneveda .stat_table th, .geneveda .stat_table td {
+            border-color: #7a68ae;
+        }
+
+        .side_head {
+            position:absolute !important;
+            left:-12mm;
+            transform: rotate(-90deg);
+            bottom: 12mm;
+            text-transform: uppercase;
+            color: #9e9e9e !important;
+            font-weight: bold;
+            letter-spacing: .25mm;
+        }
+
+        .follow-up .stat_table .pBG {
+            width: 12mm;
+            height: 27.4mm;
+            top: auto;
+            left: auto;
+            bottom: 0;
+            right: 10.5mm;
+        }
+
+        #testing_recommended thead th{
+            background-color: #7a68ae;
+            color: #FFF;
+        }
+
+        .sf4 thead th{
+            background-color: #8f8f8f;
+            color: #FFF;
+        }
+
+    </style>
     <script>
-        /*function PrintDoc() {
-            var toPrint = document.getElementById('printarea');
-            window.print()
-            var popupWin = window.open('', '_blank', 'width=900,height=900,location=no,left=200px');
-            popupWin.document.open();
-            popupWin.document.write('<html><link rel="stylesheet" type="text/css" href="assets/css/forms.css" /></head><body onload="window.print()">')
-            popupWin.document.write(toPrint.innerHTML);
-            popupWin.document.write('</html>');
-            popupWin.document.close();
-        }*/
+        function hide(elem) {
+            elem.style.display = 'none';
+            setTimeout(function () {
+                elem.style.display = '';
+            },500);
+        }
     </script>
 </head>
-<body>
+<body id="body">
 
-<style>
-
-    /* .exact, .form * {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    } */
-
-    .c2 th:nth-of-type(2), .c2 td:nth-of-type(2), .c3 th:nth-of-type(3), .c3 td:nth-of-type(3),
-    .c4 th:nth-of-type(4), .c4 td:nth-of-type(4), .c5 th:nth-of-type(5), .c5 td:nth-of-type(5) {
-        text-align: center;
-    }
-
-    .sf4 td:nth-of-type(4) {
-        font-size: 2.47mm;
-        font-weight: normal;
-        max-width: 50mm;
-    }
-
-    .columns {
-        display: flex;
-    }
-
-    .columns > .col {
-        flex-grow:1;
-    }
-
-    .columns.two > .col {
-        width: 50%;
-    }
-
-    .dashed {
-        border: .42 dashed #000; border-top:0; border-bottom:0;
-    }
-
-    .geneveda .dashed {
-        border-color: #7a68ae;
-    }
-
-    .follow-up p {
-        font-size: 3.53mm;
-        line-height: 5.29mm;
-        margin-top: 7.95mm;
-        color: #242424 !important;
-    }
-
-    .follow-up .account_logo {
-        max-width: 54.18mm;
-    }
-
-    .follow-up .lab {
-        text-align: right;
-        margin-bottom: 10.16mm;
-    }
-
-    .follow-up .lab > img {
-        max-width: 44.36mm;
-        display: inline-block;
-    }
-
-    .follow-up .header {
-        display: flex;
-        padding-bottom: 7.19mm;
-    }
-
-    .follow-up .header .col.one {
-        width: 76.2mm;
-    }
-
-    .follow-up .header .col.two {
-        flex-grow: 1;
-        text-align: right;
-    }
-
-    .follow-up .main {
-        border: .67mm solid #cbcbcb; border-left:0; border-right: 0;
-        padding-bottom: 7.62mm;
-    }
-
-    .form p > .labColor, .lC5 td:nth-of-type(5) {
-        color: #7a68ae !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-
-    .geneveda .ftable > th {
-        background: #7a68ae;
-    }
-
-    .pBG_size {
-        position: relative;
-    }
-
-    .pBG {
-        width: 100%;
-        height:100%;
-        position: absolute;
-        left:0;
-        top:0;
-        z-index:-1;
-    }
-
-    .ftable {
-        position: relative;
-        width: 100%;
-        font-size: 2.82mm;
-        margin-top: 4.23mm;
-        font-weight: 600;
-        text-align: left;
-    }
-
-    .ftable th, .ftable .pBG {
-        height: 5.24mm;
-    }
-
-    .ftable th {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-        vertical-align: middle;
-    }
-
-    .ftable tr {
-        min-height: 5.24mm;
-    }
-
-    .ftable td {
-        border-bottom: .16mm solid #4c4c4c;
-        padding: 1.35mm 0;
-        color: #2b2b2b !important;
-    }
-
-    .ftable th:first-child, .ftable td:first-child {
-        padding-left: 4.23mm;
-    }
-
-    #testing_recommended th:last-child, #testing_recommended td:last-child {
-        text-align: center;
-        width: 28.61mm;
-    }
-
-    #testing_recommended td:last-child {
-        border-left: .42mm dashed #7a68ae; border-right: .42mm dashed #7a68ae;
-        text-align: center;
-    }
-
-    .sTable {
-        text-align: left;
-        width: 100%;
-        table-layout: fixed;
-        margin-top: 3.81mm;
-    }
-
-    .sTable td, .sTable th  {
-        border: .16mm solid #4c4c4c; border-top:0; border-left:0;
-        width: 100%;
-        font-size: 2.82mm;
-        padding-left: 3.13mm;
-    }
-
-    .sTable td:last-child, .sTable th:last-child {
-        border-right:0;
-    }
-
-    .sTable th {
-        font-weight: bold;
-        padding-top: 2.03mm; padding-bottom: 2.03mm;
-    }
-
-    .geneveda .sTable th {
-        color: #7a68ae !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-
-    .sTable td {
-        font-weight: 600;
-        color: #2b2b2b !important;
-        max-width: 33%;
-        padding-top: 1.69mm; padding-bottom: 1.69mm;
-    }
-
-    .sTable td:first-child, .sTable th:first-child {
-        max-width: 28.36mm;
-    }
-
-    #not_completed {
-        padding-left: 6.77mm;
-    }
-
-    #not_completed .sTable {
-        margin-top: 9mm;
-    }
-
-    #not_recommended .sTable {
-        width: calc(100% - 7.62mm);
-    }
-
-    #not_completed th:last-child, #not_recommended th:last-child {
-        max-width: 21mm;
-    }
-
-    .form footer {
-        padding-top: 6.94mm;
-        font-size: 8pt;
-    }
-
-    .gc_title {
-        padding-bottom: 5.41mm;
-    }
-
-    .gc_title > h4 {
-        font-weight: bold;
-        font-size: 10pt;
-        padding-bottom: 1.27mm;
-    }
-
-    .gc_title > em {
-        font-size: 8pt;
-        color: #242424 !important;
-    }
-
-    .columns .foogo {
-        flex-grow: 0;
-        padding-right: 4.23mm;
-    }
-
-    .foogo > img {
-        width: 13.88mm;
-    }
-
-    .gc_contact {
-        border-top: 0.25mm solid #1c1c1c;
-        flex-grow: 1;
-        display: flex;
-        margin-top: 2.11mm;
-        position: relative;
-        padding-top: 1.86mm;
-    }
-
-    .gc_contact > section {
-        flex-grow: 1;
-        padding-left: 3.81mm;
-    }
-
-    .gc_contact::before {
-        content:"";
-        position: absolute;
-        left:-3.72mm; top:-.2mm;
-        z-index:1;
-        font-size: inherit;
-        display: inline-block;
-        width: 3.72mm;
-        height: .25mm;
-        border-top: 0.25mm solid #1c1c1c;
-        transform-origin: bottom right;
-        transform: rotate(45deg);
-    }
-
-    .gc_contact::after, .gc_contact > section::after {
-        content:"";
-        position: absolute;
-        border-radius: 50%;
-        width: 0.84mm;
-        height: 0.84mm;
-        border: .33mm solid #1c1c1c;
-        overflow: hidden;
-        right:0;
-        top: -.5mm;
-    }
-
-    .gc_contact > section::after {
-        right: auto;
-        left:-2.8mm;
-        top:-2.8mm;
-    }
-
-    .gc_contact h5 {
-        text-transform: uppercase;
-        font-weight: 600;
-    }
-
-    .gc_contact span {
-        padding-left: 3.38mm;
-    }
-
-    .gc_contact > * {
-        line-height: 11pt;
-    }
-
-    .gc_contact li {
-        position: relative;
-    }
-
-    .gc_contact > ul:last-child {
-        margin-left: 12.63mm;
-        font-weight: 600;
-    }
-
-    .gc_contact img {
-        position: absolute;
-        max-width: 2.62mm;
-        max-height: 2.62mm;
-        left: -4mm;
-        top: .9mm;
-    }
-
-    .gc_contact .gc_email {
-        left:-4.8mm;
-    }
-
-    .sb {
-        font-weight: 600;
-    }
-
-    .stat_table {
-        text-align: left;
-        position: relative;
-        font-size: 8pt;
-        font-weight: 600;
-        color: #242424 !important;
-    }
-
-    .follow-up .stat_table {
-        display: inline-block;
-    }
-
-    .stat_table th {
-        border-right: .42mm solid #000;
-        padding: 1.69mm 2.03mm;
-    }
-
-    .stat_table td {
-        border-left: .42mm solid #000;
-        border-bottom: .25mm solid #000;
-        padding: 2.03mm 0;
-    }
-
-    .stat_table td:first-child {
-        padding-right: 3.55mm; padding-left: 3.55mm;
-    }
-
-    .stat_table tr:last-child > td {
-        border-bottom: 0;
-    }
-
-    .stat_table td:last-child {
-        border-right: .42mm solid #000;
-        color: #7a68ae !important;
-    }
-
-    .geneveda .stat_table th, .geneveda .stat_table td {
-        border-color: #7a68ae;
-    }
-
-    .side_head {
-        position:absolute !important;
-        left:-12mm;
-        transform: rotate(-90deg);
-        bottom: 12mm;
-        text-transform: uppercase;
-        color: #9e9e9e !important;
-        font-weight: bold;
-        letter-spacing: .25mm;
-    }
-
-    .follow-up .stat_table .pBG {
-        width: 12mm;
-        height: 25.4mm;
-        top: auto;
-        left: auto;
-        bottom:0;
-        right: 11.5mm;
-    }
-
-
-</style>
-
-<input type="button" value="Print" class="btn" onclick="window.print()"/>
+<input type="button" value="Print" class="btn" onclick="hide(this);window.print();"/>
 
 <section class="form follow-up geneveda" id="printarea">
+
     <header class="header">
         <div class="col one">
-            <figure class="account_logo"><img src="https://www.mdlab.com/dev/images/practice/22230-LEXINGTON%20OBGYN%20ASSOCIATES.png" alt="Lexington"></figure>
-
-            <p>Thank you for selecting Geneveda to provide Hereditary Breast and Ovarian Cancer (HBOC) Screening for your patients. This report was prepared on <strong><?=date("F j, Y");?></strong>.</p>
+            <figure class="account_logo">
+                <img style="width: 100%;" src="https://www.mdlab.com/dev/images/practice/22230-LEXINGTON%20OBGYN%20ASSOCIATES.png" alt="Lexington">
+                <p>Thank you for selecting Geneveda to provide Hereditary Breast and Ovarian Cancer (HBOC) Screening for your patients. This report was prepared on <strong><?=date("F j, Y");?></strong>.</p>
+            </figure>
         </div>
 
         <div class="col two">
@@ -412,14 +422,15 @@
 
             <table class="stat_table c2 c3">
                 <thead>
-                <tr>
-                    <th><h4 class="side_head">Summary</h4></th>
-                    <th><img class="pBG" src="assets/images/swatch_gen_green.png" alt="">Today</th>
-                    <th>Total</th>
-                </tr>
+                    <tr>
+                        <th><h4 class="side_head">Summary</h4></th>
+                        <th><img class="pBG" src="assets/images/swatch_gen_green.png" alt="">Today</th>
+                        <th><span>Total</span></th>
+                    </tr>
                 </thead>
 
                 <tbody>
+
                 <?php
                 if(isset($_POST['today'])){
                     $account = $_POST['account'];
@@ -740,7 +751,7 @@
         </section>
 
         <div class="columns">
-            <figure class="foogo col"><img src="assets/images/icon_print.svg" alt=""></figure>
+            <figure class="foogo col"><img src="assets/images/logo_mdl_print.svg" alt=""></figure>
 
             <div class="gc_contact col">
                 <section>
