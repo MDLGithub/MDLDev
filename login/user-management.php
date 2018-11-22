@@ -206,19 +206,17 @@ require_once ('navbar.php');
                 </div>
                 
                 <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['status'])) && (strlen($_POST['status']))) ? " show-label valid" : ""; ?>">
-                    <label class="dynamic" for="status"><span>Status</span></label>
+                    <label class="dynamic" for="Guid_status"><span>Status</span></label>
                     <?php 
                     $selectedActive = (!isset($_POST['clear']) && isset($_POST['status']) && $_POST['status']=='1') ?  "selected " : "";
                     $selectedInactive = (!isset($_POST['clear']) && isset($_POST['status']) && $_POST['status']=='0') ?  "selected " : "";
                     ?>
                     <div class="group">
-                        <select id="Guid_role" name="status" class="<?php echo (!isset($_POST['clear']) && isset($_POST['status']) && strlen($_POST['status']) ) ? "" : "no-selection"; ?>">
+                        <select id="Guid_status" name="status" class="<?php echo (!isset($_POST['clear']) && isset($_POST['status']) && strlen($_POST['status']) ) ? "" : "no-selection"; ?>">
                             <option value="">Status</option>                                
                             <option <?php echo $selectedActive; ?> value="1" >Active</option>
                             <option <?php echo $selectedInactive; ?> value="0" >Inactive</option>
-
                         </select>
-
                         <p class="f_status">
                             <span class="status_icons"><strong></strong></span>
                         </p>
@@ -457,12 +455,18 @@ require_once ('navbar.php');
                 $inserUser = insertIntoTable($db, 'tbluser', $userData);              
                 $Guid_user = $inserUser['insertID'];
                 saveUserDetails($db, $Guid_user, $Guid_role, $userDetails);
+                //update user category relationship if user is Sales Manager
+                if(isset($_POST['Guid_category'])){
+                    $catIDs = $_POST['Guid_category'];
+                    saveCategoryUserLinks($db, $Guid_user, $catIDs);                       
+                } else {
+                    $db->query("DELETE FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$Guid_user));
+                }
                 Leave(SITE_URL."/user-management.php?update");
             } else {
                 $message = "User with this email already exists.";
             }
-        }else{ //update
-            
+        }else{ //update user info            
             $isMailExists = $db->row("SELECT `email` FROM tbluser WHERE `email`='".$email."' AND `Guid_user`<>$Guid_user");
             if(!$isMailExists){
                 $userData['Date_modified'] = date('Y-m-d H:i:s');
@@ -477,21 +481,24 @@ require_once ('navbar.php');
                         updateTable($db, 'tblprovider', array('account_id'=>$account_id), $whereUser);
                     }else{
                         insertIntoTable($db, 'tblprovider', array('account_id'=>$account_id, 'Guid_user'=>$Guid_user));
-                    }
-                    
-                }
-                
+                    }                    
+                }                 
                 //check if role is changed, then move all data to that user by role table and remove previous
                 $prevRole = $db->row('SELECT Guid_role FROM `tbluser` WHERE Guid_user=:Guid_user', $whereUser);
                 if($prevRole['Guid_role'] == $Guid_role){                     
-                    saveUserDetails($db, $Guid_user, $Guid_role, $userDetails);            
-                    Leave(SITE_URL."/user-management.php?update");
+                    saveUserDetails($db, $Guid_user, $Guid_role, $userDetails); 
                 } else { 
                     //need to move user info data to proper table and delete prev
                     moveUserData($db, $Guid_user, $userDetails, $Guid_role, $prevRole['Guid_role']);
-                    Leave(SITE_URL."/user-management.php?update");
-                }                
-                
+                } 
+                //update user category relationship if user is Sales Manager
+                if(isset($_POST['Guid_category'])){
+                    $catIDs = $_POST['Guid_category'];
+                    saveCategoryUserLinks($db, $Guid_user, $catIDs);                       
+                } else {
+                    $db->query("DELETE FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$Guid_user));
+                }
+                Leave(SITE_URL."/user-management.php?update");
             } else {
                 $message = "User with this email already exists.";
             }
@@ -500,7 +507,8 @@ require_once ('navbar.php');
     
     if(isset($_GET['action']) && $_GET['action'] !="" ){ 
         $userID = $_GET['id'];
-        $user = getUserAndRole($db, $userID);   
+        $user = getUserAndRole($db, $userID); 
+       
         //we can change only roles admin and sales reps
         if($_GET['action']=='add'){
             $allRoles = $db->query('SELECT * FROM tblrole ORDER BY role ASC'); 
@@ -536,23 +544,23 @@ require_once ('navbar.php');
         <?php if($message!=""){ ?>
             <div class="error text-center" id="message"><?php echo $message; ?></div>
         <?php } ?>
-        <form action="" method="POST" enctype="multipart/form-data"> 
+        <form id="userForm" action="" method="POST" enctype="multipart/form-data"> 
             <div class="row">                
                 <input type="hidden" name="Guid_user" value="<?php echo isset($user['Guid_user'])?$user['Guid_user']:''; ?>" />
                 <div class="col-md-6 col-md-offset-3">                   
                     <div class="f2 <?php echo ($first_name!="")?"valid show-label":"";?>">
-                        <label class="dynamic" for="first_name"><span>First Name</span></label>
+                        <label class="dynamic" for="form_first_name"><span>First Name</span></label>
                         <div class="group">
-                            <input autocomplete="off" name="first_name" value="<?php echo $first_name; ?>" type="text" class="form-control" id="first_name" placeholder="First Name">
+                            <input autocomplete="off" name="first_name" value="<?php echo $first_name; ?>" type="text" class="form-control" id="form_first_name" placeholder="First Name">
                             <p class="f_status">
                                 <span class="status_icons"><strong>*</strong></span>
                             </p>
                         </div>
                     </div>
                     <div class="f2 <?php echo ($last_name!="")?"valid show-label":"";?>">
-                        <label class="dynamic" for="last_name"><span>Last Name</span></label>
+                        <label class="dynamic" for="form_last_name"><span>Last Name</span></label>
                         <div class="group">
-                            <input autocomplete="off" name="last_name" value="<?php echo $last_name; ?>" type="text" class="form-control" id="last_name" placeholder="Last Name">
+                            <input autocomplete="off" name="last_name" value="<?php echo $last_name; ?>" type="text" class="form-control" id="form_last_name" placeholder="Last Name">
                             <p class="f_status">
                                 <span class="status_icons"><strong>*</strong></span>
                             </p>
@@ -588,16 +596,41 @@ require_once ('navbar.php');
                         </div>
                     </div>
                     <?php }  ?>  
+                    <?php if($roleInfo['role']=='Admin') { ?>
+                        <div id="userCategoryDropdown">
+                        <?php if($user['role']=='Sales Manager'){ ?>
+                        <div class="selectCategory">
+                            <label class="title"><span>Select Category</span></label>
+                            <?php
+                                $categories = $db->query("SELECT * FROM `tbl_mdl_category` ");      
+                                $userCategories = $db->query("SELECT Guid_category FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$user['Guid_user'])); 
+                                $userLinks = array();
+                                if(!empty($userCategories)){
+                                    foreach ($userCategories as $k=>$v){
+                                        $userLinks[] = $v['Guid_category'];
+                                    }
+                                }
+                            ?>      
+                            <?php foreach ($categories as $k=>$v) { ?>
+                                <div>
+                                    <input <?php if(in_array($v['Guid_category'], $userLinks)){echo "checked"; } ?> id="<?php echo $v['Guid_category']; ?>" type='checkbox' name='Guid_category[]' value="<?php echo $v['Guid_category']; ?>">
+                                    <label for="<?php echo $v['Guid_category']; ?>"><?php echo $v['name']; ?> </label>
+                                </div>                              
+                            <?php }?>
+                        </div>
+                        <?php } ?>
+                        </div>
+                    <?php } ?>
                     <?php if( $_GET['action']=='update' && $user['role']=='Physician') { ?>
                     <div class="f2 required <?php echo ($user['account']!="")?"valid show-label":"";?>">
-                        <label class="dynamic" for="status"><span>Account</span></label>
+                        <label class="dynamic" for="form_account_id"><span>Account</span></label>
                         <div class="group">
                             <?php 
                                 $accounts = $db->query("SELECT Guid_account, account, name FROM tblaccount Order BY account ASC");
                                 $getAccountId = $db->row("SELECT account_id FROM tblprovider WHERE Guid_user=:Guid_user", array('Guid_user'=>$_GET['id']) );
                                 $accountID = $getAccountId['account_id'];
                             ?>
-                            <select required id="account_id" name="account_id" class="<?php echo ($accountID=="")?'no-selection':''; ?> ">
+                            <select required id="form_account_id" name="account_id" class="<?php echo ($accountID=="")?'no-selection':''; ?> ">
                                 <option value="">Account</option>
                                 <?php foreach ($accounts as $k=>$v) { ?>
                                 <?php $selected = (isset($accountID) && $accountID==$v['account'])?" selected":""; ?>
@@ -612,10 +645,10 @@ require_once ('navbar.php');
                     <?php } ?>
                     
                     <div class="f2 required <?php echo ($user['status']!="")?"valid show-label":"";?>">
-                        <label class="dynamic" for="status"><span>Status</span></label>
+                        <label class="dynamic" for="form_status"><span>Status</span></label>
                         <div class="group">
                             <?php $userStatus = isset($_POST['status'])?$_POST['status']:$user['status'];?>
-                            <select required id="status" name="status" class="<?php echo ($user['status']=="")?'no-selection':''; ?> ">
+                            <select required id="form_status" name="status" class="<?php echo ($user['status']=="")?'no-selection':''; ?> ">
                                 <option value="">Status</option>
                                 <option <?php echo ($userStatus=='1') ? " selected": ""; ?> value="1">Active</option>   
                                 <option <?php echo ($userStatus=='0') ? " selected": ""; ?> value="0">Inactive</option>   
@@ -626,9 +659,9 @@ require_once ('navbar.php');
                         </div>
                     </div>
                     <div class="f2 required <?php echo ($user['email']!="")?"valid show-label":"";?>">
-                        <label class="dynamic" for="email"><span>Email</span></label>
+                        <label class="dynamic" for="form_email"><span>Email</span></label>
                         <div class="group">
-                            <input autocomplete="off" required="" name="email" value="<?php echo $user['email']; ?>" type="text" class="form-control" id="email" placeholder="Email">
+                            <input autocomplete="off" required="" name="email" value="<?php echo $user['email']; ?>" type="text" class="form-control" id="form_email" placeholder="Email">
                             <p class="f_status">
                                 <span class="status_icons"><strong>*</strong></span>
                             </p>
@@ -636,9 +669,9 @@ require_once ('navbar.php');
                     </div>  
                     <?php $passRequred = isset($_GET['add'])?' required':''; ?>
                     <div class="f2 <?php echo $passRequred; ?> ">
-                        <label class="dynamic" for="password"><span>Password</span></label>
+                        <label class="dynamic" for="form_password"><span>Password</span></label>
                         <div class="group">
-                            <input autocomplete="off" <?php echo $passRequred; ?> name="password" type="password" class="form-control" id="password" placeholder="Password">
+                            <input autocomplete="off" <?php echo $passRequred; ?> name="password" type="password" class="form-control" id="form_password" placeholder="Password">
                             <p class="f_status">
                                 <span class="status_icons"><strong>*</strong></span>
                             </p>
@@ -676,7 +709,7 @@ require_once ('navbar.php');
                      ?>
                     <div class="row">
                         <div class="col-md-12">
-                            <input <?php echo $checked; ?> <?php ?> id="show-tests" name="mark_as_test" value="1" type="checkbox">
+                            <input <?php echo $checked; ?> <?php ?> id="form_show-tests" name="mark_as_test" value="1" type="checkbox">
                             <label for="show-tests">Mark As Test</label>   
                         </div>
                     </div>

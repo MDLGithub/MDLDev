@@ -26,13 +26,23 @@ $userID = getThisUserID();
 $urlConfgs = getUrlConfigurations($db, $userID);
 
 if ($role == "Sales Rep"){
-    $query = "SELECT 
-    tblaccount.*                   
-    FROM tblsalesrep 
-    LEFT JOIN `tblaccountrep` ON  tblsalesrep.Guid_salesrep = tblaccountrep.Guid_salesrep
-    LEFT JOIN `tblaccount` ON tblaccountrep.Guid_account = tblaccount.Guid_account                    
-    WHERE tblsalesrep.Guid_user=".$_SESSION['user']['id'];
-    
+    $query = "SELECT tblaccount.*                   
+            FROM tblsalesrep 
+            LEFT JOIN `tblaccountrep` ON  tblsalesrep.Guid_salesrep = tblaccountrep.Guid_salesrep
+            LEFT JOIN `tblaccount` ON tblaccountrep.Guid_account = tblaccount.Guid_account                    
+            WHERE tblsalesrep.Guid_user=".$_SESSION['user']['id'];
+} elseif($role == "Sales Manager"){
+    $userCategories = $db->query("SELECT Guid_category FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$_SESSION['user']['id'])); 
+    $userLinks = '';
+    if(!empty($userCategories)){
+        foreach ($userCategories as $k=>$v){
+            $userLinks .= $v['Guid_category'].', ';
+        }
+        $userLinks = rtrim($userLinks, ', ');
+    }    
+    if($userLinks != ''){
+        $query = "SELECT * FROM tblaccount WHERE Guid_category IN (" . $userLinks . ") ";
+    } 
 } else {
     $query = "SELECT * FROM tblaccount";
 }
@@ -380,7 +390,7 @@ $accountProviders = '';
               </div>
               <div class="col-md-6">
                   <div class="row">
-                      <div class="col-lg-4 col-md-12">
+                      <div class="col-lg-12 col-md-12">
                           <p id="officeLogo">
                               <?php 
                                 if( isset($_POST['an']) && $_POST['an'] != "0"){
@@ -396,7 +406,7 @@ $accountProviders = '';
                               ?>
                           </p>
                       </div>
-                      <div class="col-lg-8 col-md-12">
+                      <div class="col-lg-12 col-md-12">
                               <?php 
                                 $addressInfo = "";
                                 $accountInfo = "";                                
@@ -445,7 +455,7 @@ $accountProviders = '';
                   <h5 id="physiciansListLabel">
                       <?php  if(isset($accountActive) && $accountActive!=''){ echo '<p class="providersTitle">Health Care Providers</p>'; }?>
                   </h5>
-                  <div id="physiciansList">
+                  <div id="physiciansList" class = "col-lg-12">
                     <?php 
                         if(isset($accountActive) && $accountActive!=''){
                             $accountProviders = get_active_providers($db, 'account_id', $thisAccount['account']);

@@ -23,6 +23,19 @@ $roleInfo = getRole($db, $userID);
 $role = $roleInfo['role'];
 
 $accounts = $db->selectAll('tblaccount', ' ORDER BY `account` ASC');
+if($role == "Sales Manager"){
+    $userCategories = $db->query("SELECT Guid_category FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$_SESSION['user']['id'])); 
+    $userLinks = '';
+    if(!empty($userCategories)){
+        foreach ($userCategories as $k=>$v){
+            $userLinks .= $v['Guid_category'].', ';
+        }
+        $userLinks = rtrim($userLinks, ', ');
+    }    
+    if($userLinks != ''){
+        $accounts = $db->query("SELECT * FROM tblaccount WHERE Guid_category IN (" . $userLinks . ") ORDER BY `account` ASC" );
+    } 
+}
 $tblproviders = $db->selectAll('tblprovider');
 
 

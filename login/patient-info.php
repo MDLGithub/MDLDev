@@ -40,7 +40,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     }
     
     $sqlQualify = "SELECT q.Guid_qualify,q.Guid_user,q.insurance,
-                    q.other_insurance,q.account_number,q.Date_created as qDate,
+                    q.other_insurance,q.account_number AS qAccountNumber,q.Date_created as qDate,
                     q.provider_id, q.deviceid, q.source, 
                     CONCAT(prov.first_name,' ',prov.last_name) provider, prov.title,
                     p.*, p.Loaded As dmdlPatient,
@@ -88,7 +88,9 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             LEFT JOIN tbluser u ON u.Guid_user = p.Guid_user
                             WHERE p.Guid_user=:Guid_user";
         $qualifyResult = $db->row($getPatientInfoQ, array('Guid_user'=>$Guid_user)); 
-        $qualifyResult['no_submited_questionnaire'] = '1';
+        if(!empty($qualifyResult)){
+            $qualifyResult['no_submited_questionnaire'] = '1';
+        }
     }
         
     $mdlInfoQ = "SELECT * FROM tbl_mdl_number WHERE Guid_user=:Guid_user";
@@ -215,13 +217,13 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 
 
 <?php 
-    if(isset($qualifyResult['account_number'])&&$qualifyResult['account_number']!=""){
+    if(isset($qualifyResult['qAccountNumber'])&&$qualifyResult['qAccountNumber']!=""){
         $accountQ = "SELECT a.Guid_account, a.account, a.name AS account_name, "
                     . "sr.Guid_salesrep, sr.first_name AS salesrep_fname, sr.last_name AS salesrep_lname, CONCAT(sr.first_name, ' ', sr.last_name) AS salesrep_name "
                     . "FROM tblaccount a "
                     . "LEFT JOIN tblaccountrep ar ON a.Guid_account=ar.Guid_account "
                     . "LEFT JOIN tblsalesrep sr ON ar.Guid_salesrep = sr.Guid_salesrep "
-                    . "WHERE a.account = '" . $qualifyResult['account_number'] . "'";
+                    . "WHERE a.account = '" . $qualifyResult['qAccountNumber'] . "'";
         $accountInfo = $db->row($accountQ);        
     } else {
         $accountInfo = FALSE;
@@ -272,7 +274,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         </section>
 
         <div id="app_data" class="scroller">
-            <?php if(isset($ssQualifyResult) && !empty($ssQualifyResult)){ ?>
+            <?php if($qualifyResult){ ?>
             <div class="row" id="patient-info-box">   
                 <div class="col-md-12">
                 <?php if(isset($message)){ ?>
@@ -335,7 +337,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 </p>
                                 <?php } ?>
                                 <?php if(isset($accountInfo['Guid_account'])){ ?>
-                                <p><label>Account: </label><a href="<?php echo SITE_URL.'/accounts.php?account_id='.$accountInfo['Guid_account']; ?>"><?php echo $qualifyResult['account_number']; ?></a>
+                                <p><label>Account: </label><a href="<?php echo SITE_URL.'/accounts.php?account_id='.$accountInfo['Guid_account']; ?>"><?php echo $qualifyResult['qAccountNumber']; ?></a>
                                     <?php
                                         if($accountInfo['account_name']!=""){
                                             echo " - ". ucwords(strtolower($accountInfo['account_name']));

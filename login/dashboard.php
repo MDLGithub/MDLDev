@@ -146,24 +146,35 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         </div>
                     </div>
                 <?php }?>
-                <?php
+                <?php 
                 if (($role == "Sales Rep") || ((isset($_POST['salesrep']) && strlen($_POST['salesrep']) && (!isset($_POST['clear']))))) {
-                    $query = "SELECT 
-                    tblaccount.*                   
-                    FROM tblsalesrep 
-                    LEFT JOIN `tblaccountrep` ON  tblsalesrep.Guid_salesrep = tblaccountrep.Guid_salesrep
-                    LEFT JOIN `tblaccount` ON tblaccountrep.Guid_account = tblaccount.Guid_account                    
-                    WHERE tblsalesrep.Guid_user=";
+                    $query = "SELECT tblaccount.*                   
+                            FROM tblsalesrep 
+                            LEFT JOIN `tblaccountrep` ON  tblsalesrep.Guid_salesrep = tblaccountrep.Guid_salesrep
+                            LEFT JOIN `tblaccount` ON tblaccountrep.Guid_account = tblaccount.Guid_account                    
+                            WHERE tblsalesrep.Guid_user=";
 
                     if (isset($_POST['salesrep']) && strlen($_POST['salesrep'])) {
                         $query .= $_POST['salesrep'];
                     } else {
                         $query .= $_SESSION['user']['id'];
                     }
+                } elseif ($role == "Sales Manager") {
+                    $query = "SELECT * FROM tblaccount WHERE ";
+                    $userCategories = $db->query("SELECT Guid_category FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$_SESSION['user']['id'])); 
+                    $userLinks = '';
+                    if(!empty($userCategories)){
+                        foreach ($userCategories as $k=>$v){
+                            $userLinks .= $v['Guid_category'].', ';
+                        }
+                        $userLinks = rtrim($userLinks, ', ');
+                    }    
+                    if($userLinks != ''){
+                        $query .= " Guid_category IN (" . $userLinks . ") ";
+                    }                     
                 } else {
                     $query = "SELECT * FROM tblaccount";
                 }
-
                 $query .= " ORDER BY account";
 
                 $accounts = $db->query($query);
@@ -174,7 +185,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         <label class="dynamic" for="account"><span>Account</span></label>
 
                         <div class="group">
-                            <select id="account" name="account" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['account'])) && (strlen($_POST['account']))) ? "" : "no-selection"; ?>">
+                            <select id="account" name="account" data-user-role="<?php echo $roleInfo['role']; ?>" class="<?php echo ((!isset($_POST['clear'])) && (isset($_POST['account'])) && (strlen($_POST['account']))) ? "" : "no-selection"; ?>">
                                 <option value="">Account</option>	
                                 <?php
                                 foreach ($accounts as $account) {
@@ -278,8 +289,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 </div>
                 <?php } ?>
                 
-                
-
                 <button id="filter" value="1" name="search" type="submit" class="button filter half"><strong>Search</strong></button>
                 <a href="<?php ?>" class="button cancel half"><strong>Clear</strong></a>
             </form>
@@ -333,7 +342,7 @@ if(isset($_POST['mark_as_test'])){
 
 $sqlTbl = "SELECT q.*, p.*, "
         . "AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') as firstname, AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') as lastname, "
-        . "a.name as account_name, a.Guid_account,"
+        . "a.name as account_name, a.Guid_account, a.Guid_category as account_category, "
         . "CONCAT (srep.first_name, ' ', srep.last_name) AS salesrep_name, srep.Guid_salesrep, "
         . "u.email, u.marked_test,  u.Guid_role, "
         . "q.Date_created AS date FROM tbl_ss_qualify q "
@@ -347,12 +356,9 @@ $whereTest = (strlen($where)) ? " AND " : " WHERE ";
 $whereTest .= " u.marked_test='0' ";      
 $whereIncomplete  = "";
 
-
 //if ((!count($error)) && (!isset($_POST['clear'])) && (!empty($_POST))) {
-if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
-   
-    $where = "";  $whereTest = "";  $whereIncomplete  = "";   
-    
+if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {   
+    $where = "";  $whereTest = "";  $whereIncomplete  = "";
     //Medical Necessity
     if (isset($_POST['meets_mn']) && strlen($_POST['meets_mn'])) {
         $whereTest = "";
@@ -463,6 +469,23 @@ if($role == "Sales Rep"){
     $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
     $where .= " srep.Guid_salesrep = '" . $salesrepInfo['Guid_salesrep'] . "'";
 }
+
+
+if($role == "Sales Manager"){    
+    $userCategories = $db->query("SELECT Guid_category FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID)); 
+    $userLinks = '';
+    if(!empty($userCategories)){
+        foreach ($userCategories as $k=>$v){
+            $userLinks .= $v['Guid_category'].', ';
+        }
+        $userLinks = rtrim($userLinks, ', ');
+    }    
+    if($userLinks != ''){
+        $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
+        $where .= " a.Guid_category IN (" . $userLinks . ") ";
+    }    
+}
+
 
 $sqlTbl .= $whereTest;
 $sqlTbl .= $whereIncomplete;
