@@ -534,20 +534,30 @@ require_once ('navbar.php');
                 $user['role'] = $roleName;                
             }            
         }   
-        
-    $modalTitle = ($_GET['action']=="update")? "Update User" : "Add New User";
+    if($_GET['action']=="update"){
+        if($first_name=='' || $last_name==''){
+            $modalTitle = "Update User";
+        }else {
+            $modalTitle = ucfirst(strtolower($first_name))." ".ucfirst(strtolower($last_name));
+        }
+    } else {
+        $modalTitle = "Add New User";
+    }
+    
 ?>
-<div id="patient-info-box" class="modalBlock">
+<div id="manage-status-modal" class="modalBlock">
     <div class="contentBlock">
+        
         <a class="close" href="<?php echo SITE_URL."/user-management.php"; ?>">X</a>        
-        <h2 class="text-center"><?php echo $modalTitle; ?></h2>
-        <?php if($message!=""){ ?>
-            <div class="error text-center" id="message"><?php echo $message; ?></div>
-        <?php } ?>
-        <form id="userForm" action="" method="POST" enctype="multipart/form-data"> 
+        <h5 class="providersTitle"><?php echo $modalTitle; ?></h5>
+        <div class="content">
+            <?php if($message!=""){ ?>
+                <div class="error text-center" id="message"><?php echo $message; ?></div>
+            <?php } ?>
+            <form id="userForm" action="" method="POST" enctype="multipart/form-data"> 
             <div class="row">                
                 <input type="hidden" name="Guid_user" value="<?php echo isset($user['Guid_user'])?$user['Guid_user']:''; ?>" />
-                <div class="col-md-6 col-md-offset-3">                   
+                <div class="col-md-12">                   
                     <div class="f2 <?php echo ($first_name!="")?"valid show-label":"";?>">
                         <label class="dynamic" for="form_first_name"><span>First Name</span></label>
                         <div class="group">
@@ -679,7 +689,7 @@ require_once ('navbar.php');
                     </div>                    
                     <?php if($user['role'] != 'Patient') { //For patients we dont have photo field in DB ?>
                     <div class="row">
-                        <div class="col-md-10">
+                        <div class="col-md-10 padd-0">
                             <div class="f2 <?php echo ($photo_filename!="")?"valid show-label":"";?>">
                                 <label class="dynamic" for="photo"><span>Photo</span></label>
                                 <div class="group">
@@ -691,7 +701,7 @@ require_once ('navbar.php');
                             </div>                    
                         </div>
                         <?php $image = (!isset($photo_filename) || $photo_filename=="")?"/assets/images/default.png":"/images/users/".$photo_filename; ?>
-                        <div id="profile-pic" class="col-md-2 pT-15">
+                        <div id="profile-pic" class="col-md-2 padd-0 pT-15 text-center">
                             <img id="image" width="40" src="<?php echo SITE_URL.$image; ?>" />
                         </div>
                     </div>    
@@ -724,6 +734,7 @@ require_once ('navbar.php');
             </div>
             
         </form>   
+        </div>
     </div>    
 </div>
 <?php } ?>
