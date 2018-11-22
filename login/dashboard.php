@@ -823,7 +823,8 @@ if(isset($_POST['dmdlUpdate'])){
                             $Guid_user = $insertUser['insertID'];
                             //insert into patients
                             $insertPatient = $db->query("INSERT INTO `tblpatient` ("
-                                    . "Guid_dmdl_patient,Guid_dmdl_physician,Guid_user,account_number,"
+                                    . "Guid_dmdl_patient,Guid_dmdl_physician,"
+                                    . "Guid_user,accountNumber,"
                                     . "firstname_enc,lastname_enc,"
                                     . "ethnicity,dob,gender,"
                                     . "address,address1,city,state,zip,"
@@ -914,7 +915,7 @@ if(isset($_POST['dmdlUpdate'])){
                             $patientData['Guid_dmdl_physician'] = $data['Physician']['GUID_PhysicianID'];
                         }
                         if($thisPatient['account_number']==''){
-                            $patientData['account_number'] = $data['account']['number'];
+                            $patientData['accountNumber'] = $data['account']['number'];
                         }
                         if($thisPatient['firstname_enc']==''){
                             $patientData['firstname_enc'] = $data['firstname'];

@@ -60,6 +60,18 @@ CREATE TABLE `tbl_mdl_category_user_link` (
 );
 
 
+//November 21
+ALTER TABLE `tblpatient` CHANGE `account_number` `accountNumber` VARCHAR(32);
+
+
+CREATE TABLE IF NOT EXISTS `tbl_mdl_updates_log` (
+                    `Guid_updates_log` INT(11) NOT NULL AUTO_INCREMENT,
+                    `function_name` VARCHAR(128) DEFAULT NULL,
+                    `description` VARCHAR(255) DEFAULT NULL,
+                    `isUpdated` ENUM('Y','N') DEFAULT 'N',
+                    `Date` DATETIME NOT NULL,
+                    PRIMARY KEY (`Guid_updates_log`)
+                );
 
 
 
