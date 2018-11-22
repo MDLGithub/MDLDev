@@ -477,27 +477,21 @@
             ),
             $today
         );
-        //print_r( $specimen );
         ?>
-
-        <table id="testing_recommended" class="ftable c4 c5 c6 lC5">
-            <thead>
-            <tr>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>DOB</th>
-                <th>Guideline Applied</th>
-                <th>Guideline Met</th>
-                <th>Date Collected</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php
-            if(!empty($specimen['info'])):
-                //echo '<pre>';print_r($specimen['info']);echo '</pre>';
-                //exit;
-
-                foreach ($specimen['info'] as $key => $value) {
+        <?php if(!empty($specimen['info'])): ?>
+            <table id="testing_recommended" class="ftable c4 c5 c6 lC5">
+                <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>DOB</th>
+                    <th>Guideline Applied</th>
+                    <th>Guideline Met</th>
+                    <th>Date Collected</th>
+                </tr>
+                </thead>
+                <tbody>
+        <?      foreach ($specimen['info'] as $key => $value) {
                     $patient_id = $value['Guid_patient'];
                     $sql = "SELECT `firstname_delete`,`lastname_delete`,`dob` FROM `tblpatient` WHERE `Guid_patient`=$patient_id";
                     $test = $db->query($sql, array('patient_id' => $value['Guid_patient']));
@@ -530,12 +524,10 @@
                     echo "<td>".$insurance[0]['guideline_met']."</td>";
                     echo "<td>".$value['Date_created']."</td>";
                     echo "</tr>";
-                }
-            endif;
-            ?>
-            </tbody>
-        </table>
-
+                } ?>
+                    </tbody>
+                </table>
+            <? endif; ?>
         <p><strong>Insufficient information</strong> was available to determine if the following patients met clinical policy testing guidelines:</p>
         <?php $unknown = get_stats_info_today(
             $db,
@@ -548,22 +540,18 @@
             ),
             $today
         ); ?>
-        <table class="ftable sf4">
-            <thead>
-            <tr>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>DOB</th>
-                <th>Information Needed</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php
-            if(!empty($unknown['info'])):
-                //echo '<pre>';print_r($unknown['info']);echo '</pre>';
-                //exit;
-
-                foreach ($unknown['info'] as $key => $value) {
+        <?php if(!empty($unknown['info'])): ?>
+            <table class="ftable sf4">
+                <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>DOB</th>
+                    <th>Information Needed</th>
+                </tr>
+                </thead>
+                <tbody>
+            <?  foreach ($unknown['info'] as $key => $value) {
                     $patient_id = $value['Guid_patient'];
                     $sql = "SELECT `firstname_delete`,`lastname_delete`,`dob` FROM `tblpatient` WHERE `Guid_patient`=$patient_id";
                     $test = $db->query($sql, array('patient_id' => $value['Guid_patient']));
@@ -651,12 +639,10 @@
                     echo "<td>".$test[0]['dob']."</td>";
                     echo "<td>".$out."</td>";
                     echo "</tr>";
-                }
-            endif;
-            ?>
-            </tbody>
-        </table>
-
+                } ?>
+                    </tbody>
+                </table>
+            <? endif; ?>
         <div id="not_recommended" class="columns two">
             <div class="col">
                 <p>The following patients were also screened and based upon the information provided, screening for BRCA, HBOC, and/or Lynch Syndrome is <strong>not</strong> recommended:</p>
@@ -671,32 +657,29 @@
                     ),
                     $today
                 ); ?>
-                <table class="sTable">
-                    <thead>
-                    <tr>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>DOB</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <?php
-                    if(!empty($notqual['info'])):
-                        foreach ($notqual['info'] as $key => $value) {
-                            $patient_id = $value['Guid_patient'];
-                            $sql = "SELECT `firstname_delete`,`lastname_delete`,`dob` FROM `tblpatient` WHERE `Guid_patient`=$patient_id";
-                            $test = $db->query($sql, array('patient_id' => $value['Guid_patient']));
-
-                            echo "<tr>";
-                            echo "<td>".$test[0]['firstname_delete']."</td>";
-                            echo "<td>".$test[0]['lastname_delete']."</td>";
-                            echo "<td>".$test[0]['dob']."</td>";
-                            echo "</tr>";
-                        }
-                    endif;
-                    ?>
-                    </tbody>
-                </table>
+                    <?php if(!empty($notqual['info'])): ?>
+                    <table class="sTable">
+                        <thead>
+                        <tr>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>DOB</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                    <? foreach ($notqual['info'] as $key => $value) {
+                        $patient_id = $value['Guid_patient'];
+                        $sql = "SELECT `firstname_delete`,`lastname_delete`,`dob` FROM `tblpatient` WHERE `Guid_patient`=$patient_id";
+                        $test = $db->query($sql, array('patient_id' => $value['Guid_patient']));
+                        echo "<tr>";
+                        echo "<td>".$test[0]['firstname_delete']."</td>";
+                        echo "<td>".$test[0]['lastname_delete']."</td>";
+                        echo "<td>".$test[0]['dob']."</td>";
+                        echo "</tr>";
+                    } ?>
+                        </tbody>
+                    </table>
+                    <? endif; ?>
             </div>
 
             <div id="not_completed" class="col">
@@ -712,32 +695,29 @@
                     ),
                     $today
                 ); ?>
-                <table class="sTable">
-                    <thead>
-                    <tr>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>DOB</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <?php
-                    if(!empty($incomplete['info'])):
-                        foreach ($incomplete['info'] as $key => $value) {
-                            $patient_id = $value['Guid_patient'];
-                            $sql = "SELECT `firstname_delete`,`lastname_delete`,`dob` FROM `tblpatient` WHERE `Guid_patient`=$patient_id";
-                            $test = $db->query($sql, array('patient_id' => $value['Guid_patient']));
-
-                            echo "<tr>";
-                            echo "<td>".$test[0]['firstname_delete']."</td>";
-                            echo "<td>".$test[0]['lastname_delete']."</td>";
-                            echo "<td>".$test[0]['dob']."</td>";
-                            echo "</tr>";
-                        }
-                    endif;
-                    ?>
-                    </tbody>
-                </table>
+                <?php if(!empty($incomplete['info'])): ?>
+                    <table class="sTable">
+                        <thead>
+                        <tr>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>DOB</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                    <? foreach ($incomplete['info'] as $key => $value) {
+                        $patient_id = $value['Guid_patient'];
+                        $sql = "SELECT `firstname_delete`,`lastname_delete`,`dob` FROM `tblpatient` WHERE `Guid_patient`=$patient_id";
+                        $test = $db->query($sql, array('patient_id' => $value['Guid_patient']));
+                        echo "<tr>";
+                        echo "<td>".$test[0]['firstname_delete']."</td>";
+                        echo "<td>".$test[0]['lastname_delete']."</td>";
+                        echo "<td>".$test[0]['dob']."</td>";
+                        echo "</tr>";
+                    } ?>
+                        </tbody>
+                    </table>
+                    <? endif; ?>
             </div>
         </div>
     </div>
