@@ -493,7 +493,7 @@
                 <tbody>
         <?      foreach ($specimen['info'] as $key => $value) {
                     $patient_id = $value['Guid_patient'];
-                    $sql = "SELECT `firstname_delete`,`lastname_delete`,`dob` FROM `tblpatient` WHERE `Guid_patient`=$patient_id";
+                    $sql = "SELECT aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname_delete, aes_decrypt(lastname_enc, 'L@stn@m3&%#') as lastname_delete, `dob` FROM `tblpatient` WHERE `Guid_patient`=$patient_id";
                     $test = $db->query($sql, array('patient_id' => $value['Guid_patient']));
 
                     $Guid_user = $value['Guid_user'];
@@ -553,7 +553,7 @@
                 <tbody>
             <?  foreach ($unknown['info'] as $key => $value) {
                     $patient_id = $value['Guid_patient'];
-                    $sql = "SELECT `firstname_delete`,`lastname_delete`,`dob` FROM `tblpatient` WHERE `Guid_patient`=$patient_id";
+                    $sql = "SELECT aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname_delete, aes_decrypt(lastname_enc, 'L@stn@m3&%#') as lastname_delete, `dob` FROM `tblpatient` WHERE `Guid_patient`=$patient_id";
                     $test = $db->query($sql, array('patient_id' => $value['Guid_patient']));
 
                     //echo '<pre>';print_r($unknown['info']);echo '</pre>';
@@ -669,7 +669,7 @@
                         <tbody>
                     <? foreach ($notqual['info'] as $key => $value) {
                         $patient_id = $value['Guid_patient'];
-                        $sql = "SELECT `firstname_delete`,`lastname_delete`,`dob` FROM `tblpatient` WHERE `Guid_patient`=$patient_id";
+                        $sql = "SELECT aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname_delete, aes_decrypt(lastname_enc, 'L@stn@m3&%#') as lastname_delete, `dob` FROM `tblpatient` WHERE `Guid_patient`=$patient_id";
                         $test = $db->query($sql, array('patient_id' => $value['Guid_patient']));
                         echo "<tr>";
                         echo "<td>".$test[0]['firstname_delete']."</td>";
@@ -707,7 +707,7 @@
                         <tbody>
                     <? foreach ($incomplete['info'] as $key => $value) {
                         $patient_id = $value['Guid_patient'];
-                        $sql = "SELECT `firstname_delete`,`lastname_delete`,`dob` FROM `tblpatient` WHERE `Guid_patient`=$patient_id";
+                        $sql = "SELECT aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname_delete, aes_decrypt(lastname_enc, 'L@stn@m3&%#') as lastname_delete, `dob` FROM `tblpatient` WHERE `Guid_patient`=$patient_id";
                         $test = $db->query($sql, array('patient_id' => $value['Guid_patient']));
                         echo "<tr>";
                         echo "<td>".$test[0]['firstname_delete']."</td>";
