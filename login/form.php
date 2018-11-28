@@ -450,8 +450,6 @@
     </header>
 
     <div class="main">
-        <p>Based upon the cited clinical policy testing guidelines, testing is <strong class="labColor">recommended</strong> for the following patients:</p>
-
         <?php
         /*$statuses = array('28' => 'Registered Paient', '36' => 'Completed Questionnaire', '16' => 'Insufficient Informatin' , '29' => 'Medically Qualified' );
         $filterUrlStr = "";
@@ -479,6 +477,7 @@
         );
         ?>
         <?php if(!empty($specimen['info'])): ?>
+            <p>Based upon the cited clinical policy testing guidelines, testing is <strong class="labColor">recommended</strong> for the following patients:</p>
             <table id="testing_recommended" class="ftable c4 c5 c6 lC5">
                 <thead>
                 <tr>
@@ -491,7 +490,7 @@
                 </tr>
                 </thead>
                 <tbody>
-        <?      foreach ($specimen['info'] as $key => $value) {
+            <?  foreach ($specimen['info'] as $key => $value) {
                     $patient_id = $value['Guid_patient'];
                     $sql = "SELECT aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname_delete, aes_decrypt(lastname_enc, 'L@stn@m3&%#') as lastname_delete, `dob` FROM `tblpatient` WHERE `Guid_patient`=$patient_id";
                     $test = $db->query($sql, array('patient_id' => $value['Guid_patient']));
@@ -528,7 +527,6 @@
                     </tbody>
                 </table>
             <? endif; ?>
-        <p><strong>Insufficient information</strong> was available to determine if the following patients met clinical policy testing guidelines:</p>
         <?php $unknown = get_stats_info_today(
             $db,
             31,
@@ -541,6 +539,7 @@
             $today
         ); ?>
         <?php if(!empty($unknown['info'])): ?>
+            <p><strong>Insufficient information</strong> was available to determine if the following patients met clinical policy testing guidelines:</p>
             <table class="ftable sf4">
                 <thead>
                 <tr>
@@ -629,8 +628,6 @@
                             $out .= $personal." No Cancer History ";
                             $out .= $family." No Cancer History ";
                         }
-
-
                     }
 
                     echo "<tr>";
@@ -645,7 +642,6 @@
             <? endif; ?>
         <div id="not_recommended" class="columns two">
             <div class="col">
-                <p>The following patients were also screened and based upon the information provided, screening for BRCA, HBOC, and/or Lynch Syndrome is <strong>not</strong> recommended:</p>
                 <?php $notqual = get_stats_info_today(
                     $db,
                     30,
@@ -658,6 +654,7 @@
                     $today
                 ); ?>
                     <?php if(!empty($notqual['info'])): ?>
+                    <p>The following patients were also screened and based upon the information provided, screening for BRCA, HBOC, and/or Lynch Syndrome is <strong>not</strong> recommended:</p>
                     <table class="sTable">
                         <thead>
                         <tr>
@@ -683,7 +680,6 @@
             </div>
 
             <div id="not_completed" class="col">
-                <p>The following patients initiated, but did not complete the questionnaire:</p>
                 <?php $incomplete = get_stats_info_today(
                     $db,
                     16,
@@ -696,6 +692,7 @@
                     $today
                 ); ?>
                 <?php if(!empty($incomplete['info'])): ?>
+                    <p>The following patients initiated, but did not complete the questionnaire:</p>
                     <table class="sTable">
                         <thead>
                         <tr>
