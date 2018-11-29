@@ -2658,8 +2658,14 @@ function dmdl_refresh($db){
         $domArr = $domObj->array; 
         if($domObj->parse_error){ 
             echo $domObj->get_xml_error();            
-        } else {             
-            $res = $domArr['CombinedResults']['GeneticResults'];
+        } else { 
+            if(isset($domArr['CombinedResults']['GeneticResults']['0'])){
+                $res = $domArr['CombinedResults']['GeneticResults']['0'];
+                $bgClass = 'duplicateResult';
+            }else{            
+                $res = $domArr['CombinedResults']['GeneticResults'];
+                $bgClass = '';
+            }
            
             $Guid_MDLNumber = isset($res['Guid_MDLNumber'])?$res['Guid_MDLNumber']:'';            
             $Date_Of_Birth = isset($res['Date_Of_Birth'])?$res['Date_Of_Birth']:'';          
@@ -2682,7 +2688,7 @@ function dmdl_refresh($db){
             
             $getPatient = getPaientPerfectMatch($db,$firstname,$lastname,$Date_Of_Birth);
          
-            $content .= "<tr>";
+            $content .= "<tr class='$bgClass'>";
             if(empty($getPatient)){ //patient not match with dmdl data => ststus=no
                 $match = "<td class='mn no'>"
                         . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][status]' value='no' />"

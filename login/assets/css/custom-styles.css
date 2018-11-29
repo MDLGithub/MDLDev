@@ -2847,3 +2847,6 @@ tr.loadedStatus{
   #setDate .buttons button{
     margin: 0 30px;
   }
+  .duplicateResult{
+    background: #ff8a26;
+  }
