@@ -18,13 +18,19 @@ $(document).ready(function(){
     });
 
 	$('#followup').click(function(e){
-		e.preventDefault();
-		$("#setDate").css("display","block");
+        e.preventDefault();
+        var modal = $('.modalBlock#setDate');
+        if ($(modal).css('display') == 'none') {
+            $(modal).show();
+        } else {
+            $(modal).hide();
+        }
 	});
 
-	$("#modal_close").click(function(e){
-		e.preventDefault();
-		$("#setDate").css("display","none");
+	$("#setDate .close").click(function(e){
+        e.preventDefault();
+        var modal = $('.modalBlock#setDate');
+		$(modal).hide();
 	});
 
 	function date_revers(str){

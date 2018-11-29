@@ -438,8 +438,6 @@
                     $_POST['today'] = date("Y-m-d");
                     $today = $_POST['today'];
 
-                    //print_r($_POST);
-
                     echo get_status_state($db, '0', array('Guid_account'=>$guid_account), array('account_id'=>$guid_account,'status_table'=>'1'), $today);
                 }
                 ?>
@@ -518,10 +516,10 @@
                     echo "<tr>";
                     echo "<td>".$test[0]['firstname_delete']."</td>";
                     echo "<td>".$test[0]['lastname_delete']."</td>";
-                    echo "<td>".$test[0]['dob']."</td>";
+                    echo "<td>".formatDate($test[0]['dob'])."</td>";
                     echo "<td>".$insurance[0]['insurance']."</td>";
                     echo "<td>".$insurance[0]['guideline_met']."</td>";
-                    echo "<td>".$value['Date_created']."</td>";
+                    echo "<td>".formatDate($value['Date_created'])."</td>";
                     echo "</tr>";
                 } ?>
                     </tbody>
@@ -633,7 +631,7 @@
                     echo "<tr>";
                     echo "<td>".$test[0]['firstname_delete']."</td>";
                     echo "<td>".$test[0]['lastname_delete']."</td>";
-                    echo "<td>".$test[0]['dob']."</td>";
+                    echo "<td>".formatDate($test[0]['dob'])."</td>";
                     echo "<td>".$out."</td>";
                     echo "</tr>";
                 } ?>
@@ -671,7 +669,7 @@
                         echo "<tr>";
                         echo "<td>".$test[0]['firstname_delete']."</td>";
                         echo "<td>".$test[0]['lastname_delete']."</td>";
-                        echo "<td>".$test[0]['dob']."</td>";
+                        echo "<td>".formatDate($test[0]['dob'])."</td>";
                         echo "</tr>";
                     } ?>
                         </tbody>
@@ -709,7 +707,7 @@
                         echo "<tr>";
                         echo "<td>".$test[0]['firstname_delete']."</td>";
                         echo "<td>".$test[0]['lastname_delete']."</td>";
-                        echo "<td>".$test[0]['dob']."</td>";
+                        echo "<td>".formatDate($test[0]['dob'])."</td>";
                         echo "</tr>";
                     } ?>
                         </tbody>

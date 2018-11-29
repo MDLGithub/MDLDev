@@ -692,32 +692,33 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                     </div>
                 </div>
             </div>
-
-            <div id="setDate" class="modal" style="position: absolute; top: 5%; left: 35%;">
-                <a id="modal_close" href="#" rel="modal:close">x</a>
-                <div class="f2">
-                    <label class="" for="account"><span>Start Date</span></label>
-                    <div class="group">
-                        <input readonly="" class="datepicker" type="text" id="from_date" name="from_date" value="" placeholder="From Date">
-                        <!-- <input type="date" name="start_date" value="<?php echo date('Y-m-d') ?>" id="start_date" > -->
+            <div id="setDate" class="modalBlock" style="display: none;">
+                <div class="contentBlock patientForms">
+                    <span class="close"></span>
+                    <div class="container form-container" style="margin:auto"> 
+                        <div class = "form-row">
+                            <div class = "patient_name">Follow Up</div>
+                        </div>
+                        <div class="f2">
+                            <label class="" for="account"><span>Start Date</span></label>
+                            <div class="group">
+                                <input readonly="" class="datepicker" type="text" id="from_date" name="from_date" value="" placeholder="From Date">
+                            </div>
+                        </div>
+                        <div class="f2">
+                            <label class="" for="account"><span>End Date</span></label>
+                            <div class="group">
+                                <input readonly="" class="datepicker" type="text" id="to_date" name="to_date" value="" placeholder="To Date" max="2018-11-13">
+                            </div>
+                        </div>
+                        <input type="hidden" name="account" value="<?php echo $accountActive['account']; ?>">
+                        <input type="hidden" name="guid_account" value="<?php echo $accountActive['Guid_account'] ?>">
+                        <div class = "buttons">
+                            <button id="reset_date" value="2018-08-01" name="submit_account" type="submit" class="button btn-inline">Reset</button>
+                            <button id="print" name="submit_account" type="submit" class="button btn-inline">Continue</button>
+              	        </div>
                     </div>
                 </div>
-                <div class="f2">
-                    <label class="" for="account"><span>End Date</span></label>
-                    <div class="group">
-                        <input readonly="" class="datepicker" type="text" id="to_date" name="to_date" value="" placeholder="To Date" max="2018-11-13">
-                        <!-- <input type="date" value="<?php echo date('Y-m-d') ?>" name="end_date" id="end_date"> -->
-                    </div>
-                </div>
-                <div class="col-md-6 center">
-                    <button id="reset_date" value="2018-08-01" name="submit_account" type="submit" class="button btn-inline">Reset</button>
-                </div>
-                <div class="col-md-6 center">
-                    <button id="print" name="submit_account" type="submit" class="button btn-inline">Continue</button>
-                </div>
-                
-                <input type="hidden" name="account" value="<?php echo $accountActive['account']; ?>">
-                <input type="hidden" name="guid_account" value="<?php echo $accountActive['Guid_account'] ?>">
             </div>
             <?php } else {?>
             <div class="full visible ">  
