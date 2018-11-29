@@ -7,11 +7,6 @@
 <html>
 <head>
     <style>
-
-        /* .exact, .form * {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        } */
         table{
             border-spacing: 0px 0px;
         }

@@ -270,7 +270,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
             </h4>
             <a href="<?php echo SITE_URL; ?>/patient-info.php?logout=1" name="log_out" class="button red back logout"></a>
             <a href="<?php echo SITE_URL; ?>/dashboard2.php" class="button homeIcon"></a>
-            <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit smaller_button"><strong>View Questionnaire</strong></a>
+            <a href="<?php echo QUESTIONNAIRE_URL; ?>" target="_blank" class="button submit smaller_button"><strong>View Questionnaire</strong></a>
         </section>
 
         <div id="app_data" class="scroller">
@@ -1325,11 +1325,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         <?php 
                         //$tblproviders = $db->query('SELECT * FROM tblprovider WHERE account_id='.$qualifyResult['account_number']);
                         if(isset($qualifyResult['qAccountNumber'])&&$qualifyResult['qAccountNumber']!=""){
-                            $providerQ =  'SELECT pr.* FROM tblprovider pr '                                
+                            $providerQ =  'SELECT pr.* FROM tblprovider pr '
                                         . 'LEFT JOIN tbluser u ON u.`Guid_user`=pr.`Guid_user`'
                                         . ' WHERE account_id='.$qualifyResult['qAccountNumber'];
                             $tblproviders = $db->query($providerQ);
-                            
+
                         foreach ($tblproviders as $k=>$v){ 
                         $selected = $qualifyResult['provider_id']==$v['Guid_provider'] ? ' selected' : '';
                         $providerTitle = '';
@@ -1365,7 +1365,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 
                     
                 <div class="text-right pT-10">
-                    <button class="button btn-inline" name="save_patient_info" type="submit">Save</button>                
+                    <button class="button btn-inline" name="save_patient_info" type="submit">Save</button>
                 </div>                
             </form> 
         </div>

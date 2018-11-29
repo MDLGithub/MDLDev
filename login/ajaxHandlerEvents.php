@@ -1,16 +1,10 @@
 <?php
-
-    // File Name: ajaxHandlerEvents.php
-
-?>
-
-<?php
+require_once('settings.php');
 
 require_once('config.php');
 require_once ('functions_event.php');
 require_once ('functions.php');
 
-sec_session_start();
 $userID = $_SESSION['user']["id"];
 $roleInfo = getRole($db, $userID);
 $role = $roleInfo['role'];

@@ -1,6 +1,6 @@
 <?php 
     require_once('config.php'); 
-    require_once('settings.php'); 
+    //require_once('settings.php');
     
     $checkLogin = login_check($db);
     if ($checkLogin['status']) {        

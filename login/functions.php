@@ -242,6 +242,8 @@ function getUserName($db, $userID){
     else {
         $result = $_SESSION['user']['type'];
     }
+
+    $_SESSION['user_name'] = $result;
     
     return $result;
 }
@@ -2174,7 +2176,7 @@ function topNavLinks($role=FALSE){
     }else{
        $content .= '<a href="'.SITE_URL.'/dashboard2.php" class="button homeIcon"></a>'; 
     }    
-    $content .= '<a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit smaller_button"><strong>View Questionnaire</strong></a>';
+    $content .= '<a href="'.QUESTIONNAIRE_URL.'" target="_blank" class="button submit smaller_button"><strong>View Questionnaire</strong></a>';
 
     return $content;
 }

@@ -2783,20 +2783,20 @@ tr.loadedStatus{
 }
 
 #setDate .modal-class{
-    background-color: #fefefe; 
-    margin: 10% auto; 
+    background-color: #fefefe;
+    margin: 10% auto;
     /*padding: 5px;*/
-    border: 1px solid #888; 
-    width: 80%; 
+    border: 1px solid #888;
+    width: 80%;
     height: 70%;
     position:relative;
   }
-  
+
   #setDate .close{
     cursor:pointer;
     padding: 1px;
   }
-  
+
   #setDate .form-container{
     margin: auto;
     display: flex;
@@ -2807,11 +2807,11 @@ tr.loadedStatus{
     max-width:none;
     padding: 0 15px 15px 15px;
   }
-  
+
   #setDate .form-row{
     height:100%;
   }
-  
+
   #setDate .patient_name{
       background: #2b4d77;
       width: 100%;
@@ -2824,9 +2824,9 @@ tr.loadedStatus{
       font-weight: bold;
       padding: 10px;
       font-size: 18px;
-  
+
   }
-  
+
   #setDate .contentBlock {
       padding: 70px 2px 2px 2px;
   }

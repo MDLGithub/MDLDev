@@ -78,7 +78,7 @@ $salesreps = $db->selectAll('tblsalesrep');
             </h4>
             <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>
             <a href="<?php echo SITE_URL; ?>/dashboard2.php" class="button homeIcon"></a>
-            <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
+            <a href="<?php echo QUESTIONNAIRE_URL; ?>" target="_blank" class="button submit"><strong>View Questionnaire</strong></a>
         </section>       
 
         <div id="app_data" class="scroller">

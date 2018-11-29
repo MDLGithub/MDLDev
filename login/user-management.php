@@ -268,7 +268,7 @@ require_once ('navbar.php');
             </h4>
             <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" name="log_out" class="button red back logout"></a>
             <a href="<?php echo SITE_URL; ?>/dashboard2.php" class="button homeIcon"></a>
-            <a href="https://www.mdlab.com/questionnaire" target="_blank" class="button submit user-mng-button"><strong>View Questionnaire</strong></a>
+            <a href="<?php echo QUESTIONNAIRE_URL; ?>" target="_blank" class="button submit user-mng-button"><strong>View Questionnaire</strong></a>
         </section>
         <div class="scroller">  
             <div class="row">               
@@ -543,21 +543,21 @@ require_once ('navbar.php');
     } else {
         $modalTitle = "Add New User";
     }
-    
+
 ?>
 <div id="manage-status-modal" class="modalBlock">
     <div class="contentBlock">
-        
-        <a class="close" href="<?php echo SITE_URL."/user-management.php"; ?>">X</a>        
+
+        <a class="close" href="<?php echo SITE_URL."/user-management.php"; ?>">X</a>
         <h5 class="providersTitle"><?php echo $modalTitle; ?></h5>
         <div class="content">
             <?php if($message!=""){ ?>
                 <div class="error text-center" id="message"><?php echo $message; ?></div>
             <?php } ?>
-            <form id="userForm" action="" method="POST" enctype="multipart/form-data"> 
+            <form id="userForm" action="" method="POST" enctype="multipart/form-data">
             <div class="row">                
                 <input type="hidden" name="Guid_user" value="<?php echo isset($user['Guid_user'])?$user['Guid_user']:''; ?>" />
-                <div class="col-md-12">                   
+                <div class="col-md-12">
                     <div class="f2 <?php echo ($first_name!="")?"valid show-label":"";?>">
                         <label class="dynamic" for="form_first_name"><span>First Name</span></label>
                         <div class="group">
@@ -735,7 +735,7 @@ require_once ('navbar.php');
             
         </form>   
         </div>
-    </div>    
+    </div>
 </div>
 <?php } ?>
 

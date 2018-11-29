@@ -1,6 +1,6 @@
 <?php 
 ob_start();
-sec_session_start();
+require_once('settings.php');
 if (login_check($db)) {
     Leave(SITE_URL.'/dashboard.php');
 }

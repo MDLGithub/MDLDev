@@ -1,7 +1,7 @@
 <?php
-
 function sec_session_start() {
-    $session_name = SESSION_NAME;   // Set a custom session name 
+    //session_start();
+    /*$session_name = SESSION_NAME;   // Set a custom session name
     $secure = SECURE;
     // This stops JavaScript being able to access the session id.
     $httponly = true;
@@ -18,7 +18,7 @@ function sec_session_start() {
     if(!isset($_SESSION)){ 
         session_start();  // Start the PHP session  
     }    
-    session_regenerate_id();    // regenerated the session, delete the old one. 
+    session_regenerate_id();    // regenerated the session, delete the old one.*/
 }
 function login($email, $password, $db) {
     $db->bind("email",$email);
