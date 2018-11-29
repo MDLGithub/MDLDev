@@ -194,7 +194,7 @@ if (empty($_POST)) {
 		array_push($qualification_text, "BRCA-Related Breast and/or Ovarian Cancer Syndrome");
 			
 		display_qualification($qualification_text, "1");
-	}elseif (($qualify['insurance'] == "Aetna") && ($qualify['gender'] == "Male") && (isset($_POST['personal_cancer'])) && (in_array("No Cancer/None of the Above", $_POST['personal_cancer']))) {	
+	} elseif (($qualify['insurance'] == "Aetna") && ($qualify['gender'] == "Male") && (isset($_POST['personal_cancer'])) && (in_array("No Cancer/None of the Above", $_POST['personal_cancer']))) {	
 		save_input();
 		
 		$qualification_text=array();
@@ -204,6 +204,28 @@ if (empty($_POST)) {
 		display_qualification($qualification_text, "1");
 	} else {		
 		save_input();
+		
+		if (isset($_POST['insurance']) && ($_POST['insurance'] == "Aetna")) {
+			$result = $conn->query("SELECT dob FROM tblpatient WHERE Guid_user = " . $qualify['Guid_user']);
+				 
+			$patient = $result->fetch_assoc();	
+			
+			$diff = abs(strtotime(date("Y-m-d")) - strtotime($patient['dob']));
+
+			$age = floor($diff / (365*60*60*24));
+		
+			if ($age <= 18) {
+				save_input();
+		
+				$qualification_text=array();
+			
+				array_push($qualification_text, "BRCA-Related Breast and/or Ovarian Cancer Syndrome");
+				
+				display_qualification($qualification_text, "1");
+			
+				exit;
+			}
+		}
 		
 		if (isset($_POST['next_step']) && ($_POST['next_step'] == "additional_summary")) {
 			$qualification_text=array();
@@ -3316,7 +3338,7 @@ function display_qualification($qualification_text, $not_qualified) {
 				$cancer_detail[$id] = $c_type;
 			}
 			if (strlen($relative['additional_cancer_type'])) {				
-				$additional_cancer = $relative['additional_cancer_type'];				
+				$additional_cancer[$id] = $relative['additional_cancer_type'];				
 			}
 			
 			// if (strlen($relative['additional_question'])) {
@@ -3348,11 +3370,11 @@ function display_qualification($qualification_text, $not_qualified) {
 										</ul>
 								</div>
 <?php				
-				if (strlen($additional_cancer)) {
+				if (strlen($additional_cancer[$rel_id])) {
 ?>
 								<div class="pInfo_type">
 									<strong>Additional Cancer Diagnosis</strong>
-									<p><?php echo $additional_cancer; ?> 
+									<p><?php echo $additional_cancer[$rel_id]; ?> 
 <?php
 					if (strlen($additional_age)) {
 ?>
