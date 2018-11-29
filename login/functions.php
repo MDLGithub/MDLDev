@@ -1496,6 +1496,36 @@ function isStatusSelected($status, $selectedStatuses){
    
     return FALSE;
 }
+/**
+ * Check Status Log Combination
+ * check combination Guid_status AND Date before saving
+ * @param type $Guid_user
+ * @param type $Date
+ * @return boolean
+ */
+function isValidStatusGroup($db,$statusIDs, $Guid_user, $Date){ 
+    var_dump($statusIDs);
+    var_dump($Guid_user);
+    var_dump($Date);
+    //check combination Guid_status, Guid_status AND Date before saving   
+    $count = 0;    
+    foreach ($statusIDs as $k=>$v){
+        $query = "SELECT Guid_status FROM tbl_mdl_status_log WHERE Guid_user=$Guid_user AND DATE(`Date`)=$Date AND Guid_status=$v";
+        $checkStat = $db->row($query, array('Guid_user'=>$Guid_user,'Guid_status'=>$v,'Date'=>$Date));
+        var_dump("SELECT Guid_status FROM tbl_mdl_status_log WHERE Guid_user=$Guid_user AND DATE(`Date`)=$Date AND Guid_status=$v");
+        var_dump($checkStat);
+        if(!empty($checkStat)){
+            $count++;
+        }        
+    }
+    if(count($statusIDs)==$count){ 
+        //if full combination match than not valid, 
+        //return false in order not to record the same combination again
+        return FALSE;
+    }
+    
+    return TRUE;
+}
 
 function saveStatusLog($db,$statusIDs, $statusLogData){
     
@@ -2454,10 +2484,13 @@ function loadTableData($db, $tableName, $tableClass='', $tableID=''){
  * @return string
  */
 function convertDmdlDate($date){
-    $dateExp  = explode("-", $date) ;            
-    $convertedDate = $dateExp['2']."-".$dateExp['0']."-".$dateExp['1'];
-    
-    return $convertedDate;
+    if($date!=''){
+        $dateExp  = explode("-", $date) ;            
+        $convertedDate = $dateExp['2']."-".$dateExp['0']."-".$dateExp['1'];
+
+        return $convertedDate;
+    }
+    return '';
 }
 
 function getPaientPossibleMatch($db,$firstname,$lastname,$Date_Of_Birth){
@@ -2628,11 +2661,11 @@ function dmdl_refresh($db){
         } else {             
             $res = $domArr['CombinedResults']['GeneticResults'];
            
-            $Guid_MDLNumber = $res['Guid_MDLNumber'];
-            $Date_Of_Birth = $res['Date_Of_Birth'];          
-            $firstname = $res['Patient_FirstName'];
-            $lastname = $res['Patient_LastName'];           
-            $accountNumber = $res['ClientID'];  
+            $Guid_MDLNumber = isset($res['Guid_MDLNumber'])?$res['Guid_MDLNumber']:'';            
+            $Date_Of_Birth = isset($res['Date_Of_Birth'])?$res['Date_Of_Birth']:'';          
+            $firstname = isset($res['Patient_FirstName'])?$res['Patient_FirstName']:'';
+            $lastname = isset($res['Patient_LastName'])?$res['Patient_LastName']:'';           
+            $accountNumber = isset($res['ClientID'])?$res['ClientID']:'';  
             $DOS = '';
             if(isset($res['DOS'])){
                 $DOS = str_replace('-','/',$res['DOS']);

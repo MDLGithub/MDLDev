@@ -728,8 +728,8 @@ require_once ('navbar.php');
                 </div>                
             </div>
             <div class="row actionButtons">
-                <div class="col-md-6 col-md-offset-3 pT-20">
-                    <button name="save_user" type="submit" class="button btn-inline" style = "margin: auto; display: block !important;">Save</button>
+                <div class="col-md-12 text-right pT-20">
+                    <button name="save_user" type="submit" class="button btn-inline" >Save</button>
                 </div>
             </div>
             

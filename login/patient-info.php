@@ -349,7 +349,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <p><label>Genetic Consultant: </label><?php echo $accountInfo['salesrep_name']; ?></p>
                                 <?php } ?>
                                 <?php if(isset($qualifyResult['provider'])){ ?>
-                                <p><label>Health Care Providers: </label><?php echo $qualifyResult['provider']; if($qualifyResult['title']!=''){ echo ", ".$qualifyResult['title']; } ?>
+                                <p><label>Health Care Providers: </label><?php echo ucwords(strtolower($qualifyResult['provider'])); if($qualifyResult['title']!=''){ echo ", ".strtoupper($qualifyResult['title']); } ?>
                                 <?php } ?>
                                 <?php if(isset($qualifyResult['source'])){ ?>
                                 <p><label>Event: </label><?php echo $qualifyResult['source']; ?></p>

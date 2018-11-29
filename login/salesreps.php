@@ -221,6 +221,10 @@ require_once ('navbar.php');
 		    <form method="POST" enctype="multipart/form-data">
                         <div class="row">
                             <div class="col-md-12 ">
+                                <h2 class="title-fs30">
+                                    <?php echo ($first_name!="") ? $first_name : ""; ?>
+                                    <?php echo ($last_name!="") ? $last_name : ""; ?>
+                                </h2>
 				<div class="status_chart">
 				    <div class="row">
 					<div class="col-md-12">
