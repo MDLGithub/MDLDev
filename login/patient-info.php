@@ -1749,6 +1749,7 @@ if(isset($_POST['edit_categories'])){
     if(isset($_POST['manage_status_log'])){ 
         $statusIDs = $_POST['status'];
         $date=($_POST['date']!="")?date('Y-m-d h:i:s',strtotime($_POST['date'])):"";
+        $DateOnly=($_POST['date']!="")?date('Y-m-d',strtotime($_POST['date'])):"";
         $Guid_patient = $qualifyResult['Guid_patient']; 
         
         $statusLogData = array(
@@ -1764,29 +1765,35 @@ if(isset($_POST['edit_categories'])){
             'deviceid' => $qualifyResult['deviceid'],
             'Date'=>$date,
             'Date_created'=>date('Y-m-d h:i:s')
-        );
-        
-        if(isset($_POST['Guid_status_log']) && $_POST['Guid_status_log']!=""){//update log
-		
+        );        
+        if(isset($_POST['Guid_status_log']) && $_POST['Guid_status_log']!=""){//update log		
             $thisLog = $db->row("SELECT * FROM tbl_mdl_status_log WHERE Guid_status_log=:Guid_status_log", array('Guid_status_log'=>$_POST['Guid_status_log']));
             $statusLogData['Date_created'] = $thisLog['Date_created'];
-            $LogGroup = $thisLog['Log_group'];
-            //delete old log
-            deleteByField($db, 'tbl_mdl_status_log', 'Log_group', $LogGroup);
-            saveStatusLog($db, $statusIDs, $statusLogData);
-            //update last status id in patient table too
-            updateCurrentStatusID($db, $Guid_patient);
-            Leave($patientInfoUrl);
-        } else {//insert log		
-            if(isset($_POST['specimenCollected']) && $_POST['specimenCollected']=='no'){
-                updateTable($db, 'tblpatient', array('specimen_collected'=>'No'), array('Guid_patient'=>$Guid_patient));
+            $LogGroup = $thisLog['Log_group'];            
+            if(isValidStatusGroup($db,$statusIDs, $_POST['Guid_user'], $DateOnly)){
+                //delete old log
+                deleteByField($db, 'tbl_mdl_status_log', 'Log_group', $LogGroup);
+                saveStatusLog($db, $statusIDs, $statusLogData);
+                //update last status id in patient table too
+                updateCurrentStatusID($db, $Guid_patient);
+                Leave($patientInfoUrl);
+            } else {
+                $message = "This status has already been added for this specimen.";
             }
-            if(isset($_POST['specimenCollected']) && $_POST['specimenCollected']=='yes'){
-                updateTable($db, 'tblpatient', array('specimen_collected'=>'Yes'), array('Guid_patient'=>$Guid_patient));
+        } else {//insert log	
+            if(isValidStatusGroup($db,$statusIDs, $_POST['Guid_user'], $DateOnly)){
+                if(isset($_POST['specimenCollected']) && $_POST['specimenCollected']=='no'){
+                    updateTable($db, 'tblpatient', array('specimen_collected'=>'No'), array('Guid_patient'=>$Guid_patient));
+                }
+                if(isset($_POST['specimenCollected']) && $_POST['specimenCollected']=='yes'){
+                    updateTable($db, 'tblpatient', array('specimen_collected'=>'Yes'), array('Guid_patient'=>$Guid_patient));
+                }
+                saveStatusLog($db, $statusIDs, $statusLogData);
+                updateCurrentStatusID($db, $Guid_patient);
+                Leave($patientInfoUrl);
+            } else {
+                $message = "This status has already been added for this specimen.";
             }
-            saveStatusLog($db, $statusIDs, $statusLogData);
-            updateCurrentStatusID($db, $Guid_patient);
-            Leave($patientInfoUrl);
         }  
     } 
 	
