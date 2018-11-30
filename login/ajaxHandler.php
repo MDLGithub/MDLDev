@@ -72,6 +72,25 @@ if (isset($_POST['openPdf'])) {
 if (isset($_POST['unlinkPdf'])) {
     removeTmpPdf($db, $_POST['pdf_name']);
 }
+if (isset($_POST['show_categroy_dropdown'])) {
+    showCategoryDropdown($db);
+}
+
+function showCategoryDropdown($db){    
+    $cnt = '<div class="selectCategory">
+                <label class="title"><span>Select Category</span></label>';
+    $categories = $db->query("SELECT * FROM `tbl_mdl_category` ");   
+    
+                foreach ($categories as $k=>$v) {
+                $cnt .= '<div>
+                            <input id="'.$v['Guid_category'].'" type="checkbox" name="Guid_category[]" value="'.$v['Guid_category'].'">
+                            <label for="'.$v['Guid_category'].'">'. $v['name'].'</label>
+                        </div>';                              
+                }
+    $cnt .= '</div>';    
+    echo json_encode(array('content'=>$cnt)); 
+    exit();
+}
 
 /**
  * salutation function for logged in Physicians
@@ -376,15 +395,16 @@ function get_this_status_dropdown($db, $parent) {
 if(isset($_POST['get_account_correlations']) && $_POST['get_account_correlations']!=''){
     $name = $_POST['get_account_correlations'];
     $id = $_POST['id'];
+    $userRole = $_POST['userRole'];
     $selectedIds = array(
 	'account' => $_POST['account'],
 	'provider' => $_POST['provider'],
 	'salesrep' => $_POST['salesRep']
     );
-    get_account_correlations($db, $id, $name, $selectedIds);
+    get_account_correlations($db, $id, $name, $userRole, $selectedIds);
 }
 
-function get_account_correlations($db, $id, $name, $selectedIds){
+function get_account_correlations($db, $id, $name, $userRole, $selectedIds){
 
     $queryAccounts  = "SELECT * FROM tblaccount";
     $queryProviders = "SELECT * FROM tblprovider";
@@ -458,6 +478,7 @@ function get_account_correlations($db, $id, $name, $selectedIds){
 	}
 
     }
+    
 
 
     $queryProviders .= " GROUP BY first_name";
@@ -476,7 +497,22 @@ function get_account_correlations($db, $id, $name, $selectedIds){
        $selected = ($id==$v['Guid_user']) ? " selected='selected'": "";
        $salesrepHtml .= '<option '.$selected.' value="'.$v['Guid_user'].'">'.$v['first_name'].' '.$v['last_name'].'</option>';
     }
-
+    
+    $userCategories = $db->query("SELECT Guid_category FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$_SESSION['user']['id'])); 
+    $userLinks = '';
+    if(!empty($userCategories)){
+        foreach ($userCategories as $k=>$v){
+            $userLinks .= $v['Guid_category'].', ';
+        }
+        $userLinks = rtrim($userLinks, ', ');
+    } 
+    if($userRole=='Sales Manager'){
+        if($userLinks!=''){
+            $wherAccount = strpos($queryAccounts, 'WHERE') ? " AND " : " WHERE ";
+            $queryAccounts .= $wherAccount . " Guid_category IN (" . $userLinks . ") ";
+        }
+    }
+    
     $queryAccounts .= "  ORDER BY account ASC";
     $accounts = $db->query($queryAccounts, $whereAccount);
     $accountsHtml = '<option value="">Account</option>';
@@ -491,6 +527,7 @@ function get_account_correlations($db, $id, $name, $selectedIds){
 			'w'=>array('account'=>$whereAccount, 'provider'=>$whereProvider,'salesrep'=>$whereSalesRep),
 			'id' => $id,
 			'name'=>$name,
+			'thisUserRole'=>$userRole,
 			'accounts_html'=>$accountsHtml,
 			'provider_html'=>$providerHtml,
 			'salesrep_html'=>$salesrepHtml

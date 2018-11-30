@@ -119,6 +119,19 @@ if(isset($_POST['submit_account'])){
 }
 $salesreps = $db->selectAll('tblsalesrep');
 $accounts = $db->selectAll('tblaccount', ' ORDER BY name ASC');
+if($role == "Sales Manager"){
+    $userCategories = $db->query("SELECT Guid_category FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$_SESSION['user']['id'])); 
+    $userLinks = '';
+    if(!empty($userCategories)){
+        foreach ($userCategories as $k=>$v){
+            $userLinks .= $v['Guid_category'].', ';
+        }
+        $userLinks = rtrim($userLinks, ', ');
+    }    
+    if($userLinks != ''){
+        $accounts = $db->query("SELECT * FROM tblaccount WHERE Guid_category IN (" . $userLinks . ") ORDER BY `name` ASC" );
+    } 
+}
 
 if($role=='Physician'){ 
     //get the Guid_account for that Physician   
@@ -229,9 +242,9 @@ require_once ('navbar.php');
                         </div>
                         <form method="POST" enctype="multipart/form-data">  
                             <div class="row">
+                                <?php if(isset($_GET['action']) && $_GET['action']=='edit'){?>
+                                <h2 class="title-fs30"><?php echo ($name!="")?$name:"";?></h2>
                                 <div class="col-md-12">
-                                    
-                                    
                                     <div class="status_chart">
                                         <div class="row">
                                             <div class="col-md-12">
@@ -271,6 +284,7 @@ require_once ('navbar.php');
                                         </div>
                                     </div>
                                 </div>
+                                <?php } ?>
                             </div>
                             
                             <div class="row pB-30">
@@ -337,7 +351,7 @@ require_once ('navbar.php');
                                             </div>  
                                             
                                         </div>
-                                        <div class="col-md-3 col-sm-2 text-center pT-20">
+                                        <div class="col-md-3 col-sm-2 text-center pT-20 category-icons">
                                             <a href="<?php echo $accountConfigUrl; ?>&manageCategories=1" class="add-new-account fs-28">
                                                 <span class="fas fa-pencil-alt"></span>
                                             </a>

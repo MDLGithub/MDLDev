@@ -35,61 +35,76 @@ $initLabels = array(
     'salesrep'=>'Sales Rep',
 );
 
-    $initQ = 'SELECT s.Guid_status, s.Guid_user, s.Date, s.Date_created, p.Guid_patient, 
-        aes_decrypt(p.firstname_enc, "F1rstn@m3@_%") as firstname, 
-        aes_decrypt(p.lastname_enc, "L@stn@m3&%#") as lastname, 
-        a.Guid_account, a.account AS account_number, 
-        a.name AS account_name, a.address AS location,  
-        num.mdl_number,
-        CONCAT(srep.`first_name`, " " ,srep.`last_name`) AS salesrep  
-        FROM `tbl_mdl_status_log` s 
-        LEFT JOIN `tblpatient` p ON s.Guid_patient=p.Guid_patient
-        LEFT JOIN `tblaccount` a ON s.Guid_account=a.Guid_account
-        LEFT JOIN `tblsalesrep` srep ON s.Guid_salesrep=srep.Guid_salesrep
-        Left JOIN `tbl_mdl_number` num ON s.Guid_user=num.Guid_user
-        WHERE s.Guid_status=:Guid_status 
-        AND s.currentstatus="Y" ';
+$initQ = 'SELECT s.Guid_status, s.Guid_user, s.Date, s.Date_created, p.Guid_patient, 
+    aes_decrypt(p.firstname_enc, "F1rstn@m3@_%") as firstname, 
+    aes_decrypt(p.lastname_enc, "L@stn@m3&%#") as lastname, 
+    a.Guid_account, a.account AS account_number, a.Guid_category,
+    a.name AS account_name, a.address AS location,  
+    num.mdl_number,
+    CONCAT(srep.`first_name`, " " ,srep.`last_name`) AS salesrep  
+    FROM `tbl_mdl_status_log` s 
+    LEFT JOIN `tblpatient` p ON s.Guid_patient=p.Guid_patient
+    LEFT JOIN `tblaccount` a ON s.Guid_account=a.Guid_account
+    LEFT JOIN `tblsalesrep` srep ON s.Guid_salesrep=srep.Guid_salesrep
+    Left JOIN `tbl_mdl_number` num ON s.Guid_user=num.Guid_user
+    WHERE s.Guid_status=:Guid_status 
+    AND s.currentstatus="Y" ';
 
-    if($markedTestUserIds!=""){
-        $initQ.='AND s.Guid_user NOT IN('.$markedTestUserIds.') ';
-    }
-    if($testUserIds!=""){
-        $initQ.='AND s.Guid_user NOT IN('.$testUserIds.') '; 
-    }
-    
-    //adding filter conditions 
-    $searchData = array();
-    if(isset($_GET['salesrep'])&&$_GET['salesrep']!=""){
-        
-        if($role=='Sales Rep'){
-            $thisSalserep = $db->row("SELECT Guid_salesrep FROM tblsalesrep WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
-            $initQ .= 'AND s.Guid_salesrep='.$thisSalserep['Guid_salesrep'].' ';
-            $searchData['Guid_salesrep'] = $thisSalserep['Guid_salesrep'];                
-        } else {
-            $initQ .= 'AND s.Guid_salesrep='.$_GET['salesrep'].' ';
-            $searchData['Guid_salesrep'] = $_GET['salesrep'];
+if ($role == "Sales Manager") {
+    $query = "SELECT * FROM tblaccount WHERE ";
+    $userCategories = $db->query("SELECT Guid_category FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$_SESSION['user']['id'])); 
+    $userLinks = '';
+    if(!empty($userCategories)){
+        foreach ($userCategories as $k=>$v){
+            $userLinks .= $v['Guid_category'].', ';
         }
-    }
-    if(isset($_GET['account'])&&$_GET['account']!=""){
-        $initQ .= 'AND a.Guid_account='.$_GET['account'].' ';
-        $searchData['Guid_account'] = $_GET['account'];
-    }
-    if(isset($_GET['mdnum'])&&$_GET['mdnum']!=""){
-        $initQ .= 'AND num.mdl_number='.$_GET['mdnum'].' ';
-        $searchData['mdl_number'] = $_GET['mdnum'];
-    }
-    if( isset($_GET['from']) && isset($_GET['to']) ){
-        $searchData['from_date'] = $_GET['from'];
-        $searchData['to_date'] = $_GET['to'];
-        if ($_GET['from'] == $_GET['to']) {
-            $initQ .= " AND s.Date LIKE '%" . date("Y-m-d", strtotime($_GET['from'])) . "%'";
-        } else {
-            $initQ .= " AND s.Date BETWEEN '" . date("Y-m-d", strtotime($_GET['from'])) . "' AND '" . date("Y-m-d", strtotime($_GET['to'])) . "'";
-        }
-    }
+        $userLinks = rtrim($userLinks, ', ');
+    }    
+    if($userLinks != ''){
+        $initQ .= " AND a.Guid_category IN (" . $userLinks . ") ";
+    }                     
+}
+
+
+if($markedTestUserIds!=""){
+    $initQ.='AND s.Guid_user NOT IN('.$markedTestUserIds.') ';
+}
+if($testUserIds!=""){
+    $initQ.='AND s.Guid_user NOT IN('.$testUserIds.') '; 
+}
     
-    
-    $initQ.='AND s.Guid_patient<>"0"';
+//adding filter conditions 
+$searchData = array();
+if(isset($_GET['salesrep'])&&$_GET['salesrep']!=""){
+
+    if($role=='Sales Rep'){
+        $thisSalserep = $db->row("SELECT Guid_salesrep FROM tblsalesrep WHERE Guid_user=:Guid_user", array('Guid_user'=>$userID));
+        $initQ .= 'AND s.Guid_salesrep='.$thisSalserep['Guid_salesrep'].' ';
+        $searchData['Guid_salesrep'] = $thisSalserep['Guid_salesrep'];                
+    } else {
+        $initQ .= 'AND s.Guid_salesrep='.$_GET['salesrep'].' ';
+        $searchData['Guid_salesrep'] = $_GET['salesrep'];
+    }
+}
+if(isset($_GET['account'])&&$_GET['account']!=""){
+    $initQ .= 'AND a.Guid_account='.$_GET['account'].' ';
+    $searchData['Guid_account'] = $_GET['account'];
+}
+if(isset($_GET['mdnum'])&&$_GET['mdnum']!=""){
+    $initQ .= 'AND num.mdl_number='.$_GET['mdnum'].' ';
+    $searchData['mdl_number'] = $_GET['mdnum'];
+}
+if( isset($_GET['from']) && isset($_GET['to']) ){
+    $searchData['from_date'] = $_GET['from'];
+    $searchData['to_date'] = $_GET['to'];
+    if ($_GET['from'] == $_GET['to']) {
+        $initQ .= " AND s.Date LIKE '%" . date("Y-m-d", strtotime($_GET['from'])) . "%'";
+    } else {
+        $initQ .= " AND s.Date BETWEEN '" . date("Y-m-d", strtotime($_GET['from'])) . "' AND '" . date("Y-m-d", strtotime($_GET['to'])) . "'";
+    }
+}
+
+$initQ.='AND s.Guid_patient<>"0"';
     
 if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
     $initData=$db->query($initQ, array('Guid_status'=>$_GET['status_id']));
