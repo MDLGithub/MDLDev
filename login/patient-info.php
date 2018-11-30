@@ -1269,18 +1269,18 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 <p><label>Email: </label>
                     <input type="email" name="email" value="<?php echo $qualifyResult['email']; ?>" autocomplete="off"/> 
                 </p>
-                <?php if(isset($qualifyResult['insurance'])){ ?>
+                
                 <p class="capitalize"><label>Insurance: </label>
-                    <input type="text" name="insurance" value="<?php echo $qualifyResult['insurance']; ?>" autocomplete="off" />
+                    <?php $qRInsurance = isset($qualifyResult['insurance'])?$qualifyResult['insurance']:''; ?>
+                    <input type="text" name="insurance" value="<?php echo $qRInsurance; ?>" autocomplete="off" />
                 </p>
-                <?php } ?>
-                <?php if(isset($qualifyResult['other_insurance'])){ ?>
+                
                 <p class="capitalize"><label>Other Insurance: </label>
-                    <input type="text" name="other_insurance" value="<?php echo $qualifyResult['other_insurance']; ?>" autocomplete="off" />
+                    <?php $other_ins = isset($qualifyResult['other_insurance'])?$qualifyResult['other_insurance']:''; ?>
+                    <input type="text" name="other_insurance" value="<?php echo $other_ins; ?>" autocomplete="off" />
                 </p>
-                <?php } ?>
-                <?php if(isset($qualifyResult['qAccountNumber'])){  ?>
-                    <?php if($role!='Physician'){  ?>
+                
+                <?php if($role!='Physician'){  ?>
                     <p>
                         <label>Account: </label>                    
                         <?php 
@@ -1307,17 +1307,20 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             <?php 
 
                             foreach ($accounts as $k=>$v){ 
-                            $selected = $qualifyResult['qAccountNumber']==$v['account'] ? ' selected' : '';
+                                if(isset($qualifyResult['qAccountNumber'])){  
+                                    $selected = $qualifyResult['qAccountNumber']==$v['account'] ? ' selected' : '';
+                                } else {
+                                    $selected = '';
+                                }
                             ?>
                             <option <?php echo $selected; ?> value="<?php echo $v['account']; ?>" ><?php echo $v['account'] .'-'. ucwords(strtolower($v['name'])); ?></option>
                             <?php } ?>
                         </select>  
                     </p>
-                    <?php } else { ?>
-                        <input type="hidden" name="account_number" value="<?php echo $qualifyResult['account_number']; ?>" />
-                    <?php } ?>
+                <?php } else { ?>
+                    <input type="hidden" name="account_number" value="<?php echo $qualifyResult['account_number']; ?>" />
                 <?php } ?>
-                <?php if(isset($qualifyResult['provider_id'])){ ?> 
+              
                 <p>
                     <label>Health Care Provider: </label>
                     <select id="pInfoAccountProviders" name="provider_id">
@@ -1331,7 +1334,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             $tblproviders = $db->query($providerQ);
                             
                         foreach ($tblproviders as $k=>$v){ 
-                        $selected = $qualifyResult['provider_id']==$v['Guid_provider'] ? ' selected' : '';
+                            if(isset($qualifyResult['provider_id'])){
+                                $selected = $qualifyResult['provider_id']==$v['Guid_provider'] ? ' selected' : '';
+                            } else {
+                                $selected = "";
+                            }
                         $providerTitle = '';
                         if(isset($v['title']) && $v['title']!=''){
                             $providerTitle = ', '.strtoupper($v['title']);
@@ -1341,9 +1348,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         <?php }} ?>
                     </select> 
                 </p>
-                <?php } ?>
                 
-                <?php if(isset($qualifyResult['source'])){   ?>
                     <?php if($role!='Physician'){  ?>
                     <p>
                         <label>Event: </label>
@@ -1352,7 +1357,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             <?php 
                             $sources = $db->selectAll('tblsource', ' ORDER BY `description` ASC');
                             foreach ($sources as $k=>$v){ 
-                            $selected = $qualifyResult['source']==$v['description'] ? ' selected' : '';
+                                if(isset($qualifyResult['source'])){
+                                    $selected = $qualifyResult['source']==$v['description'] ? ' selected' : '';
+                                } else {
+                                    $selected = "";
+                                }
                             ?>
                             <option <?php echo $selected; ?> value="<?php echo $v['description']; ?>" ><?php echo $v['description']; ?></option>
                             <?php } ?>
@@ -1361,7 +1370,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     <?php } else { ?>
                         <input type="hidden" name="source" value="<?php echo $qualifyResult['source']; ?>" />
                     <?php }  ?>
-                <?php }  ?>
+                
                 
                     
                 <div class="text-right pT-10">
