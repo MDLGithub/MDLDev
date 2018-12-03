@@ -2882,18 +2882,15 @@ function dmdl_refresh($db){
             if(isset($res['ClientFax'])&&!empty($res['ClientFax'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][fax]' value='".$res['ClientFax']."' />";
             }
-            
-            //payor details
-            if(isset($res['Insurance_Company']) && !empty($res['Insurance_Company'])){
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][payor][name]' value='".$res['Insurance_Company']."' />";
-            }
-            if(isset($res['Payer']) && !empty($res['Payer'])){ //abbreviation of ayor name
-                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][payor][PayID]' value='".$res['Payer']."' />";
-            }
+                       
             
             //BillingDetail
             if(isset($res['BillingDetail']['invoiceDetail']) && !empty($res['BillingDetail']['invoiceDetail'])){
                 foreach ($res['BillingDetail']['invoiceDetail'] as $invKey => $invDetail){
+                    //payor details
+                    if(isset($res['Insurance_Company']) && !empty($res['Insurance_Company'])){
+                        $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][invoiceDetail][".$invKey."][fullName]' value='".$res['Insurance_Company']."' />";
+                    }
                     if(isset($invDetail['InvoiceID'])){
                         $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][invoiceDetail][".$invKey."][InvoiceID]' value='".$invDetail['InvoiceID']."' />";
                     }
@@ -3157,42 +3154,33 @@ function dmdl_refresh($db){
  * @param type $dataPayor
  * @return type number => $Guid_payor 
  */
-function updateOrInsertPayor($db,$Guid_user,$dataPayor){
-    //tbl_mdl_payors
-    //check is payor exists by name or PayID
-    $name = $dataPayor['name'];
-    $PayID = $dataPayor['PayID'];
-    
-    $checkPayor = $db->row("SELECT * FROM `tbl_mdl_payors` WHERE name=:name OR PayID=:PayID", array('name'=>$name, 'PayID'=>$PayID));
+function updateOrInsertPayor($db,$Guid_user,$name, $fullName=FALSE){  
+    $checkPayor = $db->row("SELECT * FROM `tbl_mdl_payors` WHERE name=:name", array('name'=>$name));
     $thisPayorData = array();
     if(!empty($checkPayor)){ //update empty fields
         $Guid_payor = $checkPayor['Guid_payor'];
-        //check if there are empty filds then fill them
-        if($checkPayor['PayID']==''){
-            if(isset($dataPayor['PayID'])){
-                $thisPayorData['PayID'] = $dataPayor['PayID'];
+        //check if there are empty filds fullName then fill them
+        if($checkPayor['fullName']==''){
+            if($fullName){
+                $thisPayorData['fullName'] = $fullName;
             }
         }
         if(!empty($thisPayorData)){
             updateTable($db, 'tbl_mdl_payors', $thisPayorData, array('Guid_payor'=>$Guid_payor));
         }
-    } else { //insert new row
-        if(isset($dataPayor['name'])){
-            $thisPayorData['name'] = $dataPayor['name'];
+    } else { //insert new row        
+        $thisPayorData['name'] = $name;        
+        if($fullName){
+            $thisPayorData['fullName'] = $fullName;
         }
-        if(isset($dataPayor['PayID'])){
-            $thisPayorData['PayID'] = $dataPayor['PayID'];
-        }
-        if(!empty($thisPayorData)){
-            $thisPayorData['Loaded'] = 'Y';
-            $insertPayor = insertIntoTable($db, 'tbl_mdl_payors', $thisPayorData);
-            $Guid_payor = $insertPayor['insertID'];
-        }
+        $thisPayorData['Loaded'] = 'Y';
+        $insertPayor = insertIntoTable($db, 'tbl_mdl_payors', $thisPayorData);
+        $Guid_payor = $insertPayor['insertID'];        
     }       
     return $Guid_payor;
 }
 
-function updateOrInsertRevenue($db, $Guid_user, $Guid_payor, $invoiceDetails){
+function updateOrInsertRevenue($db, $Guid_user, $invoiceDetails){
     
     foreach ($invoiceDetails as $k=>$invoiceDetail) {        
         if(isset($invoiceDetail['CPT'])&&$invoiceDetail['CPT']!=''){
@@ -3205,12 +3193,16 @@ function updateOrInsertRevenue($db, $Guid_user, $Guid_payor, $invoiceDetails){
                 $Guid_cpt = $newCpt['insertID'];
             }        
             $revenueData['Guid_cpt'] = $Guid_cpt;
-        }        
+        }  
+        if(isset($invoiceDetail['PayID'])){
+            //$db,$Guid_user,$name, $fullName
+            $name = $invoiceDetail['PayID'];
+            $fullName = isset($invoiceDetail['fullName'])?$invoiceDetail['fullName']:FALSE;
+            $Guid_payor = updateOrInsertPayor($db, $Guid_user,$name, $fullName);
+            $revenueData['Guid_payor'] = $Guid_payor;
+        }
         if($Guid_user && $Guid_user!=''){
             $revenueData['Guid_user'] = $Guid_user;
-        }
-        if($Guid_payor && $Guid_payor!=''){
-            $revenueData['Guid_payor'] = $Guid_payor;
         }
         if(isset($invoiceDetail['amount'])){
             $revenueData['amount'] = $invoiceDetail['amount'];
@@ -3248,7 +3240,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     // 1. Specimen Collected
     if(isset($statuses['SpecimenCollected']['Date'])){
         $statusLogData['Date'] = $statuses['SpecimenCollected']['Date'];
-        if(isValidStatusGroup($db, array('1'), $Guid_user, $statuses['SpecimenCollected']['Date'])){            
+        if(isValidStatusGroup($db, array('1'), $Guid_user, $statusLogData['Date'])){            
             updateTable($db, 'tblpatient', array('specimen_collected'=>'Yes'), array('Guid_patient'=>$data['Guid_patient']));
             saveStatusLog($db, array('1'), $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -3260,7 +3252,8 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         $statusSAccIDs[] = '2';        
         if(isset($statuses['SpecimenAccessioned']['Test_Ordered']) && $statuses['SpecimenAccessioned']['Test_Ordered']!=''){ 
             //checking for test codes
-            $apiTestCodes = explode(',', $statuses['SpecimenAccessioned']['Test_Ordered']);
+            $sAccCodes = $statuses['SpecimenAccessioned']['Test_Ordered'];
+            $apiTestCodes = explode(',', $sAccCodes );
             $allowedTestCodes = array('1221', '1222', '1223', '1224', '1235', '1241', '1243', '1268', '1279');
             
             foreach ($apiTestCodes as $key => $value) {
@@ -3268,7 +3261,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
                     $getGuidStatusRow = $db->row("SELECT Guid_status FROM tbl_mdl_status WHERE `parent_id`='2' AND `status`='$value'");
                     if(!empty($getGuidStatusRow)){
                         $statusSAccIDs[] = $getGuidStatusRow['Guid_status'];
-                        if(isValidStatusGroup($db,$statusIDs, $Guid_user, $statuses['SpecimenAccessioned']['Date'])){
+                        if(isValidStatusGroup($db,$statusSAccIDs, $Guid_user, $statusLogData['Date'])){
                             saveStatusLog($db, $statusSAccIDs, $statusLogData);
                             updateCurrentStatusID($db, $data['Guid_patient']);
                         }
@@ -3486,7 +3479,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     if(isset($statuses['Testing_Complete']['Date'])){
         $statusLogData['Date'] = $statuses['Testing_Complete']['Date'];
         $status_LabTC_IDs = array('17','20');  
-        if(isValidStatusGroup($db,$status_LabTInP_IDs, $Guid_user, $statusLogData['Date'] )){
+        if(isValidStatusGroup($db,$status_LabTC_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_LabTC_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
@@ -3494,9 +3487,9 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //5.4 Laboratory Testing Status: Recollection Requested
     if(isset($statuses['Testing_RecollectionRequested']['Date'])){
         $statusLogData['Date'] = $statuses['Testing_RecollectionRequested']['Date'];
-        $status_LabTC_IDs = array('17','21');  
-        if(isValidStatusGroup($db,$status_LabTC_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_LabTC_IDs, $statusLogData);
+        $status_RR_IDs = array('17','21');  
+        if(isValidStatusGroup($db,$status_RR_IDs, $Guid_user, $statusLogData['Date'] )){
+            saveStatusLog($db, $status_RR_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
@@ -3548,9 +3541,9 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //6.6 Test Cancelled: Replaced by a new MDL
     if(isset($statuses['TC_NewMDL']['Date'])){
         $statusLogData['Date'] = $statuses['TC_NewMDL']['Date'];
-        $status_TC_PatientRefused_IDs = array('12','51');  
-        if(isValidStatusGroup($db,$status_TC_PatientRefused_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_TC_PatientRefused_IDs, $statusLogData);
+        $status_TC_NewMDL_IDs = array('12','51');  
+        if(isValidStatusGroup($db,$status_TC_NewMDL_IDs, $Guid_user, $statusLogData['Date'] )){
+            saveStatusLog($db, $status_TC_NewMDL_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
@@ -3614,8 +3607,8 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     if(isset($statuses['Legal_InProgress_Review']['Date'])){
         $statusLogData['Date'] = $statuses['Legal_InProgress_Review']['Date'];
         $status_Legal_InProgress_Review_IDs = array('55','56','59');  
-        if(isValidStatusGroup($db,$status_TC_NotCovered_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_TC_NotCovered_IDs, $statusLogData);
+        if(isValidStatusGroup($db,$status_Legal_InProgress_Review_IDs, $Guid_user, $statusLogData['Date'] )){
+            saveStatusLog($db, $status_Legal_InProgress_Review_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
@@ -3641,8 +3634,8 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     if(isset($statuses['Legal_InProgress_ARReview']['Date'])){
         $statusLogData['Date'] = $statuses['Legal_InProgress_ARReview']['Date'];
         $status_Legal_InProgress_ARReview_IDs = array('55','56','62');  
-        if(isValidStatusGroup($db,$status_Legal_InProgress_OR_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_Legal_InProgress_OR_IDs, $statusLogData);
+        if(isValidStatusGroup($db,$status_Legal_InProgress_ARReview_IDs, $Guid_user, $statusLogData['Date'] )){
+            saveStatusLog($db, $status_Legal_InProgress_ARReview_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
