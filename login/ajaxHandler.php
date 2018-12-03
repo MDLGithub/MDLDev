@@ -579,7 +579,7 @@ function load_url_config($db, $id){
 		    LEFT JOIN `tbldeviceinv` ON tbldevice.deviceid  = tbldeviceinv.deviceid
 		    WHERE tblurlconfig.id=:id
 		    ORDER BY tblurlconfig.id DESC";
-    $urlConfigs = $db->query($query, array("id"=>$id));
+    $urlConfigs = $db->row($query, array("id"=>$id));
 
     echo json_encode( array('error'=>true, 'post'=>$_POST, 'urlConfigs'=>$urlConfigs, 'q'=>$query) );  exit();
 }

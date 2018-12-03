@@ -549,7 +549,7 @@ require_once ('navbar.php');
     <div class="contentBlock">
         
         <a class="close" href="<?php echo SITE_URL."/user-management.php"; ?>">X</a>        
-        <h5 class="providersTitle"><?php echo $modalTitle; ?></h5>
+        <h5 class="providersTitle text-center"><?php echo $modalTitle; ?></h5>
         <div class="content">
             <?php if($message!=""){ ?>
                 <div class="error text-center" id="message"><?php echo $message; ?></div>

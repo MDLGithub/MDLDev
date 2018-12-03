@@ -718,6 +718,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                         <th>Date Paid</th>
                                         <th>Payor</th>
                                         <th>CPT</th>
+                                        <th></th>
                                         <th>Amount $</th>
                                         <?php if($role=='Admin'){ ?>
                                         <th class="text-center wh-100">Action</th>
@@ -742,6 +743,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                         <td><?php echo (!preg_match("/0{4}/" , $v['date_paid'])) ? date('n/j/Y', strtotime($v['date_paid'])) : ""; ?></td>
                                         <td><?php echo $v['payor']; ?></td>
                                         <td><?php echo $v['code']; ?></td>
+                                        <td><?php echo ($v['Loaded']=='Y')?'A':''; ?></td>
                                         <td>$<?php echo formatMoney($v['amount']); ?></td>
                                         <?php if($role=='Admin'){ ?>
                                         <td class="text-center">
@@ -1788,6 +1790,7 @@ if(isset($_POST['edit_categories'])){
                 Leave($patientInfoUrl);
             } else {
                 $message = "This status has already been added for this specimen.";
+                $msgClass = 'color-red';
             }
         } else {//insert log	
             if(isValidStatusGroup($db,$statusIDs, $_POST['Guid_user'], $DateOnly)){
@@ -1802,6 +1805,7 @@ if(isset($_POST['edit_categories'])){
                 Leave($patientInfoUrl);
             } else {
                 $message = "This status has already been added for this specimen.";
+                $msgClass = 'color-red';
             }
         }  
     } 
@@ -1827,7 +1831,8 @@ if(isset($_POST['edit_categories'])){
                 <form action="" method="POST">
                 <h4 class="text-center"></h4>
                 <?php if(isset($message)){ ?>
-                    <div class="text-center success-text"><?php echo $message; ?></div>
+                <?php $thisMsgClass=(isset($msgClass))?$msgClass:'success-text'; ?>
+                    <div class="text-center <?php echo $thisMsgClass; ?>"><?php echo $message; ?></div>
                 <?php } ?>
                 <input type="hidden" name="Guid_status_log" value="<?php echo (isset($_GET['log_id'])&&$_GET['log_id']!="")?$_GET['log_id']:""; ?>" />
                 <input type="hidden" name="Guid_user" value="<?php echo $_GET['patient']; ?>" />
