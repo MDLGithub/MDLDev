@@ -543,21 +543,21 @@ require_once ('navbar.php');
     } else {
         $modalTitle = "Add New User";
     }
-
+    
 ?>
 <div id="manage-status-modal" class="modalBlock">
     <div class="contentBlock">
-
-        <a class="close" href="<?php echo SITE_URL."/user-management.php"; ?>">X</a>
-        <h5 class="providersTitle"><?php echo $modalTitle; ?></h5>
+        
+        <a class="close" href="<?php echo SITE_URL."/user-management.php"; ?>">X</a>        
+        <h5 class="providersTitle text-center"><?php echo $modalTitle; ?></h5>
         <div class="content">
             <?php if($message!=""){ ?>
                 <div class="error text-center" id="message"><?php echo $message; ?></div>
             <?php } ?>
-            <form id="userForm" action="" method="POST" enctype="multipart/form-data">
+            <form id="userForm" action="" method="POST" enctype="multipart/form-data"> 
             <div class="row">                
                 <input type="hidden" name="Guid_user" value="<?php echo isset($user['Guid_user'])?$user['Guid_user']:''; ?>" />
-                <div class="col-md-12">
+                <div class="col-md-12">                   
                     <div class="f2 <?php echo ($first_name!="")?"valid show-label":"";?>">
                         <label class="dynamic" for="form_first_name"><span>First Name</span></label>
                         <div class="group">
@@ -728,14 +728,14 @@ require_once ('navbar.php');
                 </div>                
             </div>
             <div class="row actionButtons">
-                <div class="col-md-6 col-md-offset-3 pT-20">
-                    <button name="save_user" type="submit" class="button btn-inline" style = "margin: auto; display: block !important;">Save</button>
+                <div class="col-md-12 text-right pT-20">
+                    <button name="save_user" type="submit" class="button btn-inline" >Save</button>
                 </div>
             </div>
             
         </form>   
         </div>
-    </div>
+    </div>    
 </div>
 <?php } ?>
 

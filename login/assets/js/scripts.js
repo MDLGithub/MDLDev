@@ -608,7 +608,9 @@ $(document).ready(function () {
     }
     
     /**
-     *  Generate Url button on click foncion
+     *  Generate Url Page 
+     *  Loads url prev configuraion when from
+     *  Use Previous Settings radiobutton checked
      */
     $('.url_config').on('click', function (event) {      
         var id = $(this).attr('id'); 
@@ -621,8 +623,9 @@ $(document).ready(function () {
             },
             success: function(response) {
                 var result = JSON.parse(response);
-                var configData = result.urlConfigs[0];
-                //console.log(configData);
+                console.log(result);
+                var configData = result.urlConfigs;
+                
                 updateSelectSettings(configData);
             },
             error: function() {

@@ -41,6 +41,11 @@ body{
 .fs-15{
     font-size: 15px!important;
 }
+.title-fs30{
+    text-align: center;
+    font-size: 30px;
+    margin: 20px 0 25px 0;
+}
 .padd-0{
     padding: 0 !important;
 }
@@ -1226,7 +1231,6 @@ table.dataTable thead .sorting {
     color: #fff;
     padding: 10px;
     font-size: 18px;
-    padding-right: 50px;
     height: 45px;
 }
 #manage-status-modal .contentBlock h5 a{
@@ -2783,20 +2787,20 @@ tr.loadedStatus{
 }
 
 #setDate .modal-class{
-    background-color: #fefefe;
-    margin: 10% auto;
+    background-color: #fefefe; 
+    margin: 10% auto; 
     /*padding: 5px;*/
-    border: 1px solid #888;
-    width: 80%;
+    border: 1px solid #888; 
+    width: 80%; 
     height: 70%;
     position:relative;
   }
-
+  
   #setDate .close{
     cursor:pointer;
     padding: 1px;
   }
-
+  
   #setDate .form-container{
     margin: auto;
     display: flex;
@@ -2807,11 +2811,11 @@ tr.loadedStatus{
     max-width:none;
     padding: 0 15px 15px 15px;
   }
-
+  
   #setDate .form-row{
     height:100%;
   }
-
+  
   #setDate .patient_name{
       background: #2b4d77;
       width: 100%;
@@ -2824,9 +2828,9 @@ tr.loadedStatus{
       font-weight: bold;
       padding: 10px;
       font-size: 18px;
-
+  
   }
-
+  
   #setDate .contentBlock {
       padding: 70px 2px 2px 2px;
   }
@@ -2841,4 +2845,7 @@ tr.loadedStatus{
 
   #setDate .buttons button{
     margin: 0 30px;
+  }
+  .duplicateResult{
+    background: #ff8a26;
   }

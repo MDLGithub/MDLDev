@@ -302,7 +302,7 @@ $accountProviders = '';
                                  </div>                      
                                  <div class="form-group">
                                     <select name="lc" id="location" class="form-control">
-                                       <option value="0">Originating Location</option>
+                                       <option value="0">Event</option>
                                      <?php
                                          foreach ($sources as $k=>$v){
                                          $isLocation = ( isset($lc) && $lc==$v['code']) ? ' selected' : '';

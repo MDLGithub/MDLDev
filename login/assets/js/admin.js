@@ -339,11 +339,6 @@ $('#matrix_parameters').submit(function(event) {
 		imageAnimation: ""
 	});
 
-	var categories = []
-	$('.export_category:checked').each(function(index, value) {
-		categories.push($(value).val())
-	})
-
     $.ajax('ajaxHandler.php', {
 	type: 'POST',
 	data: {
@@ -351,8 +346,7 @@ $('#matrix_parameters').submit(function(event) {
 	   from: $('.export_filters #from_date').val(),
 	   to: $('.export_filters #to_date').val(),
 	   consultant: $('.export_filters #salesrep').val(),
-	   account: $('.export_filters #account').val(),
-	   categories
+	   account: $('.export_filters #account').val()
 	},
       success: function (response) {
 		$('body').LoadingOverlay('hide');

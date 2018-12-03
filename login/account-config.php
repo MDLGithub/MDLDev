@@ -242,9 +242,9 @@ require_once ('navbar.php');
                         </div>
                         <form method="POST" enctype="multipart/form-data">  
                             <div class="row">
+                                <?php if(isset($_GET['action']) && $_GET['action']=='edit'){?>
+                                <h2 class="title-fs30"><?php echo ($name!="")?$name:"";?></h2>
                                 <div class="col-md-12">
-                                    
-                                    
                                     <div class="status_chart">
                                         <div class="row">
                                             <div class="col-md-12">
@@ -284,6 +284,7 @@ require_once ('navbar.php');
                                         </div>
                                     </div>
                                 </div>
+                                <?php } ?>
                             </div>
                             
                             <div class="row pB-30">
