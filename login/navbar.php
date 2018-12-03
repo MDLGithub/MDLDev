@@ -14,7 +14,12 @@
                 <a class="module">BRCAcare<sup>®</sup> Portal</a>
             </li>
         </ul>
-        
+        <?php 
+            $checkUpdates = $db->row("SELECT * FROM `tbl_mdl_updates_log` WHERE isUpdated='N'");
+            if(!empty($checkUpdates)){
+        ?>
+            <a href="<?php echo SITE_URL.'/updates.php'?>" class="color-red"><i class="fas fa-info-circle"></i> New Update available.</a>
+        <?php } ?>
     </section>
     <div class="salutation" id="salutation" data-user-id="<?php echo $userID; ?>" data-role="<?php echo $role; ?>"></div>
     

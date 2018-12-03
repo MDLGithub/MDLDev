@@ -1790,6 +1790,7 @@ if(isset($_POST['edit_categories'])){
                 Leave($patientInfoUrl);
             } else {
                 $message = "This status has already been added for this specimen.";
+                $msgClass = 'color-red';
             }
         } else {//insert log	
             if(isValidStatusGroup($db,$statusIDs, $_POST['Guid_user'], $DateOnly)){
@@ -1804,6 +1805,7 @@ if(isset($_POST['edit_categories'])){
                 Leave($patientInfoUrl);
             } else {
                 $message = "This status has already been added for this specimen.";
+                $msgClass = 'color-red';
             }
         }  
     } 
@@ -1829,7 +1831,8 @@ if(isset($_POST['edit_categories'])){
                 <form action="" method="POST">
                 <h4 class="text-center"></h4>
                 <?php if(isset($message)){ ?>
-                    <div class="text-center success-text"><?php echo $message; ?></div>
+                <?php $thisMsgClass=(isset($msgClass))?$msgClass:'success-text'; ?>
+                    <div class="text-center <?php echo $thisMsgClass; ?>"><?php echo $message; ?></div>
                 <?php } ?>
                 <input type="hidden" name="Guid_status_log" value="<?php echo (isset($_GET['log_id'])&&$_GET['log_id']!="")?$_GET['log_id']:""; ?>" />
                 <input type="hidden" name="Guid_user" value="<?php echo $_GET['patient']; ?>" />
