@@ -41,6 +41,11 @@ body{
 .fs-15{
     font-size: 15px!important;
 }
+.title-fs30{
+    text-align: center;
+    font-size: 30px;
+    margin: 20px 0 25px 0;
+}
 .padd-0{
     padding: 0 !important;
 }
@@ -1226,7 +1231,6 @@ table.dataTable thead .sorting {
     color: #fff;
     padding: 10px;
     font-size: 18px;
-    padding-right: 50px;
     height: 45px;
 }
 #manage-status-modal .contentBlock h5 a{
@@ -2841,4 +2845,7 @@ tr.loadedStatus{
 
   #setDate .buttons button{
     margin: 0 30px;
+  }
+  .duplicateResult{
+    background: #ff8a26;
   }

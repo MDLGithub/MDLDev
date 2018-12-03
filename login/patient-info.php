@@ -349,7 +349,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <p><label>Genetic Consultant: </label><?php echo $accountInfo['salesrep_name']; ?></p>
                                 <?php } ?>
                                 <?php if(isset($qualifyResult['provider'])){ ?>
-                                <p><label>Health Care Providers: </label><?php echo $qualifyResult['provider']; if($qualifyResult['title']!=''){ echo ", ".$qualifyResult['title']; } ?>
+                                <p><label>Health Care Providers: </label><?php echo ucwords(strtolower($qualifyResult['provider'])); if($qualifyResult['title']!=''){ echo ", ".strtoupper($qualifyResult['title']); } ?>
                                 <?php } ?>
                                 <?php if(isset($qualifyResult['source'])){ ?>
                                 <p><label>Event: </label><?php echo $qualifyResult['source']; ?></p>
@@ -718,6 +718,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                         <th>Date Paid</th>
                                         <th>Payor</th>
                                         <th>CPT</th>
+                                        <th></th>
                                         <th>Amount $</th>
                                         <?php if($role=='Admin'){ ?>
                                         <th class="text-center wh-100">Action</th>
@@ -742,6 +743,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                         <td><?php echo (!preg_match("/0{4}/" , $v['date_paid'])) ? date('n/j/Y', strtotime($v['date_paid'])) : ""; ?></td>
                                         <td><?php echo $v['payor']; ?></td>
                                         <td><?php echo $v['code']; ?></td>
+                                        <td><?php echo ($v['Loaded']=='Y')?'A':''; ?></td>
                                         <td>$<?php echo formatMoney($v['amount']); ?></td>
                                         <?php if($role=='Admin'){ ?>
                                         <td class="text-center">
@@ -1269,18 +1271,18 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 <p><label>Email: </label>
                     <input type="email" name="email" value="<?php echo $qualifyResult['email']; ?>" autocomplete="off"/> 
                 </p>
-                <?php if(isset($qualifyResult['insurance'])){ ?>
+                
                 <p class="capitalize"><label>Insurance: </label>
-                    <input type="text" name="insurance" value="<?php echo $qualifyResult['insurance']; ?>" autocomplete="off" />
+                    <?php $qRInsurance = isset($qualifyResult['insurance'])?$qualifyResult['insurance']:''; ?>
+                    <input type="text" name="insurance" value="<?php echo $qRInsurance; ?>" autocomplete="off" />
                 </p>
-                <?php } ?>
-                <?php if(isset($qualifyResult['other_insurance'])){ ?>
+                
                 <p class="capitalize"><label>Other Insurance: </label>
-                    <input type="text" name="other_insurance" value="<?php echo $qualifyResult['other_insurance']; ?>" autocomplete="off" />
+                    <?php $other_ins = isset($qualifyResult['other_insurance'])?$qualifyResult['other_insurance']:''; ?>
+                    <input type="text" name="other_insurance" value="<?php echo $other_ins; ?>" autocomplete="off" />
                 </p>
-                <?php } ?>
-                <?php if(isset($qualifyResult['qAccountNumber'])){  ?>
-                    <?php if($role!='Physician'){  ?>
+                
+                <?php if($role!='Physician'){  ?>
                     <p>
                         <label>Account: </label>                    
                         <?php 
@@ -1307,17 +1309,20 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             <?php 
 
                             foreach ($accounts as $k=>$v){ 
-                            $selected = $qualifyResult['qAccountNumber']==$v['account'] ? ' selected' : '';
+                                if(isset($qualifyResult['qAccountNumber'])){  
+                                    $selected = $qualifyResult['qAccountNumber']==$v['account'] ? ' selected' : '';
+                                } else {
+                                    $selected = '';
+                                }
                             ?>
                             <option <?php echo $selected; ?> value="<?php echo $v['account']; ?>" ><?php echo $v['account'] .'-'. ucwords(strtolower($v['name'])); ?></option>
                             <?php } ?>
                         </select>  
                     </p>
-                    <?php } else { ?>
-                        <input type="hidden" name="account_number" value="<?php echo $qualifyResult['account_number']; ?>" />
-                    <?php } ?>
+                <?php } else { ?>
+                    <input type="hidden" name="account_number" value="<?php echo $qualifyResult['account_number']; ?>" />
                 <?php } ?>
-                <?php if(isset($qualifyResult['provider_id'])){ ?> 
+              
                 <p>
                     <label>Health Care Provider: </label>
                     <select id="pInfoAccountProviders" name="provider_id">
@@ -1331,7 +1336,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             $tblproviders = $db->query($providerQ);
 
                         foreach ($tblproviders as $k=>$v){ 
-                        $selected = $qualifyResult['provider_id']==$v['Guid_provider'] ? ' selected' : '';
+                            if(isset($qualifyResult['provider_id'])){
+                                $selected = $qualifyResult['provider_id']==$v['Guid_provider'] ? ' selected' : '';
+                            } else {
+                                $selected = "";
+                            }
                         $providerTitle = '';
                         if(isset($v['title']) && $v['title']!=''){
                             $providerTitle = ', '.strtoupper($v['title']);
@@ -1341,9 +1350,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         <?php }} ?>
                     </select> 
                 </p>
-                <?php } ?>
                 
-                <?php if(isset($qualifyResult['source'])){   ?>
                     <?php if($role!='Physician'){  ?>
                     <p>
                         <label>Event: </label>
@@ -1352,7 +1359,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             <?php 
                             $sources = $db->selectAll('tblsource', ' ORDER BY `description` ASC');
                             foreach ($sources as $k=>$v){ 
-                            $selected = $qualifyResult['source']==$v['description'] ? ' selected' : '';
+                                if(isset($qualifyResult['source'])){
+                                    $selected = $qualifyResult['source']==$v['description'] ? ' selected' : '';
+                                } else {
+                                    $selected = "";
+                                }
                             ?>
                             <option <?php echo $selected; ?> value="<?php echo $v['description']; ?>" ><?php echo $v['description']; ?></option>
                             <?php } ?>
@@ -1361,7 +1372,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     <?php } else { ?>
                         <input type="hidden" name="source" value="<?php echo $qualifyResult['source']; ?>" />
                     <?php }  ?>
-                <?php }  ?>
+                
                 
                     
                 <div class="text-right pT-10">
@@ -1749,6 +1760,7 @@ if(isset($_POST['edit_categories'])){
     if(isset($_POST['manage_status_log'])){ 
         $statusIDs = $_POST['status'];
         $date=($_POST['date']!="")?date('Y-m-d h:i:s',strtotime($_POST['date'])):"";
+        $DateOnly=($_POST['date']!="")?date('Y-m-d',strtotime($_POST['date'])):"";
         $Guid_patient = $qualifyResult['Guid_patient']; 
         
         $statusLogData = array(
@@ -1764,29 +1776,35 @@ if(isset($_POST['edit_categories'])){
             'deviceid' => $qualifyResult['deviceid'],
             'Date'=>$date,
             'Date_created'=>date('Y-m-d h:i:s')
-        );
-        
-        if(isset($_POST['Guid_status_log']) && $_POST['Guid_status_log']!=""){//update log
-		
+        );        
+        if(isset($_POST['Guid_status_log']) && $_POST['Guid_status_log']!=""){//update log		
             $thisLog = $db->row("SELECT * FROM tbl_mdl_status_log WHERE Guid_status_log=:Guid_status_log", array('Guid_status_log'=>$_POST['Guid_status_log']));
             $statusLogData['Date_created'] = $thisLog['Date_created'];
-            $LogGroup = $thisLog['Log_group'];
-            //delete old log
-            deleteByField($db, 'tbl_mdl_status_log', 'Log_group', $LogGroup);
-            saveStatusLog($db, $statusIDs, $statusLogData);
-            //update last status id in patient table too
-            updateCurrentStatusID($db, $Guid_patient);
-            Leave($patientInfoUrl);
-        } else {//insert log		
-            if(isset($_POST['specimenCollected']) && $_POST['specimenCollected']=='no'){
-                updateTable($db, 'tblpatient', array('specimen_collected'=>'No'), array('Guid_patient'=>$Guid_patient));
+            $LogGroup = $thisLog['Log_group'];            
+            if(isValidStatusGroup($db,$statusIDs, $_POST['Guid_user'], $DateOnly)){
+                //delete old log
+                deleteByField($db, 'tbl_mdl_status_log', 'Log_group', $LogGroup);
+                saveStatusLog($db, $statusIDs, $statusLogData);
+                //update last status id in patient table too
+                updateCurrentStatusID($db, $Guid_patient);
+                Leave($patientInfoUrl);
+            } else {
+                $message = "This status has already been added for this specimen.";
             }
-            if(isset($_POST['specimenCollected']) && $_POST['specimenCollected']=='yes'){
-                updateTable($db, 'tblpatient', array('specimen_collected'=>'Yes'), array('Guid_patient'=>$Guid_patient));
+        } else {//insert log	
+            if(isValidStatusGroup($db,$statusIDs, $_POST['Guid_user'], $DateOnly)){
+                if(isset($_POST['specimenCollected']) && $_POST['specimenCollected']=='no'){
+                    updateTable($db, 'tblpatient', array('specimen_collected'=>'No'), array('Guid_patient'=>$Guid_patient));
+                }
+                if(isset($_POST['specimenCollected']) && $_POST['specimenCollected']=='yes'){
+                    updateTable($db, 'tblpatient', array('specimen_collected'=>'Yes'), array('Guid_patient'=>$Guid_patient));
+                }
+                saveStatusLog($db, $statusIDs, $statusLogData);
+                updateCurrentStatusID($db, $Guid_patient);
+                Leave($patientInfoUrl);
+            } else {
+                $message = "This status has already been added for this specimen.";
             }
-            saveStatusLog($db, $statusIDs, $statusLogData);
-            updateCurrentStatusID($db, $Guid_patient);
-            Leave($patientInfoUrl);
         }  
     } 
 	
