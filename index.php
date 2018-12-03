@@ -4711,6 +4711,10 @@ function save_snap_shot($not_qualified) {
 
 	$conn->query($sql);	
 	
+	$sql = "UPDATE tblpatient p, tblqualify q SET p.insurance_name = q.insurance, p.other_insurance = q.other_insurance, p.gender = q.gender, p.accountNumber = q.account_number, p.provider_id = q.provider_id, p.other_provider = q.other_provider, p.source = q.source WHERE p.Guid_user = q.Guid_user AND p.Guid_user = " . $qualify['Guid_user'];
+	
+	$conn->query($sql);	 
+	
 	require ("db/dbdisconnect.php");
 }
 function perform_login(&$error) {
