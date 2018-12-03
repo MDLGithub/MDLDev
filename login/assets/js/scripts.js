@@ -65,15 +65,29 @@ $(document).ready(function () {
         $(".chart_header .button").toggleClass("hide"); 
     }); 
 
-    /**
-     * Dashboard Calendar Sales Rep Dropdown filter
-     * used on dashboard2.php dashboard calendar
-     */
-    /*$(".info_block_arrow").bind('click tap', function(){
-        $(".salesrep_dropdown").toggleClass("dropdown_hide");
-        $(".info_block h1").toggleClass("hide");
-        $(".info_block_arrow").toggleClass("info_block_arrow_show");
-    }); */ 
+    $('#userForm #user_type').on('change', function(){
+        var Guid_role=this.value;
+        if(Guid_role=='5'){
+            var ajaxUrl = baseUrl+'/ajaxHandler.php';
+            $.ajax( ajaxUrl , {
+                type: 'POST',
+                data: {
+                   show_categroy_dropdown: '1'
+                },
+                success: function(response) {
+                    var result = JSON.parse(response);
+                    if(result['content']){
+                        $('#userCategoryDropdown').html(result['content']);
+                    }                
+                },
+                error: function() {
+                    console.log('0');
+                }
+            });
+        } else {
+            $('#userCategoryDropdown').html("");
+        }
+    });
     
     $('.toggleRoles').on('click', function(){
         if($('.edit-status-form .rolesBlock').hasClass('hidden')){
@@ -447,6 +461,7 @@ $(document).ready(function () {
      */        
     $("#filter_form #account, #filter_form #provider, #filter_form #salesrep").on('change', function() {
         var thisName = this.name;
+        var thisUserRole = $('#filter_form #account').attr('data-user-role');
         var accountVal  = $('#filter_form #account').val();        
         var providerVal = $('#filter_form #provider').val();
         var salesRepVal = $('#filter_form #salesrep').val();
@@ -460,7 +475,8 @@ $(document).ready(function () {
                 id: this.value,
                 account: accountVal,
                 provider: providerVal,
-                salesRep: salesRepVal
+                salesRep: salesRepVal,
+                userRole: thisUserRole
             },
             success: function(response) {
                 var result = JSON.parse(response);  
@@ -525,83 +541,7 @@ $(document).ready(function () {
         }
        
     }
-    
-    $("#filter_form #account--, #filter_form #provider--, #filter_form #salesrep--").on('change', function() {
-        var thisName = this.name;
-        var accountVal  = $('#filter_form #account').val();        
-        var providerVal = $('#filter_form #provider').val();
-        var salesRepVal = $('#filter_form #salesrep').val();
         
-        accountVal = (accountVal)?accountVal:'none';
-        providerVal = (providerVal)?providerVal:'none';
-        salesRepVal = (salesRepVal)?salesRepVal:'none';
-      
-        var ajaxUrl = baseUrl+'/ajaxHandler.php';
-        $.ajax( ajaxUrl , {
-            type: 'POST',
-            data: {
-                get_account_correlations: thisName, 
-                id: this.value,
-                account: accountVal,
-                provider: providerVal,
-                salesRep: salesRepVal
-            },
-            success: function(response) {
-                var result = JSON.parse(response);  
-                console.log(result);
-                
-                if(result.name == 'account' ){ // || salesRepVal == 'none' || providerVal=='none'
-                    $("#provider, #salesrep").empty();
-                    $("#provider").append(result.provider_html);
-                    $("#salesrep").append(result.salesrep_html);
-                    if(accountVal=='none'){
-                        $("#provider, #salesrep").empty();
-                        $("#provider").append(result.provider_html);
-                        $("#salesrep").append(result.salesrep_html);
-                        $('#filter_form #provider, #filter_form #salesrep').parent().parent().removeClass('show-label valid'); 
-                        $('#filter_form #provider, #filter_form #salesrep').addClass('no-selection').val('').attr("selected", "selected");                        
-                    } 
-                }
-                
-                if(result.name == 'provider'){
-                    if(providerVal == 'none'){
-                        $('#filter_form #account').parent().parent().removeClass('show-label valid'); 
-                        $('#filter_form #account').addClass('no-selection').val('').attr("selected", "selected");                        
-                        $("#provider, #salesrep").empty();
-                        $("#provider").append(result.provider_html);
-                        $("#salesrep").append(result.salesrep_html);
-                    } else {
-                        $('#filter_form #account').parent().parent().addClass('show-label valid');
-                        $('#filter_form #account').val(result.accountID).attr("selected", "selected");
-                    }                    
-                    $('#filter_form #provider').val(result.providerID).attr("selected", "selected");
-                    if(!salesRepVal || salesRepVal==''){
-                        $("#provider, #salesrep").empty();
-                        $("#provider").append(result.provider_html);
-                        $("#salesrep").append(result.salesrep_html);
-                    }
-                }
-                if(result.name == 'salesrep'){
-                    if(accountVal == 'none'){
-                        $('#filter_form #account').parent().parent().addClass('show-label valid');
-                        $('#filter_form #account').val(result.accountID).attr("selected", "selected");
-                    }                    
-                    $('#filter_form #salesrep').val(result.salesRepID).attr("selected", "selected");
-                    if(!providerVal || providerVal==''){
-                        $("#provider, #salesrep").empty();
-                        $("#provider").append(result.provider_html);
-                        $("#salesrep").append(result.salesrep_html);
-                    }
-                }  
-                
-            },
-            error: function() {
-                console.log('0');
-            }
-        });        
-    });
-      
-    
     /**
      * Update Account info and providers 
      * @param {type} accountData
@@ -668,7 +608,9 @@ $(document).ready(function () {
     }
     
     /**
-     *  Generate Url button on click foncion
+     *  Generate Url Page 
+     *  Loads url prev configuraion when from
+     *  Use Previous Settings radiobutton checked
      */
     $('.url_config').on('click', function (event) {      
         var id = $(this).attr('id'); 
@@ -681,8 +623,9 @@ $(document).ready(function () {
             },
             success: function(response) {
                 var result = JSON.parse(response);
-                var configData = result.urlConfigs[0];
-                //console.log(configData);
+                console.log(result);
+                var configData = result.urlConfigs;
+                
                 updateSelectSettings(configData);
             },
             error: function() {
