@@ -3103,6 +3103,11 @@ function dmdl_refresh($db){
             if (isset($res['Legal_AppealSubmitted']) && !empty($res['Legal_AppealSubmitted'])) {
                 $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Legal_AppealSubmitted][Date]' value='" . convertDmdlDate($res['Legal_AppealSubmitted']) . "' />";
             }
+            //9 When [Testing_Status] => Rejected, the status should be Test Cancelled
+            if (isset($res['Testing_Status']) && $res['Testing_Status']=='Rejected') {
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Testing_Status][Status]' value='" . $res['Testing_Status'] . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Testing_Status][Date]' value='" . convertDmdlDate($res['Testing_Status_Date']) . "' />";
+            }
 
             //Revenue section on the screen
             if(isset($res['Payor']) && !empty($res['Payor'])){
@@ -3657,9 +3662,25 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     } 
+    //9 When [Testing_Status] => Rejected, the status should be Test Cancelled
+    if(isset($statuses['Testing_Status']['Date'])){
+        $statusLogData['Date'] = $statuses['Testing_Status']['Date'];
+        $status_Testing_Status_IDs = array('12');  // 12=>Test Cancelled
+        if(isValidStatusGroup($db,$status_Testing_Status_IDs, $Guid_user, $statusLogData['Date'] )){
+            saveStatusLog($db, $status_Testing_Status_IDs, $statusLogData);
+            updateCurrentStatusID($db, $data['Guid_patient']);
+        }
+    } 
        
 }
-
+/**
+ * Update function for patient
+ * firstname_enc and lastname_enc should be encrypted
+ * @param type $db
+ * @param type $data
+ * @param type $where
+ * @return boolean
+ */
 function updatePatientData($db,$data,$where){   
     $updateFields = "";
     $whereStr = "";
