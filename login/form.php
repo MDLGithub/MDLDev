@@ -427,16 +427,30 @@
                 <tbody>
 
                 <?php
-                if(isset($_POST['today'])){
                     $account = $_POST['account'];
                     $guid_account = $_POST['guid_account'];
-                    $_POST['today'] = date("Y-m-d");
-                    $today = $_POST['today'];
-
-                    echo get_status_state($db, '0', array('Guid_account'=>$guid_account), array('account_id'=>$guid_account,'status_table'=>'1'), $today);
-                }
+                    $today = date('Y:m:d');
                 ?>
-
+                <tr>
+                    <td>Registered Patients</td>
+                    <td><?= getAccountStatusCount($db, $account, '28', $today); ?></td>
+                    <td><?= getAccountStatusCount($db, $account, '28', ['to_date'=>$_POST['to_date'],'from_date'=>$_POST['from_date']]); ?></td>
+                </tr>
+                <tr>
+                    <td>Completed Questionnaire</td>
+                    <td><?= getAccountStatusCount($db, $account, '36', $today); ?></td>
+                    <td><?= getAccountStatusCount($db, $account, '36', ['to_date'=>$_POST['to_date'],'from_date'=>$_POST['from_date']]); ?></td>
+                </tr>
+                <tr>
+                    <td>Insufficient Information</td>
+                    <td><?= getAccountStatusCount($db, $account, '16', $today); ?></td>
+                    <td><?= getAccountStatusCount($db, $account, '16', ['to_date'=>$_POST['to_date'],'from_date'=>$_POST['from_date']]); ?></td>
+                </tr>
+                <tr>
+                    <td>Medically Qualified</td>
+                    <td><?= getAccountStatusCount($db, $account, '29', $today); ?></td>
+                    <td><?= getAccountStatusCount($db, $account, '29', ['to_date'=>$_POST['to_date'],'from_date'=>$_POST['from_date']]); ?></td>
+                </tr>
                 </tbody>
             </table>
         </div>

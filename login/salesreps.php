@@ -221,10 +221,6 @@ require_once ('navbar.php');
 		    <form method="POST" enctype="multipart/form-data">
                         <div class="row">
                             <div class="col-md-12 ">
-                                <h2 class="title-fs30">
-                                    <?php echo ($first_name!="") ? $first_name : ""; ?>
-                                    <?php echo ($last_name!="") ? $last_name : ""; ?>
-                                </h2>
 				<div class="status_chart">
 				    <div class="row">
 					<div class="col-md-12">
@@ -657,7 +653,7 @@ require_once ('navbar.php');
 	<a class="close"></a>
 
 	<h5 class="title">
-	    Geneveda Matrix Export Parameters
+		Geneveda Matrix Criteria
 	</h5>
 	<div class="content">
 	<form id="matrix_parameters" class="export_filters" action="" method="post">
@@ -690,7 +686,7 @@ require_once ('navbar.php');
 		</div>
 		
 		<?php
-		$date_error = " valid";
+			$date_error = " valid";
 		?>
 		
 		    <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['to_date'])) && (strlen($_POST['to_date']))) ? " show-label" : ""; ?><?php echo $date_error; ?>">
@@ -754,9 +750,23 @@ require_once ('navbar.php');
 				<span class="status_icons"><strong></strong></span>
 			    </p>
 			</div>
-		    </div>
-		
+		</div>
+		<?php 
+			$categoriesQuery = "SELECT * FROM tbl_mdl_category";
+			$categories = $db->query($categoriesQuery);
+		?>
+		<div>
+			<label class="dynamic"><span>Categories</span></label>
 
+			<div class="group">
+				<? if (!empty($categories)) { ?>
+					<? foreach ($categories as $category) { ?>
+						<label for="<?= $category['slug'] ?>" style="font-weight: 400;"><span><?= $category['name'] ?></span></label>
+						<input class="export_category" type="checkbox" name="<?= $category['slug'] ?>" value="<?= $category['Guid_category'] ?>" />
+					<? } ?>
+				<? } ?>
+			</div>
+		</div>
 		<button value="1" name="search" class="button export custom"><strong>Export</strong></button>
 		<button id="clear_filters" name="clear" class="button cancel custom"><strong>Clear</strong></button>
 	    </form>

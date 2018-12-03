@@ -19,7 +19,41 @@ if($role!="Admin"){
     Leave(SITE_URL."/no-permission.php");
 }
 
+/**
+ * add new updates in this array 
+ * and create handle function with the same name in update-functions.php
+ */
+$updateData = array(
+    '1' => array(
+        'description' => 'Change account_number to accountNumber in patients table',
+        'function' => 'update_v1'
+    ),
+    '2' => array(
+        'description' => 'Update MDL Stat Logs for missing accounts',
+        'function' => 'update_v2'
+    ),
+);
 
+/**
+ *  Create updates log table if not exists 
+ *  and insert new rows from $updateData
+ */
+$logTable = create_log_table($db);
+if($logTable['staus']===TRUE){
+    foreach ($updateData as $k=>$v){
+        $insertUpdatesData = array(
+                'function_name'=>$v['function'],
+                'description'=>$v['description'],
+                'isUpdated'=>'N',
+                'Date'=> date("Y-m-d H:i:s")
+            );
+        $checkUpdate = $db->row("SELECT `Guid_updates_log` FROM `tbl_mdl_updates_log` WHERE function_name=:function_name", array('function_name'=>$v['function']));
+        if(empty($checkUpdate)){
+            $insertUpdates = insertIntoTable($db, 'tbl_mdl_updates_log', $insertUpdatesData);
+        }
+        
+    } 
+}
 
 /**
  * Run function when clicked Update button

@@ -808,10 +808,11 @@ function getSalesrepAccounts($db, $Guid_user){
 }
 /**
  * Get Account Status Count By account number
- * @param type $db
- * @param type $account
- * @param type $Guid_status
- * @return type
+ * @param type object $db
+ * @param type int $account
+ * @param type int $Guid_status
+ * @param type mixed $eventDate
+ * @return type int $result['count'] 
  */
 function getAccountStatusCount($db, $account, $Guid_status, $eventDate=NULL ){    
     $params = array('account'=>$account,'Guid_status'=>$Guid_status);
@@ -819,10 +820,16 @@ function getAccountStatusCount($db, $account, $Guid_status, $eventDate=NULL ){
         . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
         . "WHERE l.Guid_status =:Guid_status AND l.account=:account AND u.marked_test='0' "; 
     if($eventDate){
-        $q .=  "AND DATE(l.Date)=:eventdate";
-        $params['eventdate']=$eventDate;
+        if(is_array($eventDate)) {
+            $q .=  "AND l.Date between :from and :to";
+            $params['from']=$eventDate['from_date'];
+            $params['to']=$eventDate['to_date'];
+        } else {
+            $q .=  "AND DATE(l.Date)=:eventdate";
+            $params['eventdate']=$eventDate;
+        }
     }
-    
+
     $result = $db->row($q, $params);    
     return $result['count'];
 }
@@ -1498,30 +1505,6 @@ function isStatusSelected($status, $selectedStatuses){
    
     return FALSE;
 }
-/**
- * Check Status Log Combination
- * check combination Guid_status AND Date before saving
- * @param type $Guid_user
- * @param type $Date
- * @return boolean
- */
-function isValidStatusGroup($db,$statusIDs, $Guid_user, $Date){ 
-    //check combination Guid_status AND Date before saving   
-    $count = 0;    
-    foreach ($statusIDs as $k=>$v){
-        $query = "SELECT Guid_status FROM tbl_mdl_status_log WHERE Guid_user=$Guid_user AND DATE(`Date`)='$Date' AND Guid_status='$v'";
-        $checkStat = $db->row($query, array('Guid_user'=>$Guid_user,'Guid_status'=>$v,'Date'=>$Date));
-        if(!empty($checkStat)){
-            $count++;
-        }        
-    }
-    if(count($statusIDs)==$count){ 
-        //if full combination match than not valid, 
-        //return false in order not to record the same combination again
-        return FALSE;
-    }    
-    return TRUE;
-}
 
 function saveStatusLog($db,$statusIDs, $statusLogData){
     
@@ -1806,6 +1789,7 @@ function dbDateFormat($date){
  * @param type $statusID
  * @return type array ('count'=>5, 'info'=>array())
  */
+
 function get_stats_info($db, $statusID, $hasChildren=FALSE, $searchData=array()){    
     //exclude test users
     $markedTestUserIds = getMarkedTestUserIDs($db);
@@ -1888,7 +1872,8 @@ function get_stats_info($db, $statusID, $hasChildren=FALSE, $searchData=array())
     return $result;
 }
 
-function get_status_table_rows($db, $parent = 0, $searchData=array(), $linkArr=array()) { 
+function get_status_table_rows($db, $parent = 0, $searchData=array(), $linkArr=array()) {   
+    
     $statusQ = "SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC";
     $statuses = $db->query($statusQ);
     $filterUrlStr = "";
@@ -1962,6 +1947,49 @@ function get_status_child_rows($db, $parent = 0,  $level = '', $searchData=array
             }
         }
     }
+   
+    return $content;
+}
+
+function get_status_table_rows_($db, $parent = 0) { 
+    
+    $q ='SELECT count(*) AS count, statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date` FROM `tbl_mdl_status` statuses
+        LEFT JOIN `tbl_mdl_status_log` statuslogs
+        ON statuses.`Guid_status`= statuslogs.`Guid_status`
+        WHERE `visibility`="1" 
+        AND statuslogs.`Guid_status_log`<>""        
+        AND parent_id="'.$parent.'"
+        ORDER BY statuslogs.`Date`, statuslogs.`order_by` DESC';
+    $statuses = $db->query($q);
+   
+    $content = '';    
+    if ( $statuses ) {
+        foreach ( $statuses as $status ) {
+            $q ='SELECT count(*) AS count, statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date` FROM `tbl_mdl_status` statuses
+                LEFT JOIN `tbl_mdl_status_log` statuslogs
+                ON statuses.`Guid_status`= statuslogs.`Guid_status`
+                WHERE `visibility`="1" 
+                AND statuslogs.`Guid_status_log`<>""
+                
+                AND parent_id="'.$status['Guid_status'].'"
+                ORDER BY statuslogs.`Date`, statuslogs.`order_by` DESC';
+            $checkCildren = $db->query($q);
+                    
+            if( isset($status['count']) && $status['count']!=0){
+                $optionClass = '';
+                if ( !empty($checkCildren) ) { 
+                    $optionClass = 'has_sub';                 
+                }    
+                $content .= "<tr id='".$status['Guid_status']."' class='parent ".$optionClass."'>";
+                $content .= "<td class='text-left'><span>".$status['status'].'</span></td>';            
+                $content .= '<td><a href="'.SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].'">'.$status['count'].'</a></td>';
+                if ( !empty($checkCildren) ) {
+                    $content .= get_status_child_rows( $db, $status['Guid_status'], "&nbsp;" );
+                }            
+                $content .= "</tr>";
+            }
+        }
+    }   
    
     return $content;
 }
@@ -2167,7 +2195,7 @@ function get_status_state($db, $parent = 0, $searchData=array(), $linkArr=array(
     $content = '';    
     foreach ($statuses as $key => $status) {
         $stats1 = get_stats_info($db, $key, FALSE, $searchData);
-        $stats2 = get_stats_info_today($db, $key, FALSE, $searchData, $today);
+        $stats2 = get_stats_info_today($db, $key, FALSE, [], $today);
         $content .= "<tr>";
         $content .= "<td><span>".$status."</span></td>";
         $content .= '<td><a>'.$stats2['count'].'</a></td>';
@@ -2435,18 +2463,10 @@ function loadTableData($db, $tableName, $tableClass='', $tableID=''){
  * @return string
  */
 function convertDmdlDate($date){
-    if($date!=''){
-        if (stripos($date,'T') !== false) {
-            $dateExp  = explode("T", $date);
-            $convertedDate = $dateExp['0'];            
-        } else {
-            $date = str_replace('/', '-', $date);
-            $dateExp  = explode("-", $date) ;            
-            $convertedDate = $dateExp['2']."-".$dateExp['0']."-".$dateExp['1'];            
-        }
-        return $convertedDate;
-    }
-    return '';
+    $dateExp  = explode("-", $date) ;            
+    $convertedDate = $dateExp['2']."-".$dateExp['0']."-".$dateExp['1'];
+    
+    return $convertedDate;
 }
 
 function getPaientPossibleMatch($db,$firstname,$lastname,$Date_Of_Birth){
@@ -2533,11 +2553,6 @@ function getPaientPerfectMatch($db,$firstname,$lastname,$Date_Of_Birth){
     return $getPatient;
 }
 
-/**
- * DMDL API Refresh screen function
- * @param type $db
- * @return string
- */
 function dmdl_refresh($db){ 
     require_once 'classes/xmlToArrayParser.php';
     ini_set("soap.wsdl_cache_enabled", 0);
@@ -2619,34 +2634,31 @@ function dmdl_refresh($db){
         $domArr = $domObj->array; 
         if($domObj->parse_error){ 
             echo $domObj->get_xml_error();            
-        } else { 
-            if(isset($domArr['CombinedResults']['GeneticResults']['0'])){
-                $res = $domArr['CombinedResults']['GeneticResults']['0'];
-                $bgClass = 'duplicateResult';
-            }else{            
-                $res = $domArr['CombinedResults']['GeneticResults'];
-                $bgClass = '';
-            }
+        } else {             
+            $res = $domArr['CombinedResults']['GeneticResults'];
            
-            $Guid_MDLNumber = isset($res['Guid_MDLNumber'])?$res['Guid_MDLNumber']:'';            
-            $Date_Of_Birth = isset($res['Date_Of_Birth'])?$res['Date_Of_Birth']:'';          
-            $firstname = isset($res['Patient_FirstName'])?$res['Patient_FirstName']:'';
-            $lastname = isset($res['Patient_LastName'])?$res['Patient_LastName']:'';           
-            $accountNumber = isset($res['ClientID'])?$res['ClientID']:'';  
+            $Guid_MDLNumber = $res['Guid_MDLNumber'];
+            $Date_Of_Birth = $res['Date_Of_Birth'];          
+            $firstname = $res['Patient_FirstName'];
+            $lastname = $res['Patient_LastName'];           
+            $accountNumber = $res['ClientID'];  
             $DOS = '';
             if(isset($res['DOS'])){
                 $DOS = str_replace('-','/',$res['DOS']);
             }
             
-            $dob = str_replace('-','/',$Date_Of_Birth);            
+            $dob = str_replace('-','/',$Date_Of_Birth);
+            
             $where = array(
                 'firstname' => $firstname,
                 'lastname' => $lastname,
                 'dob' => convertDmdlDate($Date_Of_Birth)
             );
+            
+            
             $getPatient = getPaientPerfectMatch($db,$firstname,$lastname,$Date_Of_Birth);
          
-            $content .= "<tr class='$bgClass'>";
+            $content .= "<tr>";
             if(empty($getPatient)){ //patient not match with dmdl data => ststus=no
                 $match = "<td class='mn no'>"
                         . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][status]' value='no' />"
@@ -2884,15 +2896,18 @@ function dmdl_refresh($db){
             if(isset($res['ClientFax'])&&!empty($res['ClientFax'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][fax]' value='".$res['ClientFax']."' />";
             }
-                       
+            
+            //payor details
+            if(isset($res['Insurance_Company']) && !empty($res['Insurance_Company'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][payor][name]' value='".$res['Insurance_Company']."' />";
+            }
+            if(isset($res['Payer']) && !empty($res['Payer'])){ //abbreviation of ayor name
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][payor][PayID]' value='".$res['Payer']."' />";
+            }
             
             //BillingDetail
             if(isset($res['BillingDetail']['invoiceDetail']) && !empty($res['BillingDetail']['invoiceDetail'])){
                 foreach ($res['BillingDetail']['invoiceDetail'] as $invKey => $invDetail){
-                    //payor details
-                    if(isset($res['Insurance_Company']) && !empty($res['Insurance_Company'])){
-                        $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][invoiceDetail][".$invKey."][fullName]' value='".$res['Insurance_Company']."' />";
-                    }
                     if(isset($invDetail['InvoiceID'])){
                         $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][invoiceDetail][".$invKey."][InvoiceID]' value='".$invDetail['InvoiceID']."' />";
                     }
@@ -2906,7 +2921,7 @@ function dmdl_refresh($db){
                         $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][invoiceDetail][".$invKey."][CPT]' value='".$invDetail['CPT']."' />";
                     }
                     if(isset($invDetail['DatePaid'])){
-                        $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][invoiceDetail][".$invKey."][DatePaid]' value='".convertDmdlDate($invDetail['DatePaid'])."' />";
+                        $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][invoiceDetail][".$invKey."][DatePaid]' value='".$invDetail['DatePaid']."' />";
                     }
                     
                     $amount = 0;
@@ -2935,79 +2950,79 @@ function dmdl_refresh($db){
             }
             //3.1 Insurance Preauthorization: Pending: Eligibility Review
             if (isset($res['IPP_EligibilityReview']) && !empty($res['IPP_EligibilityReview'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IPP_EligibilityReview][Date]' value='" . convertDmdlDate($res['IPP_EligibilityReview']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IPP_EligibilityReview][Date]' value='" . $res['IPP_EligibilityReview'] . "' />";
             }
             //3.2 Insurance Preauthorization: Pending: Preauthorization Review
             if (isset($res['IPP_PreauthorizationReview']) && !empty($res['IPP_PreauthorizationReview'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IPP_PreauthorizationReview][Date]' value='" . convertDmdlDate($res['IPP_PreauthorizationReview']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IPP_PreauthorizationReview][Date]' value='" . $res['IPP_PreauthorizationReview'] . "' />";
             }
             //3.3 Insurance Preauthorization: Pending: Legal Policy
             if (isset($res['IPP_LegalPolicy']) && !empty($res['IPP_LegalPolicy'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IPP_LegalPolicy][Date]' value='" . convertDmdlDate($res['IPP_LegalPolicy']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IPP_LegalPolicy][Date]' value='" . $res['IPP_LegalPolicy'] . "' />";
             }
             //3.4 Insurance Preauthorization: Not Required
             if (isset($res['IP_NotRequired']) && !empty($res['IP_NotRequired'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_NotRequired][Date]' value='" . convertDmdlDate($res['IP_NotRequired']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_NotRequired][Date]' value='" . $res['IP_NotRequired'] . "' />";
             }
             //3.5 Insurance Preauthorization: Approved
             if (isset($res['IP_Approved']) && !empty($res['IP_Approved'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_Approved][Date]' value='" . convertDmdlDate($res['IP_Approved']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_Approved][Date]' value='" . $res['IP_Approved'] . "' />";
             }
             //3.6 Insurance Preauthorization: Declined: Medical Necessity Not Met
             if (isset($res['IP_Declined_MedNecNotMet']) && !empty($res['IP_Declined_MedNecNotMet'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_Declined_MedNecNotMet][Date]' value='" . convertDmdlDate($res['IP_Declined_MedNecNotMet']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_Declined_MedNecNotMet][Date]' value='" . $res['IP_Declined_MedNecNotMet'] . "' />";
             }
             //3.7 Insurance Preauthorization: Declined: Not a Covered Benefit
             if (isset($res['IP_Declined_NotCovered']) && !empty($res['IP_Declined_NotCovered'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_Declined_NotCovered][Date]' value='" . convertDmdlDate($res['IP_Declined_NotCovered']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_Declined_NotCovered][Date]' value='" . $res['IP_Declined_NotCovered'] . "' />";
             }
             //3.8 Insurance Preauthorization: Declined: Experimental/Investigational
             if (isset($res['IP_Declined_Experimental']) && !empty($res['IP_Declined_Experimental'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_Declined_Experimental][Date]' value='" . convertDmdlDate($res['IP_Declined_Experimental']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_Declined_Experimental][Date]' value='" . $res['IP_Declined_Experimental'] . "' />";
             }
             //3.9 Insurance Preauthorization: Declined: MDL is OON
             if (isset($res['IP_Declined_MDLisOON']) && !empty($res['IP_Declined_MDLisOON'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_Declined_MDLisOON][Date]' value='" . convertDmdlDate($res['IP_Declined_MDLisOON']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_Declined_MDLisOON][Date]' value='" . $res['IP_Declined_MDLisOON'] . "' />";
             }
             //3.10 Insurance Preauthorization: Physician Responsibility: New Requisition Required
             if (isset($res['IP_PhysAct_NewReqRequired']) && !empty($res['IP_PhysAct_NewReqRequired'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_PhysAct_NewReqRequired][Date]' value='" . convertDmdlDate($res['IP_PhysAct_NewReqRequired']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_PhysAct_NewReqRequired][Date]' value='" . $res['IP_PhysAct_NewReqRequired'] . "' />";
             }
             //3.11 Insurance Preauthorization: Physician Responsibility: Additional ICD-10 Codes/Info Required
             if (isset($res['IP_PhysAct_AddICD10Required']) && !empty($res['IP_PhysAct_AddICD10Required'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_PhysAct_AddICD10Required][Date]' value='" . convertDmdlDate($res['IP_PhysAct_AddICD10Required']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_PhysAct_AddICD10Required][Date]' value='" . $res['IP_PhysAct_AddICD10Required'] . "' />";
             }
             //3.12 Insurance Preauthorization: Physician Action Required: Physician Consultation Required
             if (isset($res['IP_PhysAct_PhysConsultationRequired']) && !empty($res['IP_PhysAct_PhysConsultationRequired'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_PhysAct_PhysConsultationRequired][Date]' value='" . convertDmdlDate($res['IP_PhysAct_PhysConsultationRequired']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_PhysAct_PhysConsultationRequired][Date]' value='" . $res['IP_PhysAct_PhysConsultationRequired'] . "' />";
             }
             //3.13 Insurance Preauthorization: Physician Action Required: Precertification Required: AIMs
             if (isset($res['IP_PhysAct_PrecertificationRequiredAIMS']) && !empty($res['IP_PhysAct_PrecertificationRequiredAIMS'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_PhysAct_PrecertificationRequiredAIMS][Date]' value='" . convertDmdlDate($res['IP_PhysAct_PrecertificationRequiredAIMS']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_PhysAct_PrecertificationRequiredAIMS][Date]' value='" . $res['IP_PhysAct_PrecertificationRequiredAIMS'] . "' />";
             }
             //3.14 Insurance Preauthorization: Physician Action Required: Precertification Required: Beacon
             if (isset($res['IP_PhysAct_PrecertificationRequiredBeacon']) && !empty($res['IP_PhysAct_PrecertificationRequiredBeacon'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_PhysAct_PrecertificationRequiredBeacon][Date]' value='" . convertDmdlDate($res['IP_PhysAct_PrecertificationRequiredBeacon']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][IP_PhysAct_PrecertificationRequiredBeacon][Date]' value='" . $res['IP_PhysAct_PrecertificationRequiredBeacon'] . "' />";
             }
             //4.1 Patient Responsibility: Assume financial responsibility
             if (isset($res['PR_AssumeFinancialResponsibility']) && !empty($res['PR_AssumeFinancialResponsibility'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][PR_AssumeFinancialResponsibility][Date]' value='" . convertDmdlDate($res['PR_AssumeFinancialResponsibility']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][PR_AssumeFinancialResponsibility][Date]' value='" . $res['PR_AssumeFinancialResponsibility'] . "' />";
             }
             //4.2 Patient Responsibility: New Insurance information
             if (isset($res['PR_NewInsurance']) && !empty($res['PR_NewInsurance'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][PR_NewInsurance][Date]' value='" . convertDmdlDate($res['PR_NewInsurance']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][PR_NewInsurance][Date]' value='" . $res['PR_NewInsurance'] . "' />";
             }
             //4.3 Patient Responsibility: Awaiting Lower Deductible
             if (isset($res['PR_LowerDeduct']) && !empty($res['PR_LowerDeduct'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][PR_LowerDeduct][Date]' value='" . convertDmdlDate($res['PR_LowerDeduct']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][PR_LowerDeduct][Date]' value='" . $res['PR_LowerDeduct'] . "' />";
             }
             //4.4 Patient Responsibility: Awaiting Additional Family History
             if (isset($res['PR_AddFamilyHistory']) && !empty($res['PR_AddFamilyHistory'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][PR_AddFamilyHistory][Date]' value='" . convertDmdlDate($res['PR_AddFamilyHistory']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][PR_AddFamilyHistory][Date]' value='" . $res['PR_AddFamilyHistory'] . "' />";
             }
             //4.5 Patient Responsibility: Family History Received 
             if (isset($res['PR_FamilyHistoryReceived']) && !empty($res['PR_FamilyHistoryReceived'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][PR_FamilyHistoryReceived][Date]' value='" . convertDmdlDate($res['PR_FamilyHistoryReceived']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][PR_FamilyHistoryReceived][Date]' value='" . $res['PR_FamilyHistoryReceived'] . "' />";
             }
             //4.6 & 4.7 Patient Responsibility: Genetic Counseling: Pending, Completed...          
             if (isset($res['Genetic_Counseling_Status']) && !empty($res['Genetic_Counseling_Status'])) {
@@ -3018,92 +3033,92 @@ function dmdl_refresh($db){
             }
             //5.1 Laboratory Testing Status: Pending
             if (isset($res['Testing_Pending']) && !empty($res['Testing_Pending'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Testing_Pending][Date]' value='" . convertDmdlDate($res['Testing_Pending']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Testing_Pending][Date]' value='" . $res['Testing_Pending'] . "' />";
             }
             //5.2 Laboratory Testing Status: In Progress
             if (isset($res['Testing_InProgress']) && !empty($res['Testing_InProgress'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Testing_InProgress][Date]' value='" . convertDmdlDate($res['Testing_InProgress']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Testing_InProgress][Date]' value='" . $res['Testing_InProgress'] . "' />";
             }
             //5.3 Laboratory Testing Status: Complete
             if (isset($res['Testing_Complete']) && !empty($res['Testing_Complete'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Testing_Complete][Date]' value='" . convertDmdlDate($res['Testing_Complete']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Testing_Complete][Date]' value='" . $res['Testing_Complete'] . "' />";
             }
             //5.4 Laboratory Testing Status: Recollection Requested
             if (isset($res['Testing_RecollectionRequested']) && !empty($res['Testing_RecollectionRequested'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Testing_RecollectionRequested][Date]' value='" . convertDmdlDate($res['Testing_RecollectionRequested']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Testing_RecollectionRequested][Date]' value='" . $res['Testing_RecollectionRequested'] . "' />";
             }
             //6.1 Test Cancelled: MDL Out-of-Network/High Patient Responsibility
             if (isset($res['TC_MDLOON']) && !empty($res['TC_MDLOON'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_MDLOON][Date]' value='" . convertDmdlDate($res['TC_MDLOON']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_MDLOON][Date]' value='" . $res['TC_MDLOON'] . "' />";
             }
             //6.2 Test Cancelled: MDL In-Network/High 
             if (isset($res['TC_MDLIN']) && !empty($res['TC_MDLIN'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_MDLIN][Date]' value='" . convertDmdlDate($res['TC_MDLIN']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_MDLIN][Date]' value='" . $res['TC_MDLIN'] . "' />";
             }
             //6.3 Test Cancelled: Physician Cancelled Testing 
             if (isset($res['TC_PhysicianCancelled']) && !empty($res['TC_PhysicianCancelled'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_PhysicianCancelled][Date]' value='" . convertDmdlDate($res['TC_PhysicianCancelled']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_PhysicianCancelled][Date]' value='" . $res['TC_PhysicianCancelled'] . "' />";
             }
             //6.4 Test Cancelled: Incomplete Genetic Counselling
             if (isset($res['TC_IncompleteGC']) && !empty($res['TC_IncompleteGC'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_IncompleteGC][Date]' value='" . convertDmdlDate($res['TC_IncompleteGC']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_IncompleteGC][Date]' value='" . $res['TC_IncompleteGC'] . "' />";
             }
             //6.5 Test Cancelled: Patient refused to sign consent form
             if (isset($res['TC_PatientRefused']) && !empty($res['TC_PatientRefused'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_PatientRefused][Date]' value='" . convertDmdlDate($res['TC_PatientRefused']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_PatientRefused][Date]' value='" . $res['TC_PatientRefused'] . "' />";
             }
             //6.6 Test Cancelled: Replaced by a new MDL
             if (isset($res['TC_NewMDL']) && !empty($res['TC_NewMDL'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_NewMDL][Date]' value='" . convertDmdlDate($res['TC_NewMDL']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_NewMDL][Date]' value='" . $res['TC_NewMDL'] . "' />";
             }
             //6.7 Test Cancelled: Cancelled following Genetic Counselor Consultation
             if (isset($res['TC_GC']) && !empty($res['TC_GC'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_GC][Date]' value='" . convertDmdlDate($res['TC_GC']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_GC][Date]' value='" . $res['TC_GC'] . "' />";
             }
             //6.8 Test Cancelled: Patient did not want to assume OOP costs: Out-Of-Network: Humana
             if (isset($res['TC_Humana']) && !empty($res['TC_Humana'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_Humana][Date]' value='" . convertDmdlDate($res['TC_Humana']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_Humana][Date]' value='" . $res['TC_Humana'] . "' />";
             }
             //6.9 Test Cancelled: Patient did not want to assume OOP costs: Other Insurance
             if (isset($res['TC_OtherInsurance']) && !empty($res['TC_OtherInsurance'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_OtherInsurance][Date]' value='" . convertDmdlDate($res['TC_OtherInsurance']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_OtherInsurance][Date]' value='" . $res['TC_OtherInsurance'] . "' />";
             }
             //6.10 Test Cancelled: Patient did not want to assume OOP costs: Deductible
             if (isset($res['TC_Deductible']) && !empty($res['TC_Deductible'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_Deductible][Date]' value='" . convertDmdlDate($res['TC_Deductible']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_Deductible][Date]' value='" . $res['TC_Deductible'] . "' />";
             }
             //6.11 Test Cancelled: Patient did not want to assume OOP costs: No Coverage due to Lack of MN
             if (isset($res['TC_NoCoverage']) && !empty($res['TC_NoCoverage'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_NoCoverage][Date]' value='" . convertDmdlDate($res['TC_NoCoverage']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_NoCoverage][Date]' value='" . $res['TC_NoCoverage'] . "' />";
             }
             //6.12 Test Cancelled: Patient did not want to assume OOP costs: Not a Covered Benefit
             if (isset($res['TC_NotCovered']) && !empty($res['TC_NotCovered'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_NotCovered][Date]' value='" . convertDmdlDate($res['TC_NotCovered']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_NotCovered][Date]' value='" . $res['TC_NotCovered'] . "' />";
             }
             //7.1 waiting for billed ststus updated from API
             //8.1 Legal/AR Review: In Progress: Legal Review
             if (isset($res['Legal_InProgress_Review']) && !empty($res['Legal_InProgress_Review'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Legal_InProgress_Review][Date]' value='" . convertDmdlDate($res['Legal_InProgress_Review']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Legal_InProgress_Review][Date]' value='" . $res['Legal_InProgress_Review'] . "' />";
             }
             //8.2 Legal/AR Review: In Progress: Seeking additional ICD-10 codes
             if (isset($res['Legal_InProgress_AddICD10']) && !empty($res['Legal_InProgress_AddICD10'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Legal_InProgress_AddICD10][Date]' value='" . convertDmdlDate($res['Legal_InProgress_AddICD10']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Legal_InProgress_AddICD10][Date]' value='" . $res['Legal_InProgress_AddICD10'] . "' />";
             }
             //8.3 Legal/AR Review: In Progress: Obtaining Medical Records
             if (isset($res['Legal_InProgress_OR']) && !empty($res['Legal_InProgress_OR'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Legal_InProgress_OR][Date]' value='" . convertDmdlDate($res['Legal_InProgress_OR']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Legal_InProgress_OR][Date]' value='" . $res['Legal_InProgress_OR'] . "' />";
             }
             //8.4 Legal/AR Review: In Progress: AR Review
             if (isset($res['Legal_InProgress_ARReview']) && !empty($res['Legal_InProgress_ARReview'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Legal_InProgress_ARReview][Date]' value='" . convertDmdlDate($res['Legal_InProgress_ARReview']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Legal_InProgress_ARReview][Date]' value='" . $res['Legal_InProgress_ARReview'] . "' />";
             }
             //8.5 Legal/AR Review: Policy Limitation
             if (isset($res['Legal_PolicyLimitation']) && !empty($res['Legal_PolicyLimitation'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Legal_PolicyLimitation][Date]' value='" . convertDmdlDate($res['Legal_PolicyLimitation']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Legal_PolicyLimitation][Date]' value='" . $res['Legal_PolicyLimitation'] . "' />";
             }
             //8.6 Legal/AR Review: Appeal Submitted
             if (isset($res['Legal_AppealSubmitted']) && !empty($res['Legal_AppealSubmitted'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Legal_AppealSubmitted][Date]' value='" . convertDmdlDate($res['Legal_AppealSubmitted']) . "' />";
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Legal_AppealSubmitted][Date]' value='" . $res['Legal_AppealSubmitted'] . "' />";
             }
 
             //Revenue section on the screen
@@ -3156,33 +3171,42 @@ function dmdl_refresh($db){
  * @param type $dataPayor
  * @return type number => $Guid_payor 
  */
-function updateOrInsertPayor($db,$Guid_user,$name, $fullName=FALSE){  
-    $checkPayor = $db->row("SELECT * FROM `tbl_mdl_payors` WHERE name=:name", array('name'=>$name));
+function updateOrInsertPayor($db,$Guid_user,$dataPayor){
+    //tbl_mdl_payors
+    //check is payor exists by name or PayID
+    $name = $dataPayor['name'];
+    $PayID = $dataPayor['PayID'];
+    
+    $checkPayor = $db->row("SELECT * FROM `tbl_mdl_payors` WHERE name=:name OR PayID=:PayID", array('name'=>$name, 'PayID'=>$PayID));
     $thisPayorData = array();
     if(!empty($checkPayor)){ //update empty fields
         $Guid_payor = $checkPayor['Guid_payor'];
-        //check if there are empty filds fullName then fill them
-        if($checkPayor['fullName']==''){
-            if($fullName){
-                $thisPayorData['fullName'] = $fullName;
+        //check if there are empty filds then fill them
+        if($checkPayor['PayID']==''){
+            if(isset($dataPayor['PayID'])){
+                $thisPayorData['PayID'] = $dataPayor['PayID'];
             }
         }
         if(!empty($thisPayorData)){
             updateTable($db, 'tbl_mdl_payors', $thisPayorData, array('Guid_payor'=>$Guid_payor));
         }
-    } else { //insert new row        
-        $thisPayorData['name'] = $name;        
-        if($fullName){
-            $thisPayorData['fullName'] = $fullName;
+    } else { //insert new row
+        if(isset($dataPayor['name'])){
+            $thisPayorData['name'] = $dataPayor['name'];
         }
-        $thisPayorData['Loaded'] = 'Y';
-        $insertPayor = insertIntoTable($db, 'tbl_mdl_payors', $thisPayorData);
-        $Guid_payor = $insertPayor['insertID'];        
+        if(isset($dataPayor['PayID'])){
+            $thisPayorData['PayID'] = $dataPayor['PayID'];
+        }
+        if(!empty($thisPayorData)){
+            $thisPayorData['Loaded'] = 'Y';
+            $insertPayor = insertIntoTable($db, 'tbl_mdl_payors', $thisPayorData);
+            $Guid_payor = $insertPayor['insertID'];
+        }
     }       
     return $Guid_payor;
 }
 
-function updateOrInsertRevenue($db, $Guid_user, $invoiceDetails){
+function updateOrInsertRevenue($db, $Guid_user, $Guid_payor, $invoiceDetails){
     
     foreach ($invoiceDetails as $k=>$invoiceDetail) {        
         if(isset($invoiceDetail['CPT'])&&$invoiceDetail['CPT']!=''){
@@ -3195,16 +3219,12 @@ function updateOrInsertRevenue($db, $Guid_user, $invoiceDetails){
                 $Guid_cpt = $newCpt['insertID'];
             }        
             $revenueData['Guid_cpt'] = $Guid_cpt;
-        }  
-        if(isset($invoiceDetail['PayID'])){
-            //$db,$Guid_user,$name, $fullName
-            $name = $invoiceDetail['PayID'];
-            $fullName = isset($invoiceDetail['fullName'])?$invoiceDetail['fullName']:FALSE;
-            $Guid_payor = updateOrInsertPayor($db, $Guid_user,$name, $fullName);
-            $revenueData['Guid_payor'] = $Guid_payor;
-        }
+        }        
         if($Guid_user && $Guid_user!=''){
             $revenueData['Guid_user'] = $Guid_user;
+        }
+        if($Guid_payor && $Guid_payor!=''){
+            $revenueData['Guid_payor'] = $Guid_payor;
         }
         if(isset($invoiceDetail['amount'])){
             $revenueData['amount'] = $invoiceDetail['amount'];
@@ -3238,15 +3258,12 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         'deviceid' => $data['deviceid'],        
         'Date_created'=>date('Y-m-d h:i:s')
     );
-    $Guid_user = $data['Guid_user'];
     // 1. Specimen Collected
     if(isset($statuses['SpecimenCollected']['Date'])){
         $statusLogData['Date'] = $statuses['SpecimenCollected']['Date'];
-        if(isValidStatusGroup($db, array('1'), $Guid_user, $statusLogData['Date'])){            
-            updateTable($db, 'tblpatient', array('specimen_collected'=>'Yes'), array('Guid_patient'=>$data['Guid_patient']));
-            saveStatusLog($db, array('1'), $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        updateTable($db, 'tblpatient', array('specimen_collected'=>'Yes'), array('Guid_patient'=>$data['Guid_patient']));
+        saveStatusLog($db, array('1'), $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }   
     //2 Specimen Accessioned, 2.1 SpecimenAccessioned Test Code
     if(isset($statuses['SpecimenAccessioned']['Date'])){
@@ -3254,8 +3271,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         $statusSAccIDs[] = '2';        
         if(isset($statuses['SpecimenAccessioned']['Test_Ordered']) && $statuses['SpecimenAccessioned']['Test_Ordered']!=''){ 
             //checking for test codes
-            $sAccCodes = $statuses['SpecimenAccessioned']['Test_Ordered'];
-            $apiTestCodes = explode(',', $sAccCodes );
+            $apiTestCodes = explode(',', $statuses['SpecimenAccessioned']['Test_Ordered']);
             $allowedTestCodes = array('1221', '1222', '1223', '1224', '1235', '1241', '1243', '1268', '1279');
             
             foreach ($apiTestCodes as $key => $value) {
@@ -3263,10 +3279,8 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
                     $getGuidStatusRow = $db->row("SELECT Guid_status FROM tbl_mdl_status WHERE `parent_id`='2' AND `status`='$value'");
                     if(!empty($getGuidStatusRow)){
                         $statusSAccIDs[] = $getGuidStatusRow['Guid_status'];
-                        if(isValidStatusGroup($db,$statusSAccIDs, $Guid_user, $statusLogData['Date'])){
-                            saveStatusLog($db, $statusSAccIDs, $statusLogData);
-                            updateCurrentStatusID($db, $data['Guid_patient']);
-                        }
+                        saveStatusLog($db, $statusSAccIDs, $statusLogData);
+                        updateCurrentStatusID($db, $data['Guid_patient']);
                     }
                 }
             }
@@ -3276,173 +3290,135 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //3.1 Insurance Preauthorization: Pending: Eligibility Review
     if(isset($statuses['IPP_EligibilityReview']['Date'])){
         $statusLogData['Date'] = $statuses['IPP_EligibilityReview']['Date'];
-        $statusIPP_EIDs = array('6','7','84'); 
-        if(isValidStatusGroup($db,$statusIPP_EIDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $statusIPP_EIDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        $statusIPP_EIDs = array('6','7','84');  
+        saveStatusLog($db, $statusIPP_EIDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //3.2 Insurance Preauthorization: Pending: Preauthorization Review
     if(isset($statuses['IPP_PreauthorizationReview']['Date'])){
         $statusLogData['Date'] = $statuses['IPP_PreauthorizationReview']['Date'];
         $statusIPP_ERIDs = array('6','7','85');  
-        if(isValidStatusGroup($db,$statusIPP_ERIDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $statusIPP_ERIDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $statusIPP_ERIDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //3.3 Insurance Preauthorization: Pending: Preauthorization Review
     if(isset($statuses['IPP_LegalPolicy']['Date'])){
         $statusLogData['Date'] = $statuses['IPP_LegalPolicy']['Date'];
         $statusIPP_LPIDs = array('6','7','46');  
-        if(isValidStatusGroup($db,$statusIPP_LPIDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $statusIPP_LPIDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $statusIPP_LPIDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //3.4 Insurance Preauthorization: Not Required
     if(isset($statuses['IP_NotRequired']['Date'])){
         $statusLogData['Date'] = $statuses['IP_NotRequired']['Date'];
         $statusIP_NRIDs = array('6','27');  
-        if(isValidStatusGroup($db,$statusIP_NRIDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $statusIP_NRIDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $statusIP_NRIDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //3.5 Insurance Preauthorization: Approved
     if(isset($statuses['IP_Approved']['Date'])){
         $statusLogData['Date'] = $statuses['IP_Approved']['Date'];
         $statusIP_ApprovedIDs = array('6','8');  
-        if(isValidStatusGroup($db,$statusIP_ApprovedIDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $statusIP_ApprovedIDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $statusIP_ApprovedIDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //3.6 Insurance Preauthorization: Declined: Medical Necessity Not Met
     if(isset($statuses['IP_Declined_MedNecNotMet']['Date'])){
         $statusLogData['Date'] = $statuses['IP_Declined_MedNecNotMet']['Date'];
         $statusIP_DMNM_IDs = array('6','9','10');  
-        if(isValidStatusGroup($db,$statusIP_DMNM_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $statusIP_DMNM_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $statusIP_DMNM_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //3.7 Insurance Preauthorization: Declined: Not a Covered Benefit
     if(isset($statuses['IP_Declined_NotCovered']['Date'])){
         $statusLogData['Date'] = $statuses['IP_Declined_NotCovered']['Date'];
         $statusIP_DNC_IDs = array('6','9','11');  
-        if(isValidStatusGroup($db,$statusIP_DNC_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $statusIP_DNC_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $statusIP_DNC_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //3.8 Insurance Preauthorization: Declined: Experimental/Investigational
     if(isset($statuses['IP_Declined_Experimental']['Date'])){
         $statusLogData['Date'] = $statuses['IP_Declined_Experimental']['Date'];
         $statusIP_DE_IDs = array('6','9','25');  
-        if(isValidStatusGroup($db,$statusIP_DE_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $statusIP_DE_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $statusIP_DE_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //3.9 Insurance Preauthorization: Declined: MDL is OON
     if(isset($statuses['IP_Declined_MDLisOON']['Date'])){
         $statusLogData['Date'] = $statuses['IP_Declined_MDLisOON']['Date'];
         $statusIP_DMDLOON_IDs = array('6','9','33');  
-        if(isValidStatusGroup($db,$statusIP_DMDLOON_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $statusIP_DMDLOON_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $statusIP_DMDLOON_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //3.10 Insurance Preauthorization: Physician Responsibility: New Requisition Required
     if(isset($statuses['IP_PhysAct_NewReqRequired']['Date'])){
         $statusLogData['Date'] = $statuses['IP_PhysAct_NewReqRequired']['Date'];
         $statusIP_PANRR_IDs = array('6','99','47');   // ????????????????????
-        if(isValidStatusGroup($db,$statusIP_PANRR_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $statusIP_PANRR_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $statusIP_PANRR_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //3.11 Insurance Preauthorization: Physician Responsibility: Additional ICD-10 Codes/Info Required
     if(isset($statuses['IP_PhysAct_AddICD10Required']['Date'])){
         $statusLogData['Date'] = $statuses['IP_PhysAct_AddICD10Required']['Date'];
         $statusIP_AICD10_IDs = array('6','99','48');   // ????????????????????
-        if(isValidStatusGroup($db,$statusIP_AICD10_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $statusIP_AICD10_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $statusIP_AICD10_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //3.12 Insurance Preauthorization: Physician Action Required: Physician Consultation Required
     if(isset($statuses['IP_PhysAct_PhysConsultationRequired']['Date'])){
         $statusLogData['Date'] = $statuses['IP_PhysAct_PhysConsultationRequired']['Date'];
         $statusIP_PAPCR_IDs = array('6','99','49');   // ????????????????????
-        if(isValidStatusGroup($db,$statusIP_PAPCR_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $statusIP_PAPCR_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $statusIP_PAPCR_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //3.13 Insurance Preauthorization: Physician Action Required: Precertification Required: AIMs
     if(isset($statuses['IP_PhysAct_PrecertificationRequiredAIMS']['Date'])){
         $statusLogData['Date'] = $statuses['IP_PhysAct_PrecertificationRequiredAIMS']['Date'];
         $statusIP_PAPRAIMs_IDs = array('6','99','74','75');   // ????????????????????
-        if(isValidStatusGroup($db,$statusIP_PAPRAIMs_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $statusIP_PAPRAIMs_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $statusIP_PAPRAIMs_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //3.14 Insurance Preauthorization: Physician Action Required: Precertification Required: Beacon
     if(isset($statuses['IP_PhysAct_PrecertificationRequiredBeacon']['Date'])){
         $statusLogData['Date'] = $statuses['IP_PhysAct_PrecertificationRequiredBeacon']['Date'];
         $statusIP_PAPRB_IDs = array('6','99','74','76');   // ????????????????????
-        if(isValidStatusGroup($db,$statusIP_PAPRB_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $statusIP_PAPRB_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $statusIP_PAPRB_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //4.1 Patient Responsibility: Assume financial responsibility
     if(isset($statuses['PR_AssumeFinancialResponsibility']['Date'])){
         $statusLogData['Date'] = $statuses['PR_AssumeFinancialResponsibility']['Date'];
         $statusPR_AFR_IDs = array('34','63');   // ????????????????????
-        if(isValidStatusGroup($db,$statusPR_AFR_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $statusPR_AFR_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $statusPR_AFR_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //4.2 Patient Responsibility: New Insurance information
     if(isset($statuses['PR_NewInsurance']['Date'])){
         $statusLogData['Date'] = $statuses['PR_NewInsurance']['Date'];
         $statusPR_NI_IDs = array('34','64');   // ????????????????????
-        if(isValidStatusGroup($db,$statusPR_NI_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $statusPR_NI_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $statusPR_NI_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //4.3 Patient Responsibility: Awaiting Lower Deductible
     if(isset($statuses['PR_LowerDeduct']['Date'])){
         $statusLogData['Date'] = $statuses['PR_LowerDeduct']['Date'];
         $statusPR_LD_IDs = array('34','66');   // ????????????????????
-        if(isValidStatusGroup($db,$statusPR_LD_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $statusPR_LD_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $statusPR_LD_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //4.4 Patient Responsibility: Awaiting Additional Family History
     if(isset($statuses['PR_AddFamilyHistory']['Date'])){
         $statusLogData['Date'] = $statuses['PR_AddFamilyHistory']['Date'];
         $statusPR_AFH_IDs = array('34','68');   // ????????????????????
-        if(isValidStatusGroup($db,$statusPR_AFH_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $statusPR_AFH_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $statusPR_AFH_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //4.5 Patient Responsibility: Family History Received 
     if(isset($statuses['PR_FamilyHistoryReceived']['Date'])){
         $statusLogData['Date'] = $statuses['PR_FamilyHistoryReceived']['Date'];
         $statusPR_FHR_IDs = array('34','97');   // ????????????????????
-        if(isValidStatusGroup($db,$statusPR_FHR_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $statusPR_FHR_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $statusPR_FHR_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //4.6 & 4.7 Patient Responsibility: Genetic Counseling: Pending,Completed,Waived    
     if(isset($statuses['Genetic_Counseling']['Status'])){
@@ -3453,155 +3429,121 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         if(!empty($getGuidStatusRow)){
             $statusGCIDs[] = $getGuidStatusRow['Guid_status'];
             $statusLogData['Date'] = $statuses['Genetic_Counseling']['Date'];
-            if(isValidStatusGroup($db,$statusGCIDs, $Guid_user, $statusLogData['Date'] )){
-                saveStatusLog($db, $statusGCIDs, $statusLogData);
-                updateCurrentStatusID($db, $data['Guid_patient']);
-            }
+            saveStatusLog($db, $statusGCIDs, $statusLogData);
+            updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
     //5.1 Laboratory Testing Status: Pending
     if(isset($statuses['Testing_Pending']['Date'])){
         $statusLogData['Date'] = $statuses['Testing_Pending']['Date'];
         $status_LabTP_IDs = array('17','18');  
-        if(isValidStatusGroup($db,$status_LabTP_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_LabTP_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $status_LabTP_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //5.2 Laboratory Testing Status: In Progress
     if(isset($statuses['Testing_InProgress']['Date'])){
         $statusLogData['Date'] = $statuses['Testing_InProgress']['Date'];
         $status_LabTInP_IDs = array('17','19');  
-        if(isValidStatusGroup($db,$status_LabTInP_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_LabTInP_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $status_LabTInP_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //5.3 Laboratory Testing Status: Complete
     if(isset($statuses['Testing_Complete']['Date'])){
         $statusLogData['Date'] = $statuses['Testing_Complete']['Date'];
         $status_LabTC_IDs = array('17','20');  
-        if(isValidStatusGroup($db,$status_LabTC_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_LabTC_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $status_LabTC_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //5.4 Laboratory Testing Status: Recollection Requested
     if(isset($statuses['Testing_RecollectionRequested']['Date'])){
         $statusLogData['Date'] = $statuses['Testing_RecollectionRequested']['Date'];
-        $status_RR_IDs = array('17','21');  
-        if(isValidStatusGroup($db,$status_RR_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_RR_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        $status_LabTC_IDs = array('17','21');  
+        saveStatusLog($db, $status_LabTC_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //6.1 Test Cancelled: MDL Out-of-Network/High Patient Responsibility
     if(isset($statuses['TC_MDLOON']['Date'])){
         $statusLogData['Date'] = $statuses['TC_MDLOON']['Date'];
         $status_TC_MDLOON_IDs = array('12','13');  
-        if(isValidStatusGroup($db,$status_TC_MDLOON_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_TC_MDLOON_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $status_TC_MDLOON_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //6.2 Test Cancelled: MDL In-Network/High 
     if(isset($statuses['TC_MDLIN']['Date'])){
         $statusLogData['Date'] = $statuses['TC_MDLIN']['Date'];
         $status_TC_MDLIN_IDs = array('12','14');  
-        if(isValidStatusGroup($db,$status_TC_MDLIN_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_TC_MDLIN_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $status_TC_MDLIN_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //6.3 Test Cancelled: Physician Cancelled Testing
     if(isset($statuses['TC_PhysicianCancelled']['Date'])){
         $statusLogData['Date'] = $statuses['TC_PhysicianCancelled']['Date'];
         $status_TC_phC_IDs = array('12','15');  
-        if(isValidStatusGroup($db,$status_TC_phC_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_TC_phC_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $status_TC_phC_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //6.4 Test Cancelled: Incomplete Genetic Counselling
     if(isset($statuses['TC_IncompleteGC']['Date'])){
         $statusLogData['Date'] = $statuses['TC_IncompleteGC']['Date'];
         $status_TC_IncompleteGC_IDs = array('12','16');  
-        if(isValidStatusGroup($db,$status_TC_IncompleteGC_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_TC_IncompleteGC_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $status_TC_IncompleteGC_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //6.5 Test Cancelled: Patient refused to sign consent form
     if(isset($statuses['TC_PatientRefused']['Date'])){
         $statusLogData['Date'] = $statuses['TC_PatientRefused']['Date'];
         $status_TC_PatientRefused_IDs = array('12','26');  
-        if(isValidStatusGroup($db,$status_TC_PatientRefused_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_TC_PatientRefused_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $status_TC_PatientRefused_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //6.6 Test Cancelled: Replaced by a new MDL
     if(isset($statuses['TC_NewMDL']['Date'])){
         $statusLogData['Date'] = $statuses['TC_NewMDL']['Date'];
-        $status_TC_NewMDL_IDs = array('12','51');  
-        if(isValidStatusGroup($db,$status_TC_NewMDL_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_TC_NewMDL_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        $status_TC_PatientRefused_IDs = array('12','51');  
+        saveStatusLog($db, $status_TC_PatientRefused_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //6.7 Test Cancelled: Cancelled following Genetic Counselor Consultation
     if(isset($statuses['TC_GC']['Date'])){
         $statusLogData['Date'] = $statuses['TC_GC']['Date'];
         $status_TC_GC_IDs = array('12','65');  
-        if(isValidStatusGroup($db,$status_TC_GC_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_TC_GC_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $status_TC_GC_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //6.8 Test Cancelled: Patient did not want to assume OOP costs: Out-Of-Network: Humana
     if(isset($statuses['TC_Humana']['Date'])){
         $statusLogData['Date'] = $statuses['TC_Humana']['Date'];
         $status_TC_Humana_IDs = array('12','67','93','95');  
-        if(isValidStatusGroup($db,$status_TC_Humana_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_TC_Humana_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $status_TC_Humana_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //6.9 Test Cancelled: Patient did not want to assume OOP costs: Other Insurance
     if(isset($statuses['TC_OtherInsurance']['Date'])){
         $statusLogData['Date'] = $statuses['TC_OtherInsurance']['Date'];
         $status_TC_OtherInsurance_IDs = array('12','67','93','96');  
-        if(isValidStatusGroup($db,$status_TC_OtherInsurance_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_TC_OtherInsurance_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $status_TC_OtherInsurance_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //6.10 Test Cancelled: Patient did not want to assume OOP costs: Deductible
     if(isset($statuses['TC_Deductible']['Date'])){
         $statusLogData['Date'] = $statuses['TC_Deductible']['Date'];
         $status_TC_Deductible_IDs = array('12','67','94');  
-        if(isValidStatusGroup($db,$status_TC_Deductible_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_TC_Deductible_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $status_TC_Deductible_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //6.11 Test Cancelled: Patient did not want to assume OOP costs: No Coverage due to Lack of MN
     if(isset($statuses['TC_NoCoverage']['Date'])){
         $statusLogData['Date'] = $statuses['TC_NoCoverage']['Date'];
         $status_TC_NoCoverage_IDs = array('12','67','98');  
-        if(isValidStatusGroup($db,$status_TC_NoCoverage_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_TC_NoCoverage_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $status_TC_NoCoverage_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //6.12 Test Cancelled: Patient did not want to assume OOP costs: Not a Covered Benefit
     if(isset($statuses['TC_NotCovered']['Date'])){
         $statusLogData['Date'] = $statuses['TC_NotCovered']['Date'];
         $status_TC_NotCovered_IDs = array('12','67','100');  
-        if(isValidStatusGroup($db,$status_TC_NotCovered_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_TC_NotCovered_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $status_TC_NotCovered_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //7.1 Billed statuses don't added yet
     
@@ -3609,55 +3551,43 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     if(isset($statuses['Legal_InProgress_Review']['Date'])){
         $statusLogData['Date'] = $statuses['Legal_InProgress_Review']['Date'];
         $status_Legal_InProgress_Review_IDs = array('55','56','59');  
-        if(isValidStatusGroup($db,$status_Legal_InProgress_Review_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_Legal_InProgress_Review_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $status_Legal_InProgress_Review_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //8.2 Legal/AR Review: In Progress: Seeking additional ICD-10 codes
     if(isset($statuses['Legal_InProgress_AddICD10']['Date'])){
         $statusLogData['Date'] = $statuses['Legal_InProgress_AddICD10']['Date'];
         $status_Legal_InProgress_AddICD10_IDs = array('55','56','60');  
-        if(isValidStatusGroup($db,$status_Legal_InProgress_AddICD10_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_Legal_InProgress_AddICD10_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $status_Legal_InProgress_AddICD10_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //8.3 Legal/AR Review: In Progress: Obtaining Medical Records
     if(isset($statuses['Legal_InProgress_OR']['Date'])){
         $statusLogData['Date'] = $statuses['Legal_InProgress_OR']['Date'];
         $status_Legal_InProgress_OR_IDs = array('55','56','61');  
-        if(isValidStatusGroup($db,$status_Legal_InProgress_OR_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_Legal_InProgress_OR_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $status_Legal_InProgress_OR_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //8.4 Legal/AR Review: In Progress: AR Review
     if(isset($statuses['Legal_InProgress_ARReview']['Date'])){
         $statusLogData['Date'] = $statuses['Legal_InProgress_ARReview']['Date'];
         $status_Legal_InProgress_ARReview_IDs = array('55','56','62');  
-        if(isValidStatusGroup($db,$status_Legal_InProgress_ARReview_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_Legal_InProgress_ARReview_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $status_Legal_InProgress_ARReview_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //8.5 Legal/AR Review: Policy Limitation
     if(isset($statuses['Legal_PolicyLimitation']['Date'])){
         $statusLogData['Date'] = $statuses['Legal_PolicyLimitation']['Date'];
-        $status_Legal_PolicyLimitation_IDs = array('55','57'); 
-        if(isValidStatusGroup($db,$status_Legal_PolicyLimitation_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_Legal_PolicyLimitation_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        $status_Legal_PolicyLimitation_IDs = array('55','57');  
+        saveStatusLog($db, $status_Legal_PolicyLimitation_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     }
     //8.6 Legal/AR Review: Appeal Submitted
     if(isset($statuses['Legal_AppealSubmitted']['Date'])){
         $statusLogData['Date'] = $statuses['Legal_AppealSubmitted']['Date'];
         $status_Legal_AppealSubmitted_IDs = array('55','58');  
-        if(isValidStatusGroup($db,$status_Legal_AppealSubmitted_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_Legal_AppealSubmitted_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
+        saveStatusLog($db, $status_Legal_AppealSubmitted_IDs, $statusLogData);
+        updateCurrentStatusID($db, $data['Guid_patient']);
     } 
        
 }

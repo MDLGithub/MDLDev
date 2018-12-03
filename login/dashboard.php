@@ -856,11 +856,17 @@ if(isset($_POST['dmdlUpdate'])){
                                 $Guid_provider = updateOrInsertProvider($db,$accountNum,$Guid_account,$Guid_user,$apiProviderData);
                             }
                             
-                            //update or insert payor and revenue data                            
-                            if(isset($data['invoiceDetail']) && !empty($data['invoiceDetail'])){
-                                updateOrInsertRevenue($db, $Guid_user, $data['invoiceDetail']);
+                            //update or insert payor and revenue data
+                            if(isset($data['payor']) && !empty($data['payor'])){
+                                $Guid_payor = updateOrInsertPayor($db, $Guid_user,$data['payor']);                            
+                                //update or insert add revenue
+                                if(isset($Guid_payor)&&$Guid_payor!=''){
+                                    if(isset($data['invoiceDetail']) && !empty($data['invoiceDetail'])){
+                                        updateOrInsertRevenue($db, $Guid_user, $Guid_payor, $data['invoiceDetail']);
+                                    }
+                                }
                             }
-                                
+                            
 
                             $statuses = $_POST["dmdl"]["$mdlNum"]["statuses"];
 

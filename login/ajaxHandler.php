@@ -579,7 +579,7 @@ function load_url_config($db, $id){
 		    LEFT JOIN `tbldeviceinv` ON tbldevice.deviceid  = tbldeviceinv.deviceid
 		    WHERE tblurlconfig.id=:id
 		    ORDER BY tblurlconfig.id DESC";
-    $urlConfigs = $db->row($query, array("id"=>$id));
+    $urlConfigs = $db->query($query, array("id"=>$id));
 
     echo json_encode( array('error'=>true, 'post'=>$_POST, 'urlConfigs'=>$urlConfigs, 'q'=>$query) );  exit();
 }
@@ -642,11 +642,13 @@ function exportUsers($db) {
     LEFT JOIN tblaccountrep ar ON ar.Guid_account = a.Guid_account 
     LEFT JOIN tblsalesrep srep ON ar.Guid_salesrep = srep.Guid_salesrep
     LEFT JOIN tbl_mdl_number mdl ON q.Guid_user = mdl.Guid_user
+    LEFT JOIN tbl_mdl_category_user_link uc ON uc.Guid_user = srep.Guid_user
     
     WHERE  u.marked_test = '0' 
     
     AND q.account_number = ". ($_POST['account'] == '' ? "a.account" : ":account") ."
     AND a.Guid_account = ar.Guid_account AND ar.Guid_salesrep = ". ($_POST['consultant'] == '' ? "srep.Guid_salesrep" : ":consultant") ." 
+    ". (!empty($_POST['categories']) ? " AND uc.Guid_category IN (". join(',', array_values($_POST['categories'])) .") " : " ") ."
      ". ($_POST['from'] == '' ? " " : "AND q.Date_created >=:from") ." 
      ". ($_POST['to'] == '' ? " " : "AND q.Date_created <=:to") ." 
     AND mdl.mdl_number IS NOT NULL AND mdl.mdl_number != '' AND mdl.mdl_number != 0

@@ -1,54 +1,25 @@
 <?php
 /**
- * add new updates in this array 
- * and create handle function with the same name in update-functions.php
+ *  Change account_number to accountNumber in patients table
  */
-$updateData = array(
-    '1' => array(
-        'description' => 'Change account_number to accountNumber in patients table',
-        'function' => 'update_v1'
-    ),
-    '2' => array(
-        'description' => 'Update MDL Stat Logs for missing accounts',
-        'function' => 'update_v2'
-    ),
-    '3' => array(
-        'description' => 'Rename Column PayID to fullName in Payors Table',
-        'function' => 'update_v3'
-    ),
-);
-
-/**
- *  Create updates log table if not exists 
- *  and insert new rows from $updateData
- */
-$logTable = create_log_table($db);
-if($logTable['staus']===TRUE){
-    foreach ($updateData as $k=>$v){
-        $insertUpdatesData = array(
-                'function_name'=>$v['function'],
-                'description'=>$v['description'],
-                'isUpdated'=>'N',
-                'Date'=> date("Y-m-d H:i:s")
-            );
-        $checkUpdate = $db->row("SELECT `Guid_updates_log` FROM `tbl_mdl_updates_log` WHERE function_name=:function_name", array('function_name'=>$v['function']));
-        if(empty($checkUpdate)){
-            $insertUpdates = insertIntoTable($db, 'tbl_mdl_updates_log', $insertUpdatesData);
-        }
-        
-    } 
-}
-/*
- * Rename Column PayID to fullName in Payors Table
- */
-function update_v3($db, $function){
-    $query = "ALTER TABLE `tbl_mdl_payors` CHANGE `PayID` `fullName` VARCHAR(256)";
-    $renamePayID = $db->query($query);    
-    updateTable($db, 'tbl_mdl_updates_log', array('isUpdated'=>'Y'), array('function_name'=>$function));
-  
+function update_v1($db, $function){
+    $check_account_number = $db->row("SELECT * FROM `tblpatient`");
+    if(array_key_exists('account_number', $check_account_number)){
+        $sql = "ALTER TABLE `tblpatient` CHANGE `account_number` `accountNumber` VARCHAR(32);";
+        $db->query($sql);    
+    }
+    $check_accountNumber = $db->row("SELECT * FROM `tblpatient`");    
+    if(array_key_exists('accountNumber', $check_accountNumber)){
+        updateTable($db, 'tbl_mdl_updates_log', array('isUpdated'=>'Y'), array('function_name'=>$function));
+        $message = "Table updated successfully!";
+        $staus = TRUE;
+    } else {
+        $message = 'Could not update table.';
+        $staus = FALSE;
+    }    
     $returnArr = array(
-        'staus' => TRUE,
-        'message' => 'Payors Table Updated.'
+        'staus' => $staus,
+        'message' => $message
     );
     return $returnArr;
 }
@@ -111,31 +82,6 @@ function update_v2($db, $function){
     );
     return $returnArr;
 }
-/**
- *  Change account_number to accountNumber in patients table
- */
-function update_v1($db, $function){
-    $check_account_number = $db->row("SELECT * FROM `tblpatient`");
-    if(array_key_exists('account_number', $check_account_number)){
-        $sql = "ALTER TABLE `tblpatient` CHANGE `account_number` `accountNumber` VARCHAR(32);";
-        $db->query($sql);    
-    }
-    $check_accountNumber = $db->row("SELECT * FROM `tblpatient`");    
-    if(array_key_exists('accountNumber', $check_accountNumber)){
-        updateTable($db, 'tbl_mdl_updates_log', array('isUpdated'=>'Y'), array('function_name'=>$function));
-        $message = "Table updated successfully!";
-        $staus = TRUE;
-    } else {
-        $message = 'Could not update table.';
-        $staus = FALSE;
-    }    
-    $returnArr = array(
-        'staus' => $staus,
-        'message' => $message
-    );
-    return $returnArr;
-}
-
 
 /**
  * Run given function
