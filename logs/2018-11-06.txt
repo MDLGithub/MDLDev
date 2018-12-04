@@ -1,0 +1,74 @@
+Time : 11:36:23
+SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.patient_id' in 'where clause'
+Raw SQL : SELECT q.Date_created AS date, CONCAT(srep.first_name, ' ', srep.last_name) as 'sales', mdl.mdl_number as 'mdl',
+    (SELECT MAX(sp.Date) FROM tbl_mdl_status_log sp WHERE sp.account = a.account AND sp.Guid_patient = p.patient_id AND sp.Guid_status = 2) as 'accessioned',
+    a.account as 'account',
+    a.name as 'account_name',
+    q.qualified as 'med_necessity',
+    q.source as 'event',
+    q.Guid_user as 'user_id',
+    srep.color_matrix as 'sales_color',
+    q.Date_created,
+    p.Guid_patient as 'patient_id'
+    
+    FROM tbl_ss_qualify q 
+    LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user 
+    LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user
+    LEFT JOIN tblaccount a ON a.account = q.account_number 
+    LEFT JOIN tblaccountrep ar ON ar.Guid_account = a.Guid_account 
+    LEFT JOIN tblsalesrep srep ON ar.Guid_salesrep = srep.Guid_salesrep
+    LEFT JOIN tbl_mdl_status_log sl ON sl.Guid_salesrep = srep.Guid_salesrep 
+    LEFT JOIN tbl_mdl_status s ON sl.Guid_status = s.Guid_status 
+    LEFT JOIN tbl_mdl_number mdl ON q.Guid_user = mdl.Guid_user
+    
+    WHERE  u.marked_test = '0' 
+    
+    AND q.account_number = a.account
+    AND a.Guid_account = ar.Guid_account AND ar.Guid_salesrep = srep.Guid_salesrep 
+       
+       
+    AND mdl.mdl_number IS NOT NULL AND mdl.mdl_number != '' AND mdl.mdl_number != 0
+    
+    AND CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) NOT LIKE '%test%' 
+    AND CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) NOT LIKE '%John Smith%' 
+    AND CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) NOT LIKE '%John Doe%' 
+    AND CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) NOT LIKE '%Jane Doe%'
+    
+    GROUP BY q.Guid_qualify ORDER BY sales ASC, account ASC, accessioned ASC
+
+Time : 11:32:20
+SQLSTATE[42S22]: Column not found: 1054 Unknown column 'accessioned' in 'order clause'
+Raw SQL : SELECT q.Date_created AS date, CONCAT(srep.first_name, ' ', srep.last_name) as 'sales', mdl.mdl_number as 'mdl',
+    a.account as 'account',
+    a.name as 'account_name',
+    q.qualified as 'med_necessity',
+    q.source as 'event',
+    q.Guid_user as 'user_id',
+    srep.color_matrix as 'sales_color',
+    q.Date_created,
+    p.Guid_patient as 'patient_id'
+    
+    FROM tbl_ss_qualify q 
+    LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user 
+    LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user
+    LEFT JOIN tblaccount a ON a.account = q.account_number 
+    LEFT JOIN tblaccountrep ar ON ar.Guid_account = a.Guid_account 
+    LEFT JOIN tblsalesrep srep ON ar.Guid_salesrep = srep.Guid_salesrep
+    LEFT JOIN tbl_mdl_status_log sl ON sl.Guid_salesrep = srep.Guid_salesrep 
+    LEFT JOIN tbl_mdl_status s ON sl.Guid_status = s.Guid_status 
+    LEFT JOIN tbl_mdl_number mdl ON q.Guid_user = mdl.Guid_user
+    
+    WHERE  u.marked_test = '0' 
+    
+    AND q.account_number = a.account
+    AND a.Guid_account = ar.Guid_account AND ar.Guid_salesrep = srep.Guid_salesrep 
+       
+       
+    AND mdl.mdl_number IS NOT NULL AND mdl.mdl_number != '' AND mdl.mdl_number != 0
+    
+    AND CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) NOT LIKE '%test%' 
+    AND CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) NOT LIKE '%John Smith%' 
+    AND CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) NOT LIKE '%John Doe%' 
+    AND CONCAT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%'), ' ', AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#')) NOT LIKE '%Jane Doe%'
+    
+    GROUP BY q.Guid_qualify ORDER BY sales ASC, account ASC, accessioned ASC

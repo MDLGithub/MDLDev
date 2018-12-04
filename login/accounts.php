@@ -374,7 +374,8 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                     
                         <div class="address-container">
                             <div id="accountLogo">
-                                <?php $logo = $logo ? "/../images/practice/".$logo : "/assets/images/default.png"; ?>
+                                <?php
+                                $logo = ($accountActive['logo'] !== '') ? "/../images/practice/".$accountActive['logo'] : "/assets/images/default.png"; ?>
                                 <img class="" src="<?php echo SITE_URL.$logo; ?>" />
                                 <div>
                                     <label >Category: </label>

@@ -50,6 +50,7 @@
                     <?php if($role=='Admin'){ ?>
                         <li><a href="<?php echo SITE_URL; ?>/access-roles.php">Access Roles</a></li>
                         <li><a href="<?php echo SITE_URL; ?>/user-management.php">User Management</a></li>
+                        <li><a href="<?php echo HTTP_SERVER; ?>/app/pdf-forms/list">Form Management</a></li>
                     <?php } ?>
                     <?php if($role != 'Patient') { ?>    
                         <li><a href="<?php echo SITE_URL; ?>/mdl-stats.php">MDL Stats</a></li>

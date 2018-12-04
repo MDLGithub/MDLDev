@@ -194,7 +194,7 @@ if (empty($_POST)) {
 		array_push($qualification_text, "BRCA-Related Breast and/or Ovarian Cancer Syndrome");
 			
 		display_qualification($qualification_text, "1");
-	} elseif (($qualify['insurance'] == "Aetna") && ($qualify['gender'] == "Male") && (isset($_POST['personal_cancer'])) && (in_array("No Cancer/None of the Above", $_POST['personal_cancer']))) {	
+	}elseif (($qualify['insurance'] == "Aetna") && ($qualify['gender'] == "Male") && (isset($_POST['personal_cancer'])) && (in_array("No Cancer/None of the Above", $_POST['personal_cancer']))) {	
 		save_input();
 		
 		$qualification_text=array();
@@ -204,28 +204,6 @@ if (empty($_POST)) {
 		display_qualification($qualification_text, "1");
 	} else {		
 		save_input();
-		
-		if (isset($_POST['insurance']) && ($_POST['insurance'] == "Aetna")) {
-			$result = $conn->query("SELECT dob FROM tblpatient WHERE Guid_user = " . $qualify['Guid_user']);
-				 
-			$patient = $result->fetch_assoc();	
-			
-			$diff = abs(strtotime(date("Y-m-d")) - strtotime($patient['dob']));
-
-			$age = floor($diff / (365*60*60*24));
-		
-			if ($age <= 18) {
-				save_input();
-		
-				$qualification_text=array();
-			
-				array_push($qualification_text, "BRCA-Related Breast and/or Ovarian Cancer Syndrome");
-				
-				display_qualification($qualification_text, "1");
-			
-				exit;
-			}
-		}
 		
 		if (isset($_POST['next_step']) && ($_POST['next_step'] == "additional_summary")) {
 			$qualification_text=array();
@@ -3338,7 +3316,7 @@ function display_qualification($qualification_text, $not_qualified) {
 				$cancer_detail[$id] = $c_type;
 			}
 			if (strlen($relative['additional_cancer_type'])) {				
-				$additional_cancer[$id] = $relative['additional_cancer_type'];				
+				$additional_cancer = $relative['additional_cancer_type'];				
 			}
 			
 			// if (strlen($relative['additional_question'])) {
@@ -3370,11 +3348,11 @@ function display_qualification($qualification_text, $not_qualified) {
 										</ul>
 								</div>
 <?php				
-				if (strlen($additional_cancer[$rel_id])) {
+				if (strlen($additional_cancer)) {
 ?>
 								<div class="pInfo_type">
 									<strong>Additional Cancer Diagnosis</strong>
-									<p><?php echo $additional_cancer[$rel_id]; ?> 
+									<p><?php echo $additional_cancer; ?> 
 <?php
 					if (strlen($additional_age)) {
 ?>
@@ -4088,7 +4066,7 @@ function display_qualification($qualification_text, $not_qualified) {
 	
 	$content = '			
 			<p>Questionnaire was submitted successfully.</p>			
-			<a href="https://www.mdlab.com/questionnaire/?';
+			<a href="'. ROOT  .'/login"';
 			
 	if (isset($_GET['ln']) && ($_GET['ln'] == "pin")) {
 		$content .= 'ln=pin';
@@ -5423,7 +5401,7 @@ function patient_consent($firstname, $lastname) {
     $pconsent = '
 		<section class="form patient_consent" style="page-break-before: always;">
 		    <figure class="form_logo">
-				<img src="https://www.mdlab.com/questionnaire/images/logo_geneveda.png" alt="Geneveda">
+				<img src="'. dirname(__FILE__) .'/questionnaire/images/logo_geneveda.png" alt="Geneveda">
 				<figcaption>A Division of Medical Diagnostic Laboratories, LLC</figcaption>
 			</figure>
 			

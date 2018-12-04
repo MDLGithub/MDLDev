@@ -300,6 +300,7 @@ echo '
 		$gene_guideline_met = array();
 		$gene_temp = array();
 		$gene_gdmet=array();
+		$count = [];
 		
 		$lynch_genes = array("EPCAM","MLH1","MSH2","MSH6","PMS2");
 			

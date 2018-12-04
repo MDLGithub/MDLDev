@@ -1,0 +1,22 @@
+Time : 10:47:32
+SQLSTATE[42000]: Syntax error or access violation: 1065 Query was empty
+
+Time : 10:42:07
+SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'WHERE l.Date between '2018-07-01' and '2018-11-30'' at line 1
+Raw SQL : SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user WHERE l.Guid_status =:Guid_status AND l.account=:account AND u.marked_test='0' WHERE l.Date between :from and :to
+
+Time : 10:36:36
+SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'WHERE l.Date between '2018-07-01' and '2018-11-30'' at line 1
+Raw SQL : SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user WHERE l.Guid_status =:Guid_status AND l.account=:account AND u.marked_test='0' WHERE l.Date between :from and :to
+
+Time : 10:25:20
+SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'WHERE l.Date between '2018-03-01' and '2018-11-30'' at line 1
+Raw SQL : SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user WHERE l.Guid_status =:Guid_status AND l.account=:account AND u.marked_test='0' WHERE l.Date between :from and :to
+
+Time : 08:22:21
+SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'WHERE l.Date between '2018-05-01' and '2018-11-30'' at line 1
+Raw SQL : SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user WHERE l.Guid_status =:Guid_status AND l.account=:account AND u.marked_test='0' WHERE l.Date between :from and :to
+
+Time : 05:55:42
+SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND uc.Guid_category IN (1,2)' at line 1
+Raw SQL : AND uc.Guid_category IN (1,2)

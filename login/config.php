@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// ini_set('display_errors', 1);
 
 include_once (dirname(__FILE__)."/../config.php");
 
@@ -20,7 +20,7 @@ define('SESSION_NAME', "mdldevadmin"); //Should be different for dev and prod
 define("QUESTIONNAIRE_URL", ROOT);
 
 // Paths
-define("SITE_ROOT", $_SERVER["DOCUMENT_ROOT"] . "/login");
+define("SITE_ROOT",$_SERVER["DOCUMENT_ROOT"] . "/login");
 define("SITE_URL", "http://".$_SERVER["HTTP_HOST"] . "/login");
 define("SITE_MVC_URL", "http://".$_SERVER["HTTP_HOST"] . "/app");
 

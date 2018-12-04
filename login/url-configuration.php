@@ -56,7 +56,7 @@ $lastConfigData = getLastUrlConfig($db);
 $urlData = $lastConfigData;
 $currentUserId = $_SESSION['user']['id'];
 $urlPath = parse_url(SITE_URL,PHP_URL_PATH);
-$urlMain = "https://www.mdlab.com/dev";
+$urlMain = HTTPS_HOST;
 if (strpos($urlPath, 'questionnaire') !== false) {
     $urlMain = "https://www.mdlab.com/questionnaire";
 }
