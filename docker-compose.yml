@@ -1,7 +1,7 @@
 version: '2'
 services:
   backend:
-    image: avega/website:7.0-apache-php
+    image: gbgmdl/website:7.0-apache-php
     container_name: backend
     environment:
       URL_1: http://localhost:4001/app/
