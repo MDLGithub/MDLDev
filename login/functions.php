@@ -2570,7 +2570,7 @@ function dmdl_refresh($db){
             . "AND UpdateDatetime IS NULL "
             . "OR UpdateDatetime = '' "
             . "OR UpdateDatetime < NOW() - INTERVAL 60 MINUTE "); */
-    $dmdlResult = $db->query("SELECT * FROM tbl_mdl_dmdl WHERE ToUpdate='Y' AND Linked='N' LIMIT $start,$per_page");
+    $dmdlResult = $db->query("SELECT * FROM tbl_mdl_dmdl WHERE ToUpdate='Y' AND Linked='N' ORDER BY MDLNumber ASC LIMIT $start,$per_page");
     $content=""; $match=""; $possibleM ="";
     
     $content .= "<form action='' method='POST'>";
