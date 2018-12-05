@@ -228,7 +228,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     } else {
         $accountInfo = FALSE;
     }
-    var_dump($accountQ);
+    
     //creating xml link for loaded patients
     if(isset($qualifyResult['dmdlPatient'])&&$qualifyResult['dmdlPatient']=='Y'){      
         if( $qualifyResult['Guid_dmdl_patient']!='' && $qualifyResult['Guid_dmdl_physician']!='' && $mdlInfo['mdl_number']!=''){
