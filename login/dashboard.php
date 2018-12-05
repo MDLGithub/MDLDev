@@ -1059,6 +1059,7 @@ if(isset($_POST['dmdlUpdate'])){
             "paging":   false,
             "info":     false,
             "bSortCellsTop": false,
+            "order": [[ 4, "asc" ]],
             "language": {
                 "emptyTable": "No match found."
             },

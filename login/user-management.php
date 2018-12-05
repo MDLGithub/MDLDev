@@ -93,19 +93,26 @@ foreach ($userTables as $k=>$v){
             $valid_attempts = $now - (2 * 60 * 60);            
             $attemptsQ = "SELECT email FROM tbluser_login_attempts WHERE time > '$valid_attempts' GROUP BY `email`";
             $lockedEmails = $db->query($attemptsQ);
-            $emails = '';
-            //var_dump($lockedEmails);
+            $emails = '';           
+            
             if(!empty($lockedEmails)){
+                
                 foreach ($lockedEmails as $key=>$val){
-                    $emails .= "'".$val['email']."', ";
+                    $thisEmail = $val['email'];
+                    $attemptsByEmail = $db->query("SELECT email FROM tbluser_login_attempts WHERE email='$thisEmail' AND time > '$valid_attempts'");
+                    if(count($attemptsByEmail) > 5){
+                        $emails .= "'".$val['email']."', ";
+                    }
                 }
                 $emails = rtrim($emails, ', ');
             }
-            if($emails){
+            
+            if($emails != ''){
                 $selectQ .= " AND u.email IN(".$emails.")";
             } else {
                 $selectQ = "";
-            }         
+            }  
+            
         }
     }   
    

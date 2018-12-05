@@ -1,5 +1,5 @@
 <?php
-	$directory = "/questionnaire/login";
+	$directory = dirname(__FILE__);
 	require_once('config.php');
 	
 	//require ("../db/dbconnect.php");
@@ -300,7 +300,6 @@ echo '
 		$gene_guideline_met = array();
 		$gene_temp = array();
 		$gene_gdmet=array();
-		$count = [];
 		
 		$lynch_genes = array("EPCAM","MLH1","MSH2","MSH6","PMS2");
 			
@@ -1018,7 +1017,7 @@ echo '
 echo '
 							</li>';
 	}
-	$q = "SELECT * FROM tblpatient WHERE Guid_user = " . $qualify['Guid_user'];
+	$q = "SELECT AES_DECRYPT(firstname_enc, 'F1rstn@m3@_%') as firstname, AES_DECRYPT(lastname_enc, 'L@stn@m3&%#') as lastname FROM tblpatient WHERE Guid_user = " . $qualify['Guid_user'];
 	$patient = $db->row($q);
 	
 
@@ -1170,7 +1169,7 @@ function patient_consent($firstname, $lastname) {
     $pconsent = '
 		<section class="form patient_consent">
 		    <figure class="form_logo">
-				<img src="https://www.mdlab.com/questionnaire/images/logo_geneveda.png" alt="Geneveda">
+				<img src="https://www.mdlab.com/dev/images/logo_geneveda.png" alt="Geneveda">
 				<figcaption>A Division of Medical Diagnostic Laboratories, LLC</figcaption>
 			</figure>
 			

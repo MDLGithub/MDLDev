@@ -39,11 +39,9 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         $patientInfoUrl .= '&incomplete=1';   
     }
     
-    $sqlQualify = "SELECT q.Guid_qualify,q.Guid_user,q.insurance,
-                    q.other_insurance,q.account_number AS qAccountNumber,q.Date_created as qDate,
-                    q.provider_id, q.deviceid, q.source, 
+    $sqlQualify = "SELECT q.Guid_qualify, q.Guid_user, q.Date_created as qDate, q.deviceid, 
                     CONCAT(prov.first_name,' ',prov.last_name) provider, prov.title,
-                    p.*, p.Loaded As dmdlPatient,
+                    p.*, p.Loaded As dmdlPatient, 
                     aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname, 
                     aes_decrypt(lastname_enc, 'L@stn@m3&%#') as lastname, 
                     u.email, u.marked_test ";
@@ -68,7 +66,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     }
     $sqlQualify .= "ORDER BY q.`Date_created` DESC LIMIT 1";
     $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$Guid_user));  
-
+  
     $patientData = $qualifyResult;
     unset($patientData['firstname_enc']);
     unset($patientData['lastname_enc']);
@@ -83,8 +81,10 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             p.*, p.Loaded As dmdlPatient,
                             aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname, 
                             aes_decrypt(lastname_enc, 'L@stn@m3&%#') as lastname, 
+                            CONCAT(prov.first_name,' ',prov.last_name) provider, prov.title,
                             u.email, u.marked_test, u.Loaded as user_loaded
                             FROM tblpatient p
+                            LEFT JOIN tblprovider prov ON prov.Guid_provider = p.provider_id
                             LEFT JOIN tbluser u ON u.Guid_user = p.Guid_user
                             WHERE p.Guid_user=:Guid_user";
         $qualifyResult = $db->row($getPatientInfoQ, array('Guid_user'=>$Guid_user)); 
@@ -217,17 +217,18 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 
 
 <?php 
-    if(isset($qualifyResult['qAccountNumber'])&&$qualifyResult['qAccountNumber']!=""){
+    if(isset($qualifyResult['accountNumber'])&&$qualifyResult['accountNumber']!=""){
         $accountQ = "SELECT a.Guid_account, a.account, a.name AS account_name, "
                     . "sr.Guid_salesrep, sr.first_name AS salesrep_fname, sr.last_name AS salesrep_lname, CONCAT(sr.first_name, ' ', sr.last_name) AS salesrep_name "
                     . "FROM tblaccount a "
                     . "LEFT JOIN tblaccountrep ar ON a.Guid_account=ar.Guid_account "
                     . "LEFT JOIN tblsalesrep sr ON ar.Guid_salesrep = sr.Guid_salesrep "
-                    . "WHERE a.account = '" . $qualifyResult['qAccountNumber'] . "'";
+                    . "WHERE a.account = '" . $qualifyResult['accountNumber'] . "'";
         $accountInfo = $db->row($accountQ);        
     } else {
         $accountInfo = FALSE;
     }
+    
     //creating xml link for loaded patients
     if(isset($qualifyResult['dmdlPatient'])&&$qualifyResult['dmdlPatient']=='Y'){      
         if( $qualifyResult['Guid_dmdl_patient']!='' && $qualifyResult['Guid_dmdl_physician']!='' && $mdlInfo['mdl_number']!=''){
@@ -330,14 +331,14 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <p><label>Date of Birth: </label><?php echo ($qualifyResult['dob']!="")?date("n/j/Y", strtotime($qualifyResult['dob'])):""; ?></p>
                                 <p><label>Email: </label><?php echo $qualifyResult['email']; ?></p>
                                 <?php if(isset($qualifyResult['other_insurance'])){ ?>
-                                <p class="capitalize"><label>Insurance: </label><?php echo $qualifyResult['insurance'];
+                                <p class="capitalize"><label>Insurance: </label><?php echo $qualifyResult['insurance_name'];
                                             if($qualifyResult['other_insurance']!="" && $qualifyResult['other_insurance']!="Other"){
                                                 echo " (".$qualifyResult['other_insurance'].")";
                                             }?>                                  
                                 </p>
                                 <?php } ?>
                                 <?php if(isset($accountInfo['Guid_account'])){ ?>
-                                <p><label>Account: </label><a href="<?php echo SITE_URL.'/accounts.php?account_id='.$accountInfo['Guid_account']; ?>"><?php echo $qualifyResult['qAccountNumber']; ?></a>
+                                <p><label>Account: </label><a href="<?php echo SITE_URL.'/accounts.php?account_id='.$accountInfo['Guid_account']; ?>"><?php echo $qualifyResult['accountNumber']; ?></a>
                                     <?php
                                         if($accountInfo['account_name']!=""){
                                             echo " - ". ucwords(strtolower($accountInfo['account_name']));
@@ -1216,10 +1217,15 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 
         if(isset($_POST['dob']) && $_POST['dob']!=""){
             $dob= date('Y-m-d h:i:s', strtotime($_POST['dob']));
-            updateTable($db, 'tblpatient', array('dob'=>$dob), array('Guid_user'=>$_GET['patient']));
-        }
-
-         
+            $patientDataArr = array(
+                                    'dob'=>$dob,
+                                    'source'=>$source,
+                                    'accountNumber'=>$account_number,
+                                    'insurance_name'=>$insurance,
+                                    'other_insurance'=>$other_insurance,
+                                    'provider_id'=>$provider_id);
+            updateTable($db, 'tblpatient', $patientDataArr, array('Guid_user'=>$_GET['patient']));
+        }        
         
         $dateCreated = $_POST['qDate'];
 
@@ -1273,7 +1279,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 </p>
                 
                 <p class="capitalize"><label>Insurance: </label>
-                    <?php $qRInsurance = isset($qualifyResult['insurance'])?$qualifyResult['insurance']:''; ?>
+                    <?php $qRInsurance = isset($qualifyResult['insurance_name'])?$qualifyResult['insurance_name']:''; ?>
                     <input type="text" name="insurance" value="<?php echo $qRInsurance; ?>" autocomplete="off" />
                 </p>
                 
@@ -1309,8 +1315,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             <?php 
 
                             foreach ($accounts as $k=>$v){ 
-                                if(isset($qualifyResult['qAccountNumber'])){  
-                                    $selected = $qualifyResult['qAccountNumber']==$v['account'] ? ' selected' : '';
+                                if(isset($qualifyResult['accountNumber'])){  
+                                    $selected = $qualifyResult['accountNumber']==$v['account'] ? ' selected' : '';
                                 } else {
                                     $selected = '';
                                 }
@@ -1329,10 +1335,10 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         <option value="">Select Provider</option>
                         <?php 
                         //$tblproviders = $db->query('SELECT * FROM tblprovider WHERE account_id='.$qualifyResult['account_number']);
-                        if(isset($qualifyResult['qAccountNumber'])&&$qualifyResult['qAccountNumber']!=""){
+                        if(isset($qualifyResult['accountNumber'])&&$qualifyResult['accountNumber']!=""){
                             $providerQ =  'SELECT pr.* FROM tblprovider pr '                                
                                         . 'LEFT JOIN tbluser u ON u.`Guid_user`=pr.`Guid_user`'
-                                        . ' WHERE account_id='.$qualifyResult['qAccountNumber'];
+                                        . ' WHERE account_id='.$qualifyResult['accountNumber'];
                             $tblproviders = $db->query($providerQ);
                             
                         foreach ($tblproviders as $k=>$v){ 
@@ -1372,7 +1378,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     <?php } else { ?>
                         <input type="hidden" name="source" value="<?php echo $qualifyResult['source']; ?>" />
                     <?php }  ?>
-                
+                    <input type="hidden" name="Guid_patient" value="<?php echo $qualifyResult['Guid_patient']; ?>" />
                 
                     
                 <div class="text-right pT-10">
