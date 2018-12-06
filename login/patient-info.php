@@ -41,7 +41,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     
     $sqlQualify = "SELECT q.Guid_qualify, q.Guid_user, q.Date_created as qDate, q.deviceid, 
                     CONCAT(prov.first_name,' ',prov.last_name) provider, prov.title,
-                    p.*, p.Loaded As dmdlPatient, 
+                    p.*, p.Loaded As dmdlPatient, p.Linked AS dmdlLinked,
                     aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname, 
                     aes_decrypt(lastname_enc, 'L@stn@m3&%#') as lastname, 
                     u.email, u.marked_test ";
@@ -230,11 +230,12 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     }
     
     //creating xml link for loaded patients
-    if(isset($qualifyResult['dmdlPatient'])&&$qualifyResult['dmdlPatient']=='Y'){      
-        if( $qualifyResult['Guid_dmdl_patient']!='' && $qualifyResult['Guid_dmdl_physician']!='' && $mdlInfo['mdl_number']!=''){
+    //var_dump($qualifyResult);
+    if( $qualifyResult['dmdlPatient']=='Y' || $qualifyResult['dmdlLinked']=='Y' ){ 
+        if( $qualifyResult['Guid_dmdl_patient']!='' && $qualifyResult['Guid_dmdl_physician']!='' && $qualifyResult['dMDL_mdl_number']!=''){
             $patientId = $qualifyResult['Guid_dmdl_patient'];
             $physicianId = $qualifyResult['Guid_dmdl_physician'];
-            $mdlNumber = $mdlInfo['mdl_number'];
+            $mdlNumber = $qualifyResult['dMDL_mdl_number'];
             $xmlLink = SITE_URL."/dmdlPatientInfo.php?patientId=$patientId&physicianId=$physicianId&mdlNumber=$mdlNumber";
         }
     }

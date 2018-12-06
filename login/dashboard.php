@@ -823,14 +823,14 @@ if(isset($_POST['dmdlUpdate'])){
                             $Guid_user = $insertUser['insertID'];
                             //insert into patients
                             $insertPatient = $db->query("INSERT INTO `tblpatient` ("
-                                    . "Guid_dmdl_patient,Guid_dmdl_physician,"
+                                    . "Guid_dmdl_patient,Guid_dmdl_physician,dMDL_mdl_number,"
                                     . "Guid_user,accountNumber,"
                                     . "firstname_enc,lastname_enc,"
                                     . "ethnicity,dob,gender,"
                                     . "address,address1,city,state,zip,"
                                     . "phone_number,phone_number_home,"
                                     . "Loaded,Linked,physician_name,insurance_name,Date_created) "
-                                    . "VALUES ('$Guid_dmdl_patient','$Guid_dmdl_physician','$Guid_user','$account_number', "
+                                    . "VALUES ('$Guid_dmdl_patient','$Guid_dmdl_physician','$dmdl_mdl_num','$Guid_user','$account_number', "
                                     . "AES_ENCRYPT('$firstname_enc', 'F1rstn@m3@_%'),AES_ENCRYPT('$lastname_enc', 'L@stn@m3&%#'), "
                                     . "'$ethnicity','$dob','$gender',"
                                     . "'$address','$address1','$city','$state','$zip',"
@@ -905,6 +905,7 @@ if(isset($_POST['dmdlUpdate'])){
                         $Guid_patient = $thisPatient['Guid_patient'];
                         //update patent table
                         $patientData = array();
+                        $patientData['dMDL_mdl_number'] = $data['mdlnumber'];
                         if($thisPatient['Guid_dmdl_patient']==''){
                             $patientData['Guid_dmdl_patient'] = $data['Guid_PatientId'];
                         }

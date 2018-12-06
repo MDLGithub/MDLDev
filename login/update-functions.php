@@ -16,6 +16,10 @@ $updateData = array(
         'description' => 'Rename Column PayID to fullName in Payors Table',
         'function' => 'update_v3'
     ),
+    '4' => array(
+        'description' => 'Add Column dMDL_mdl_number to patients screen in order to have all api params for xml page',
+        'function' => 'update_v4'
+    ),
 );
 
 /**
@@ -37,6 +41,19 @@ if($logTable['staus']===TRUE){
         }
         
     } 
+}
+/*
+ * Add Column dMDL_mdl_number to patients screen in order to have all api params for xml page
+ */
+function update_v4($db, $function){
+    $query = "ALTER TABLE `tblpatient` ADD COLUMN `dMDL_mdl_number` VARCHAR(25) AFTER Guid_dmdl_physician";
+    $result = $db->query($query); 
+    updateTable($db, 'tbl_mdl_updates_log', array('isUpdated'=>'Y'), array('function_name'=>$function));
+    $returnArr = array(
+        'staus' => TRUE,
+        'message' => 'Patiens Table Updated.'
+    );
+    return $returnArr;
 }
 /*
  * Rename Column PayID to fullName in Payors Table
