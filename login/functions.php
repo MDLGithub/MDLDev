@@ -3485,16 +3485,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
-    //5.3 Laboratory Testing Status: Complete
-    if(isset($statuses['Testing_Complete']['Date'])){
-        $statusLogData['Date'] = $statuses['Testing_Complete']['Date'];
-        $status_LabTC_IDs = array('17','20');  
-        if(isValidStatusGroup($db,$status_LabTC_IDs, $Guid_user, $statusLogData['Date'] )){
-            saveStatusLog($db, $status_LabTC_IDs, $statusLogData);
-            updateCurrentStatusID($db, $data['Guid_patient']);
-        }
-    }
-    //5.4 Laboratory Testing Status: Recollection Requested
+    //5.3 Laboratory Testing Status: Recollection Requested
     if(isset($statuses['Testing_RecollectionRequested']['Date'])){
         $statusLogData['Date'] = $statuses['Testing_RecollectionRequested']['Date'];
         $status_RR_IDs = array('17','21');  
@@ -3611,9 +3602,20 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
-    //7.1 Billed statuses don't added yet
     
-    //8.1 Legal/AR Review: In Progress: Legal Review
+    //7 Test Result Released
+    if(isset($statuses['Testing_Complete']['Date'])){
+        $statusLogData['Date'] = $statuses['Testing_Complete']['Date'];
+        $status_TestReleased_IDs = array('22');  
+        if(isValidStatusGroup($db,$status_TestReleased_IDs, $Guid_user, $statusLogData['Date'] )){
+            saveStatusLog($db, $status_TestReleased_IDs, $statusLogData);
+            updateCurrentStatusID($db, $data['Guid_patient']);
+        }
+    }
+    
+    //8.1 Billed statuses don't added yet
+    
+    //9.1 Legal/AR Review: In Progress: Legal Review
     if(isset($statuses['Legal_InProgress_Review']['Date'])){
         $statusLogData['Date'] = $statuses['Legal_InProgress_Review']['Date'];
         $status_Legal_InProgress_Review_IDs = array('55','56','59');  
@@ -3622,7 +3624,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
-    //8.2 Legal/AR Review: In Progress: Seeking additional ICD-10 codes
+    //9.2 Legal/AR Review: In Progress: Seeking additional ICD-10 codes
     if(isset($statuses['Legal_InProgress_AddICD10']['Date'])){
         $statusLogData['Date'] = $statuses['Legal_InProgress_AddICD10']['Date'];
         $status_Legal_InProgress_AddICD10_IDs = array('55','56','60');  
@@ -3631,7 +3633,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
-    //8.3 Legal/AR Review: In Progress: Obtaining Medical Records
+    //9.3 Legal/AR Review: In Progress: Obtaining Medical Records
     if(isset($statuses['Legal_InProgress_OR']['Date'])){
         $statusLogData['Date'] = $statuses['Legal_InProgress_OR']['Date'];
         $status_Legal_InProgress_OR_IDs = array('55','56','61');  
@@ -3640,7 +3642,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
-    //8.4 Legal/AR Review: In Progress: AR Review
+    //9.4 Legal/AR Review: In Progress: AR Review
     if(isset($statuses['Legal_InProgress_ARReview']['Date'])){
         $statusLogData['Date'] = $statuses['Legal_InProgress_ARReview']['Date'];
         $status_Legal_InProgress_ARReview_IDs = array('55','56','62');  
@@ -3649,7 +3651,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
-    //8.5 Legal/AR Review: Policy Limitation
+    //9.5 Legal/AR Review: Policy Limitation
     if(isset($statuses['Legal_PolicyLimitation']['Date'])){
         $statusLogData['Date'] = $statuses['Legal_PolicyLimitation']['Date'];
         $status_Legal_PolicyLimitation_IDs = array('55','57'); 
@@ -3658,7 +3660,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
-    //8.6 Legal/AR Review: Appeal Submitted
+    //9.6 Legal/AR Review: Appeal Submitted
     if(isset($statuses['Legal_AppealSubmitted']['Date'])){
         $statusLogData['Date'] = $statuses['Legal_AppealSubmitted']['Date'];
         $status_Legal_AppealSubmitted_IDs = array('55','58');  
@@ -3667,7 +3669,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     } 
-    //9 When [Testing_Status] => Rejected, the status should be Test Cancelled
+    //10. When [Testing_Status] => Rejected, the status should be Test Cancelled
     if(isset($statuses['Testing_Status']['Date'])){
         $statusLogData['Date'] = $statuses['Testing_Status']['Date'];
         $status_Testing_Status_IDs = array('12');  // 12=>Test Cancelled
