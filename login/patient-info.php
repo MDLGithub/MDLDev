@@ -458,10 +458,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     <div class="row pT-30">
                         <div id="questionaryInfo"  class="col-md-6">
                             <h5>
-                                Submission History: 
-                                <!-- <a class="pull-right" id="add-deductable-log">
-                                    <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
-                                </a>-->
+                                Submission History:
                             </h5>
                             <table class="table">
                             <thead>
@@ -480,6 +477,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                         //$queryPers = "SELECT * FROM `tbl_ss_qualifypers` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created";
                                         //$qPers = $db->query($queryPers, array('Guid_qualify'=>$Guid_qualify, 'Date_created'=>$Date_created));
                                         $qAns = $db->query("SELECT * FROM `tbl_ss_qualifyans` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created", array('Guid_qualify'=>$Guid_qualify, 'Date_created'=>$Date_created));
+                                        $genMutation = $db->query("SELECT * FROM `tbl_ss_qualifygene` WHERE `Guid_qualify`=:Guid_qualify", array('Guid_qualify'=>$Guid_qualify));
                                         $qualifyedClass = "";
                                         if($v['qualified'] == 'No'){
                                             $qualifyedClass = "mn no";
@@ -540,6 +538,16 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                                 } else {
                                                     echo "<p>".$personal." No Cancer History</p>";                                                    
                                                     echo "<p>".$family." No Cancer History</p>"; 
+                                                }
+                                                
+                                                if(isset($genMutation) && !empty($genMutation)){
+                                                    echo "<label>Gene mutation: </label> ";
+                                                    $mutation = '';
+                                                    foreach ($genMutation as $gKey => $gVal ){
+                                                        $mutation .= $gVal['gene_relation'].': '.$gVal['gene'].'; ';
+                                                    }
+                                                    $mutation = rtrim($mutation, '; ');
+                                                    echo $mutation;
                                                 }
                                                 ?>
                                                
