@@ -300,12 +300,12 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             viewRender: function(view, element) {
                 var currentDate = $('#calendar').fullCalendar('getDate');
                 var beginOfWeek = currentDate.startOf('week');
-                $("#calendarmonth").html($.fullCalendar.formatDate(beginOfWeek,"MMMM DD"));
+                $("#calendarmonth").html($.fullCalendar.formatDate(beginOfWeek,"MMMM D"));
                 $("#calendaryear").html($.fullCalendar.formatDate(beginOfWeek,"YYYY"));
                 $(".salesrep_list").html("<ul><li><a href='<?php echo SITE_URL; ?>/dashboard2.php'>Select All</a></li></ul>");
                 window.setTimeout(function(){
                     $("#calendar").find('.fc-toolbar > div.fc-center > h2').empty().append(
-                        "Week of "+view.start.format('MMMM D, YYYY')
+                        "" +view.start.format('MMMM D, YYYY')
                     );
                 },0);
                 //top_stats();
@@ -486,6 +486,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     content += '<div>Qualified <span style="float:right">' + event.qualifiedCnt + '</span></div>';
                     content += '<div>Submitted <span style="float:right">' + event.submittedCnt + '</span></div>';
                     content += '</div>';
+
                     return $(content);
                     
                 } else {
@@ -1293,14 +1294,14 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                     <div class="col-md-2"><span id="mebrcacnt" style="">0</span><span id="topbrcacnt">0</span></div>
                     <div class="col-md-1">Registered</div>
                     <div class="col-md-2"><span id="meregcnt" style="">0</span><span id="topregcnt">0</span></div>
-                    <div class="col-md-1">Completed</div>
-                    <div class="col-md-2"><span id="mecomcnt" style="">0</span><span id="topcomcnt">0</span></div>
+                    <div class="col-md-1">Qualified</div>
+                    <div class="col-md-2"><span id="mequalcnt" style="">0</span><span id="topqualcnt">0</span></div>
                 </div>
                 <div class="row">
                     <div class="col-md-1" style="border-bottom-left-radius:10px;">Health Care Fair</div>
                     <div class="col-md-2"><span id="meeventcnt" style="">0</span><span id="topeventcnt">0</span></div>
-                    <div class="col-md-1">Qualified</div>
-                    <div class="col-md-2"><span id="mequalcnt" style="">0</span><span id="topqualcnt">0</span></div>
+                    <div class="col-md-1">Completed</div>
+                    <div class="col-md-2"><span id="mecomcnt" style="">0</span><span id="topcomcnt">0</span></div>
                     <div class="col-md-1">Submitted</div>
                     <div class="col-md-2"><span id="mesubcnt" style="">0</span><span id="topsubcnt">0</span></div>
                 </div>
@@ -1356,12 +1357,12 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 <div id = "chart_stats">
                     <div class = "chart_header  col-lg-12 col-md-12">
                             <p class = "stats_date">
-                                <span>Stats for Week of</span>
-                                <span id="calendarmonth"></span>, 
+                                <span>Submitting Stat for Week of </span>
+                                <span id="calendarmonth"></span>,
                                 <span id="calendaryear"></span>
                                 <span></span>
                             </p> 
-                            <a href="mdl-stats.php" target="_blank" class="button submit smaller_button"><strong>View All Stats</strong></a>
+
 
                     </div>
                     <div id="piechart"  class="col-md-6 col-sm-12" style="padding:0;"></div>
@@ -1369,7 +1370,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                         <div id="legend"></div>
                         <div id="chart" style="padding:0;"></div>
                     </div> -->
-                    <div class="col-md-6 col-sm-12" id="chart" style="padding:0;"></div>
+                    <div id="chart" class="col-md-6 col-sm-12"  style="padding:0;"></div>
                     
                     <!-- <div class="overlay"><div>No data available</div></div> -->
                     
@@ -1572,6 +1573,9 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             </div>
         </div>
     </div>
+    <p>
+
+    </p>
 </main>
 <script>
     $(function () {
@@ -1585,12 +1589,9 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
 </script>
 <script>
         function createChart() {
-          
+
             $("#chart").kendoChart({
-                title: {
-                    text: "Top Submitting Genetic Consultants"
-                },
-                sort:{       
+                sort:{
                     field :"data",
                     dir:"desc"
                 },
@@ -1628,9 +1629,6 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             });
 
             $("#piechart").kendoChart({
-                title: {
-                    text: "Top Submitting Accounts"
-                },
                 chartArea: {
                     width: 620,
                     height: 450
@@ -1641,7 +1639,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 seriesDefaults: {
                     labels: {
                         template: "#if (value > 0) {# #: value #% #}#",
-                        position: function(e) { 
+                        position: function(e) {
                                 if(e.percentage < 0.1)
                                     return "outsideEnd";
                                 else
@@ -1723,3 +1721,5 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
     </script>
 <?php require_once 'scripts.php'; ?>
 <?php require_once 'footer.php'; ?>
+
+

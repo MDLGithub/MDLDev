@@ -19,7 +19,7 @@ if (isset($_POST['email'], $_POST['password'])) {
         if($role=='Physician'){
             Leave(SITE_URL.'/accounts.php');
         }else{
-            Leave(SITE_URL.'/dashboard.php');
+            Leave(SITE_URL.'/dashboard2.php');
         }
     } else {
         $showMsg = '1';
