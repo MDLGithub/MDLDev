@@ -854,6 +854,9 @@ if(isset($_POST['dmdlUpdate'])){
                             if(isset($Guid_account) && $Guid_account!=''){
                                 $apiProviderData = $data['Physician'];
                                 $Guid_provider = updateOrInsertProvider($db,$accountNum,$Guid_account,$Guid_user,$apiProviderData);
+                                if($Guid_provider){
+                                    updateTable($db, 'tblpatient', array('provider_id'=>$Guid_provider), array('Guid_patient'=>$Guid_patient));
+                                }
                             }
                             
                             //update or insert payor and revenue data                            
@@ -962,25 +965,33 @@ if(isset($_POST['dmdlUpdate'])){
 
                         //update mdl number
                         $wherUserIs = array('Guid_user'=>$Guid_user);
-                        $thisMdl = $db->query("SELECT * FROM tbl_mdl_number WHERE Guid_user=:Guid_user", $wherUserIs);
-                        $mdlData['mdl_number']=$data['mdlnumber'];
+                        $checkMDLNum = $db->query("SELECT * FROM tbl_mdl_number WHERE mdl_number=:mdl_number", array('mdl_number'=>$data['mdlnumber']));
                         $mdlNumMatch = False;
-                        if(!empty($thisMdl)){                            
-                            foreach ($thisMdl as $key => $mdlVal) {
-                                if($mdlVal['mdl_number']!=''){
-                                    if($mdlVal['mdl_number']==$data['mdlnumber']){
-                                        $mdlNumMatch = True;
+                        //check if mdl number is not exists
+                        if(empty($checkMDLNum)){
+                            //get mdl number by user ID                           
+                            $thisMdl = $db->query("SELECT * FROM tbl_mdl_number WHERE Guid_user=:Guid_user", $wherUserIs);
+                            $mdlData['mdl_number']=$data['mdlnumber'];
+                            
+                            if(!empty($thisMdl)){                            
+                                foreach ($thisMdl as $key => $mdlVal) {
+                                    if($mdlVal['mdl_number']!=''){
+                                        if($mdlVal['mdl_number']==$data['mdlnumber']){
+                                            $mdlNumMatch = True;
+                                        }
                                     }
-                                }
-                            } 
+                                } 
+                            }
                         }
                                                
                         if($mdlNumMatch){
                             $updateMDLNum = updateTable($db, 'tbl_mdl_number', $mdlData, $wherUserIs);
                         } else {
-                            $mdlData['Loaded']='Y';
-                            $mdlData['Guid_user']=$Guid_user;
-                            $insertMDLNum = insertIntoTable($db, 'tbl_mdl_number', $mdlData);
+                            if(!empty($mdlData)){
+                                $mdlData['Loaded']='Y';
+                                $mdlData['Guid_user']=$Guid_user;
+                                $insertMDLNum = insertIntoTable($db, 'tbl_mdl_number', $mdlData);
+                            }
                         }
 
                         //update OR insert account

@@ -2448,15 +2448,18 @@ function convertDmdlDate($date){
 }
 
 function getPaientPossibleMatch($db,$firstname,$lastname,$Date_Of_Birth){
-    $SQuery = "SELECT p.Guid_patient, p.Guid_user, p.dob,"
+    $SQuery = "SELECT p.Guid_patient, p.Guid_user, p.dob, p.accountNumber, "
             . "AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') as firstname,"
-            . "AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') as lastname "
+            . "AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') as lastname, "
+            . "mdlNum.mdl_number "
             . "FROM tblpatient p "
             . "LEFT JOIN tbluser u ON u.Guid_user = p.Guid_user "
+            . "LEFT JOIN tbl_mdl_number mdlNum ON mdlNum.Guid_user=p.Guid_user  "
             . "WHERE u.marked_test='0' AND u.Loaded='N' AND p.Linked='N' "
             . "AND (LOWER(CONVERT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') USING 'utf8')) LIKE '%".strtolower($firstname)."%' "
             . "OR LOWER(CONVERT(AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') USING 'utf8')) LIKE '%".strtolower($lastname)."%' "
-            . "OR p.dob='".convertDmdlDate($Date_Of_Birth)."' )";
+            . "OR p.dob='".convertDmdlDate($Date_Of_Birth)."' ) "
+            . "ORDER BY firstname, lastname ";
 
     $SGetPatient = $db->query($SQuery);
     
@@ -2464,22 +2467,11 @@ function getPaientPossibleMatch($db,$firstname,$lastname,$Date_Of_Birth){
 }
 
 function getMatchedPatientsDropdown($db, $Guid_MDLNumber, $SGetPatient){
+    //var_dump($SGetPatient);
     $sOption = ''; $sContent = ''; $mdl_num = '';
-    foreach ($SGetPatient as $k=>$v){
+    foreach ($SGetPatient as $k=>$v){       
         $matchedPatient=$v; 
-        $this_Guid_user = $v['Guid_user'];
-        $sqlQualify = "SELECT q.account_number FROM tbl_ss_qualify q WHERE Guid_user=:Guid_user ORDER BY q.`Date_created` DESC LIMIT 1 ";
-        $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$this_Guid_user));
-
-        $mdlNumberResult = $db->query("SELECT `mdl_number` FROM `tbl_mdl_number` WHERE Guid_user=:Guid_user", array('Guid_user'=>$this_Guid_user));
-
-        if(!empty($mdlNumberResult)){
-            foreach ($mdlNumberResult as $key=>$mdlNum){
-                if($mdlNum['mdl_number']!=''){
-                    $mdl_num .= $mdlNum['mdl_number'].', ';
-                }
-            }           
-        }
+        $this_Guid_user = $v['Guid_user'];    
         
         $DOS_braca = $db->query("SELECT Date(`Date`) as Date FROM `tbl_mdl_status_log` WHERE Guid_status='1' AND Guid_user=:Guid_user",array('Guid_user'=>$this_Guid_user));
         $DOS_braca_date = '';
@@ -2492,13 +2484,13 @@ function getMatchedPatientsDropdown($db, $Guid_MDLNumber, $SGetPatient){
         $sOption .= "<option value='".$v['Guid_patient']."'>";                        
         $sOption .= ucwords(strtolower($v['firstname']." ".$v['lastname']));
         $sOption .= " (".date("m/d/Y", strtotime($matchedPatient['dob'])).") ";
-        if($mdl_num!=''){
-            $sOption .= "MDL#: ".$mdl_num;
+        if($v['mdl_number'] && $v['mdl_number']!=''){
+            $sOption .= "MDL#: ".$v['mdl_number'].', ';
         }
-        if($qualifyResult['account_number']!=''){
-        $sOption .= "Acct#: ".$qualifyResult['account_number'].", ";
+        if($v['accountNumber'] && $v['accountNumber']!=''){
+        $sOption .= "Acct#: ".$v['accountNumber'].", ";
         }
-        $sOption .= "Patient ID: ".$v['Guid_patient'];
+        $sOption .= "Patient ID: ".$v['Guid_patient'].", User ID: ".$v['Guid_user'];
         if($DOS_braca_date!=''){
             $sOption .= ", DOS: ".date("m/d/Y", strtotime($DOS_braca_date));
         }
@@ -2700,6 +2692,8 @@ function dmdl_refresh($db){
                                 if($val['mdl_number']!=''){
                                     if($val['mdl_number']==$Guid_MDLNumber){
                                         $mdlNumMatch = True;
+                                    }else{
+                                        $mdlNumMatch = False;
                                     }
                                     $mdl_num .= $val['mdl_number'].', ';
                                 }
@@ -2886,7 +2880,14 @@ function dmdl_refresh($db){
             
             //BillingDetail
             if(isset($res['BillingDetail']['invoiceDetail']) && !empty($res['BillingDetail']['invoiceDetail'])){
-                foreach ($res['BillingDetail']['invoiceDetail'] as $invKey => $invDetail){
+		$billingArray = array();
+                
+                if( isset($res['BillingDetail']['invoiceDetail']['0']) ){
+                    $billingArray = $res['BillingDetail']['invoiceDetail'];
+                } else {
+                    $billingArray[0] = $res['BillingDetail']['invoiceDetail'];
+                }
+                foreach($billingArray as $invKey => $invDetail){
                     //payor details
                     if(isset($res['Insurance_Company']) && !empty($res['Insurance_Company'])){
                         $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][invoiceDetail][".$invKey."][fullName]' value='".$res['Insurance_Company']."' />";
@@ -3185,9 +3186,13 @@ function updateOrInsertPayor($db,$Guid_user,$name, $fullName=FALSE){
     return $Guid_payor;
 }
 
-function updateOrInsertRevenue($db, $Guid_user, $invoiceDetails){
-    
-    foreach ($invoiceDetails as $k=>$invoiceDetail) {        
+function updateOrInsertRevenue($db, $Guid_user, $invoiceDetails){    
+   
+    $invoiceArray = $invoiceDetails;
+    if(!isset($invoiceDetails[0])){
+        $invoiceArray[0] = $invoiceDetails;
+    }
+    foreach ($invoiceArray as $k=>$invoiceDetail) {        
         if(isset($invoiceDetail['CPT'])&&$invoiceDetail['CPT']!=''){
             //check CPT
             $checkCPT = $db->row("SELECT * FROM `tbl_mdl_cpt_code` WHERE code=:code",array('code'=>$invoiceDetail['CPT']));
