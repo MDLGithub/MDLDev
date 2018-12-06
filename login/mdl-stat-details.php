@@ -17,6 +17,8 @@ $role = $roleInfo['role'];
 $roleID = $roleInfo['Guid_role'];
 
 $accessRole = getAccessRoleByKey('mdlStats');
+$roleIDs = unserialize($accessRole['value']);
+$dataViewAccess = isUserHasAnyAccess($roleIDs, $roleID, 'view');
 
 if($role!="Admin"){
     //Leave(SITE_URL."/no-permission.php");
@@ -183,7 +185,7 @@ require_once ('navbar.php');
 
 <main class="full-width">
     <div class="box full visible ">
-      
+        <?php if($dataViewAccess) { ?>
         <section id="palette_top" class="shorter_palette_top">
             <h4>  
                 <ol class="breadcrumb">
@@ -337,7 +339,9 @@ require_once ('navbar.php');
                 
            
         </div>
-      
+        <?php } else { ?>
+            <p>Sorry! You don't have access to this page content. </p>
+        <?php } ?>
     </div>
 </main>
 
