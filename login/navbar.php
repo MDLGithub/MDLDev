@@ -51,7 +51,7 @@
                         <li><a href="<?php echo SITE_URL; ?>/access-roles.php">Access Roles</a></li>
                         <li><a href="<?php echo SITE_URL; ?>/user-management.php">User Management</a></li>
                     <?php } ?>
-                    <?php if($role != 'Patient') { ?>    
+                    <?php if($role != 'Patient' && $role != 'Physician') { ?>    
                         <li><a href="<?php echo SITE_URL; ?>/mdl-stats.php">MDL Stats</a></li>
                     <?php } ?>
                 </ul>                
