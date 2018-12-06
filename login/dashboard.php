@@ -497,7 +497,6 @@ $qualify_requests = $db->query($sqlTbl);
 
 $num_estimates = $qualify_requests;
 
-
 if(isset($_GET['resetDmdlData']) && $_GET['resetDmdlData']=='1'){
     if($role=='Admin'){
         //remove Loaded Data
@@ -524,7 +523,6 @@ if(isset($_GET['resetDmdlData']) && $_GET['resetDmdlData']=='1'){
     <div class="box full visible">
         <?php if($dataViewAccess){ ?>
         <section id="palette_top" class="shorter_palette_top">
-            <h4  class = "palette_results" ><?php echo count($num_estimates) . " Results"; ?></h4>
             <?php echo topNavLinks($role); ?>
         </section>
 
