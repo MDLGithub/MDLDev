@@ -298,7 +298,6 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart' && isset($_POST[
 	}else{
 		$data = array(
 	            'series' => array ([
-	                    'name'=> 'Submitted',
 	                    'data'=> $submitted,
 	                    'color'=> "#3a8a5f",
 	                    'labels'=> array('visible' => true),

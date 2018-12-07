@@ -478,6 +478,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     content +='</div>' + '</div>';
 
                 if (event.evtCnt) {
+                    var content;
 
                     var content = '<div class="fc-content evtcontent summarybrca days-' + eventDate + '" style="padding: 0 20px; font-size: 15px; line-height: 16px;">';
                     content += '<div class="numberCircleContainer"><span class="numberCircle">' + event.evtCnt + '</span></div>';
@@ -587,7 +588,18 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         (data['topregisteredcount'] != 0 ) ? $('#topregcnt').html(data['topregisteredcount']) : 0;
                         (data['topcompletedcount'] != 0 ) ? $('#topcomcnt').html(data['topcompletedcount']) : 0;
                         (data['topsubmittedcount'] != 0 ) ? $('#topsubcnt').html(data['topsubmittedcount']) : 0;
-  
+
+                        var hide = (data['topsubmittedcount']);
+                            if (hide == undefined)  {
+                                $('#chart').hide();
+                                $('#piechart').hide();
+                            } else {
+                                $('#chart').show();
+                                $('#piechart').show();
+                            }
+
+
+
                     }
                 });
                 <?php //endif; ?>
@@ -1365,13 +1377,14 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
 
 
                     </div>
+
                     <div id="piechart"  class="col-md-6 col-sm-12" style="padding:0;"></div>
                     <!-- <div class="col-md-6 col-sm-12">
                         <div id="legend"></div>
                         <div id="chart" style="padding:0;"></div>
                     </div> -->
                     <div id="chart" class="col-md-6 col-sm-12"  style="padding:0;"></div>
-                    
+
                     <!-- <div class="overlay"><div>No data available</div></div> -->
                     
                 </div>
@@ -1656,6 +1669,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
             });
         }
 
+
         function chartTemplate(e){
             console.log(e);
         }
@@ -1721,5 +1735,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
     </script>
 <?php require_once 'scripts.php'; ?>
 <?php require_once 'footer.php'; ?>
+
+
 
 
