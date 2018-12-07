@@ -793,6 +793,7 @@ if(isset($_POST['dmdlUpdate'])){
                 $city = isset($data['city'])?$data['city']:'';
                 $state = isset($data['state'])?$data['state']:'';
                 $zip = isset($data['zip'])?$data['zip']:'';
+                $insurance_Company = isset($data['Insurance_Company'])?$data['Insurance_Company']:'';
                 
                 if(isset($data['Physician']['FirstName'])){
                     $physician_name = $data['Physician']['FirstName'];
@@ -827,13 +828,13 @@ if(isset($_POST['dmdlUpdate'])){
                                     . "ethnicity,dob,gender,"
                                     . "address,address1,city,state,zip,"
                                     . "phone_number,phone_number_home,"
-                                    . "Loaded,Linked,physician_name,insurance_name,Date_created) "
+                                    . "Loaded,Linked,physician_name,insurance_name,source,Date_created) "
                                     . "VALUES ('$Guid_dmdl_patient','$Guid_dmdl_physician','$dmdl_mdl_num','$Guid_user','$account_number', "
                                     . "AES_ENCRYPT('$firstname_enc', 'F1rstn@m3@_%'),AES_ENCRYPT('$lastname_enc', 'L@stn@m3&%#'), "
                                     . "'$ethnicity','$dob','$gender',"
                                     . "'$address','$address1','$city','$state','$zip',"
                                     . "'$phone_number','$phone_number_home', "
-                                    . "'Y','Y', '$physician_name','$insurance_name', NOW())");
+                                    . "'Y','Y', '$physician_name','$insurance_Company','Lunch', NOW())");
                             $Guid_patient = $db->lastInsertId();
                             
                             //update mdl number
@@ -951,10 +952,12 @@ if(isset($_POST['dmdlUpdate'])){
                         }                        
                         if($thisPatient['physician_name']==''){
                             $patientData['physician_name'] = $data['Physician']['FirstName']." ".$data['Physician']['LastName'];
-                        }
-                                               
+                        }                                               
                         if($thisPatient['insurance_name']==''){
-                            $patientData['insurance_name'] = $data['insurance_full'];
+                            $patientData['insurance_name'] = $data['Insurance_Company'];
+                        }
+                        if($thisPatient['source']==''){
+                            $patientData['source'] = 'Lunch';
                         }
                         if(!empty($thisPatient)){
                             $patientData['Linked'] = 'Y';

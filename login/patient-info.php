@@ -354,7 +354,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <p><label>Date of Birth: </label><?php echo ($qualifyResult['dob']!="")?date("n/j/Y", strtotime($qualifyResult['dob'])):""; ?></p>
                                 <p><label>Email: </label><?php echo $qualifyResult['email']; ?></p>
                                 <?php if(isset($qualifyResult['other_insurance'])){ ?>
-                                <p class="capitalize"><label>Insurance: </label><?php echo $qualifyResult['insurance_name'];
+                                <p class="capitalize"><label>Insurance: </label><?php echo ucwords(strtolower($qualifyResult['insurance_name']));
                                             if($qualifyResult['other_insurance']!="" && $qualifyResult['other_insurance']!="Other"){
                                                 echo " (".$qualifyResult['other_insurance'].")";
                                             }?>                                  

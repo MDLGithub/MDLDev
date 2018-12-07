@@ -2831,6 +2831,9 @@ function dmdl_refresh($db){
             if(isset($res['Patient_Zip'])&&!empty($res['Patient_Zip'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][zip]' value='".$res['Patient_Zip']."' />";
             }
+            if(isset($res['Insurance_Company'])&&!empty($res['Insurance_Company'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Insurance_Company]' value='".$res['Insurance_Company']."' />";
+            }
             
             //Physician Info
             if(isset($res['GUID_PhysicianID'])&&!empty($res['GUID_PhysicianID'])){
@@ -2877,6 +2880,7 @@ function dmdl_refresh($db){
             if(isset($res['ClientFax'])&&!empty($res['ClientFax'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][fax]' value='".$res['ClientFax']."' />";
             }
+            
                        
             
             //BillingDetail
