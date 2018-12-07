@@ -863,7 +863,7 @@ if(isset($_POST['dmdlUpdate'])){
                                     . "'$ethnicity','$dob','$gender',"
                                     . "'$address','$address1','$city','$state','$zip',"
                                     . "'$phone_number','$phone_number_home', "
-                                    . "'Y','Y', '$physician_name','$insurance_Company','Lunch', NOW())");
+                                    . "'Y','Y', '$physician_name','$insurance_Company','N/A', NOW())");
                             $Guid_patient = $db->lastInsertId();
                             
                             //update mdl number
@@ -986,7 +986,7 @@ if(isset($_POST['dmdlUpdate'])){
                             $patientData['insurance_name'] = $data['Insurance_Company'];
                         }
                         if($thisPatient['source']==''){
-                            $patientData['source'] = 'Lunch';
+                            $patientData['source'] = 'N/A';
                         }
                         if(!empty($thisPatient)){
                             $patientData['Linked'] = 'Y';
