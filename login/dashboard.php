@@ -127,6 +127,19 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     </div>
                 </div>
                 <?php } ?>
+                
+                <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['mdl_number'])) && (strlen(trim($_POST['mdl_number'])))) ? " show-label valid" : ""; ?>">
+                    <label class="dynamic" for="mdl_number"><span>MDL Number</span></label>
+
+                    <div class="group">
+                        <input id="mdl_number" name="mdl_number" type="text" value="<?php echo ((!isset($_POST['clear'])) && isset($_POST['mdl_number']) && strlen(trim($_POST['mdl_number']))) ? trim($_POST['mdl_number']) : ""; ?>" placeholder="MDL Number">
+
+                        <p class="f_status">
+                            <span class="status_icons"><strong></strong></span>
+                        </p>
+                    </div>
+                </div>
+                
                 <?php if(isFieldVisibleByRole($roleIDs['insurance']['view'], $roleID)) {?>
                     <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['insurance'])) && (strlen($_POST['insurance']))) ? " show-label valid" : ""; ?>">
                         <label class="dynamic" for="insurance"><span>Insurance</span></label>
@@ -344,12 +357,14 @@ $sqlTbl = "SELECT q.*, p.*, "
         . "AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') as firstname, AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') as lastname, "
         . "a.name as account_name, a.Guid_account, a.Guid_category as account_category, "
         . "CONCAT (srep.first_name, ' ', srep.last_name) AS salesrep_name, srep.Guid_salesrep, "
-        . "u.email, u.marked_test,  u.Guid_role, "
+        . "u.email, u.marked_test, u.Guid_role, "
+        . "mdlnum.mdl_number, mdlnum.Loaded as mdl_number_loaded, "
         . "q.Date_created AS date FROM tbl_ss_qualify q "
         . "LEFT JOIN tblaccount a ON q.account_number = a.account "
         . "LEFT JOIN tblaccountrep arep ON arep.Guid_account = a.Guid_account "
         . "LEFT JOIN tblsalesrep srep ON srep.Guid_salesrep = arep.Guid_salesrep "
         . "LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user "
+        . "LEFT JOIN tbl_mdl_number mdlnum ON p.Guid_user = mdlnum.Guid_user "
         . "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user";
 $where = "";
 $whereTest = (strlen($where)) ? " AND " : " WHERE ";
@@ -410,6 +425,11 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
     if (isset($_POST['last_name']) && strlen(trim($_POST['last_name']))) {
         $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
         $where .= " LOWER(CONVERT(AES_DECRYPT(lastname_enc, 'L@stn@m3&%#') USING 'utf8')) LIKE '%" . strtolower($_POST['last_name']) . "%'";
+    }
+    //MDL#
+    if (isset($_POST['mdl_number']) && strlen($_POST['mdl_number'])) {
+        $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
+        $where .= " mdlnum.mdl_number = '" . $_POST['mdl_number'] . "'";
     }
     //Insurance
     if (isset($_POST['insurance']) && strlen($_POST['insurance'])) {
@@ -651,6 +671,7 @@ if(isset($_GET['resetDmdlData']) && $_GET['resetDmdlData']=='1'){
                        <?php if(isFieldVisibleByRole($roleIDs['salesrep']['view'], $roleID)) {?>
                            <th>Genetic Consultant</th>  
                        <?php } ?>
+                        <th>MDL#</th>  
                        <?php if(isFieldVisibleByRole($roleIDs['salesrep']['view'], $roleID)) {?>
                            <th>Email</th>  
                        <?php } ?>
@@ -739,6 +760,14 @@ if(isset($_GET['resetDmdlData']) && $_GET['resetDmdlData']=='1'){
                                     <?php if(isFieldVisibleByRole($roleIDs['salesrep']['view'], $roleID)) {?>
                                         <td><?php echo $qualify_request['salesrep_name']; ?></td>          
                                     <?php } ?>
+                                   
+                                    <td class="tdAccount">
+                                        <?php if($qualify_request['mdl_number']!=""){ ?>
+                                            <img src = "<?php echo SITE_URL; ?>/images/icon_circle_sharp.png" />
+                                        <?php echo "<span class='account_name'>".$qualify_request['mdl_number']."</span>"; ?>
+                                        <?php } ?>
+                                        
+                                    </td> 
                                     <?php if(isFieldVisibleByRole($roleIDs['salesrep']['view'], $roleID)) {?>
                                         <td class="mn">
                                             <?php if($qualify_request['email']==""){ ?>
