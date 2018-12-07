@@ -1053,7 +1053,7 @@ thead th{
     z-index:5;
     display:table;
     width:100%;
-    width:calc(100% - 18px);
+    table-layout:fixed;
 
 }
 
@@ -1066,7 +1066,7 @@ thead th{
 
 #dataTableHome thead th,    
 #tableHeaderFixed thead th{    
-    width:inherit;
+    width:inherit !important;
 
 }
 
@@ -1074,7 +1074,8 @@ thead th{
 #tableHeaderFixed tbody {
     overflow-x:hidden;
     display:block;
-    width:calc(100% - 18px);
+    /*width:calc(100% - 18px);*/
+    width:100%;
     margin-top:61px;
 }
 #dataTableHome tbody .t_row,
@@ -1280,6 +1281,7 @@ and (orientation : landscape) {
 
     #dataTableHome tbody{
         margin-top:61px;
+        width: calc(100% - 18px);
     }
 
     #dataTableHome tbody td {
@@ -1439,6 +1441,7 @@ and (orientation : portrait) {
         position:absolute;
         width:165%;
         margin-top: 25px;
+        table-layout: auto;
     }
 
 
@@ -1672,7 +1675,7 @@ and (-webkit-min-device-pixel-ratio: 2) {
     #dataTableHome thead{
         top:0px;
         position:absolute;
-        width:calc(100% - 18px);
+        width: 100%;
         margin-top:25px;
     }
 
@@ -1690,7 +1693,7 @@ and (-webkit-min-device-pixel-ratio: 2) {
     }
 
     .wider-bar{
-        width: calc(100% - 18px) !important;
+        width: 100%!important;
     }
 
     #app_data .url_config_box input[type='radio'], input[type='radio']:checked{
@@ -1735,6 +1738,7 @@ and (-webkit-min-device-pixel-ratio: 2) {
     #dataTableHome tbody{
 
         margin-top: 62px;
+        width: calc(100% - 18px);
 
     }
 
