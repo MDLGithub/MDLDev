@@ -91,21 +91,16 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         if(!empty($qualifyResult)){
             $qualifyResult['no_submited_questionnaire'] = '1';
         }
-    }
-        
+    }        
     $mdlInfoQ = "SELECT * FROM tbl_mdl_number WHERE Guid_user=:Guid_user";
-    $mdlInfo = $db->row($mdlInfoQ, array('Guid_user'=>$Guid_user));
-    
+    $mdlInfo = $db->row($mdlInfoQ, array('Guid_user'=>$Guid_user));    
     if(isset($qualifyResult['Guid_qualify'])){
         $Guid_qualify = $qualifyResult['Guid_qualify'];
-
         $sqlSSQualify = "SELECT ssq.* FROM tbl_ss_qualify ssq WHERE ssq.Guid_qualify=:Guid_qualify  ORDER BY Date_created DESC";
         $ssQualifyResult = $db->query($sqlSSQualify, array('Guid_qualify'=>$Guid_qualify));
-    }
-    
+    }    
     $errorMsgMdlStats = "";
-    if(isset($_POST['save'])){
-       
+    if(isset($_POST['save'])){       
         $numSize = strlen($_POST['mdl_number']);
         if(isset($_POST['mdl_number'])&&$_POST['mdl_number']!=""){
             if(!isset($_POST['mark_as_test'])){
@@ -115,27 +110,23 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 }
             }
         }
-        if($isValid){
-            
+        if($isValid){            
             //total_deductible
             if(isset($_POST['total_deductible']) && $_POST['total_deductible']!=""){                
                 updateTable($db, 'tblpatient', array('total_deductible'=> $_POST['total_deductible']), array('Guid_user'=>$_GET['patient']));
-            }
-            
+            }            
             //test kit
             if(isset($_POST['test_kit'])){  
                 updateTable($db,'tblpatient', array('test_kit'=>'1'), array('Guid_user'=>$_GET['patient']));
             } else {
                 updateTable($db,'tblpatient', array('test_kit'=>'0'), array('Guid_user'=>$_GET['patient']));
             }
-            
             //mark user as a test            
             if(isset($_POST['mark_as_test'])){  
                 updateTable($db,'tbluser', array('marked_test'=>'1'), array('Guid_user'=>$_GET['patient']));
             } else {
                 updateTable($db,'tbluser', array('marked_test'=>'0'), array('Guid_user'=>$_GET['patient']));
-            }           
-
+            } 
             //Update MDL# info
             if(isset($_POST['mdl_number'])){
                 $mdlNumberData['mdl_number']=$_POST['mdl_number'];
@@ -153,8 +144,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 if($mdlNumberData){                    
                    insertIntoTable($db, 'tbl_mdl_number', $mdlNumberData); 
                 }
-            }           
-           
+            }    
             //add deductable log 
             if(isset($_POST['deductableAdd']) && !empty($_POST['deductableAdd'])){
                 $dedData = $_POST['deductableAdd'];                
@@ -184,8 +174,6 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     $updateReveue = updateTable($db, 'tbl_deductable_log', $dataDeductable, $whereDeductable);            
                 }
             } 
-                        
-            
             $url=$patientInfoUrl."&u";
             Leave($url);
         }
@@ -212,6 +200,15 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         deleteByField($db,'tbl_mdl_note', 'Guid_note', $_GET['delete-note-log']);
         Leave($patientInfoUrl);
     }
+    
+    if(isset($_GET['linked']) && $_GET['linked'] == 'Y'){
+        updateTable($db, 'tblpatient', array('Linked'=>'Y'), array('Guid_user'=>$_GET['patient']));
+        Leave($patientInfoUrl);
+    } 
+    elseif (isset($_GET['linked']) && $_GET['linked'] == 'N') {
+        updateTable($db, 'tblpatient', array('Linked'=>'N'), array('Guid_user'=>$_GET['patient']));
+        Leave($patientInfoUrl);
+    }
   
  } ?>
 
@@ -228,7 +225,12 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     } else {
         $accountInfo = FALSE;
     }
-    
+    if(isset($qualifyResult['dmdlPatient'])){
+        $patientLoaded = $qualifyResult['dmdlPatient'];
+    }
+    if(isset($qualifyResult['dmdlLinked'])){
+        $patientLinked = $qualifyResult['dmdlLinked'];
+    }
     //creating xml link for loaded patients
     //var_dump($qualifyResult);
     if( $qualifyResult['dmdlPatient']=='Y' || $qualifyResult['dmdlLinked']=='Y' ){ 
@@ -239,6 +241,8 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
             $xmlLink = SITE_URL."/dmdlPatientInfo.php?patientId=$patientId&physicianId=$physicianId&mdlNumber=$mdlNumber";
         }
     }
+    
+    
 ?>
 
 <link rel="stylesheet" href="assets/css/brca_forms.css">
@@ -283,17 +287,35 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 <div class="error-text"><?php echo $message; ?></div>
                 <?php } ?>
                
-                <h2 class="text-center"><?php echo ucfirst(strtolower($qualifyResult['firstname']))." ".formatLastName($qualifyResult['lastname']);?></h2>
-                <a class="patient_forms">
-                    <img src="./images/icon_forms.png" />
-                    <p>Forms</p>
-                </a>
-                <?php if($role=='Admin' && $xmlLink!=''){ ?>
-                <a class="xmlLink" href="<?php echo $xmlLink; ?>">
-                    <img src="./images/xmlIcon.png" />
-                    <p>XML</p>
-                </a>
-                <?php } ?>
+                <h2 class="text-center">
+                    <?php echo ucfirst(strtolower($qualifyResult['firstname']))." ".formatLastName($qualifyResult['lastname']);?>
+                    
+                </h2>
+                <div class="iconsBox">
+                    <a class="patient_forms">
+                        <img src="./images/icon_forms.png" />
+                        <p>Forms</p>
+                    </a>
+                    <?php if($role=='Admin' && $xmlLink!=''){ ?>
+                    <a class="xmlLink" href="<?php echo $xmlLink; ?>">
+                        <img src="./images/xmlIcon.png" />
+                        <p>XML</p>
+                    </a>
+                    <?php } ?>
+                    <?php if($role=='Admin' && isset($patientLoaded) && $patientLoaded=='Y'){ ?>
+                    <span class="circleA">
+                        <img src="./images/icon_circle_A.png" />
+                    </span>
+                    <?php } ?>
+                    <?php if($role=='Admin' && isset($patientLinked)){ ?>                    
+                        <?php if($patientLinked=='Y'){ ?>
+                        <a class="linked" href="<?php echo $patientInfoUrl.'&linked=N'; ?>"><i class="fas fa-link"></i></a>
+                        <?php } else { ?>
+                        <a class="linked" href="<?php echo $patientInfoUrl.'&linked=Y'; ?>"><i class="fas fa-unlink"></i></a>
+                        <?php } ?> 
+                    <?php } ?>
+                </div>
+                
                 <div class="row">
                      <div id="message" class="error-text text-center">
                         <?php if($errorMsgMdlStats){ ?>   

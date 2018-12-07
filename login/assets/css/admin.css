@@ -1471,15 +1471,21 @@ and (-webkit-min-device-pixel-ratio: 2) {
     text-align: center;
     width: 100px;
 }
-
-.patient_forms, .xmlLink {
-    text-align: center;
-    width: 100px;
+.iconsBox {
     float: right;
-    margin-top: -65px;
+    font-size: 16px;
+    font-weight: normal;
+    margin-top: -50px;
+    text-align: center;
 }
-.xmlLink{
-    margin-right: 70px;
+.iconsBox > a, .iconsBox > span{
+    text-align: center;
+    float: right;
+    margin: 0 15px;
+}
+.iconsBox .linked{
+    font-size: 25px;
+    margin-top: 3px;
 }
 
 .export_matrix img {
@@ -1490,8 +1496,7 @@ and (-webkit-min-device-pixel-ratio: 2) {
 
 .patient_forms img, .xmlLink img {
     height: 30px;
-    margin-left: 36%;
-    display: block;
+    width: auto;
 }
 
 .export_matrix p {

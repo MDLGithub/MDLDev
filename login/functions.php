@@ -3081,6 +3081,14 @@ function dmdl_refresh($db){
                 $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_NotCovered][Date]' value='" . convertDmdlDate($res['TC_NotCovered']) . "' />";
             }
             //7.1 waiting for billed ststus updated from API
+            if (isset($res['BillingDate']) && !empty($res['BillingDate'])) {
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][BillingDate][Date]' value='" . convertDmdlDate($res['BillingDate']) . "' />";
+            }
+            if (isset($res['Test_Paid']) && !empty($res['Test_Paid'])) {
+                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Test_Paid]' value='" . $res['Test_Paid'] . "' />";
+            }
+            
+            
             //8.1 Legal/AR Review: In Progress: Legal Review
             if (isset($res['Legal_InProgress_Review']) && !empty($res['Legal_InProgress_Review'])) {
                 $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Legal_InProgress_Review][Date]' value='" . convertDmdlDate($res['Legal_InProgress_Review']) . "' />";
