@@ -2547,7 +2547,7 @@ function dmdl_refresh($db){
         return;
     }    
     //Process GET variables to get $start value for LIMIT
-    $per_page=50;
+    $per_page=45;
     //getting total number of records 
     $res=$db->row("SELECT count(Guid_mdl_dmdl) as count FROM tbl_mdl_dmdl WHERE ToUpdate='Y' AND Linked='N'");
     $total_rows=$res['count'];
@@ -3148,7 +3148,7 @@ function dmdl_refresh($db){
     $content .= "</form>";
     
     if(isset($PAGES)){
-    $content .= "<div class='refreshPaging'>Pages: "; 
+    $content .= "<div class='refreshPaging'>"; 
     foreach ($PAGES as $i => $link){
         if ($i == $CUR_PAGE){
             $content .= "<span class='current'>".$i."</span>";
