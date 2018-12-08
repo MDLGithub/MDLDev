@@ -305,6 +305,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     <?php if($role=='Admin' && isset($patientLoaded) && $patientLoaded=='Y'){ ?>
                     <span class="circleA">
                         <img src="./images/icon_circle_A.png" />
+                        <p>Auto created</p>
                     </span>
                     <?php } ?>
                     <?php if($role=='Admin' && isset($patientLinked)){ ?>                    
