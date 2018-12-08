@@ -309,9 +309,15 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     <?php } ?>
                     <?php if($role=='Admin' && isset($patientLinked)){ ?>                    
                         <?php if($patientLinked=='Y'){ ?>
-                        <a class="linked" href="<?php echo $patientInfoUrl.'&linked=N'; ?>"><i class="fas fa-link"></i></a>
+                        <a class="linked" href="<?php echo $patientInfoUrl.'&linked=N'; ?>">
+                            <i class="fas fa-link"></i>
+                            <p>Link to dMDL</p>
+                        </a>
                         <?php } else { ?>
-                        <a class="linked" href="<?php echo $patientInfoUrl.'&linked=Y'; ?>"><i class="fas fa-unlink"></i></a>
+                        <a class="linked" href="<?php echo $patientInfoUrl.'&linked=Y'; ?>">
+                            <i class="fas fa-unlink"></i>
+                            <p>Disconnect from dMDL</p>
+                        </a>
                         <?php } ?> 
                     <?php } ?>
                 </div>

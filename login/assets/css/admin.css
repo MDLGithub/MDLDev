@@ -1478,6 +1478,13 @@ and (-webkit-min-device-pixel-ratio: 2) {
     margin-top: -50px;
     text-align: center;
 }
+.iconsBox p{
+    font-size: 16px;
+}
+.iconsBox i{
+    height: 33px;
+    display: inline-block;
+}
 .iconsBox > a, .iconsBox > span{
     text-align: center;
     float: right;
