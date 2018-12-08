@@ -890,11 +890,9 @@ if(isset($_POST['dmdlUpdate'])){
                             //update or insert payor and revenue data                            
                             if(isset($data['invoiceDetail']) && !empty($data['invoiceDetail'])){
                                 updateOrInsertRevenue($db, $Guid_user, $data['invoiceDetail']);
-                            }
-                                
+                            }                               
 
                             $statuses = $_POST["dmdl"]["$mdlNum"]["statuses"];
-
                             //insert suatuses
                             $statusLogData = array(
                                 'Guid_user' =>  $Guid_user,
@@ -916,12 +914,13 @@ if(isset($_POST['dmdlUpdate'])){
                             if(!empty($getSalesrep)){
                                 $statusLogData['Guid_salesrep'] = $getSalesrep['Guid_salesrep'];
                                 $statusLogData['salesrep_fname'] = $getSalesrep['first_name'];
-                                $statusLogData['salesrep_lname'] = $accountInfo['last_name'];
+                                $statusLogData['salesrep_lname'] = $getSalesrep['last_name'];
                             }
                             //update tbl_mdl_dmdl UpdateDatetime   
                             updateTable($db, 'tbl_mdl_dmdl', array('UpdateDatetime'=> date('Y-m-d h:i:s'),'Linked'=>'Y'), array('Guid_mdl_dmdl'=>$Guid_mdl_dmdl));
-    
-                            $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum,$data['Guid_mdl_dmdl']);
+                            $csvMdlNumber = $data['csv_mdlnumber'];
+                            $invoceData = isset($data['invoiceDetail'])?$data['invoiceDetail']:array();
+                            $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum,$data['Guid_mdl_dmdl'], $invoceData, $csvMdlNumber);
 
                         } 
                     } else { //update 
@@ -1034,6 +1033,12 @@ if(isset($_POST['dmdlUpdate'])){
                             $apiProviderData = $data['Physician'];
                             $Guid_provider = updateOrInsertProvider($db,$accountNum,$Guid_account,$Guid_user,$apiProviderData);
                         }
+                        
+                        //update or insert payor and revenue data                            
+                        if(isset($data['invoiceDetail']) && !empty($data['invoiceDetail'])){
+                            updateOrInsertRevenue($db, $Guid_user, $data['invoiceDetail']);
+                        }
+                        
                         $mdlNum = $data['mdlnumber'];
                         if( isset($_POST["dmdl"]["$mdlNum"]["statuses"])){
                             $statuses = $_POST["dmdl"]["$mdlNum"]["statuses"];
@@ -1062,8 +1067,9 @@ if(isset($_POST['dmdlUpdate'])){
                             //var_dump($statusLogData);
                             //update tbl_mdl_dmdl UpdateDatetime   
                             updateTable($db, 'tbl_mdl_dmdl', array('UpdateDatetime'=> date('Y-m-d h:i:s'),'Linked'=>'Y'), array('Guid_mdl_dmdl'=>$Guid_mdl_dmdl));
-                            
-                            $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum,$data['Guid_mdl_dmdl']);
+                            $invoceData = isset($data['invoiceDetail'])?$data['invoiceDetail']:array();
+                            $csvMdlNumber = $data['csv_mdlnumber'];
+                            $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum,$data['Guid_mdl_dmdl'], $invoceData, $csvMdlNumber);
                         }
                     }                        
                 } 

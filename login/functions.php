@@ -1526,7 +1526,7 @@ function saveStatusLog($db,$statusIDs, $statusLogData){
     
     $i = 1;
     foreach ($statusIDs as $k=>$status){        
-        $statusLogData ['Guid_status'] = $status;
+        $statusLogData['Guid_status'] = $status;
 
         if($i==1){
             $insertStatusLog = insertIntoTable($db, 'tbl_mdl_status_log', $statusLogData);
@@ -3087,11 +3087,7 @@ function dmdl_refresh($db){
             //7.1 waiting for billed ststus updated from API
             if (isset($res['BillingDate']) && !empty($res['BillingDate'])) {
                 $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][BillingDate][Date]' value='" . convertDmdlDate($res['BillingDate']) . "' />";
-            }
-            if (isset($res['Test_Paid']) && !empty($res['Test_Paid'])) {
-                $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Test_Paid]' value='" . $res['Test_Paid'] . "' />";
-            }
-            
+            }            
             
             //8.1 Legal/AR Review: In Progress: Legal Review
             if (isset($res['Legal_InProgress_Review']) && !empty($res['Legal_InProgress_Review'])) {
@@ -3242,9 +3238,8 @@ function updateOrInsertRevenue($db, $Guid_user, $invoiceDetails){
     
 }
 
-function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl){    
+function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl, $invoiceDetails, $csvMdlNumber){    
     
-    //var_dump($data);
     $statusLogData = array(
         'Loaded' => 'Y',
         'Guid_user' => $data['Guid_user'],
@@ -3507,6 +3502,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
+    $testCancelledStat = FALSE;
     //6.1 Test Cancelled: MDL Out-of-Network/High Patient Responsibility
     if(isset($statuses['TC_MDLOON']['Date'])){
         $statusLogData['Date'] = $statuses['TC_MDLOON']['Date'];
@@ -3514,6 +3510,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         if(isValidStatusGroup($db,$status_TC_MDLOON_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_MDLOON_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
+            $testCancelledStat = TRUE;
         }
     }
     //6.2 Test Cancelled: MDL In-Network/High 
@@ -3523,6 +3520,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         if(isValidStatusGroup($db,$status_TC_MDLIN_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_MDLIN_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
+            $testCancelledStat = TRUE;
         }
     }
     //6.3 Test Cancelled: Physician Cancelled Testing
@@ -3532,6 +3530,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         if(isValidStatusGroup($db,$status_TC_phC_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_phC_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
+            $testCancelledStat = TRUE;
         }
     }
     //6.4 Test Cancelled: Incomplete Genetic Counselling
@@ -3541,6 +3540,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         if(isValidStatusGroup($db,$status_TC_IncompleteGC_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_IncompleteGC_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
+            $testCancelledStat = TRUE;
         }
     }
     //6.5 Test Cancelled: Patient refused to sign consent form
@@ -3550,6 +3550,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         if(isValidStatusGroup($db,$status_TC_PatientRefused_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_PatientRefused_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
+            $testCancelledStat = TRUE;
         }
     }
     //6.6 Test Cancelled: Replaced by a new MDL
@@ -3559,6 +3560,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         if(isValidStatusGroup($db,$status_TC_NewMDL_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_NewMDL_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
+            $testCancelledStat = TRUE;
         }
     }
     //6.7 Test Cancelled: Cancelled following Genetic Counselor Consultation
@@ -3568,6 +3570,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         if(isValidStatusGroup($db,$status_TC_GC_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_GC_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
+            $testCancelledStat = TRUE;
         }
     }
     //6.8 Test Cancelled: Patient did not want to assume OOP costs: Out-Of-Network: Humana
@@ -3577,6 +3580,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         if(isValidStatusGroup($db,$status_TC_Humana_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_Humana_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
+            $testCancelledStat = TRUE;
         }
     }
     //6.9 Test Cancelled: Patient did not want to assume OOP costs: Other Insurance
@@ -3586,6 +3590,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         if(isValidStatusGroup($db,$status_TC_OtherInsurance_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_OtherInsurance_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
+            $testCancelledStat = TRUE;
         }
     }
     //6.10 Test Cancelled: Patient did not want to assume OOP costs: Deductible
@@ -3595,6 +3600,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         if(isValidStatusGroup($db,$status_TC_Deductible_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_Deductible_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
+            $testCancelledStat = TRUE;
         }
     }
     //6.11 Test Cancelled: Patient did not want to assume OOP costs: No Coverage due to Lack of MN
@@ -3604,6 +3610,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         if(isValidStatusGroup($db,$status_TC_NoCoverage_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_NoCoverage_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
+            $testCancelledStat = TRUE;
         }
     }
     //6.12 Test Cancelled: Patient did not want to assume OOP costs: Not a Covered Benefit
@@ -3613,7 +3620,12 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         if(isValidStatusGroup($db,$status_TC_NotCovered_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_NotCovered_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
+            $testCancelledStat = TRUE;
         }
+    }
+    //if Any of Test Cancelled Statuses updated set ToUpdate = 'N' in tbl_mdl_dmdl
+    if($testCancelledStat){        
+        updateTable($db, 'tbl_mdl_dmdl', array('ToUpdate'=>'N'), array('MDLNumber'=>$csvMdlNumber));
     }
     
     //7 Test Result Released
@@ -3626,7 +3638,45 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         }
     }
     
-    //8.1 Billed statuses don't added yet
+    //8.1 Billed statuses
+    if(isset($statuses['BillingDate']['Date'])){
+        $statusLogData['Date'] = $statuses['Testing_Complete']['Date'];
+        $status_AwaitingPayment_IDs = array('32','52');  //Billed: Awaiting Payment
+        if(isValidStatusGroup($db,$status_AwaitingPayment_IDs, $Guid_user, $statusLogData['Date'] )){
+            saveStatusLog($db, $status_AwaitingPayment_IDs, $statusLogData);
+            updateCurrentStatusID($db, $data['Guid_patient']);
+        }
+        /* Checking for Billed: Payment Received
+         * When all of the CPT codes have payments (and not 0.00), 
+         * and the total of the payments is > 0, 
+         * then the status of Payment Received could be added. 
+         * The date of that status would be the latest CPT payment date.
+         */
+        $invoiceArray = array();
+        if(!empty($invoiceDetails)){    
+            
+            $invoiceArray = $invoiceDetails;
+            if(!isset($invoiceDetails[0])){
+                $invoiceArray[0] = $invoiceDetails;
+            }   
+            //for calculateing sum of revenue amount
+            $sum = 0;            
+            foreach ($invoiceArray as $k=>$v){
+                $DatePaid = $v['DatePaid'];
+                $sum += $v['amount'];              
+            } 
+            if($sum > 0){
+                $statusLogData['Date'] = $DatePaid;
+                $status_PaymentReceived_IDs = array('32','53');  //Billed: Payment Received
+                if(isValidStatusGroup($db,$status_PaymentReceived_IDs, $Guid_user, $statusLogData['Date'] )){                                        
+                    saveStatusLog($db, $status_PaymentReceived_IDs, $statusLogData);
+                    updateCurrentStatusID($db, $data['Guid_patient']);
+                    //if Billed: Payment Received, set ToUpdate = 'N' in tbl_mdl_dmdl
+                    updateTable($db, 'tbl_mdl_dmdl', array('ToUpdate'=>'N'), array('MDLNumber'=>$csvMdlNumber));
+                }
+            }            
+        }
+    }
     
     //9.1 Legal/AR Review: In Progress: Legal Review
     if(isset($statuses['Legal_InProgress_Review']['Date'])){
