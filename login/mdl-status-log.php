@@ -146,7 +146,7 @@ require_once ('navbar.php');
 ?>
 <div id="patient-info-box" class="modalBlock">
     <div class="contentBlock">
-        <a class="close" href="<?php echo SITE_URL."/user-management.php"; ?>"></a>        
+        <a class="close" href="<?php echo SITE_URL."/user-management.php"; ?>">X</a>        
         <h2 class="text-center">User Info</h2>
         <form action="" method="POST" enctype="multipart/form-data"> 
             <div class="row">

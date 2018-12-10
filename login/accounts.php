@@ -738,7 +738,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
 
 <div id="add-account-provider-box" class="modalBlock <?php echo $providerBoxClass; ?>">
     <div class="contentBlock">
-        <a class="close" href="<?php echo SITE_URL."/accounts.php?account_id=".$_GET['account_id']; ?>"></a>
+        <a class="close" href="<?php echo SITE_URL."/accounts.php?account_id=".$_GET['account_id']; ?>">X</a>
         <?php if(isset($message)){ ?>
         <div class="error-text"><?php echo $message; ?></div>
         <?php } ?>

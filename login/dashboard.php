@@ -520,18 +520,7 @@ $num_estimates = $qualify_requests;
 if(isset($_GET['resetDmdlData']) && $_GET['resetDmdlData']=='1'){
     if($role=='Admin'){
         //remove Loaded Data
-        $loadedDataTables = array('tbluser','tblpatient', 'tblaccount', 
-                                    'tblprovider', 'tbl_mdl_number', 'tbl_mdl_status_log', 
-                                    'tbl_mdl_payors', 'tbl_revenue', 'tbl_mdl_cpt_code'
-                                );
-        foreach ($loadedDataTables as $k=>$tableName){
-            $db->query("DELETE FROM $tableName WHERE Loaded='Y'");
-        } 
-        //Reset Linked Flags
-        $linkedDataTables = array('tbl_mdl_dmdl','tblpatient');
-        foreach ($linkedDataTables as $k=>$tableName){
-            $db->query("UPDATE $tableName SET Linked='N' WHERE Linked='Y'");
-        } 
+        resetDmdlLoadedData($db);        
         
         Leave(SITE_URL."/dashboard.php");
     }
@@ -796,6 +785,32 @@ if(isset($_GET['resetDmdlData']) && $_GET['resetDmdlData']=='1'){
 
 <?php 
 if(isset($_POST['dmdlUpdate'])){
+    
+    /* 
+     * When Update is clicked 
+     * update statuses and Payment information 
+     * for those that are already linked and not showing on the screen
+     * Those should be updated until the status is Payment received or Test Cancelled.
+    */ 
+    $linkedPatientsQ = "SELECT 
+                            p.*,
+                            dmdl.Guid_mdl_dmdl,
+                            dmdl.MDLNumber as csv_mdlnumber,
+                            dmdl.ToUpdate
+                        FROM `tblpatient` p
+                        LEFT JOIN `tbl_mdl_dmdl` dmdl ON dmdl.PatientID=p.Guid_dmdl_patient
+                        WHERE p.Linked = 'Y' 
+                            AND p.Guid_dmdl_patient <> '' 
+                            AND p.Guid_dmdl_physician <> '' 
+                            AND p.dMDL_mdl_number <> '' 
+                            AND dmdl.ToUpdate = 'Y'";
+    $linkedPatients = $db->query($linkedPatientsQ);
+    var_dump($linkedPatients);
+    if(!empty($linkedPatients)){
+        foreach ($linkedPatients as $k=>$patientInfo){
+            updatedMDLLinkedPatients($db,$patientInfo);
+        }
+    }
     
     if(isset($_POST['dmdl']['selected'])){
         foreach ($_POST['dmdl']['selected'] as $mdlNum=>$v){
@@ -1083,7 +1098,7 @@ if(isset($_POST['dmdlUpdate'])){
 <?php if( (isset($_GET['refresh'])) && $_GET['refresh']=="1" ){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock refreshModal">
-        <a class="close" href="<?php echo SITE_URL."/dashboard.php"; ?>"></a> 
+        <a class="close" href="<?php echo SITE_URL."/dashboard.php"; ?>">X</a> 
         <h5 class="title">
             Refresh Results
         </h5>
