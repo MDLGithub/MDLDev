@@ -213,7 +213,7 @@ if(isset($_GET['field_id'])){
 ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock manageStatsModal">
-        <a class="close" href="<?php echo $statsConfigUrl; ?>">X</a>        
+        <a class="close" href="<?php echo $statsConfigUrl; ?>"></a>        
         
         <h5 class="title">
             Config field - <?php echo $fieldConfigTitle; ?>

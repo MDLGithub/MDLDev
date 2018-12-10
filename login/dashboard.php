@@ -1098,7 +1098,7 @@ if(isset($_POST['dmdlUpdate'])){
 <?php if( (isset($_GET['refresh'])) && $_GET['refresh']=="1" ){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock refreshModal">
-        <a class="close" href="<?php echo SITE_URL."/dashboard.php"; ?>">X</a> 
+        <a class="close" href="<?php echo SITE_URL."/dashboard.php"; ?>"></a> 
         <h5 class="title">
             Refresh Results
         </h5>

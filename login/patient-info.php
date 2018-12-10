@@ -1298,7 +1298,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 <?php if( (isset($_GET['edit_patient_info'])) && $_GET['edit_patient_info']=="1" ){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock patientInfo">
-        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a> 
+        <a class="close" href="<?php echo $patientInfoUrl; ?>"></a> 
         <h5 class="title">
             Update Patient Info
         </h5>
@@ -1464,7 +1464,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 <?php if($role=='Admin' && (isset($_GET['add_revenue']) || (isset($_GET['edit_revenue'])&& $_GET['edit_revenue']!="")) ){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock">
-        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>        
+        <a class="close" href="<?php echo $patientInfoUrl; ?>"></a>        
         
         <h5 class="title">
             Add Revenue
@@ -1549,7 +1549,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 <?php if(isset($_GET['manage_status']) && $_GET['manage_status']=='add' && $role=='Admin'){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock">
-        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>        
+        <a class="close" href="<?php echo $patientInfoUrl; ?>"></a>        
         
         <h5 class="title">
             Add New Status
@@ -1636,7 +1636,7 @@ if(isset($_POST['edit_statuses'])){
 <?php if(isset($_GET['manage_status']) && $_GET['manage_status']=='edit' && $role=='Admin'){ ?>
 <div id="manage-status-modal" class="modalBlock editStausesModal">
     <div class="contentBlock">
-        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>       
+        <a class="close" href="<?php echo $patientInfoUrl; ?>"></a>       
         
         <h5 class="title">
             Edit Statuses
@@ -1687,7 +1687,7 @@ if(isset($_POST['edit_statuses'])){
 <?php if(isset($_GET['manage_note_category']) && $_GET['manage_note_category']=='add' && $role=='Admin'){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock">
-        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>        
+        <a class="close" href="<?php echo $patientInfoUrl; ?>"></a>        
         
         <h5 class="title">
             Add Note Category
@@ -1752,7 +1752,7 @@ if(isset($_POST['edit_categories'])){
 <?php if(isset($_GET['manage_note_category']) && $_GET['manage_note_category']=='edit' && $role=='Admin'){ ?>
 <div id="manage-status-modal" class="modalBlock editStausesModal">
     <div class="contentBlock">
-        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>       
+        <a class="close" href="<?php echo $patientInfoUrl; ?>"></a>       
         
         <h5 class="title">
             Edit Note Categories
@@ -1866,7 +1866,7 @@ if(isset($_POST['edit_categories'])){
 ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock">
-        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>        
+        <a class="close" href="<?php echo $patientInfoUrl; ?>"></a>        
         
         <h5 class="title"><?php echo $title;?> </h5>
         <div class="content">
@@ -1957,7 +1957,7 @@ if(isset($_POST['edit_categories'])){
 ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock">
-        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>        
+        <a class="close" href="<?php echo $patientInfoUrl; ?>"></a>        
         
         <h5 class="title"><?php echo $title;?> </h5>
         <div class="content">

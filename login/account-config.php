@@ -669,7 +669,7 @@ if(isset($_POST['edit_categories'])){
 <?php if( (isset($_GET['manageCategories'])) && $_GET['manageCategories']=="1" ){ ?>
 <div id="manage-status-modal" class="modalBlock editStausesModal">
     <div class="contentBlock ">
-        <a class="close" href="<?php echo $accountConfigUrl; ?>">X</a> 
+        <a class="close" href="<?php echo $accountConfigUrl; ?>"></a> 
         <h5 class="title">
             Edit Categories
         </h5>
@@ -720,7 +720,7 @@ if(isset($_POST['add_new_category'])){
 <?php if( (isset($_GET['addCategory'])) && $_GET['addCategory']=="1" ){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock ">
-        <a class="close" href="<?php echo $accountConfigUrl; ?>">X</a> 
+        <a class="close" href="<?php echo $accountConfigUrl; ?>"></a> 
         <h5 class="providersTitle">Add New Category</h5>
         <div class="content">
                     
