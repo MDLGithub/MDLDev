@@ -47,9 +47,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 <link rel="stylesheet" href="assets/eventschedule/css/bootstrap-datetimepicker.min.css">
 <script src="assets/eventschedule/js/jquery.min.js"></script>
 <script src="assets/eventschedule/js/jquery-ui.min.js"></script>
-<!-- <script src="assets/eventschedule/js/moment.min.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/locale/af.js"></script>
 <script src="assets/eventschedule/js/fullcalendar.min.js"></script>
 <script src="assets/eventschedule/js/bootstrap-datetimepicker.min.js"></script>
+
 
 <style>
     .col-md-1 { width: 10.333333% !important;}
@@ -349,7 +350,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
 </style>
 <script>
-    
+
     Date.prototype.getUnixTime = function() { return this.getTime()/1000|0 };
     if(!Date.now) Date.now = function() { return new Date(); }
     Date.time = function() { return Date.now().getUnixTime(); }
@@ -407,13 +408,15 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
         localStorage.setItem('salesrepValue', <?php echo (isset($_GET['salerepId']) && $_GET['salerepId'] != 0) ?  $_GET['salerepId'] : 0 ?>);
         localStorage.setItem('accountValue', <?php echo (isset($_GET['accountId']) && $_GET['accountId'] != 0) ?  $_GET['accountId'] : 0 ?>);
-        var d = new Date();
+        var unixTime = new Date().getUnixTime();
+        var d = new Date(unixTime * 1000);
         var evtsDate = d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate();
         evtsDate = evtsDate.toString();
         <?php //if(isset($_GET['salerepId']) || isset($_GET['accountId'])): ?>
         if (localStorage.evtsDate) {
             evtsDate = (localStorage.evtsDate).toString();
         }
+
         <?php //endif; ?>
         var calView = "basicWeek";
         if(window.localStorage.calView){
@@ -479,14 +482,15 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             selectHelper: true,
             editable: false,
             eventOverlap: false,
+            firstDay: 0,
             contentHeight: 'auto',
             defaultDate: evtsDate,
             defaultView: calView,
+
             dayRender: function (date, cell) {
                 var today = new Date();
-                var dd = today.getDate();
+                var dd = today.getDay();
                 var mm = today.getMonth() + 1; //January is 0!
-
                 var yyyy = today.getFullYear();
                 if (dd < 10) {
                     dd = '0' + dd;
@@ -501,22 +505,26 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     cell.css("background-size", "100% 100%");
                 }
             },
+
             viewRender: function(view, element) {
+                moment.tz.setDefault("Etc/GMT+0");
                 $("#salesrepfilter").html("<option value='0'>Generic Consultant</option>");
                 $("#accountfilter").html("<option value='0'>Account</option>");
                 if(view.type == "basicWeek"){
                     window.setTimeout(function(){
                         $("#calendar").find('.fc-toolbar > div.fc-center > h2').empty().append(
-                            "Week of "+moment(view.start._d).format('MMMM D, YYYY'));
+                            "Week of " + moment(view.start._d).format('MMMM D, YYYY'));
                     },0);
                 }
             },
             eventClick: function (event, jsEvent, view)
             {
+
                 var moment = $.datepicker.formatDate('yy-mm-dd', new Date());
                 // Get the modal
                 var modal = document.getElementById('myModal');
                 var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
+
                 var thisdate = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
                 if (moment <= thisdate) {
                     $('#updateEvent').find('input, #eventupdate, select').prop("disabled", false);
@@ -567,8 +575,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     $("div.modalaccounttype").hide();
                     $("div.modalhealthcare").show();
                 }
-                var today = new Date();
-                var currentDate = today.getDate();
+                var today = new Date().getUnixTime();
+                var currentDate = today.getDate().getUnixTime();
                 var eventDate = $.fullCalendar.formatDate(event.start, "DD");
                 var parsedNow =  new Date(today).getUnixTime();
                 var parsedEventTime = new Date(event.start).getUnixTime();
@@ -619,18 +627,16 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 $('.show-stats').off('click');
                 var today = new Date();
                 var currentDate = today.getDate();
-                                
                 var eventDate = $.fullCalendar.formatDate(event.start, "DD");
 
                 var parsedNow =  new Date(today).getUnixTime();
                 var parsedEventTime = new Date(event.start).getUnixTime();
-                
+
                 var time = $.fullCalendar.formatDate(event.start, "hh:mm a");
                 var logo = "";
                 var account = "";
                 var name = "";
                 var salesrep = "";
-                
                 if (event.account)
                     account = event.account + ' - ';
 
@@ -765,11 +771,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         }
                     });
                 }
-
-                var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1, selectedDate: $.fullCalendar.formatDate(event.start, "Y-M-DD")};     
+                var eventData = { action: 'getStates', account: event.account, regitered:28, qualified: 29, completed: 36,  submitted: 1, selectedDate: $.fullCalendar.formatDate(event.start, "Y-M-DD")};
                 var today = new Date();
                 var parsedNow =  new Date(today).getUnixTime();
-                var parsedEventTime = new Date(event.start).getUnixTime();  
+                var parsedEventTime = new Date(event.start).getUnixTime();
                 //if(event.title == 'BRCA Day'){
                 $.ajax({
                     url: "ajaxHandlerEvents.php",
@@ -831,6 +836,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     evtdata = {salesreps:null, acc: uniqueAccString, startdate: startdate, enddate:enddate, action:'eventStats'};
                 }
                 localStorage.setItem('evtsDate', startdate );
+
                 window.localStorage.setItem('calView', view.name );
                 $.ajax({
                     type : 'POST',
@@ -1777,6 +1783,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 $clause = "  ORDER BY first_name, last_name";
 $salesrep = $db->selectAll('tblsalesrep', $clause);
 ?>
+
 <main class="wider-main">
     <?php if ($thisMessage != "") { ?>
         <section id="msg_display" class="show success">
@@ -2163,6 +2170,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
         </div>
     </div>
 </main>
+
 <button id="action_palette_toggle" class="toggle_move"><i class="fa fa-2x fa-angle-right"></i></button>
 <script>
     $(function () {
