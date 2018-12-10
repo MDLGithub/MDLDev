@@ -555,7 +555,7 @@ require_once ('navbar.php');
 <div id="manage-status-modal" class="modalBlock">
     <div class="contentBlock">
         
-        <a class="close" href="<?php echo SITE_URL."/user-management.php"; ?>">X</a>        
+        <a class="close" href="<?php echo SITE_URL."/user-management.php"; ?>"></a>        
         <h5 class="providersTitle text-center"><?php echo $modalTitle; ?></h5>
         <div class="content">
             <?php if($message!=""){ ?>
@@ -749,7 +749,7 @@ require_once ('navbar.php');
 <!-- Unlock user and show logs modal Box -->
 <div id="login-attempt-log-box" class="modalBlock">
     <div class="contentBlock">
-        <a class="close">X</a>        
+        <a class="close"></a>        
         <h2 class="text-center">Login Attempts</h2>
         <h2 id="locked-user-email" class="pB-10"></h2>       
         <table class="table">

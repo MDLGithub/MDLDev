@@ -202,7 +202,7 @@ require_once ('navbar.php');
             <?php $parent = isset($_GET['parent'])?$_GET['parent']:""; ?>
             <h1 class="title-st1">
                 Status: <?php echo getStatusName($db, $_GET['status_id'], $parent); ?>
-                <a class="pull-right" href="<?php echo SITE_URL."/mdl-stat-details-config.php"?>"  style="font-size:30px; margin-right: 30px;">
+                <a class="pull-right" href="<?php echo SITE_URL."/mdl-stat-details-config.php"?>"  style="font-size:30px; margin-right: 30px;position:absolute;right:0;">
                     <i class="fas fa-cogs "></i>
                 </a>
             </h1>
