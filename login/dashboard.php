@@ -519,11 +519,11 @@ $qualify_requests = $db->query($sqlTbl);
 
 $num_estimates = $qualify_requests;
 
+//closed for now, maybe will be used or removed at all 
 if(isset($_GET['resetDmdlData']) && $_GET['resetDmdlData']=='1'){
     if($role=='Admin'){
         //remove Loaded Data
-        resetDmdlLoadedData($db);        
-        
+        //resetDmdlLoadedData($db);  
         Leave(SITE_URL."/dashboard.php");
     }
 }
@@ -595,9 +595,9 @@ if(isset($_GET['resetDmdlData']) && $_GET['resetDmdlData']=='1'){
                         <span class="dmdlRefresh">  
                             <a title="Open dMDL Screen." href="<?php echo SITE_URL.'/dashboard.php?refresh=1'; ?>" class="refresh" type="submit" name="dmdlRefresh"><i class="fas fa-sync-alt"></i></a>
                         </span>     
-                        <span class="dmdlRefresh">  
+<!--                        <span class="dmdlRefresh">  
                             <a title="Reset dMDL Loaded Data." href="<?php echo SITE_URL.'/dashboard.php?resetDmdlData=1'; ?>" class="refresh" type="submit" name="dmdlRefresh"><i class="fa fa-clock"></i></a>
-                        </span>  
+                        </span>  -->
                     </form>
                     <div class="uploadMsg">
                     <?php if($uploadMessage!=""){ echo $uploadMessage; }?>
