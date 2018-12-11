@@ -948,57 +948,58 @@ if(isset($_POST['dmdlUpdate'])){
                         $Guid_user = $thisPatient['Guid_user'];    
                         $Guid_patient = $thisPatient['Guid_patient'];
                         //update patent table
-                        $patientData = array();
                         $patientData['dMDL_mdl_number'] = $data['mdlnumber'];
-                        if($thisPatient['Guid_dmdl_patient']==''){
-                            $patientData['Guid_dmdl_patient'] = $data['Guid_PatientId'];
-                        }
-                        if($thisPatient['Guid_dmdl_physician']==''){
-                            $patientData['Guid_dmdl_physician'] = $data['Physician']['GUID_PhysicianID'];
-                        }
-                        if($thisPatient['account_number']==''){
+                        $patientData['Guid_dmdl_patient'] = $data['Guid_PatientId'];
+                        $patientData['Guid_dmdl_physician'] = $data['Physician']['GUID_PhysicianID'];
+                        
+                        if(isset($data['account']['number']) && $thisPatient['accountNumber']==''){
                             $patientData['accountNumber'] = $data['account']['number'];
                         }
-                        if($thisPatient['firstname_enc']==''){
+                        if(isset($data['firstname']) && $thisPatient['firstname_enc']==''){
                             $patientData['firstname_enc'] = $data['firstname'];
                         }
-                        if($thisPatient['lastname_enc']==''){
+                        if(isset($data['lastname']) && $thisPatient['lastname_enc']==''){
                             $patientData['lastname_enc'] = $data['lastname'];
                         }
-                        if($thisPatient['ethnicity']==''){
+                        if(isset($data['ethnicity']) && $thisPatient['ethnicity']==''){
                             $patientData['ethnicity'] = $data['ethnicity'];
                         }
-                        if($thisPatient['dob']==''){
+                        if(isset($data['dob']) && $thisPatient['dob']==''){
                             $patientData['dob'] = $data['dob'];
                         }
-                        if($thisPatient['phone_number']==''){
+                        if(isset($data['phone_number']) && $thisPatient['phone_number']==''){
                             $patientData['phone_number'] = $data['phone_number'];
                         }
-                        if($thisPatient['phone_number_home']==''){
+                        if(isset($data['phone_number_home']) && $thisPatient['phone_number_home']==''){
                             $patientData['phone_number_home'] = $data['phone_number_home'];
                         }
-                        if($thisPatient['gender']==''){
+                        if(isset($data['gender']) && $thisPatient['gender']==''){
                             $patientData['gender'] = $data['gender'];
                         }
-                        if($thisPatient['address']==''){
+                        if(isset($data['address']) && $thisPatient['address']==''){
                             $patientData['address'] = $data['address'];
                         }
-                        if($thisPatient['address1']==''){
+                        if(isset($data['address1']) && $thisPatient['address1']==''){
                             $patientData['address1'] = $data['address1'];
                         }
-                        if($thisPatient['city']==''){
+                        if(isset($data['city']) && $thisPatient['city']==''){
                             $patientData['city'] = $data['city'];
                         }
-                        if($thisPatient['state']==''){
+                        if(isset($data['state']) && $thisPatient['state']==''){
                             $patientData['state'] = $data['state'];
                         }
-                        if($thisPatient['zip']==''){
+                        if(isset($data['zip']) && $thisPatient['zip']==''){
                             $patientData['zip'] = $data['zip'];
                         }                        
                         if($thisPatient['physician_name']==''){
-                            $patientData['physician_name'] = $data['Physician']['FirstName']." ".$data['Physician']['LastName'];
+                            if(isset($data['Physician']['FirstName'])){
+                            $patientData['physician_name'] = $data['Physician']['FirstName'];
+                            }
+                            if(isset($data['Physician']['LastName'])){
+                            $patientData['physician_name'] .= " ".$data['Physician']['LastName'];
+                            }
                         }                                               
-                        if($thisPatient['insurance_name']==''){
+                        if(isset($data['Insurance_Company']) && $thisPatient['insurance_name']==''){
                             $patientData['insurance_name'] = $data['Insurance_Company'];
                         }
                         if($thisPatient['source']==''){
@@ -1079,7 +1080,7 @@ if(isset($_POST['dmdlUpdate'])){
                             if(!empty($getSalesrep)){
                                 $statusLogData['Guid_salesrep'] = $getSalesrep['Guid_salesrep'];
                                 $statusLogData['salesrep_fname'] = $getSalesrep['first_name'];
-                                $statusLogData['salesrep_lname'] = $accountInfo['last_name'];
+                                $statusLogData['salesrep_lname'] = $getSalesrep['last_name'];
                             }
                             //var_dump($statusLogData);
                             //update tbl_mdl_dmdl UpdateDatetime   
