@@ -4017,6 +4017,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
          * and the total of the payments is > 0, 
          * then the status of Payment Received could be added. 
          * The date of that status would be the latest CPT payment date.
+         * do not display Billed: Payment Received if any of the CPT code amounts come back as 0
          */
         $invoiceArray = array();
         if(!empty($invoiceDetails)){    
@@ -4026,12 +4027,15 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
                 $invoiceArray[0] = $invoiceDetails;
             }   
             //for calculateing sum of revenue amount
-            $sum = 0;            
+            $isPaymentReceived = TRUE;            
             foreach ($invoiceArray as $k=>$v){
                 $DatePaid = $v['DatePaid'];
-                $sum += $v['amount'];              
+                if($v['amount']<=0){
+                    $isPaymentReceived = FALSE;
+                    break;
+                }              
             } 
-            if($sum > 0){
+            if($isPaymentReceived){
                 $statusLogData['Date'] = $DatePaid;
                 $status_PaymentReceived_IDs = array('32','53');  //Billed: Payment Received
                 if(isValidStatusGroup($db,$status_PaymentReceived_IDs, $Guid_user, $statusLogData['Date'] )){                                        
