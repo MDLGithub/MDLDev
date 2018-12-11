@@ -3277,7 +3277,7 @@ function dmdl_refresh($db){
                     }
                     if(isset($invDetail['DatePaid'])){
                         $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][invoiceDetail][".$invKey."][DatePaid]' value='".convertDmdlDate($invDetail['DatePaid'])."' />";
-                    }
+                    } 
                     
                     $amount = 0;
                     if(isset($invDetail['Total_PtPaid'])){

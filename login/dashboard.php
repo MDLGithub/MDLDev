@@ -382,11 +382,13 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
                         p.*, AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') as firstname, AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') as lastname,
                         CONCAT (srep.first_name, ' ', srep.last_name) AS salesrep_name, srep.Guid_salesrep, 
                         u.email, u.marked_test, u.Guid_role, q.Date_created AS `date`, 
+                        mdlnum.mdl_number, mdlnum.Loaded as mdl_number_loaded,
                         '1' AS incomplete FROM tblqualify q  
                         LEFT JOIN tblaccount a ON q.account_number = a.account
                         LEFT JOIN tblaccountrep arep ON arep.Guid_account = a.Guid_account 
                         LEFT JOIN tblsalesrep srep ON srep.Guid_salesrep = arep.Guid_salesrep
                         LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user  
+                        LEFT JOIN tbl_mdl_number mdlnum ON p.Guid_user = mdlnum.Guid_user
                         LEFT JOIN tbluser u ON p.Guid_user = u.Guid_user"; 
             $where = " WHERE NOT EXISTS(SELECT * FROM tbl_ss_qualify qs WHERE q.Guid_qualify=qs.Guid_qualify) AND u.marked_test='0'";
         

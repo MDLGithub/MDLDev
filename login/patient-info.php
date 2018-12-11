@@ -305,7 +305,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     <?php if($role=='Admin' && isset($patientLoaded) && $patientLoaded=='Y'){ ?>
                     <span class="circleA">
                         <img src="./images/icon_circle_A.png" />
-                        <p>Auto created</p>
+                        <p>Auto Created</p>
                     </span>
                     <?php } ?>
                     <?php if($role=='Admin' && isset($patientLinked)){ ?>                    
@@ -330,11 +330,13 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             <?php echo $errorMsgMdlStats; ?>
                         <?php } ?>
                     </div>
+                    <?php if($qualifyResult['specimen_collected']!=='No'){ ?>
                     <div id="specimenRadioBox" class="<?php echo ($qualifyResult['specimen_collected']=='Yes')?'hidden':"";?>" >
                         <h5 class="inline">Specimen collected?</h5>                        
                         <a class="yes" href="<?php echo $patientInfoUrl.'&status_log=add&specimen=yes'?>"><i class="fas fa-tint"></i> Yes</a> &nbsp;&nbsp;
                         <a class="no" href="<?php echo $patientInfoUrl.'&status_log=add&specimen=no'?>"><i class="fas fa-tint-slash"></i> No</a>
                     </div>
+                    <?php } ?>
                     <?php if( isset($qualifyResult['specimen_collected']) && $qualifyResult['specimen_collected']!=NULL && $qualifyResult['specimen_collected']!='0' ){ ?>
                     <div id="mdlInfoBox" class="pInfo <?php echo ($qualifyResult['specimen_collected']!='Yes')?'hidden':"";?>">
                         <p>
@@ -779,7 +781,15 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                         }
                                     ?>
                                     <tr id="<?php echo $v['Guid_revenue']; ?>">
-                                        <td><?php echo (!preg_match("/0{4}/" , $v['date_paid'])) ? date('n/j/Y', strtotime($v['date_paid'])) : ""; ?></td>
+                                        <td>
+                                            <?php 
+                                            $datePaid = '-';
+                                            if($v['date_paid'] != ''){
+                                                $datePaid = (!preg_match("/0{4}/" , $v['date_paid'])) ? date('n/j/Y', strtotime($v['date_paid'])) : "";
+                                            }
+                                            echo $datePaid; 
+                                            ?>
+                                        </td>
                                         <td><?php echo $v['payor']; ?></td>
                                         <td><?php echo $v['code']; ?></td>
                                         <td><?php echo ($v['Loaded']=='Y')?'A':''; ?></td>
@@ -1400,6 +1410,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         <label>Event: </label>
                         <select name="source">
                             <option value="">Select Location</option>
+                            <option value="N/A">N/A</option>
                             <?php 
                             $sources = $db->selectAll('tblsource', ' ORDER BY `description` ASC');
                             foreach ($sources as $k=>$v){ 

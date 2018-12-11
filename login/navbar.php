@@ -52,7 +52,7 @@
                         <li><a href="<?php echo SITE_URL; ?>/user-management.php">User Management</a></li>
                     <?php } ?>
                     <?php if($role != 'Patient' && $role != 'Physician') { ?>    
-                        <li><a href="<?php echo SITE_URL; ?>/mdl-stats.php">MDL Stats</a></li>
+                        <li><a href="<?php echo SITE_URL; ?>/mdl-stats.php">MDL Statuses</a></li>
                     <?php } ?>
                 </ul>                
                 <a href="<?php echo SITE_URL; ?>/dashboard.php?logout=1" id="log_out" name="log_out" class="button red back"><strong>Log Out</strong></a>

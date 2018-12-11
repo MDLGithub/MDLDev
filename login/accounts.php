@@ -412,14 +412,14 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                         </div>
 
                         <div class="providersTable">
-                        <?php if($role!='Physician'){ ?>                        
+                        <?php //if($role!='Physician'){ ?>                        
                         <h4 id="physiciansListLabel" class="accounts">
                             Physicians       
                             <a href="<?php echo SITE_URL;?>/accounts.php?account_id=<?php echo $thisAccountID;?>&provider_guid=add" class="pull-right" id="add-account-provider">
                                 <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
                             </a>
                         </h4>
-                        <?php } ?>
+                        <?php //} ?>
                         <table class="table providersTable">
                             <thead>
                                 <tr>                        
