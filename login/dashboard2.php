@@ -547,6 +547,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         if (hide == undefined)  {
                             $('#chart').hide();
                             $('#piechart').hide();
+                            $('#topperformer').html('&#9726; No Submitter');
                         } else {
                             $('#chart').show();
                             $('#piechart').show();
@@ -600,14 +601,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                                 max:returndata.yaxis
                             },
                         });
+                        $('#topperformer').html(returndata.topperformer);
                         var viewModel = kendo.observable({
                             series: chart.options.series,
                             markerColor: function(e) {
                                 return e.get("visible") ? e.color : "grey";
                             }
                         });
-                        var topperformer = parseJSON(returndata.submitted);
-                        $('#topperformer').html(topperformer);
+
 
 
                         kendo.bind($("#legend"), viewModel);
