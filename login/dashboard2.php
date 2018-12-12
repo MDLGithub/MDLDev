@@ -205,7 +205,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
         $('#chart').hide();
         $('#piechart').hide();
-
+        $('#topsubmitter').html('&#9726; Nobody');
         createChart();
 
         $(".f2").width('95%');
@@ -599,7 +599,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             $('#chart').show();
                             $('#piechart').show();
                         }
-
+                        $('#topsubmitter').html('&#9726; Nobody');
                     }
                 });
                 <?php //endif; ?>
@@ -634,6 +634,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     data: chartParams,
                     dataType: 'json',
                     success: function(returndata){
+                        $('#topsubmitter').html(returndata.topsubmitter);
                         //console.log(returndata);
                         var chart = $("#chart").data("kendoChart");
                         //console.log(chart.options.series);
@@ -775,7 +776,6 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         $(".salesrep_list a").click(function(){
             var moment = $('#calendar').fullCalendar('getDate');
             localStorage.setItem('evtsDate',moment.format())
-            alert(localStorage.evtsDate);
         })
 
         // Whenever the user clicks on the "save" button
@@ -1260,6 +1260,7 @@ $clause = " ORDER BY Guid_salesrep";
 $salesrep = $db->selectAll('tblsalesrep', $clause);
 ?>
 <main class="full-width">
+    <?php var_dump($_SESSION); ?>
     <?php if ($thisMessage != "") { ?>
         <section id="msg_display" class="show success">
             <h4><?php echo $thisMessage; ?></h4>
@@ -1288,7 +1289,7 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 <div id="performance_section" class="col-md-8">
                 <div class="header week_stats" style="font-weight:bold;">    
                     <p>This Week's Stats</p>
-                    <p class="top_performer">&#9726; Top Performer</p>
+                    <p class="top_performer" id="topsubmitter">&#9726; Nobody</p>
                     <?php 
                         if($role == 'Sales Rep'):
                             echo "<p class = 'genetic_consultant'>&#9726; Me</p>";

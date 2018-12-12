@@ -274,18 +274,16 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart' && isset($_POST[
             'categories' =>  $regSalereps
         );
     }
-    if (isset($regSalereps)) {
-        $data['new'] = $regSalereps['0'];
-    }
-    if (!isset($submit['topsubmittedName'])) {
-        $data['topperformer'] = $regSalereps['0'];
+
+    if(!isset($submit['topsubmittedName'])){
+        $data['topsubmitter'] = '&#9726; Top Submitter: ' . $regSalereps['0'];
     } else {
-        $checkUser = explode(' ', $submit['topsubmittedName']);
-        $topSubmitter =  $submit['topsubmittedName'];
-        if ($checkUser['0'] == $_SESSION['user_name']) {
-            $data['topperformer'] = '&#9726; Top Submitter: Me';
+        $mySessionName = trim($_SESSION['user_name'], '');
+        $topPerformerName = explode(' ', $submit['topsubmittedName']);
+        if ($mySessionName == $topPerformerName['0']) {
+            $data['topsubmitter'] = '&#9726; Top Submitter: Me';
         } else {
-            $data['topperformer'] = '&#9726; Top Submitter: ' . $topSubmitter;
+            $data['topsubmitter'] = '&#9726; Top Submitter: ' . $submit['topsubmittedName'];
         }
     }
 
