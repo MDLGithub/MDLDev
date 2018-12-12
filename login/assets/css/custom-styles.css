@@ -1277,6 +1277,7 @@ and (orientation : landscape) {
         width: calc(100% - 18px);
         top: 0px;
         margin-top:23px;
+        table-layout: auto;
     }
 
     #dataTableHome tbody{
@@ -1749,6 +1750,7 @@ and (-webkit-min-device-pixel-ratio: 2) {
         position:absolute;
         width:calc(100% - 18px);
         margin-top: 25px;
+        table-layout: auto;
     }
 
     #dataTableHome tbody{
