@@ -1260,7 +1260,6 @@ $clause = " ORDER BY Guid_salesrep";
 $salesrep = $db->selectAll('tblsalesrep', $clause);
 ?>
 <main class="full-width">
-    <?php var_dump($_SESSION); ?>
     <?php if ($thisMessage != "") { ?>
         <section id="msg_display" class="show success">
             <h4><?php echo $thisMessage; ?></h4>
