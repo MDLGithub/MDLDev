@@ -3746,51 +3746,53 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
-    //3.10 Insurance Preauthorization: Physician Responsibility: New Requisition Required
+    
+    //3.10 Physician Responsibility: New Requisition Required
     if(isset($statuses['IP_PhysAct_NewReqRequired']['Date'])){
         $statusLogData['Date'] = $statuses['IP_PhysAct_NewReqRequired']['Date'];
-        $statusIP_PANRR_IDs = array('6','99','47');   // ????????????????????
+        $statusIP_PANRR_IDs = array('99','47'); 
         if(isValidStatusGroup($db,$statusIP_PANRR_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $statusIP_PANRR_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
-    //3.11 Insurance Preauthorization: Physician Responsibility: Additional ICD-10 Codes/Info Required
+    //3.11 Physician Responsibility: Additional ICD-10 Codes/Info Required
     if(isset($statuses['IP_PhysAct_AddICD10Required']['Date'])){
         $statusLogData['Date'] = $statuses['IP_PhysAct_AddICD10Required']['Date'];
-        $statusIP_AICD10_IDs = array('6','99','48');   // ????????????????????
+        $statusIP_AICD10_IDs = array('99','48');  
         if(isValidStatusGroup($db,$statusIP_AICD10_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $statusIP_AICD10_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
-    //3.12 Insurance Preauthorization: Physician Action Required: Physician Consultation Required
+    //3.12 Physician Action Required: Physician Consultation Required
     if(isset($statuses['IP_PhysAct_PhysConsultationRequired']['Date'])){
         $statusLogData['Date'] = $statuses['IP_PhysAct_PhysConsultationRequired']['Date'];
-        $statusIP_PAPCR_IDs = array('6','99','49');   // ????????????????????
+        $statusIP_PAPCR_IDs = array('99','49');  
         if(isValidStatusGroup($db,$statusIP_PAPCR_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $statusIP_PAPCR_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
-    //3.13 Insurance Preauthorization: Physician Action Required: Precertification Required: AIMs
+    //3.13 Physician Action Required: Precertification Required: AIMs
     if(isset($statuses['IP_PhysAct_PrecertificationRequiredAIMS']['Date'])){
         $statusLogData['Date'] = $statuses['IP_PhysAct_PrecertificationRequiredAIMS']['Date'];
-        $statusIP_PAPRAIMs_IDs = array('6','99','74','75');   // ????????????????????
+        $statusIP_PAPRAIMs_IDs = array('99','74','75');  
         if(isValidStatusGroup($db,$statusIP_PAPRAIMs_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $statusIP_PAPRAIMs_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
-    //3.14 Insurance Preauthorization: Physician Action Required: Precertification Required: Beacon
+    //3.14 Physician Action Required: Precertification Required: Beacon
     if(isset($statuses['IP_PhysAct_PrecertificationRequiredBeacon']['Date'])){
         $statusLogData['Date'] = $statuses['IP_PhysAct_PrecertificationRequiredBeacon']['Date'];
-        $statusIP_PAPRB_IDs = array('6','99','74','76');   // ????????????????????
+        $statusIP_PAPRB_IDs = array('99','74','76');  
         if(isValidStatusGroup($db,$statusIP_PAPRB_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $statusIP_PAPRB_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
+    
     //4.1 Patient Responsibility: Assume financial responsibility
     if(isset($statuses['PR_AssumeFinancialResponsibility']['Date'])){
         $statusLogData['Date'] = $statuses['PR_AssumeFinancialResponsibility']['Date'];
