@@ -5226,7 +5226,7 @@ function generate_overlays($error) {
 				
 		$user = $result->fetch_assoc();	
 		
-		$result = $conn->query("SELECT * FROM tblpatient WHERE Guid_user = " . $qualify['Guid_user']);
+		$result = $conn->query("SELECT dob, AES_DECRYPT(firstname_enc, 'F1rstn@m3@_%') as firstname, AES_DECRYPT(lastname_enc, 'L@stn@m3&%#') as lastname  FROM tblpatient WHERE Guid_user = " . $qualify['Guid_user']);
 				
 	    $patient = $result->fetch_assoc();	
 		
