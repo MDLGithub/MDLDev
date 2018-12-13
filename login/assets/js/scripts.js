@@ -1184,6 +1184,12 @@ function confirmationDeleteNooteLog(anchor){
     var conf = confirm('Are you sure you want to delete Note #'+$str[1]+'?');   
     if(conf)  window.location=anchor.attr("href");
 }
+function confirmationDeleteCPTPattern(anchor){
+    $str = anchor.attr("href").split("&");
+    $str = $str[1].split("="); 
+    var conf = confirm('Are you sure you want to delete CPT Pattern?');   
+    if(conf)  window.location=anchor.attr("href");
+}
 
 
 

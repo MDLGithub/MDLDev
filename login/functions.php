@@ -3199,6 +3199,9 @@ function dmdl_refresh($db){
             }
             if(isset($res['Insurance_Company'])&&!empty($res['Insurance_Company'])){
                 $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Insurance_Company]' value='".$res['Insurance_Company']."' />";
+            }            
+            if(isset($res['PolicyID'])&&!empty($res['PolicyID'])){
+                $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][policyID]' value='".$res['PolicyID']."' />";
             }
             
             //Physician Info
@@ -4008,6 +4011,8 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     if(isset($statuses['BillingDate']['Date'])){
         $statusLogData['Date'] = $statuses['Testing_Complete']['Date'];
         $status_AwaitingPayment_IDs = array('32','52');  //Billed: Awaiting Payment
+        //get Awaiting Payment -> Test Code
+        //$getTestCode = $db->query();
         if(isValidStatusGroup($db,$status_AwaitingPayment_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_AwaitingPayment_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -4029,8 +4034,8 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
             //for calculateing sum of revenue amount
             $isPaymentReceived = TRUE;            
             foreach ($invoiceArray as $k=>$v){
-                $DatePaid = $v['DatePaid'];
-                if($v['amount']<=0){
+                $DatePaid = isset($v['DatePaid'])?$v['DatePaid']:'';
+                if(isset($v['amount']) && $v['amount']<=0){
                     $isPaymentReceived = FALSE;
                     break;
                 }              

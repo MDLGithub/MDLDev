@@ -311,12 +311,12 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         <?php if($patientLinked=='Y'){ ?>
                         <a class="linked" href="<?php echo $patientInfoUrl.'&linked=N'; ?>">
                             <i class="fas fa-link"></i>
-                            <p>Link to dMDL</p>
+                            <p>Linked</p>
                         </a>
                         <?php } else { ?>
                         <a class="linked" href="<?php echo $patientInfoUrl.'&linked=Y'; ?>">
                             <i class="fas fa-unlink"></i>
-                            <p>Disconnect from dMDL</p>
+                            <p>Unlinked</p>
                         </a>
                         <?php } ?> 
                     <?php } ?>
@@ -747,7 +747,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <?php if($role=='Admin'){ ?>
                                 <a title="Add Revenue" class="pull-right" href="<?php echo $patientInfoUrl."&add_revenue=1";?>">
                                     <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
+                                </a> 
+                                <a title="Add dMDL CPT Patterns" class="pull-right mR-10" href="<?php echo $patientInfoUrl."&dmdl_cpt_patterns=1";?>">
+                                    <span class="fas fa-grip-horizontal"></span>  CPT Patterns
                                 </a>
+                                
                                 <?php } ?>
                             </h5>
                             <div class="revenue-form"></div>
@@ -1441,6 +1445,83 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     
     
 <?php
+    
+    //delete delete dMDL CPT pattern
+    if(isset($_GET['delete_pattern']) && $_GET['delete_pattern']!="" && $role=='Admin'){
+        deleteByField($db,'tbl_mdl_dmdl_cpt_mapping', 'Guid_cpt_mapping', $_GET['delete_pattern']);
+        Leave($patientInfoUrl.'&dmdl_cpt_patterns=1');
+    }
+    
+    if(isset($_POST['manage_dmdl_pattern'])){
+        $cptMappingData = array(
+            'test_code' => preg_replace('/\s+/', '', $_POST['test_code']),
+            'cpt_pattern' => preg_replace('/\s+/', '', $_POST['cpt_pattern'])
+        );
+       if(isset($_POST['Guid_cpt_mapping']) && $_POST['Guid_cpt_mapping']!=""){ //update
+            $where = array('Guid_cpt_mapping'=>$_POST['Guid_cpt_mapping']);            
+            $updateCPTMapping = updateTable($db, 'tbl_mdl_dmdl_cpt_mapping', $cptMappingData, $where);
+            Leave($patientInfoUrl.'&dmdl_cpt_patterns=1');
+        } else { //insert            
+            $insertCPTMapping = insertIntoTable($db, 'tbl_mdl_dmdl_cpt_mapping', $cptMappingData);
+            if($insertCPTMapping['insertID']!=""){
+               Leave($patientInfoUrl.'&dmdl_cpt_patterns=1');
+            }
+        }
+    } 
+    if(isset($_GET['edit_revenue'])&&$_GET['edit_revenue']!=""){
+       $getRevenueQ = 'SELECT r.*, p.name AS payor, cpt.code '
+                    . 'FROM tbl_revenue r '
+                    . 'LEFT JOIN tbl_mdl_payors p ON r.Guid_payor=p.Guid_payor '
+                    . 'LEFT JOIN tbl_mdl_cpt_code cpt ON r.Guid_cpt=cpt.Guid_cpt '
+                    . 'WHERE Guid_revenue=:Guid_revenue';
+        $revenueRow = $db->row($getRevenueQ, array('Guid_revenue'=>$_GET['edit_revenue']));
+        extract($revenueRow);
+    }
+?>
+<?php if($role=='Admin' && (isset($_GET['dmdl_cpt_patterns']) && $_GET['dmdl_cpt_patterns']=='1') ){ ?>
+<div id="manage-status-modal" class="modalBlock editStausesModal">
+    <div class="contentBlock">
+        <a class="close" href="<?php echo $patientInfoUrl; ?>"></a>        
+        
+        <h5 class="title">
+            dMDL CPT to Test Code Patterns &nbsp;&nbsp;
+            <a title="Add CPT Pattern" href="<?php echo $patientInfoUrl; ?>&dmdl_cpt_patterns=1&add_pattern=1">
+                <span class="fas fa-plus-circle" aria-hidden="true"></span> 
+            </a>
+        </h5>
+        <div class="content">
+            <?php $cptPatterns = $db->query("SELECT * FROM `tbl_mdl_dmdl_cpt_mapping`"); ?>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Test Code</th>
+                        <th>CPT Pattern</th>                        
+                        <th class="w-50 text-center">Acctions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($cptPatterns as $k=>$v){ ?>
+                    <tr>
+                        <td><?php echo $v['test_code']; ?></td>
+                        <td><?php echo $v['cpt_pattern']; ?></td>
+                        <td class="text-center">
+                            <a href="<?php  echo $patientInfoUrl; ?>&dmdl_cpt_patterns=1&edit_pattern=<?php echo $v['Guid_cpt_mapping']; ?>">
+                                <span class="fas fa-pencil-alt"></span>
+                            </a>
+                            <a onclick="javascript:confirmationDeleteCPTPattern($(this));return false;" href="<?php  echo $patientInfoUrl; ?>&dmdl_cpt_patterns=1&delete_pattern=<?php echo $v['Guid_cpt_mapping']; ?>">
+                                <span class="far fa-trash-alt"></span>
+                            </a>
+                        </td>
+                    </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<?php } ?>
+
+<?php
     if(isset($_POST['manage_revenue'])){ 
         $date_paid = ($_POST['date_paid'] != "")?date('Y-m-d h:i:s', strtotime($_POST['date_paid'])):"";
         $revenueData=array(
@@ -1471,6 +1552,49 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         extract($revenueRow);
     }
 ?>
+<?php if($role=='Admin' && (isset($_GET['add_pattern']) || (isset($_GET['edit_pattern'])&& $_GET['edit_pattern']!="")) ){ ?>
+<div id="manage-status-modal" class="modalBlock ">
+    <div class="contentBlock">
+        <a class="close" href="<?php echo $patientInfoUrl; ?>&dmdl_cpt_patterns=1"></a>        
+        
+        <h5 class="title">
+            <?php if(isset($_GET['add_pattern'])){ echo "Add New Pattern"; } else { echo "Edit Pattern"; }?>
+        </h5>
+        <div class="content">
+            <?php 
+                $Guid_cpt_mapping = '';
+                $test_code = '';
+                $cpt_pattern = '';
+                if(isset($_GET['edit_pattern']) && $_GET['edit_pattern']!=''){
+                    $getPatternRow = $db->row("SELECT * FROM tbl_mdl_dmdl_cpt_mapping WHERE Guid_cpt_mapping=:Guid_cpt_mapping", array('Guid_cpt_mapping'=>$_GET['edit_pattern']));
+                    if(!empty($getPatternRow)){
+                        $Guid_cpt_mapping = $getPatternRow['Guid_cpt_mapping'];
+                        $test_code = $getPatternRow['test_code'];
+                        $cpt_pattern = $getPatternRow['cpt_pattern'];
+                    }
+                }
+            ?>
+            <div class="add-status-form">
+                <form action="" method="POST">
+                    <h4 class="text-center"></h4>
+                    <?php if(isset($message)){ ?>
+                        <div class="text-center success-text"><?php echo $message; ?></div>
+                    <?php } ?>
+                    <input type="hidden" name="Guid_cpt_mapping" value="<?php echo $Guid_cpt_mapping; ?>" />
+                    <div class="">
+                        <input value="<?php echo $test_code; ?>" class="inputFullW" name="test_code" type="text" placeholder="Test Code">
+                        <textarea class="inputFullW" name="cpt_pattern" placeholder="dMDL CPT Pattern"><?php echo $cpt_pattern; ?></textarea>
+                    </div>
+                    <div class="text-right pT-10">
+                        <button class="button btn-inline" name="manage_dmdl_pattern" type="submit" >Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php } ?>
+
 <?php if($role=='Admin' && (isset($_GET['add_revenue']) || (isset($_GET['edit_revenue'])&& $_GET['edit_revenue']!="")) ){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock">

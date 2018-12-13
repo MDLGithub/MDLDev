@@ -840,6 +840,7 @@ if(isset($_POST['dmdlUpdate'])){
                 $state = isset($data['state'])?$data['state']:'';
                 $zip = isset($data['zip'])?$data['zip']:'';
                 $insurance_Company = isset($data['Insurance_Company'])?$data['Insurance_Company']:'';
+                $policyID = isset($data['policyID'])?$data['policyID']:'';
                 
                 if(isset($data['Physician']['FirstName'])){
                     $physician_name = $data['Physician']['FirstName'];
@@ -874,13 +875,13 @@ if(isset($_POST['dmdlUpdate'])){
                                     . "ethnicity,dob,gender,"
                                     . "address,address1,city,state,zip,"
                                     . "phone_number,phone_number_home,"
-                                    . "Loaded,Linked,physician_name,insurance_name,source,Date_created) "
+                                    . "Loaded,Linked,physician_name,insurance_name,source,policyID,Date_created) "
                                     . "VALUES ('$Guid_dmdl_patient','$Guid_dmdl_physician','$dmdl_mdl_num','$Guid_user','$account_number', "
                                     . "AES_ENCRYPT('$firstname_enc', 'F1rstn@m3@_%'),AES_ENCRYPT('$lastname_enc', 'L@stn@m3&%#'), "
                                     . "'$ethnicity','$dob','$gender',"
                                     . "'$address','$address1','$city','$state','$zip',"
                                     . "'$phone_number','$phone_number_home', "
-                                    . "'Y','Y', '$physician_name','$insurance_Company','N/A', NOW())");
+                                    . "'Y','Y', '$physician_name','$insurance_Company','N/A','$policyID', NOW())");
                             $Guid_patient = $db->lastInsertId();
                             
                             //update mdl number
@@ -990,6 +991,9 @@ if(isset($_POST['dmdlUpdate'])){
                         }
                         if(isset($data['zip']) && $thisPatient['zip']==''){
                             $patientData['zip'] = $data['zip'];
+                        }                        
+                        if(isset($data['policyID']) && $thisPatient['policyID']==''){
+                            $patientData['policyID'] = $data['policyID'];
                         }                        
                         if($thisPatient['physician_name']==''){
                             if(isset($data['Physician']['FirstName'])){

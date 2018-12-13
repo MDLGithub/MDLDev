@@ -20,6 +20,14 @@ $updateData = array(
         'description' => 'Add Column dMDL_mdl_number to patients screen in order to have all api params for xml page',
         'function' => 'update_v4'
     ),
+    '5' => array(
+        'description' => 'Add Column PolicyID in patients table',
+        'function' => 'update_v5'
+    ),
+    '6' => array(
+        'description' => 'Add dMDL CPT Test Code Mapping Table and insert provided data',
+        'function' => 'update_v6'
+    ),
 );
 
 /**
@@ -41,6 +49,64 @@ if($logTable['staus']===TRUE){
         }
         
     } 
+}
+
+/*
+ * Add Column dMDL_mdl_number to patients screen in order to have all api params for xml page
+ */
+function update_v6($db, $function){
+    $message = '';
+    $sql = "CREATE TABLE IF NOT EXISTS `tbl_mdl_dmdl_cpt_mapping` (
+                    `Guid_cpt_mapping` INT(11) NOT NULL AUTO_INCREMENT,
+                    `cpt_pattern` TEXT DEFAULT NULL,
+                    `test_code` VARCHAR(60) DEFAULT NULL,
+                    PRIMARY KEY (`Guid_cpt_mapping`)
+                );";
+    $db->query($sql);
+    //check if table crated
+    $updatesMappingTable = $db->query('select 1 from `tbl_mdl_dmdl_cpt_mapping` LIMIT 1');
+    if(!$updatesMappingTable) {
+        $message = 'Could not create table.';
+        $staus = FALSE;
+    }
+    $message = "Table created successfully!";
+    $staus = TRUE;
+    //mapping array paterns provided by Martin
+    $mappingArr = array(
+                        '0' => array('pattern' => '81211,81213', 'test_code'=>'1221'),
+                        '1' => array('pattern' => '81215', 'test_code'=>'1224'),
+                        '2' => array('pattern' => '81213,81408', 'test_code'=>'1235'),
+                        '3' => array('pattern' => '81211,81213', 'test_code'=>'1221'),
+                    );
+    if($staus){
+        //insert provided patternt to table
+        foreach ($mappingArr as $k=>$v){
+            $data = array('cpt_pattern'=>$v['pattern'], 'test_code'=>$v['test_code']);
+            insertIntoTable($db, 'tbl_mdl_dmdl_cpt_mapping', $data);
+        }
+        $message = "Table created and patern data inserted successfully!";
+        
+        updateTable($db, 'tbl_mdl_updates_log', array('isUpdated'=>'Y'), array('function_name'=>$function));
+    }
+   
+    $returnArr = array(
+        'staus' => $staus,
+        'message' => $message
+    );
+    return $returnArr;
+}
+/*
+ * Add Column PolicyID in patients table
+ */
+function update_v5($db, $function){
+    $query = "ALTER TABLE `tblpatient` ADD COLUMN `policyID` VARCHAR(60) AFTER source";
+    $result = $db->query($query); 
+    updateTable($db, 'tbl_mdl_updates_log', array('isUpdated'=>'Y'), array('function_name'=>$function));
+    $returnArr = array(
+        'staus' => TRUE,
+        'message' => 'Patiens Table Updated.'
+    );
+    return $returnArr;
 }
 /*
  * Add Column dMDL_mdl_number to patients screen in order to have all api params for xml page
