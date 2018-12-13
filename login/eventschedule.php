@@ -116,9 +116,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
     .fc-month-view .evttitle, .fc-basicWeek-view .evttitle{width:90%;}
     .fc-basicWeek-view .fc-comments{width: 90%;}
-    .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px; pointer-events: visible;}
-    .rightCircleicon2{ position: absolute; width: 20px; height: 20px; right: 0px; top: -1px; background-image: url("assets/eventschedule/images/icon_health_fair.png"); background-repeat: no-repeat;background-size: 20px 20px;pointer-events: visible;}
-   
+    .rightCircleicon1{ position: absolute; width: 20px; height: 20px; right: 3px; top: 3px; background-image: url("assets/eventschedule/images/icon_brca_day.png"); background-repeat: no-repeat;background-size: 20px 20px; pointer-events: visible;}
+    .rightCircleicon2{ position: absolute; width: 20px; height: 20px; right: 3px; top: 3px; background-image: url("assets/eventschedule/images/icon_health_fair.png"); background-repeat: no-repeat;background-size: 20px 20px;}
+
     .numberCircle {
         padding: 14px;
         text-align: center;
