@@ -627,7 +627,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 $('.show-stats').off('click');
                 var today = new Date();
                 var currentDate = today.getDate();
-                var eventDate = $.fullCalendar.formatDate(event.start, "DDDD");
+                var eventDate = $.fullCalendar.formatDate(event.start, "YYYYMDD");
 
                 var parsedNow =  new Date(today).getUnixTime();
                 var parsedEventTime = new Date(event.start).getUnixTime();
@@ -704,20 +704,19 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 if (event.evtCnt) {
 
                     var now = new Date();
-                    var start = new Date(now.getFullYear(), 0, 0);
-                    var diff = now - start;
-                    var oneDay = 1000 * 60 * 60 * 24;
-                    var day = Math.floor(diff / oneDay);
-
-                    if(eventDate > day) {
+                    var day = now.getUTCDate();
+                    var month = (now.getMonth() +1);
+                    var year = now.getUTCFullYear();
+                    if (day < 10) {
+                        day = "0" + day;
+                    }
+                    var dat = year + "" + month + day;
+                    if(eventDate > dat) {
                         var content = '<div class="fc-content evtcontent summarybrca days-' + eventDate + '" style="padding: 0 20px; font-size: 15px; line-height: 16px;">';
                         content += '<div class="numberCircleContainer"><span class="numberCircle">' + event.evtCnt + '</span></div>';
                         content += '</div>';
                         return $(content);
                     }
-
-
-
                     var content = '<div class="fc-content evtcontent days-' + eventDate + '" style="padding: 0 20px;">';
                     content += '<div class="numberCircleContainer"><span class="numberCircle">' + event.evtCnt + '</span></></div>';
                     content += '<div><img src="assets/eventschedule/icons/silhouette_icon.png" width="13" style="margin-right:5px;">Registered <span style="float:right">' + event.registeredCnt + '</span></div>';
