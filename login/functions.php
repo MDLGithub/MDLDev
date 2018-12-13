@@ -3498,7 +3498,7 @@ function dmdl_refresh($db){
                 $content .= "</tr>";
             } else {
                 $content.= "<tr><td colspan='9'>"
-                        . "<strong>dMDL API Result is empty for this patients. </strong>"
+                        . "<strong>dMDL API Result is empty for this patient. </strong>"
                         . "Patient ID => ".$dmdlVal['PatientID']."; " 
                         . "Physician ID => ". $dmdlVal['PhysicianID']."; " 
                         . "MDL# => ".$dmdlVal['MDLNumber'] 
