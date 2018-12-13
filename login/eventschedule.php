@@ -486,6 +486,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
             contentHeight: 'auto',
             defaultDate: evtsDate,
             defaultView: calView,
+            showNonCurrentDates: false,
 
             dayRender: function (date, cell) {
                 var today = new Date();
@@ -517,8 +518,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     },0);
                 }
             },
-            eventClick: function (event, jsEvent, view)
-            {
+            eventClick: function (event, jsEvent, view){
 
                 var moment = $.datepicker.formatDate('yy-mm-dd', new Date());
                 // Get the modal
