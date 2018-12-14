@@ -247,6 +247,15 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart' && isset($_POST[
     }
     if(isset($_POST['showtopPerformer']) && !empty($submit)){
         array_push($regSalereps, $submit['topsubmittedName']);
+
+        foreach($regSalereps as $key => $name)
+        {
+            $name = trim(preg_replace('~[\s]{2,}~', ' ', $name));
+            if($name == $_SESSION['user_name'])
+            {
+                $regSalereps[$key] = 'Me';
+            }
+        }
         $data = array(
             'dataSource' => array(
                 'data' => array(
@@ -275,18 +284,17 @@ if(isset($_POST['action']) && $_POST['action'] == 'getBarChart' && isset($_POST[
         );
     }
 
+    $mySessionName = $_SESSION['user_name'];
     if(!isset($submit['topsubmittedName'])){
         $data['topsubmitter'] = '&#9726; Top Submitter: ' . $regSalereps['0'];
     } else {
-        $mySessionName = trim($_SESSION['user_name'], '');
-        $topPerformerName = explode(' ', $submit['topsubmittedName']);
-        if ($mySessionName == $topPerformerName['0']) {
+        $topSubmiterName = trim(preg_replace('~[\s]{2,}~', ' ', $submit['topsubmittedName']));
+        if ($mySessionName == $topSubmiterName) {
             $data['topsubmitter'] = '&#9726; Top Submitter: Me';
         } else {
             $data['topsubmitter'] = '&#9726; Top Submitter: ' . $submit['topsubmittedName'];
         }
     }
-
     echo json_encode($data);
 }
 /* --------------------- BRCA Days Member Account  ------------------------- */
@@ -304,6 +312,7 @@ if(isset($_POST['action']) && $_POST['action'] == 'mebrcacount'){
             'mebrcacount' => $row['cnt']
         );
     }
+
     echo json_encode($data);
 }
 /* --------------------- BRCA Days Top Account  ------------------------- */
@@ -537,6 +546,7 @@ if( isset($_POST['action']) && $_POST['action'] == 'eventStats'){
         }
     }
     $result = $db->query($query,array("startdate"=>$_POST['startdate'], 'enddate'=>$_POST['enddate']));
+
     echo json_encode($result);
 }
 /* ---------------------  Get Dynamic Consultant List --------------------- */
