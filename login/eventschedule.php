@@ -65,6 +65,10 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     textarea.form-control{height: auto !important;}
     .fc-event-container {padding: 5px 0 !important;}
 
+    .day-summary {
+        width: 23%;
+    }
+
     .fc-event {
         box-shadow:  0 0 .25em !important;
         border-radius:  .625em !important;
@@ -192,9 +196,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
     }
 
     .fc-basicDay-view .fc-logo{
-        width: 23%;
-        display: flex;
-        align-items: center;
+
+        height: auto;
+        width: auto;
     }
 
     .day_stats{
@@ -219,7 +223,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         font-weight:bold;
     }
 
-    .fc-basicDay-view .fc-logo img{  width:100%; max-width: 130px; margin: 10px 0; }
+    .fc-basicDay-view .fc-logo img{ width:100%; max-width: 130px; margin: 10px 0; }
 
     .fc-month-view .fc-scroller{ height: auto !important; }
 
@@ -301,6 +305,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         .fc-basicDay-view .fc-logo{
             width: 100%;
         }
+
     }
 
 
@@ -464,6 +469,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
         var state_count = 0, count = 0, state_count1 = 0, count1 = 0;
         
         window.regCnt = 0;
+        id_count = 0;
         var calendar = $('#calendar').fullCalendar({
             header: {
                 left: 'prev,next today',
@@ -642,24 +648,52 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
                 if (event.salesrep)
                     salesrep = '<div class="fc-salesrep" >' + event.salesrep + '</div>';
-                var cmts = '';
 
+                var cmts = '';
                 var view = $('#calendar').fullCalendar('getView');
+
                 if(view.name == 'basicDay'){
-                    console.log(event);
+                    //console.log(event);
+
                     cmts = '<div class = "day_stats">';
                     cmts += '<div class="show-stats"><span class="silhouette"><span>0</span> <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"><span>0</span> <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna"><span>0</span> <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask"><span>0</span> <img src="assets/eventschedule/icons/flask_icon.png"></span></div>' + '</div>';
                     cmts += '</div>'
                     cmts += '<div class="fc-comments"><h1>Comments</h1><div class = "day-comments">';
-                    if(event.comments != null) 
+                    if(event.comments != null)
                           cmts += event.comments;
                     cmts += '</div></div>'
-                    
-                    cmts += '<div class="fc-logo" id="fc-logo-'+state_count+'">';
+                    cmts += '<div class="day-summary"> <div class="fc-logo" id="fc-logo-'+state_count+'">';
                     if(event.logo != '' || event.logo != null)
                         cmts += '<img src="<?php echo SITE_URL; ?>/../images/practice/'+event.logo+'" onerror="imgError(this);" /></div>';
                     else
                         cmts += '<img src="<?php echo SITE_URL; ?>/assets/images/default.png" /></div>';
+                    id_count = id_count+1;
+                        $.ajax({
+                        url: "ajaxHandlerEvents.php",
+                        type: "POST",
+                        data: ({
+                            action: 'takeCommonStatistic',
+                            account: event.account,
+                            id_count: id_count,
+                        }),
+                        dataType: 'json',
+                        success: function (result) {
+                            var rescom1 = '#reg' + (result.id_count);
+                            var rescom2 = '#com' + (result.id_count);
+                            var rescom3 = '#qua' + (result.id_count);
+                            var rescom4 = '#sub' + (result.id_count);
+                            $(rescom1).html(result.reg);
+                            $(rescom2).html(result.com);
+                            $(rescom3).html(result.qua);
+                            $(rescom4).html(result.sub);
+                        }
+
+                    });
+                    cmts +='<div><div class = "day_stats" >';
+                    cmts +='<span class="silhouette"><span id="reg' + id_count + '"></span> <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | ';
+                    cmts +='<span class="checkmark"><span id="com' + id_count + '" ></span> <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | ';
+                    cmts +='<span  class="dna"><span id="qua' + id_count +'">0</span> <img src="assets/eventschedule/icons/dna_icon.png"></span> | ';
+                    cmts +='<span  class="flask"><span id="sub' + id_count + '" >0</span> <img src="assets/eventschedule/icons/flask_icon.png"></span></div>';
                     state_count = state_count+1;
                 }
 
@@ -733,18 +767,18 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                                 content += '<p class="acc-click" id="acc'+event.accountid+'" >' + modifiedName + '</p></div>';
                             else{
                                 content += '<a class="acc-click" id="acc-'+event.accountid+'"  href="accounts.php?account_id='+event.accountid+'">' + modifiedName + '</a></div>';
-                            } 
+                            }
                             content += salesrep + cmts;
                             content += "<div class='state2_count'>"
                             if(view.name != 'basicDay'){
                                 content += '<div class="show-stats"><span class="silhouette"><span>0</span> <img src="assets/eventschedule/icons/silhouette_icon.png"></span> | <span class="checkmark"><span> 0</span> <img src="assets/eventschedule/icons/checkmark_icon.png"></span> | <span class="dna"><span>0</span> <img src="assets/eventschedule/icons/dna_icon.png"></span> | <span class="flask"><span>0</span> <img src="assets/eventschedule/icons/flask_icon.png"></span></div>';
                             }
-                            
-                            content += '</div><div class="' + icon + '"></div>';   
+
+                            content += '</div><div class="' + icon + '"></div>';
                             content += '</div> </div>';
                             state_count1 += 1;
                         return $(content);
-                        
+
                     } else {
                         return $(content);
                     }
@@ -779,8 +813,8 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                                     logo = res[0];
                                     element[0].childNodes[2].innerHTML = '<img src = "../images/practice/'+logo.logo+'" />';
                                 }
-                                else{   
-                                    element[0].childNodes[2].innerHTML = '<img src = "images/logo-placeholder.png" />';    
+                                else{
+                                    element[0].childNodes[2].innerHTML = '<img src = "images/logo-placeholder.png" />';
                                 }
                             }
                         }
@@ -817,7 +851,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         }
                     }
                 });
-                //}             
+                //}
             },
             eventAfterAllRender: function(view) {
                 var events = $('#calendar').fullCalendar('getView');
@@ -840,7 +874,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 var uniqueIdsString = uniqueIds.toString();
 
                 var evtdata = {};
-                
+
                 if(view.name == 'basicDay'){
                     var startdate = moment(view.start._d).format('YYYY-MM-DD');
                     var enddate = moment(view.start._d).format('YYYY-MM-DD');

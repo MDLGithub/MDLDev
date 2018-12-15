@@ -636,3 +636,25 @@ if(isset($_POST['action']) && $_POST['action'] == 'eventDynamicAcc' && isset($_P
     );
     echo json_encode($result);
 }
+/* ------------------------------------ Take common statistic ------------------------- */
+
+if(isset($_POST['action']) && $_POST['action'] == 'takeCommonStatistic' && isset($_POST['account']) && isset($_POST['id_count'])) {
+    $account = $_POST['account']; //account id
+    $idCount = $_POST['id_count']; //counter for id
+    $result =[
+        'id_count' => $idCount,
+        'reg' => '0',
+        'com' => '0',
+        'qua' => '0',
+        'sub' => '0',
+    ];
+    $reg = '28'; //registered id
+    $com = '36'; //completed id
+    $qua = '29'; //qualified id
+    $sub = '1';  //submited id
+    $result['reg'] = getAccountStatusCount($db, $account, $reg );
+    $result['com'] = getAccountStatusCount($db, $account, $com );
+    $result['qua'] = getAccountStatusCount($db, $account, $qua );
+    $result['sub'] = getAccountStatusCount($db, $account, $sub );
+    echo json_encode($result);
+}
