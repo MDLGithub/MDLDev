@@ -515,7 +515,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
             viewRender: function(view, element) {
                 moment.tz.setDefault("Etc/GMT+0");
-                $("#salesrepfilter").html("<option value='0'>Generic Consultant</option>");
+                $("#salesrepfilter").html("<option value='0'>Genetic Consultant</option>");
                 $("#accountfilter").html("<option value='0'>Account</option>");
                 if(view.type == "basicWeek"){
                     window.setTimeout(function(){
@@ -917,7 +917,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                             console.log(res);
                             var result = JSON.parse(res);
                             $("#salesrepfilter").empty();
-                            $("#salesrepfilter").html("<option value='0'>Generic Consultant</option>").append(result.salesArray);
+                            $("#salesrepfilter").html("<option value='0'>Genetic Consultant</option>").append(result.salesArray);
                             if(localStorage.getItem("salesrepValue") !== null && localStorage.salesrepValue != 0){
                                 $('#salesrepfilter').val(localStorage.salesrepValue);    
                             }else{
@@ -948,7 +948,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         success: function(res){
                             var result = JSON.parse(res)
                             $("#salesrepfilter").empty();
-                            $("#salesrepfilter").html("<option value='0'>Generic Consultant</option>").append(result.salesArray);
+                            $("#salesrepfilter").html("<option value='0'>Genetic Consultant</option>").append(result.salesArray);
                             if(localStorage.getItem("salesrepValue") !== null && localStorage.salesrepValue != 0){
                                 $('#salesrepfilter').val(localStorage.salesrepValue);    
                             }else{
@@ -966,7 +966,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 <?php endif; ?>
 
                 <?php if( !isset($_GET['accountId']) && !isset($_GET['salerepId']) ): ?>
-                    $("#salesrepfilter").html("<option value='0'>Generic Consultant</option>");
+                    $("#salesrepfilter").html("<option value='0'>Genetic Consultant</option>");
                     $("#accountfilter").html("<option value='0'>Account</option>");
                     $.get({
                         url:'ajaxHandlerEvents.php', 

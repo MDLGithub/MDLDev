@@ -304,7 +304,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 moment.tz.setDefault("Etc/GMT+0");
                 var currentDate = $('#calendar').fullCalendar('getDate');
                 var beginOfWeek = currentDate.startOf('week');
-                $("#calendarmonth").html($.fullCalendar.formatDate(beginOfWeek,"MMMM DD"));
+                $("#calendarmonth").html($.fullCalendar.formatDate(beginOfWeek,"MMMM D"));
                 $("#calendaryear").html($.fullCalendar.formatDate(beginOfWeek,"YYYY"));
                 $(".salesrep_list").html("<ul><li><a href='<?php echo SITE_URL; ?>/dashboard2.php'>Select All</a></li></ul>");
                 window.setTimeout(function(){
@@ -426,7 +426,7 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
 
                 var today = new Date();
                 var currentDate = today.getDate();
-                var eventDate = $.fullCalendar.formatDate(event.start, "DDDD");
+                var eventDate = $.fullCalendar.formatDate(event.start, "YYYYMDD");
                 var parsedNow =  new Date(today).getUnixTime();
                 var parsedEventTime = new Date(event.start).getUnixTime();
 
@@ -484,18 +484,19 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                 if (event.evtCnt) {
 
                     var now = new Date();
-                    var start = new Date(now.getFullYear(), 0, 0);
-                    var diff = now - start;
-                    var oneDay = 1000 * 60 * 60 * 24;
-                    var day = Math.floor(diff / oneDay);
-
-                    if(eventDate > day) {
+                    var day = now.getUTCDate();
+                    var month = (now.getMonth() +1);
+                    var year = now.getUTCFullYear();
+                    if (day < 10) {
+                        day = "0" + day;
+                    }
+                    var dat = year + "" + month + day;
+                    if(eventDate > dat) {
                         var content = '<div class="fc-content evtcontent summarybrca days-' + eventDate + '" style="padding: 0 20px; font-size: 15px; line-height: 16px;">';
                         content += '<div class="numberCircleContainer"><span class="numberCircle">' + event.evtCnt + '</span></div>';
                         content += '</div>';
                         return $(content);
                     }
-
                     var content = '<div class="fc-content evtcontent summarybrca days-' + eventDate + '" style="padding: 0 20px; font-size: 15px; line-height: 16px;">';
                     content += '<div class="numberCircleContainer"><span class="numberCircle">' + event.evtCnt + '</span></div>';
                     content += '<div>Registered <span style="float:right">' + event.registeredCnt + '</span></div>';
@@ -1382,8 +1383,8 @@ $salesrep = $db->selectAll('tblsalesrep', $clause);
                 <div id = "chart_stats">
                     <div class = "chart_header  col-lg-12 col-md-12">
                             <p class = "stats_date">
-                                <span>Submitting Stat for Week of </span>
-                                <span id="calendarmonth"></span>, 
+                                <span>Submitting Stat for Week of</span>
+                                <span id="calendarmonth"></span>,
                                 <span id="calendaryear"></span>
                                 <span></span>
                             </p>
