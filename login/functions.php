@@ -3466,7 +3466,7 @@ function dmdl_refresh($db){
                     $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][BillingDate][Date]' value='" . convertDmdlDate($res['BillingDate']) . "' />";
                 }            
                 if (isset($res['CPT']) && !empty($res['CPT'])) {
-                    $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][AwaitingPayment][CptPattern]' value='" . convertDmdlDate($res['BillingDate']) . "' />";
+                    $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][AwaitingPayment][CptPattern]' value='" . $res['CPT']  . "' />";
                 }            
 
                 //8.1 Legal/AR Review: In Progress: Legal Review
