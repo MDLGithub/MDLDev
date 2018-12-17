@@ -1,12 +1,4 @@
 <?php
-$url = "https://mybrcacare.com";
-
-if (strlen($_SERVER['QUERY_STRING'])) {
-	$url .= "/?" . $_SERVER['QUERY_STRING'];
-} 
-
-header('Location: ' . $url);
-
 //require "database.php";
 
 //$db = Database::getInstance();
