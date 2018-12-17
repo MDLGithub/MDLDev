@@ -99,9 +99,16 @@ function update_v6($db, $function){
  * Add Column PolicyID in patients table
  */
 function update_v5($db, $function){
-    $query = "ALTER TABLE `tblpatient` ADD COLUMN `policyID` VARCHAR(60) AFTER source";
-    $result = $db->query($query); 
-    updateTable($db, 'tbl_mdl_updates_log', array('isUpdated'=>'Y'), array('function_name'=>$function));
+    //check column
+    $checkColumn = $db->row("SHOW COLUMNS FROM tblpatient WHERE FIELD = 'policyID'");
+   
+    if(!empty($checkColumn)){
+        updateTable($db, 'tbl_mdl_updates_log', array('isUpdated'=>'Y'), array('function_name'=>$function));
+    } else {    
+        $query = "ALTER TABLE `tblpatient` ADD COLUMN `policyID` VARCHAR(60) AFTER source";
+        $result = $db->query($query); 
+        updateTable($db, 'tbl_mdl_updates_log', array('isUpdated'=>'Y'), array('function_name'=>$function));
+    }
     $returnArr = array(
         'staus' => TRUE,
         'message' => 'Patiens Table Updated.'
