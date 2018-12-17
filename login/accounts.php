@@ -169,8 +169,8 @@ if(isset($_GET['provider_guid']) && $_GET['provider_guid']!="" && $_GET['provide
     $Guid_user = $providerInfo["Guid_user"];
     $npi = $providerInfo["npi"];
     $provider_account_id = $providerInfo["account_id"];
-    $provider_first_name = $providerInfo["first_name"];
-    $provider_last_name = $providerInfo["last_name"];    
+    $provider_first_name = ucfirst(strtolower($providerInfo["first_name"]));
+    $provider_last_name = ucfirst(strtolower($providerInfo["last_name"]));    
     $provider_email = $providerInfo["provider_email"];    
        
     $provider_title = $providerInfo["title"];    
@@ -301,7 +301,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                 <div class="row">
                     <div class="col-md-8">                       
                         <div id = "physician-header">
-                            <h2><?php echo $accountActive['account']." - ". strtoupper($accountActive['name']); ?></h2>
+                            <h2><?php echo $accountActive['account']." - ". formatAccountName($accountActive['name']); ?></h2>
                         </div>
                         
                         <div class="status_chart">
@@ -374,8 +374,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                     
                         <div class="address-container">
                             <div id="accountLogo">
-                                <?php
-                                $logo = ($accountActive['logo'] !== '') ? "/../images/practice/".$accountActive['logo'] : "/assets/images/default.png"; ?>
+                                <?php $logo = $logo ? "/../images/practice/".$logo : "/assets/images/default.png"; ?>
                                 <img class="" src="<?php echo SITE_URL.$logo; ?>" />
                                 <div>
                                     <label >Category: </label>
@@ -389,8 +388,8 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                                 <div>
                                     <?php 
                                     if($address){
-                                        echo $address."<br/>";
-                                        if($city !=""){ echo $city.", "; }
+                                        echo ucwords(strtolower($address))."<br/>";
+                                        if($city !=""){ echo ucwords(strtolower($city)).", "; }
                                         if($state !=""){ echo $state." "; }
                                         if($zip !="" ){ echo $zip ."<br/>"; } 
                                     }
@@ -413,14 +412,14 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                         </div>
 
                         <div class="providersTable">
-                        <?php if($role!='Physician'){ ?>                        
+                        <?php //if($role!='Physician'){ ?>                        
                         <h4 id="physiciansListLabel" class="accounts">
                             Physicians       
                             <a href="<?php echo SITE_URL;?>/accounts.php?account_id=<?php echo $thisAccountID;?>&provider_guid=add" class="pull-right" id="add-account-provider">
                                 <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
                             </a>
                         </h4>
-                        <?php } ?>
+                        <?php //} ?>
                         <table class="table providersTable">
                             <thead>
                                 <tr>                        
@@ -449,7 +448,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                                 <tr>                            
                                     <td><?php echo $v['npi']; ?></td>
                                     <td><?php echo $v['title']; ?></td>
-                                    <td><?php echo $v['first_name']." ". $v['last_name']; ?></td>                                    
+                                    <td><?php echo ucwords(strtolower($v['first_name']." ". $v['last_name'])); ?></td>                                    
                                     <td>
                                         <?php 
                                             $incomplete = getProviderStatusCount($db, 'Incomplete', $v['Guid_provider'] );
@@ -739,6 +738,7 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
 
 <div id="add-account-provider-box" class="modalBlock <?php echo $providerBoxClass; ?>">
     <div class="contentBlock">
+        <a class="close" href="<?php echo SITE_URL."/accounts.php?account_id=".$_GET['account_id']; ?>"></a>
         <?php if(isset($message)){ ?>
         <div class="error-text"><?php echo $message; ?></div>
         <?php } ?>
@@ -833,14 +833,10 @@ if(isset($_GET['status_id'])&& $_GET['status_id']!=""){
                         <img id="image" width="40" src="<?php echo SITE_URL.$providerImg; ?>" />
                     </div>
                 </div>
-            </div>
-            
+            </div>           
             
             <div class="">
                 <button class="btn-inline" name="manage_provider" type="submit" >Save</button>
-                <button onclick="goBack();" type="button" class="btn-inline btn-cancel">Cancel</button>                   
-
-                <!--<a class="btn-inline btn-cancel" href="<?php echo SITE_URL."/accounts.php?account_id=".$_GET['account_id'];?>">Cancel</a>-->
             </div>
         </form>
           

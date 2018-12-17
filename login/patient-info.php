@@ -41,7 +41,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     
     $sqlQualify = "SELECT q.Guid_qualify, q.Guid_user, q.Date_created as qDate, q.deviceid, 
                     CONCAT(prov.first_name,' ',prov.last_name) provider, prov.title,
-                    p.*, p.Loaded As dmdlPatient, 
+                    p.*, p.Loaded As dmdlPatient, p.Linked AS dmdlLinked,
                     aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname, 
                     aes_decrypt(lastname_enc, 'L@stn@m3&%#') as lastname, 
                     u.email, u.marked_test ";
@@ -78,7 +78,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     if(!$qualifyResult){
         //Leave(SITE_URL);
         $getPatientInfoQ = "SELECT 
-                            p.*, p.Loaded As dmdlPatient,
+                            p.*, p.Loaded As dmdlPatient, p.Linked AS dmdlLinked,
                             aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname, 
                             aes_decrypt(lastname_enc, 'L@stn@m3&%#') as lastname, 
                             CONCAT(prov.first_name,' ',prov.last_name) provider, prov.title,
@@ -91,21 +91,16 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         if(!empty($qualifyResult)){
             $qualifyResult['no_submited_questionnaire'] = '1';
         }
-    }
-        
+    }        
     $mdlInfoQ = "SELECT * FROM tbl_mdl_number WHERE Guid_user=:Guid_user";
-    $mdlInfo = $db->row($mdlInfoQ, array('Guid_user'=>$Guid_user));
-    
+    $mdlInfo = $db->row($mdlInfoQ, array('Guid_user'=>$Guid_user));    
     if(isset($qualifyResult['Guid_qualify'])){
         $Guid_qualify = $qualifyResult['Guid_qualify'];
-
         $sqlSSQualify = "SELECT ssq.* FROM tbl_ss_qualify ssq WHERE ssq.Guid_qualify=:Guid_qualify  ORDER BY Date_created DESC";
         $ssQualifyResult = $db->query($sqlSSQualify, array('Guid_qualify'=>$Guid_qualify));
-    }
-    
+    }    
     $errorMsgMdlStats = "";
-    if(isset($_POST['save'])){
-       
+    if(isset($_POST['save'])){       
         $numSize = strlen($_POST['mdl_number']);
         if(isset($_POST['mdl_number'])&&$_POST['mdl_number']!=""){
             if(!isset($_POST['mark_as_test'])){
@@ -115,27 +110,23 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 }
             }
         }
-        if($isValid){
-            
+        if($isValid){            
             //total_deductible
             if(isset($_POST['total_deductible']) && $_POST['total_deductible']!=""){                
                 updateTable($db, 'tblpatient', array('total_deductible'=> $_POST['total_deductible']), array('Guid_user'=>$_GET['patient']));
-            }
-            
+            }            
             //test kit
             if(isset($_POST['test_kit'])){  
                 updateTable($db,'tblpatient', array('test_kit'=>'1'), array('Guid_user'=>$_GET['patient']));
             } else {
                 updateTable($db,'tblpatient', array('test_kit'=>'0'), array('Guid_user'=>$_GET['patient']));
             }
-            
             //mark user as a test            
             if(isset($_POST['mark_as_test'])){  
                 updateTable($db,'tbluser', array('marked_test'=>'1'), array('Guid_user'=>$_GET['patient']));
             } else {
                 updateTable($db,'tbluser', array('marked_test'=>'0'), array('Guid_user'=>$_GET['patient']));
-            }           
-
+            } 
             //Update MDL# info
             if(isset($_POST['mdl_number'])){
                 $mdlNumberData['mdl_number']=$_POST['mdl_number'];
@@ -153,8 +144,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 if($mdlNumberData){                    
                    insertIntoTable($db, 'tbl_mdl_number', $mdlNumberData); 
                 }
-            }           
-           
+            }    
             //add deductable log 
             if(isset($_POST['deductableAdd']) && !empty($_POST['deductableAdd'])){
                 $dedData = $_POST['deductableAdd'];                
@@ -184,8 +174,6 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     $updateReveue = updateTable($db, 'tbl_deductable_log', $dataDeductable, $whereDeductable);            
                 }
             } 
-                        
-            
             $url=$patientInfoUrl."&u";
             Leave($url);
         }
@@ -212,6 +200,15 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         deleteByField($db,'tbl_mdl_note', 'Guid_note', $_GET['delete-note-log']);
         Leave($patientInfoUrl);
     }
+    
+    if(isset($_GET['linked']) && $_GET['linked'] == 'Y'){
+        updateTable($db, 'tblpatient', array('Linked'=>'Y'), array('Guid_user'=>$_GET['patient']));
+        Leave($patientInfoUrl);
+    } 
+    elseif (isset($_GET['linked']) && $_GET['linked'] == 'N') {
+        updateTable($db, 'tblpatient', array('Linked'=>'N'), array('Guid_user'=>$_GET['patient']));
+        Leave($patientInfoUrl);
+    }
   
  } ?>
 
@@ -228,16 +225,23 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     } else {
         $accountInfo = FALSE;
     }
-    
+    if(isset($qualifyResult['dmdlPatient'])){
+        $patientLoaded = $qualifyResult['dmdlPatient'];
+    }
+    if(isset($qualifyResult['dmdlLinked'])){
+        $patientLinked = $qualifyResult['dmdlLinked'];
+    }
     //creating xml link for loaded patients
-    if(isset($qualifyResult['dmdlPatient'])&&$qualifyResult['dmdlPatient']=='Y'){      
-        if( $qualifyResult['Guid_dmdl_patient']!='' && $qualifyResult['Guid_dmdl_physician']!='' && $mdlInfo['mdl_number']!=''){
+    if( $qualifyResult['dmdlPatient']=='Y' || $qualifyResult['dmdlLinked']=='Y' ){ 
+        if( $qualifyResult['Guid_dmdl_patient']!='' && $qualifyResult['Guid_dmdl_physician']!='' && $qualifyResult['dMDL_mdl_number']!=''){
             $patientId = $qualifyResult['Guid_dmdl_patient'];
             $physicianId = $qualifyResult['Guid_dmdl_physician'];
-            $mdlNumber = $mdlInfo['mdl_number'];
+            $mdlNumber = $qualifyResult['dMDL_mdl_number'];
             $xmlLink = SITE_URL."/dmdlPatientInfo.php?patientId=$patientId&physicianId=$physicianId&mdlNumber=$mdlNumber";
         }
     }
+    
+    
 ?>
 
 <link rel="stylesheet" href="assets/css/brca_forms.css">
@@ -282,17 +286,42 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                 <div class="error-text"><?php echo $message; ?></div>
                 <?php } ?>
                
-                <h2 class="text-center"><?php echo ucfirst(strtolower($qualifyResult['firstname']))." ".formatLastName($qualifyResult['lastname']);?></h2>
-                <a class="patient_forms">
-                    <img src="./images/icon_forms.png" />
-                    <p>Forms</p>
-                </a>
-                <?php if($role=='Admin' && $xmlLink!=''){ ?>
-                <a class="xmlLink" href="<?php echo $xmlLink; ?>">
-                    <img src="./images/xmlIcon.png" />
-                    <p>XML</p>
-                </a>
-                <?php } ?>
+                <h2 class="text-center">
+                    <?php echo ucfirst(strtolower($qualifyResult['firstname']))." ".formatLastName($qualifyResult['lastname']);?>
+                    
+                </h2>
+                <div class="iconsBox">
+                    <a class="patient_forms">
+                        <img src="./images/icon_forms.png" />
+                        <p>Forms</p>
+                    </a>
+                    <?php if($role=='Admin' && $xmlLink!=''){ ?>
+                    <a class="xmlLink" href="<?php echo $xmlLink; ?>">
+                        <img src="./images/xmlIcon.png" />
+                        <p>XML</p>
+                    </a>
+                    <?php } ?>
+                    <?php if($role=='Admin' && isset($patientLoaded) && $patientLoaded=='Y'){ ?>
+                    <span class="circleA">
+                        <img src="./images/icon_circle_A.png" />
+                        <p>Auto Created</p>
+                    </span>
+                    <?php } ?>
+                    <?php if($role=='Admin' && isset($patientLinked)){ ?>                    
+                        <?php if($patientLinked=='Y'){ ?>
+                        <a class="linked" href="<?php echo $patientInfoUrl.'&linked=N'; ?>">
+                            <i class="fas fa-link"></i>
+                            <p>Linked</p>
+                        </a>
+                        <?php } else { ?>
+                        <a class="linked" href="<?php echo $patientInfoUrl.'&linked=Y'; ?>">
+                            <i class="fas fa-unlink"></i>
+                            <p>Unlinked</p>
+                        </a>
+                        <?php } ?> 
+                    <?php } ?>
+                </div>
+                
                 <div class="row">
                      <div id="message" class="error-text text-center">
                         <?php if($errorMsgMdlStats){ ?>   
@@ -300,11 +329,13 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                             <?php echo $errorMsgMdlStats; ?>
                         <?php } ?>
                     </div>
+                    <?php if($qualifyResult['specimen_collected']!=='No'){ ?>
                     <div id="specimenRadioBox" class="<?php echo ($qualifyResult['specimen_collected']=='Yes')?'hidden':"";?>" >
                         <h5 class="inline">Specimen collected?</h5>                        
                         <a class="yes" href="<?php echo $patientInfoUrl.'&status_log=add&specimen=yes'?>"><i class="fas fa-tint"></i> Yes</a> &nbsp;&nbsp;
                         <a class="no" href="<?php echo $patientInfoUrl.'&status_log=add&specimen=no'?>"><i class="fas fa-tint-slash"></i> No</a>
                     </div>
+                    <?php } ?>
                     <?php if( isset($qualifyResult['specimen_collected']) && $qualifyResult['specimen_collected']!=NULL && $qualifyResult['specimen_collected']!='0' ){ ?>
                     <div id="mdlInfoBox" class="pInfo <?php echo ($qualifyResult['specimen_collected']!='Yes')?'hidden':"";?>">
                         <p>
@@ -331,7 +362,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <p><label>Date of Birth: </label><?php echo ($qualifyResult['dob']!="")?date("n/j/Y", strtotime($qualifyResult['dob'])):""; ?></p>
                                 <p><label>Email: </label><?php echo $qualifyResult['email']; ?></p>
                                 <?php if(isset($qualifyResult['other_insurance'])){ ?>
-                                <p class="capitalize"><label>Insurance: </label><?php echo $qualifyResult['insurance_name'];
+                                <p class="capitalize"><label>Insurance: </label><?php echo ucwords(strtolower($qualifyResult['insurance_name']));
                                             if($qualifyResult['other_insurance']!="" && $qualifyResult['other_insurance']!="Other"){
                                                 echo " (".$qualifyResult['other_insurance'].")";
                                             }?>                                  
@@ -457,10 +488,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                     <div class="row pT-30">
                         <div id="questionaryInfo"  class="col-md-6">
                             <h5>
-                                Submission History: 
-                                <!-- <a class="pull-right" id="add-deductable-log">
-                                    <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
-                                </a>-->
+                                Submission History:
                             </h5>
                             <table class="table">
                             <thead>
@@ -479,6 +507,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                         //$queryPers = "SELECT * FROM `tbl_ss_qualifypers` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created";
                                         //$qPers = $db->query($queryPers, array('Guid_qualify'=>$Guid_qualify, 'Date_created'=>$Date_created));
                                         $qAns = $db->query("SELECT * FROM `tbl_ss_qualifyans` WHERE `Guid_qualify`=:Guid_qualify AND `Date_created`=:Date_created", array('Guid_qualify'=>$Guid_qualify, 'Date_created'=>$Date_created));
+                                        $genMutation = $db->query("SELECT * FROM `tbl_ss_qualifygene` WHERE `Guid_qualify`=:Guid_qualify", array('Guid_qualify'=>$Guid_qualify));
                                         $qualifyedClass = "";
                                         if($v['qualified'] == 'No'){
                                             $qualifyedClass = "mn no";
@@ -539,6 +568,16 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                                 } else {
                                                     echo "<p>".$personal." No Cancer History</p>";                                                    
                                                     echo "<p>".$family." No Cancer History</p>"; 
+                                                }
+                                                
+                                                if(isset($genMutation) && !empty($genMutation)){
+                                                    echo "<label>Gene mutation: </label> ";
+                                                    $mutation = '';
+                                                    foreach ($genMutation as $gKey => $gVal ){
+                                                        $mutation .= $gVal['gene_relation'].': '.$gVal['gene'].'; ';
+                                                    }
+                                                    $mutation = rtrim($mutation, '; ');
+                                                    echo $mutation;
                                                 }
                                                 ?>
                                                
@@ -708,7 +747,11 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                 <?php if($role=='Admin'){ ?>
                                 <a title="Add Revenue" class="pull-right" href="<?php echo $patientInfoUrl."&add_revenue=1";?>">
                                     <span class="fas fa-plus-circle" aria-hidden="true"></span>  Add
+                                </a> 
+                                <a title="Add dMDL CPT Patterns" class="pull-right mR-10" href="<?php echo $patientInfoUrl."&dmdl_cpt_patterns=1";?>">
+                                    <span class="fas fa-grip-horizontal"></span>  CPT Patterns
                                 </a>
+                                
                                 <?php } ?>
                             </h5>
                             <div class="revenue-form"></div>
@@ -741,7 +784,15 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                                         }
                                     ?>
                                     <tr id="<?php echo $v['Guid_revenue']; ?>">
-                                        <td><?php echo (!preg_match("/0{4}/" , $v['date_paid'])) ? date('n/j/Y', strtotime($v['date_paid'])) : ""; ?></td>
+                                        <td>
+                                            <?php 
+                                            $datePaid = '-';
+                                            if($v['date_paid'] != ''){
+                                                $datePaid = (!preg_match("/0{4}/" , $v['date_paid'])) ? date('n/j/Y', strtotime($v['date_paid'])) : "";
+                                            }
+                                            echo $datePaid; 
+                                            ?>
+                                        </td>
                                         <td><?php echo $v['payor']; ?></td>
                                         <td><?php echo $v['code']; ?></td>
                                         <td><?php echo ($v['Loaded']=='Y')?'A':''; ?></td>
@@ -1260,7 +1311,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 <?php if( (isset($_GET['edit_patient_info'])) && $_GET['edit_patient_info']=="1" ){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock patientInfo">
-        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a> 
+        <a class="close" href="<?php echo $patientInfoUrl; ?>"></a> 
         <h5 class="title">
             Update Patient Info
         </h5>
@@ -1362,6 +1413,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
                         <label>Event: </label>
                         <select name="source">
                             <option value="">Select Location</option>
+                            <option value="N/A">N/A</option>
                             <?php 
                             $sources = $db->selectAll('tblsource', ' ORDER BY `description` ASC');
                             foreach ($sources as $k=>$v){ 
@@ -1393,6 +1445,83 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
     
     
 <?php
+    
+    //delete delete dMDL CPT pattern
+    if(isset($_GET['delete_pattern']) && $_GET['delete_pattern']!="" && $role=='Admin'){
+        deleteByField($db,'tbl_mdl_dmdl_cpt_mapping', 'Guid_cpt_mapping', $_GET['delete_pattern']);
+        Leave($patientInfoUrl.'&dmdl_cpt_patterns=1');
+    }
+    
+    if(isset($_POST['manage_dmdl_pattern'])){
+        $cptMappingData = array(
+            'test_code' => preg_replace('/\s+/', '', $_POST['test_code']),
+            'cpt_pattern' => preg_replace('/\s+/', '', $_POST['cpt_pattern'])
+        );
+       if(isset($_POST['Guid_cpt_mapping']) && $_POST['Guid_cpt_mapping']!=""){ //update
+            $where = array('Guid_cpt_mapping'=>$_POST['Guid_cpt_mapping']);            
+            $updateCPTMapping = updateTable($db, 'tbl_mdl_dmdl_cpt_mapping', $cptMappingData, $where);
+            Leave($patientInfoUrl.'&dmdl_cpt_patterns=1');
+        } else { //insert            
+            $insertCPTMapping = insertIntoTable($db, 'tbl_mdl_dmdl_cpt_mapping', $cptMappingData);
+            if($insertCPTMapping['insertID']!=""){
+               Leave($patientInfoUrl.'&dmdl_cpt_patterns=1');
+            }
+        }
+    } 
+    if(isset($_GET['edit_revenue'])&&$_GET['edit_revenue']!=""){
+       $getRevenueQ = 'SELECT r.*, p.name AS payor, cpt.code '
+                    . 'FROM tbl_revenue r '
+                    . 'LEFT JOIN tbl_mdl_payors p ON r.Guid_payor=p.Guid_payor '
+                    . 'LEFT JOIN tbl_mdl_cpt_code cpt ON r.Guid_cpt=cpt.Guid_cpt '
+                    . 'WHERE Guid_revenue=:Guid_revenue';
+        $revenueRow = $db->row($getRevenueQ, array('Guid_revenue'=>$_GET['edit_revenue']));
+        extract($revenueRow);
+    }
+?>
+<?php if($role=='Admin' && (isset($_GET['dmdl_cpt_patterns']) && $_GET['dmdl_cpt_patterns']=='1') ){ ?>
+<div id="manage-status-modal" class="modalBlock editStausesModal">
+    <div class="contentBlock">
+        <a class="close" href="<?php echo $patientInfoUrl; ?>"></a>        
+        
+        <h5 class="title">
+            dMDL CPT to Test Code Patterns &nbsp;&nbsp;
+            <a title="Add CPT Pattern" href="<?php echo $patientInfoUrl; ?>&dmdl_cpt_patterns=1&add_pattern=1">
+                <span class="fas fa-plus-circle" aria-hidden="true"></span> 
+            </a>
+        </h5>
+        <div class="content">
+            <?php $cptPatterns = $db->query("SELECT * FROM `tbl_mdl_dmdl_cpt_mapping`"); ?>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Test Code</th>
+                        <th>CPT Pattern</th>                        
+                        <th class="w-50 text-center">Acctions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($cptPatterns as $k=>$v){ ?>
+                    <tr>
+                        <td><?php echo $v['test_code']; ?></td>
+                        <td><?php echo $v['cpt_pattern']; ?></td>
+                        <td class="text-center">
+                            <a href="<?php  echo $patientInfoUrl; ?>&dmdl_cpt_patterns=1&edit_pattern=<?php echo $v['Guid_cpt_mapping']; ?>">
+                                <span class="fas fa-pencil-alt"></span>
+                            </a>
+                            <a onclick="javascript:confirmationDeleteCPTPattern($(this));return false;" href="<?php  echo $patientInfoUrl; ?>&dmdl_cpt_patterns=1&delete_pattern=<?php echo $v['Guid_cpt_mapping']; ?>">
+                                <span class="far fa-trash-alt"></span>
+                            </a>
+                        </td>
+                    </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<?php } ?>
+
+<?php
     if(isset($_POST['manage_revenue'])){ 
         $date_paid = ($_POST['date_paid'] != "")?date('Y-m-d h:i:s', strtotime($_POST['date_paid'])):"";
         $revenueData=array(
@@ -1423,10 +1552,53 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
         extract($revenueRow);
     }
 ?>
+<?php if($role=='Admin' && (isset($_GET['add_pattern']) || (isset($_GET['edit_pattern'])&& $_GET['edit_pattern']!="")) ){ ?>
+<div id="manage-status-modal" class="modalBlock ">
+    <div class="contentBlock">
+        <a class="close" href="<?php echo $patientInfoUrl; ?>&dmdl_cpt_patterns=1"></a>        
+        
+        <h5 class="title">
+            <?php if(isset($_GET['add_pattern'])){ echo "Add New Pattern"; } else { echo "Edit Pattern"; }?>
+        </h5>
+        <div class="content">
+            <?php 
+                $Guid_cpt_mapping = '';
+                $test_code = '';
+                $cpt_pattern = '';
+                if(isset($_GET['edit_pattern']) && $_GET['edit_pattern']!=''){
+                    $getPatternRow = $db->row("SELECT * FROM tbl_mdl_dmdl_cpt_mapping WHERE Guid_cpt_mapping=:Guid_cpt_mapping", array('Guid_cpt_mapping'=>$_GET['edit_pattern']));
+                    if(!empty($getPatternRow)){
+                        $Guid_cpt_mapping = $getPatternRow['Guid_cpt_mapping'];
+                        $test_code = $getPatternRow['test_code'];
+                        $cpt_pattern = $getPatternRow['cpt_pattern'];
+                    }
+                }
+            ?>
+            <div class="add-status-form">
+                <form action="" method="POST">
+                    <h4 class="text-center"></h4>
+                    <?php if(isset($message)){ ?>
+                        <div class="text-center success-text"><?php echo $message; ?></div>
+                    <?php } ?>
+                    <input type="hidden" name="Guid_cpt_mapping" value="<?php echo $Guid_cpt_mapping; ?>" />
+                    <div class="">
+                        <input value="<?php echo $test_code; ?>" class="inputFullW" name="test_code" type="text" placeholder="Test Code">
+                        <textarea class="inputFullW" name="cpt_pattern" placeholder="dMDL CPT Pattern"><?php echo $cpt_pattern; ?></textarea>
+                    </div>
+                    <div class="text-right pT-10">
+                        <button class="button btn-inline" name="manage_dmdl_pattern" type="submit" >Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php } ?>
+
 <?php if($role=='Admin' && (isset($_GET['add_revenue']) || (isset($_GET['edit_revenue'])&& $_GET['edit_revenue']!="")) ){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock">
-        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>        
+        <a class="close" href="<?php echo $patientInfoUrl; ?>"></a>        
         
         <h5 class="title">
             Add Revenue
@@ -1511,7 +1683,7 @@ if(isset($_GET['patient']) && $_GET['patient'] !="" ){
 <?php if(isset($_GET['manage_status']) && $_GET['manage_status']=='add' && $role=='Admin'){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock">
-        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>        
+        <a class="close" href="<?php echo $patientInfoUrl; ?>"></a>        
         
         <h5 class="title">
             Add New Status
@@ -1598,7 +1770,7 @@ if(isset($_POST['edit_statuses'])){
 <?php if(isset($_GET['manage_status']) && $_GET['manage_status']=='edit' && $role=='Admin'){ ?>
 <div id="manage-status-modal" class="modalBlock editStausesModal">
     <div class="contentBlock">
-        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>       
+        <a class="close" href="<?php echo $patientInfoUrl; ?>"></a>       
         
         <h5 class="title">
             Edit Statuses
@@ -1649,7 +1821,7 @@ if(isset($_POST['edit_statuses'])){
 <?php if(isset($_GET['manage_note_category']) && $_GET['manage_note_category']=='add' && $role=='Admin'){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock">
-        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>        
+        <a class="close" href="<?php echo $patientInfoUrl; ?>"></a>        
         
         <h5 class="title">
             Add Note Category
@@ -1714,7 +1886,7 @@ if(isset($_POST['edit_categories'])){
 <?php if(isset($_GET['manage_note_category']) && $_GET['manage_note_category']=='edit' && $role=='Admin'){ ?>
 <div id="manage-status-modal" class="modalBlock editStausesModal">
     <div class="contentBlock">
-        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>       
+        <a class="close" href="<?php echo $patientInfoUrl; ?>"></a>       
         
         <h5 class="title">
             Edit Note Categories
@@ -1828,7 +2000,7 @@ if(isset($_POST['edit_categories'])){
 ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock">
-        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>        
+        <a class="close" href="<?php echo $patientInfoUrl; ?>"></a>        
         
         <h5 class="title"><?php echo $title;?> </h5>
         <div class="content">
@@ -1919,7 +2091,7 @@ if(isset($_POST['edit_categories'])){
 ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock">
-        <a class="close" href="<?php echo $patientInfoUrl; ?>">X</a>        
+        <a class="close" href="<?php echo $patientInfoUrl; ?>"></a>        
         
         <h5 class="title"><?php echo $title;?> </h5>
         <div class="content">

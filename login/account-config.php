@@ -206,6 +206,9 @@ require_once ('navbar.php');
                     }
                     $accountInfo = $accountInfo['0'];
                     extract($accountInfo); 
+                    $address = isset($address)?ucwords(strtolower($address)):'';
+                    $city = isset($city)?ucwords(strtolower($city)):'';
+                    $name = isset($name) ? formatAccountName($name) : '';
                     $labelClass="";   
                     $noSelection = '';
                 }else{  
@@ -214,8 +217,8 @@ require_once ('navbar.php');
                     $account = isset($account) ? $account : '';
                     $name = isset($name) ? $name : '';
                     $logo = '';
-                    $address = isset($address)?$address:'';
-                    $city = isset($city)?$city:'';
+                    $address = isset($address)?ucwords(strtolower($address)):'';
+                    $city = isset($city)?ucwords(strtolower($city)):'';
                     $state= isset($state)?$state:'';
                     $zip= isset($zip)?$zip:'';
                     $website= isset($website)?$website:'';
@@ -579,7 +582,7 @@ require_once ('navbar.php');
                                     <td><?php echo $v['category_name']; ?></td>
                                 <?php } ?>    
                                 <?php if(isFieldVisibleByRole($isCityView, $roleID)) {?>
-                                    <td><?php echo $v['city']; ?></td>
+                                    <td><?php echo ucwords(strtolower($v['city'])); ?></td>
                                 <?php } ?>    
                                 <?php if(isFieldVisibleByRole($isStateView, $roleID)) {?>
                                    <td><?php echo $v['state']; ?></td>
@@ -666,7 +669,7 @@ if(isset($_POST['edit_categories'])){
 <?php if( (isset($_GET['manageCategories'])) && $_GET['manageCategories']=="1" ){ ?>
 <div id="manage-status-modal" class="modalBlock editStausesModal">
     <div class="contentBlock ">
-        <a class="close" href="<?php echo $accountConfigUrl; ?>">X</a> 
+        <a class="close" href="<?php echo $accountConfigUrl; ?>"></a> 
         <h5 class="title">
             Edit Categories
         </h5>
@@ -717,7 +720,7 @@ if(isset($_POST['add_new_category'])){
 <?php if( (isset($_GET['addCategory'])) && $_GET['addCategory']=="1" ){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock ">
-        <a class="close" href="<?php echo $accountConfigUrl; ?>">X</a> 
+        <a class="close" href="<?php echo $accountConfigUrl; ?>"></a> 
         <h5 class="providersTitle">Add New Category</h5>
         <div class="content">
                     

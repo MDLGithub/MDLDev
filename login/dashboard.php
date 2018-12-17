@@ -127,6 +127,19 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     </div>
                 </div>
                 <?php } ?>
+                
+                <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['mdl_number'])) && (strlen(trim($_POST['mdl_number'])))) ? " show-label valid" : ""; ?>">
+                    <label class="dynamic" for="mdl_number"><span>MDL Number</span></label>
+
+                    <div class="group">
+                        <input id="mdl_number" name="mdl_number" type="text" value="<?php echo ((!isset($_POST['clear'])) && isset($_POST['mdl_number']) && strlen(trim($_POST['mdl_number']))) ? trim($_POST['mdl_number']) : ""; ?>" placeholder="MDL Number">
+
+                        <p class="f_status">
+                            <span class="status_icons"><strong></strong></span>
+                        </p>
+                    </div>
+                </div>
+                
                 <?php if(isFieldVisibleByRole($roleIDs['insurance']['view'], $roleID)) {?>
                     <div class="f2<?php echo ((!isset($_POST['clear'])) && (isset($_POST['insurance'])) && (strlen($_POST['insurance']))) ? " show-label valid" : ""; ?>">
                         <label class="dynamic" for="insurance"><span>Insurance</span></label>
@@ -344,12 +357,14 @@ $sqlTbl = "SELECT q.*, p.*, "
         . "AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') as firstname, AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') as lastname, "
         . "a.name as account_name, a.Guid_account, a.Guid_category as account_category, "
         . "CONCAT (srep.first_name, ' ', srep.last_name) AS salesrep_name, srep.Guid_salesrep, "
-        . "u.email, u.marked_test,  u.Guid_role, "
+        . "u.email, u.marked_test, u.Guid_role, "
+        . "mdlnum.mdl_number, mdlnum.Loaded as mdl_number_loaded, "
         . "q.Date_created AS date FROM tbl_ss_qualify q "
         . "LEFT JOIN tblaccount a ON q.account_number = a.account "
         . "LEFT JOIN tblaccountrep arep ON arep.Guid_account = a.Guid_account "
         . "LEFT JOIN tblsalesrep srep ON srep.Guid_salesrep = arep.Guid_salesrep "
         . "LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user "
+        . "LEFT JOIN tbl_mdl_number mdlnum ON p.Guid_user = mdlnum.Guid_user "
         . "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user";
 $where = "";
 $whereTest = (strlen($where)) ? " AND " : " WHERE ";
@@ -367,11 +382,13 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
                         p.*, AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') as firstname, AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') as lastname,
                         CONCAT (srep.first_name, ' ', srep.last_name) AS salesrep_name, srep.Guid_salesrep, 
                         u.email, u.marked_test, u.Guid_role, q.Date_created AS `date`, 
+                        mdlnum.mdl_number, mdlnum.Loaded as mdl_number_loaded,
                         '1' AS incomplete FROM tblqualify q  
                         LEFT JOIN tblaccount a ON q.account_number = a.account
                         LEFT JOIN tblaccountrep arep ON arep.Guid_account = a.Guid_account 
                         LEFT JOIN tblsalesrep srep ON srep.Guid_salesrep = arep.Guid_salesrep
                         LEFT JOIN tblpatient p ON q.Guid_user = p.Guid_user  
+                        LEFT JOIN tbl_mdl_number mdlnum ON p.Guid_user = mdlnum.Guid_user
                         LEFT JOIN tbluser u ON p.Guid_user = u.Guid_user"; 
             $where = " WHERE NOT EXISTS(SELECT * FROM tbl_ss_qualify qs WHERE q.Guid_qualify=qs.Guid_qualify) AND u.marked_test='0'";
         
@@ -410,6 +427,11 @@ if ((!isset($_POST['clear'])) && (!empty($_POST['search']))) {
     if (isset($_POST['last_name']) && strlen(trim($_POST['last_name']))) {
         $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
         $where .= " LOWER(CONVERT(AES_DECRYPT(lastname_enc, 'L@stn@m3&%#') USING 'utf8')) LIKE '%" . strtolower($_POST['last_name']) . "%'";
+    }
+    //MDL#
+    if (isset($_POST['mdl_number']) && strlen($_POST['mdl_number'])) {
+        $where .= (strlen($where) || strlen($whereTest)) ? " AND " : " WHERE ";
+        $where .= " mdlnum.mdl_number = '" . $_POST['mdl_number'] . "'";
     }
     //Insurance
     if (isset($_POST['insurance']) && strlen($_POST['insurance'])) {
@@ -497,23 +519,11 @@ $qualify_requests = $db->query($sqlTbl);
 
 $num_estimates = $qualify_requests;
 
-
+//closed for now, maybe will be used or removed at all 
 if(isset($_GET['resetDmdlData']) && $_GET['resetDmdlData']=='1'){
     if($role=='Admin'){
         //remove Loaded Data
-        $loadedDataTables = array('tbluser','tblpatient', 'tblaccount', 
-                                    'tblprovider', 'tbl_mdl_number', 'tbl_mdl_status_log', 
-                                    'tbl_mdl_payors', 'tbl_revenue', 'tbl_mdl_cpt_code'
-                                );
-        foreach ($loadedDataTables as $k=>$tableName){
-            $db->query("DELETE FROM $tableName WHERE Loaded='Y'");
-        } 
-        //Reset Linked Flags
-        $linkedDataTables = array('tbl_mdl_dmdl','tblpatient');
-        foreach ($linkedDataTables as $k=>$tableName){
-            $db->query("UPDATE $tableName SET Linked='N' WHERE Linked='Y'");
-        } 
-        
+        //resetDmdlLoadedData($db);  
         Leave(SITE_URL."/dashboard.php");
     }
 }
@@ -524,7 +534,6 @@ if(isset($_GET['resetDmdlData']) && $_GET['resetDmdlData']=='1'){
     <div class="box full visible">
         <?php if($dataViewAccess){ ?>
         <section id="palette_top" class="shorter_palette_top">
-            <h4  class = "palette_results" ><?php echo count($num_estimates) . " Results"; ?></h4>
             <?php echo topNavLinks($role); ?>
         </section>
 
@@ -586,9 +595,9 @@ if(isset($_GET['resetDmdlData']) && $_GET['resetDmdlData']=='1'){
                         <span class="dmdlRefresh">  
                             <a title="Open dMDL Screen." href="<?php echo SITE_URL.'/dashboard.php?refresh=1'; ?>" class="refresh" type="submit" name="dmdlRefresh"><i class="fas fa-sync-alt"></i></a>
                         </span>     
-                        <span class="dmdlRefresh">  
+<!--                        <span class="dmdlRefresh">  
                             <a title="Reset dMDL Loaded Data." href="<?php echo SITE_URL.'/dashboard.php?resetDmdlData=1'; ?>" class="refresh" type="submit" name="dmdlRefresh"><i class="fa fa-clock"></i></a>
-                        </span>  
+                        </span>  -->
                     </form>
                     <div class="uploadMsg">
                     <?php if($uploadMessage!=""){ echo $uploadMessage; }?>
@@ -653,6 +662,7 @@ if(isset($_GET['resetDmdlData']) && $_GET['resetDmdlData']=='1'){
                        <?php if(isFieldVisibleByRole($roleIDs['salesrep']['view'], $roleID)) {?>
                            <th>Genetic Consultant</th>  
                        <?php } ?>
+                        <th>MDL#</th>  
                        <?php if(isFieldVisibleByRole($roleIDs['salesrep']['view'], $roleID)) {?>
                            <th>Email</th>  
                        <?php } ?>
@@ -741,6 +751,14 @@ if(isset($_GET['resetDmdlData']) && $_GET['resetDmdlData']=='1'){
                                     <?php if(isFieldVisibleByRole($roleIDs['salesrep']['view'], $roleID)) {?>
                                         <td><?php echo $qualify_request['salesrep_name']; ?></td>          
                                     <?php } ?>
+                                   
+                                    <td class="tdAccount">
+                                        <?php if($qualify_request['mdl_number']!=""){ ?>
+                                            <img src = "<?php echo SITE_URL; ?>/images/icon_circle_sharp.png" />
+                                        <?php echo "<span class='account_name'>".$qualify_request['mdl_number']."</span>"; ?>
+                                        <?php } ?>
+                                        
+                                    </td> 
                                     <?php if(isFieldVisibleByRole($roleIDs['salesrep']['view'], $roleID)) {?>
                                         <td class="mn">
                                             <?php if($qualify_request['email']==""){ ?>
@@ -770,6 +788,32 @@ if(isset($_GET['resetDmdlData']) && $_GET['resetDmdlData']=='1'){
 <?php 
 if(isset($_POST['dmdlUpdate'])){
     
+    /* 
+     * When Update is clicked 
+     * update statuses and Payment information 
+     * for those that are already linked and not showing on the screen
+     * Those should be updated until the status is Payment received or Test Cancelled.
+    */ 
+    $linkedPatientsQ = "SELECT 
+                            p.*,
+                            dmdl.Guid_mdl_dmdl,
+                            dmdl.MDLNumber as csv_mdlnumber,
+                            dmdl.ToUpdate
+                        FROM `tblpatient` p
+                        LEFT JOIN `tbl_mdl_dmdl` dmdl ON dmdl.PatientID=p.Guid_dmdl_patient
+                        WHERE p.Linked = 'Y' 
+                            AND p.Guid_dmdl_patient <> '' 
+                            AND p.Guid_dmdl_physician <> '' 
+                            AND p.dMDL_mdl_number <> '' 
+                            AND dmdl.ToUpdate = 'Y'";
+    $linkedPatients = $db->query($linkedPatientsQ);
+    var_dump($linkedPatients);
+    if(!empty($linkedPatients)){
+        foreach ($linkedPatients as $k=>$patientInfo){
+            updatedMDLLinkedPatients($db,$patientInfo);
+        }
+    }
+    
     if(isset($_POST['dmdl']['selected'])){
         foreach ($_POST['dmdl']['selected'] as $mdlNum=>$v){
             $dmdlItem = $_POST["dmdl"]["$mdlNum"];
@@ -795,6 +839,8 @@ if(isset($_POST['dmdlUpdate'])){
                 $city = isset($data['city'])?$data['city']:'';
                 $state = isset($data['state'])?$data['state']:'';
                 $zip = isset($data['zip'])?$data['zip']:'';
+                $insurance_Company = isset($data['Insurance_Company'])?$data['Insurance_Company']:'';
+                $policyID = isset($data['policyID'])?$data['policyID']:'';
                 
                 if(isset($data['Physician']['FirstName'])){
                     $physician_name = $data['Physician']['FirstName'];
@@ -823,19 +869,19 @@ if(isset($_POST['dmdlUpdate'])){
                             $Guid_user = $insertUser['insertID'];
                             //insert into patients
                             $insertPatient = $db->query("INSERT INTO `tblpatient` ("
-                                    . "Guid_dmdl_patient,Guid_dmdl_physician,"
+                                    . "Guid_dmdl_patient,Guid_dmdl_physician,dMDL_mdl_number,"
                                     . "Guid_user,accountNumber,"
                                     . "firstname_enc,lastname_enc,"
                                     . "ethnicity,dob,gender,"
                                     . "address,address1,city,state,zip,"
                                     . "phone_number,phone_number_home,"
-                                    . "Loaded,Linked,physician_name,insurance_name,Date_created) "
-                                    . "VALUES ('$Guid_dmdl_patient','$Guid_dmdl_physician','$Guid_user','$account_number', "
+                                    . "Loaded,Linked,physician_name,insurance_name,source,policyID,Date_created) "
+                                    . "VALUES ('$Guid_dmdl_patient','$Guid_dmdl_physician','$dmdl_mdl_num','$Guid_user','$account_number', "
                                     . "AES_ENCRYPT('$firstname_enc', 'F1rstn@m3@_%'),AES_ENCRYPT('$lastname_enc', 'L@stn@m3&%#'), "
                                     . "'$ethnicity','$dob','$gender',"
                                     . "'$address','$address1','$city','$state','$zip',"
                                     . "'$phone_number','$phone_number_home', "
-                                    . "'Y','Y', '$physician_name','$insurance_name', NOW())");
+                                    . "'Y','Y', '$physician_name','$insurance_Company','N/A','$policyID', NOW())");
                             $Guid_patient = $db->lastInsertId();
                             
                             //update mdl number
@@ -854,16 +900,17 @@ if(isset($_POST['dmdlUpdate'])){
                             if(isset($Guid_account) && $Guid_account!=''){
                                 $apiProviderData = $data['Physician'];
                                 $Guid_provider = updateOrInsertProvider($db,$accountNum,$Guid_account,$Guid_user,$apiProviderData);
+                                if($Guid_provider){
+                                    updateTable($db, 'tblpatient', array('provider_id'=>$Guid_provider), array('Guid_patient'=>$Guid_patient));
+                                }
                             }
                             
                             //update or insert payor and revenue data                            
                             if(isset($data['invoiceDetail']) && !empty($data['invoiceDetail'])){
                                 updateOrInsertRevenue($db, $Guid_user, $data['invoiceDetail']);
-                            }
-                                
+                            }                               
 
                             $statuses = $_POST["dmdl"]["$mdlNum"]["statuses"];
-
                             //insert suatuses
                             $statusLogData = array(
                                 'Guid_user' =>  $Guid_user,
@@ -885,12 +932,13 @@ if(isset($_POST['dmdlUpdate'])){
                             if(!empty($getSalesrep)){
                                 $statusLogData['Guid_salesrep'] = $getSalesrep['Guid_salesrep'];
                                 $statusLogData['salesrep_fname'] = $getSalesrep['first_name'];
-                                $statusLogData['salesrep_lname'] = $accountInfo['last_name'];
+                                $statusLogData['salesrep_lname'] = $getSalesrep['last_name'];
                             }
                             //update tbl_mdl_dmdl UpdateDatetime   
                             updateTable($db, 'tbl_mdl_dmdl', array('UpdateDatetime'=> date('Y-m-d h:i:s'),'Linked'=>'Y'), array('Guid_mdl_dmdl'=>$Guid_mdl_dmdl));
-    
-                            $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum,$data['Guid_mdl_dmdl']);
+                            $csvMdlNumber = $data['csv_mdlnumber'];
+                            $invoceData = isset($data['invoiceDetail'])?$data['invoiceDetail']:array();
+                            $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum,$data['Guid_mdl_dmdl'], $invoceData, $csvMdlNumber);
 
                         } 
                     } else { //update 
@@ -901,58 +949,65 @@ if(isset($_POST['dmdlUpdate'])){
                         $Guid_user = $thisPatient['Guid_user'];    
                         $Guid_patient = $thisPatient['Guid_patient'];
                         //update patent table
-                        $patientData = array();
-                        if($thisPatient['Guid_dmdl_patient']==''){
-                            $patientData['Guid_dmdl_patient'] = $data['Guid_PatientId'];
-                        }
-                        if($thisPatient['Guid_dmdl_physician']==''){
-                            $patientData['Guid_dmdl_physician'] = $data['Physician']['GUID_PhysicianID'];
-                        }
-                        if($thisPatient['account_number']==''){
+                        $patientData['dMDL_mdl_number'] = $data['mdlnumber'];
+                        $patientData['Guid_dmdl_patient'] = $data['Guid_PatientId'];
+                        $patientData['Guid_dmdl_physician'] = $data['Physician']['GUID_PhysicianID'];
+                        
+                        if(isset($data['account']['number']) && $thisPatient['accountNumber']==''){
                             $patientData['accountNumber'] = $data['account']['number'];
                         }
-                        if($thisPatient['firstname_enc']==''){
+                        if(isset($data['firstname']) && $thisPatient['firstname_enc']==''){
                             $patientData['firstname_enc'] = $data['firstname'];
                         }
-                        if($thisPatient['lastname_enc']==''){
+                        if(isset($data['lastname']) && $thisPatient['lastname_enc']==''){
                             $patientData['lastname_enc'] = $data['lastname'];
                         }
-                        if($thisPatient['ethnicity']==''){
+                        if(isset($data['ethnicity']) && $thisPatient['ethnicity']==''){
                             $patientData['ethnicity'] = $data['ethnicity'];
                         }
-                        if($thisPatient['dob']==''){
+                        if(isset($data['dob']) && $thisPatient['dob']==''){
                             $patientData['dob'] = $data['dob'];
                         }
-                        if($thisPatient['phone_number']==''){
+                        if(isset($data['phone_number']) && $thisPatient['phone_number']==''){
                             $patientData['phone_number'] = $data['phone_number'];
                         }
-                        if($thisPatient['phone_number_home']==''){
+                        if(isset($data['phone_number_home']) && $thisPatient['phone_number_home']==''){
                             $patientData['phone_number_home'] = $data['phone_number_home'];
                         }
-                        if($thisPatient['gender']==''){
+                        if(isset($data['gender']) && $thisPatient['gender']==''){
                             $patientData['gender'] = $data['gender'];
                         }
-                        if($thisPatient['address']==''){
+                        if(isset($data['address']) && $thisPatient['address']==''){
                             $patientData['address'] = $data['address'];
                         }
-                        if($thisPatient['address1']==''){
+                        if(isset($data['address1']) && $thisPatient['address1']==''){
                             $patientData['address1'] = $data['address1'];
                         }
-                        if($thisPatient['city']==''){
+                        if(isset($data['city']) && $thisPatient['city']==''){
                             $patientData['city'] = $data['city'];
                         }
-                        if($thisPatient['state']==''){
+                        if(isset($data['state']) && $thisPatient['state']==''){
                             $patientData['state'] = $data['state'];
                         }
-                        if($thisPatient['zip']==''){
+                        if(isset($data['zip']) && $thisPatient['zip']==''){
                             $patientData['zip'] = $data['zip'];
                         }                        
+                        if(isset($data['policyID']) && $thisPatient['policyID']==''){
+                            $patientData['policyID'] = $data['policyID'];
+                        }                        
                         if($thisPatient['physician_name']==''){
-                            $patientData['physician_name'] = $data['Physician']['FirstName']." ".$data['Physician']['LastName'];
+                            if(isset($data['Physician']['FirstName'])){
+                            $patientData['physician_name'] = $data['Physician']['FirstName'];
+                            }
+                            if(isset($data['Physician']['LastName'])){
+                            $patientData['physician_name'] .= " ".$data['Physician']['LastName'];
+                            }
+                        }                                               
+                        if(isset($data['Insurance_Company']) && $thisPatient['insurance_name']==''){
+                            $patientData['insurance_name'] = $data['Insurance_Company'];
                         }
-                                               
-                        if($thisPatient['insurance_name']==''){
-                            $patientData['insurance_name'] = $data['insurance_full'];
+                        if($thisPatient['source']==''){
+                            $patientData['source'] = 'N/A';
                         }
                         if(!empty($thisPatient)){
                             $patientData['Linked'] = 'Y';
@@ -962,25 +1017,33 @@ if(isset($_POST['dmdlUpdate'])){
 
                         //update mdl number
                         $wherUserIs = array('Guid_user'=>$Guid_user);
-                        $thisMdl = $db->query("SELECT * FROM tbl_mdl_number WHERE Guid_user=:Guid_user", $wherUserIs);
-                        $mdlData['mdl_number']=$data['mdlnumber'];
+                        $checkMDLNum = $db->query("SELECT * FROM tbl_mdl_number WHERE mdl_number=:mdl_number", array('mdl_number'=>$data['mdlnumber']));
                         $mdlNumMatch = False;
-                        if(!empty($thisMdl)){                            
-                            foreach ($thisMdl as $key => $mdlVal) {
-                                if($mdlVal['mdl_number']!=''){
-                                    if($mdlVal['mdl_number']==$data['mdlnumber']){
-                                        $mdlNumMatch = True;
+                        //check if mdl number is not exists
+                        if(empty($checkMDLNum)){
+                            //get mdl number by user ID                           
+                            $thisMdl = $db->query("SELECT * FROM tbl_mdl_number WHERE Guid_user=:Guid_user", $wherUserIs);
+                            $mdlData['mdl_number']=$data['mdlnumber'];
+                            
+                            if(!empty($thisMdl)){                            
+                                foreach ($thisMdl as $key => $mdlVal) {
+                                    if($mdlVal['mdl_number']!=''){
+                                        if($mdlVal['mdl_number']==$data['mdlnumber']){
+                                            $mdlNumMatch = True;
+                                        }
                                     }
-                                }
-                            } 
+                                } 
+                            }
                         }
                                                
                         if($mdlNumMatch){
                             $updateMDLNum = updateTable($db, 'tbl_mdl_number', $mdlData, $wherUserIs);
                         } else {
-                            $mdlData['Loaded']='Y';
-                            $mdlData['Guid_user']=$Guid_user;
-                            $insertMDLNum = insertIntoTable($db, 'tbl_mdl_number', $mdlData);
+                            if(!empty($mdlData)){
+                                $mdlData['Loaded']='Y';
+                                $mdlData['Guid_user']=$Guid_user;
+                                $insertMDLNum = insertIntoTable($db, 'tbl_mdl_number', $mdlData);
+                            }
                         }
 
                         //update OR insert account
@@ -992,6 +1055,12 @@ if(isset($_POST['dmdlUpdate'])){
                             $apiProviderData = $data['Physician'];
                             $Guid_provider = updateOrInsertProvider($db,$accountNum,$Guid_account,$Guid_user,$apiProviderData);
                         }
+                        
+                        //update or insert payor and revenue data                            
+                        if(isset($data['invoiceDetail']) && !empty($data['invoiceDetail'])){
+                            updateOrInsertRevenue($db, $Guid_user, $data['invoiceDetail']);
+                        }
+                        
                         $mdlNum = $data['mdlnumber'];
                         if( isset($_POST["dmdl"]["$mdlNum"]["statuses"])){
                             $statuses = $_POST["dmdl"]["$mdlNum"]["statuses"];
@@ -1015,13 +1084,14 @@ if(isset($_POST['dmdlUpdate'])){
                             if(!empty($getSalesrep)){
                                 $statusLogData['Guid_salesrep'] = $getSalesrep['Guid_salesrep'];
                                 $statusLogData['salesrep_fname'] = $getSalesrep['first_name'];
-                                $statusLogData['salesrep_lname'] = $accountInfo['last_name'];
+                                $statusLogData['salesrep_lname'] = $getSalesrep['last_name'];
                             }
                             //var_dump($statusLogData);
                             //update tbl_mdl_dmdl UpdateDatetime   
                             updateTable($db, 'tbl_mdl_dmdl', array('UpdateDatetime'=> date('Y-m-d h:i:s'),'Linked'=>'Y'), array('Guid_mdl_dmdl'=>$Guid_mdl_dmdl));
-                            
-                            $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum,$data['Guid_mdl_dmdl']);
+                            $invoceData = isset($data['invoiceDetail'])?$data['invoiceDetail']:array();
+                            $csvMdlNumber = $data['csv_mdlnumber'];
+                            $insertDmdlStatuses = insertDmdlStatuses($db,$statuses,$statusLogData,$mdlNum,$data['Guid_mdl_dmdl'], $invoceData, $csvMdlNumber);
                         }
                     }                        
                 } 
@@ -1035,7 +1105,7 @@ if(isset($_POST['dmdlUpdate'])){
 <?php if( (isset($_GET['refresh'])) && $_GET['refresh']=="1" ){ ?>
 <div id="manage-status-modal" class="modalBlock ">
     <div class="contentBlock refreshModal">
-        <a class="close" href="<?php echo SITE_URL."/dashboard.php"; ?>">X</a> 
+        <a class="close" href="<?php echo SITE_URL."/dashboard.php"; ?>"></a> 
         <h5 class="title">
             Refresh Results
         </h5>
