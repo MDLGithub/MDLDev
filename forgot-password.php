@@ -68,7 +68,7 @@ function generate_header($title) {
 <?php
 	} else {
 ?>
-					<figure id="app_logo_mdl"><img src="../dev1/wp-content/themes/oceanreef/images/logo.png" alt="MDL"></figure>
+					<figure id="app_logo_mdl"><img src="../dev2/wp-content/themes/oceanreef/images/logo.png" alt="MDL"></figure>
 <?php
 	}
 	

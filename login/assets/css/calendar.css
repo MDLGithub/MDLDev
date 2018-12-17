@@ -2487,7 +2487,7 @@ and (orientation : portrait) {
     } 
 
     
-    .salesrep_list ul::after {
+    .salesrep_list::after {
       content: '';
       position: absolute;
       background: grey;
