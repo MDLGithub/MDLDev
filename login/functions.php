@@ -4034,7 +4034,17 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         $status_AwaitingPayment_IDs = array('32','52');  //Billed: Awaiting Payment
         //get Awaiting Payment -> Test Code
         $cpt_pattern = $statuses['AwaitingPayment']['CptPattern'];
-        $getCodeFromPattern = $db->query("SELECT * FROM tbl_mdl_dmdl_cpt_mapping WHERE cpt_pattern=:cpt_pattern", array('cpt_pattern'=>$cpt_pattern));
+        $getCodeFromPattern = $db->row("SELECT * FROM tbl_mdl_dmdl_cpt_mapping WHERE cpt_pattern=:cpt_pattern", array('cpt_pattern'=>$cpt_pattern));
+        if( !empty($getCodeFromPattern) ){
+            if(isset($getCodeFromPattern['test_code']) && $getCodeFromPattern['test_code']!=''){
+                //get Awating payment test code Guid_status
+                $testCode = $getCodeFromPattern['test_code'];
+                $testCodeSatusID = $db->row("SELECT Guid_status FROM `tbl_mdl_status` WHERE parent_id=:parent_id AND status=:status", array('parent_id'=>'52', 'status'=>$testCode));
+                $status_AwaitingPayment_IDs[] = $testCodeSatusID['Guid_status'];
+            }
+        } else {
+            
+        }
         if(isValidStatusGroup($db,$status_AwaitingPayment_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_AwaitingPayment_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
