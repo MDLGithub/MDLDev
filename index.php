@@ -1,4 +1,12 @@
 <?php
+$url = "https://mybrcacare.com";
+
+if (strlen($_SERVER['QUERY_STRING'])) {
+	$url .= "/?" . $_SERVER['QUERY_STRING'];
+} 
+
+header('Location: ' . $url);
+
 //require "database.php";
 
 //$db = Database::getInstance();
@@ -194,7 +202,7 @@ if (empty($_POST)) {
 		array_push($qualification_text, "BRCA-Related Breast and/or Ovarian Cancer Syndrome");
 			
 		display_qualification($qualification_text, "1");
-	}elseif (($qualify['insurance'] == "Aetna") && ($qualify['gender'] == "Male") && (isset($_POST['personal_cancer'])) && (in_array("No Cancer/None of the Above", $_POST['personal_cancer']))) {	
+	} elseif (($qualify['insurance'] == "Aetna") && ($qualify['gender'] == "Male") && (isset($_POST['personal_cancer'])) && (in_array("No Cancer/None of the Above", $_POST['personal_cancer']))) {	
 		save_input();
 		
 		$qualification_text=array();
@@ -204,6 +212,28 @@ if (empty($_POST)) {
 		display_qualification($qualification_text, "1");
 	} else {		
 		save_input();
+		
+		if (isset($_POST['insurance']) && ($_POST['insurance'] == "Aetna")) {
+			$result = $conn->query("SELECT dob FROM tblpatient WHERE Guid_user = " . $qualify['Guid_user']);
+				 
+			$patient = $result->fetch_assoc();	
+			
+			$diff = abs(strtotime(date("Y-m-d")) - strtotime($patient['dob']));
+
+			$age = floor($diff / (365*60*60*24));
+		
+			if ($age <= 18) {
+				save_input();
+		
+				$qualification_text=array();
+			
+				array_push($qualification_text, "BRCA-Related Breast and/or Ovarian Cancer Syndrome");
+				
+				display_qualification($qualification_text, "1");
+			
+				exit;
+			}
+		}
 		
 		if (isset($_POST['next_step']) && ($_POST['next_step'] == "additional_summary")) {
 			$qualification_text=array();
@@ -3316,7 +3346,7 @@ function display_qualification($qualification_text, $not_qualified) {
 				$cancer_detail[$id] = $c_type;
 			}
 			if (strlen($relative['additional_cancer_type'])) {				
-				$additional_cancer = $relative['additional_cancer_type'];				
+				$additional_cancer[$id] = $relative['additional_cancer_type'];				
 			}
 			
 			// if (strlen($relative['additional_question'])) {
@@ -3348,11 +3378,11 @@ function display_qualification($qualification_text, $not_qualified) {
 										</ul>
 								</div>
 <?php				
-				if (strlen($additional_cancer)) {
+				if (strlen($additional_cancer[$rel_id])) {
 ?>
 								<div class="pInfo_type">
 									<strong>Additional Cancer Diagnosis</strong>
-									<p><?php echo $additional_cancer; ?> 
+									<p><?php echo $additional_cancer[$rel_id]; ?> 
 <?php
 					if (strlen($additional_age)) {
 ?>
@@ -4689,6 +4719,10 @@ function save_snap_shot($not_qualified) {
 
 	$conn->query($sql);	
 	
+	$sql = "UPDATE tblpatient p, tblqualify q SET p.insurance_name = q.insurance, p.other_insurance = q.other_insurance, p.gender = q.gender, p.accountNumber = q.account_number, p.provider_id = q.provider_id, p.other_provider = q.other_provider, p.source = q.source WHERE p.Guid_user = q.Guid_user AND p.Guid_user = " . $qualify['Guid_user'];
+	
+	$conn->query($sql);	
+	
 	require ("db/dbdisconnect.php");
 }
 function perform_login(&$error) {
@@ -5200,7 +5234,7 @@ function generate_overlays($error) {
 				
 		$user = $result->fetch_assoc();	
 		
-		$result = $conn->query("SELECT * FROM tblpatient WHERE Guid_user = " . $qualify['Guid_user']);
+		$result = $conn->query("SELECT dob, AES_DECRYPT(firstname_enc, 'F1rstn@m3@_%') as firstname, AES_DECRYPT(lastname_enc, 'L@stn@m3&%#') as lastname  FROM tblpatient WHERE Guid_user = " . $qualify['Guid_user']);
 				
 	    $patient = $result->fetch_assoc();	
 		
