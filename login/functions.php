@@ -2532,6 +2532,28 @@ function getPaientPerfectMatch($db,$firstname,$lastname,$Date_Of_Birth){
     //var_dump($getPatient);
     return $getPatient;
 }
+
+
+
+function resetDmdlLoadedData($db){
+    $loadedDataTables = array('tbluser','tblpatient', 'tblaccount', 
+                                'tblprovider', 'tbl_mdl_number', 'tbl_mdl_status_log', 
+                                'tbl_mdl_payors', 'tbl_revenue', 'tbl_mdl_cpt_code'
+                            );
+    //Delete table rows wirh Loaded flag = 'Y'
+    foreach ($loadedDataTables as $k=>$tableName){
+        $db->query("DELETE FROM $tableName WHERE Loaded='Y'");
+    } 
+    //Reset Linked Flags
+    $linkedDataTables = array('tbl_mdl_dmdl','tblpatient');
+    foreach ($linkedDataTables as $k=>$tableName){
+        $db->query("UPDATE $tableName SET Linked='N' WHERE Linked='Y'");
+    } 
+    //set ToUpdate From N to Y in tbl_mdl_dmdl
+    $db->query("UPDATE `tbl_mdl_dmdl` SET ToUpdate='Y' WHERE ToUpdate='N'");
+    
+    return TRUE;
+}
 /**
  * $res is returned array from dMDL API
  * @param type $res
@@ -2753,22 +2775,22 @@ function getInvoiceDetail($res){
         foreach($billingArray as $invKey => $invDetail){
             //payor details
             if(isset($res['Insurance_Company']) && !empty($res['Insurance_Company'])){
-                $invoiceDetail['invoiceDetail'][".$invKey."]['fullName'] = $res['Insurance_Company'];
+                $invoiceDetail['invoiceDetail'][$invKey]['fullName'] = $res['Insurance_Company'];
             }
             if(isset($invDetail['InvoiceID'])){
-                $invoiceDetail['invoiceDetail'][".$invKey."]['InvoiceID'] = $invDetail['InvoiceID'];
+                $invoiceDetail['invoiceDetail'][$invKey]['InvoiceID'] = $invDetail['InvoiceID'];
             }
             if(isset($invDetail['PayID'])){
-                $invoiceDetail['invoiceDetail'][".$invKey."]['PayID'] = $invDetail['PayID'];
+                $invoiceDetail['invoiceDetail'][$invKey]['PayID'] = $invDetail['PayID'];
             }
             if(isset($invDetail['TestCode'])){
-                $invoiceDetail['invoiceDetail'][".$invKey."]['TestCode'] = $invDetail['TestCode'];
+                $invoiceDetail['invoiceDetail'][$invKey]['TestCode'] = $invDetail['TestCode'];
             }
             if(isset($invDetail['CPT'])){
-                $invoiceDetail['invoiceDetail'][".$invKey."]['CPT'] = $invDetail['CPT'];
+                $invoiceDetail['invoiceDetail'][$invKey]['CPT'] = $invDetail['CPT'];
             }
             if(isset($invDetail['DatePaid'])){
-                $invoiceDetail['invoiceDetail'][".$invKey."]['DatePaid'] = convertDmdlDate($invDetail['DatePaid']);
+                $invoiceDetail['invoiceDetail'][$invKey]['DatePaid'] = convertDmdlDate($invDetail['DatePaid']);
             }
 
             $amount = 0;
@@ -2778,33 +2800,13 @@ function getInvoiceDetail($res){
             if(isset($invDetail['Total_InsPaid'])){
                 $amount += $invDetail['Total_InsPaid'];
             }
-            $invoiceDetail['invoiceDetail'][".$invKey."]['amount'] = $amount;
+            $invoiceDetail['invoiceDetail'][$invKey]['amount'] = $amount;
 
         }
     }
     return $invoiceDetail;
 }
 
-
-function resetDmdlLoadedData($db){
-    $loadedDataTables = array('tbluser','tblpatient', 'tblaccount', 
-                                'tblprovider', 'tbl_mdl_number', 'tbl_mdl_status_log', 
-                                'tbl_mdl_payors', 'tbl_revenue', 'tbl_mdl_cpt_code'
-                            );
-    //Delete table rows wirh Loaded flag = 'Y'
-    foreach ($loadedDataTables as $k=>$tableName){
-        $db->query("DELETE FROM $tableName WHERE Loaded='Y'");
-    } 
-    //Reset Linked Flags
-    $linkedDataTables = array('tbl_mdl_dmdl','tblpatient');
-    foreach ($linkedDataTables as $k=>$tableName){
-        $db->query("UPDATE $tableName SET Linked='N' WHERE Linked='Y'");
-    } 
-    //set ToUpdate From N to Y in tbl_mdl_dmdl
-    $db->query("UPDATE `tbl_mdl_dmdl` SET ToUpdate='Y' WHERE ToUpdate='N'");
-    
-    return TRUE;
-}
 
 /**
  * update dMDL Linked Patients
@@ -2893,8 +2895,8 @@ function updatedMDLLinkedPatients($db, $patientInfo){
     
     //update or insert payor and revenue data      
     if(isset($res['BillingDetail']['invoiceDetail']) && !empty($res['BillingDetail']['invoiceDetail'])){
-        $invoiceDetail = getInvoiceDetail($res);
-        updateOrInsertRevenue($db, $patientInfo['Guid_user'], $invoiceDetail);
+        $getInvoiceDetail = getInvoiceDetail($res);
+        updateOrInsertRevenue($db, $patientInfo['Guid_user'], $getInvoiceDetail['invoiceDetail']);
     }  
     
 }
@@ -3584,13 +3586,15 @@ function updateOrInsertPayor($db,$Guid_user,$name, $fullName=FALSE){
 }
 
 function updateOrInsertRevenue($db, $Guid_user, $invoiceDetails){    
-   
     $invoiceArray = $invoiceDetails;
+    
     if(!isset($invoiceDetails[0])){
         $invoiceArray[0] = $invoiceDetails;
     }
-    foreach ($invoiceArray as $k=>$invoiceDetail) {        
+    foreach ($invoiceArray as $k=>$invoiceDetail) {  
+        $revenueData = array();
         if(isset($invoiceDetail['CPT'])&&$invoiceDetail['CPT']!=''){
+            
             //check CPT
             $checkCPT = $db->row("SELECT * FROM `tbl_mdl_cpt_code` WHERE code=:code",array('code'=>$invoiceDetail['CPT']));
             if(!empty($checkCPT)){
@@ -3608,22 +3612,66 @@ function updateOrInsertRevenue($db, $Guid_user, $invoiceDetails){
             $Guid_payor = updateOrInsertPayor($db, $Guid_user,$name, $fullName);
             $revenueData['Guid_payor'] = $Guid_payor;
         }
-        if($Guid_user && $Guid_user!=''){
-            $revenueData['Guid_user'] = $Guid_user;
-        }
+        
         if(isset($invoiceDetail['amount'])){
             $revenueData['amount'] = $invoiceDetail['amount'];
         }
         if(isset($invoiceDetail['DatePaid'])&&$invoiceDetail['DatePaid']!=''){
             $date_paid = date('Y-m-d h:i:s', strtotime($invoiceDetail['DatePaid']));
             $revenueData['date_paid'] = $date_paid;
-        }        
-        if(!empty($revenueData)){
+        }     
+        if(!empty($revenueData)){        
+            $revenueData['Guid_user'] = $Guid_user;
             $revenueData['Loaded'] = 'Y';
-            $insertRevenue = insertIntoTable($db, 'tbl_revenue', $revenueData);
+            $isRevenueExists = checkRevenue($db, $revenueData); //returns true if exists
+            if(!$isRevenueExists){ //if not exists in db
+                $insertRevenue = insertIntoTable($db, 'tbl_revenue', $revenueData);
+            }
         }
     }
     
+}
+/**
+ * Check Revenue 
+ * @param type $db
+ * @param type $revenueData
+ * @return boolean - true if data exists and false if not
+ */
+function checkRevenue($db, $revenueData){
+    $query = "SELECT * FROM `tbl_revenue`";
+    $where = '';
+    if(isset($revenueData['Guid_user']) && $revenueData['Guid_user'] != ''){
+        $Guid_user = $revenueData['Guid_user'];
+        $where .= "Guid_user='$Guid_user' AND ";
+    }
+    if(isset($revenueData['Guid_payor']) && $revenueData['Guid_payor'] != ''){        
+        $Guid_payor = $revenueData['Guid_payor'];
+        $where .= "Guid_payor='$Guid_payor' AND ";
+    }
+    if(isset($revenueData['Guid_cpt']) && $revenueData['Guid_cpt'] != ''){
+        $Guid_cpt = $revenueData['Guid_cpt'];
+        $where .= "Guid_cpt='$Guid_cpt' AND ";        
+    }
+    if(isset($revenueData['amount']) && $revenueData['amount'] != ''){
+        $amount = $revenueData['amount'];
+        $where .= "amount='$amount' AND ";        
+    }
+    if(isset($revenueData['date_paid']) && $revenueData['date_paid'] != ''){
+        $date_paid = $revenueData['date_paid'];
+        $where .= "date_paid='$date_paid' AND ";        
+    }
+    $where = rtrim($where, "AND ");
+    if($where!=''){
+        $query .= " WHERE $where";
+        $checkRevenue = $db->row($query);
+        if(!empty($checkRevenue)){ //if record exists
+            return TRUE;
+        } else { //if not
+            return FALSE;
+        }
+    }
+    //if condition is empty it means revenueData is empty
+    return FALSE;
 }
 
 function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl, $invoiceDetails, $csvMdlNumber){    
@@ -4033,17 +4081,19 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         $statusLogData['Date'] = $statuses['Testing_Complete']['Date'];
         $status_AwaitingPayment_IDs = array('32','52');  //Billed: Awaiting Payment
         //get Awaiting Payment -> Test Code
-        $cpt_pattern = $statuses['AwaitingPayment']['CptPattern'];
-        $getCodeFromPattern = $db->row("SELECT * FROM tbl_mdl_dmdl_cpt_mapping WHERE cpt_pattern=:cpt_pattern", array('cpt_pattern'=>$cpt_pattern));
-        if( !empty($getCodeFromPattern) ){
-            if(isset($getCodeFromPattern['test_code']) && $getCodeFromPattern['test_code']!=''){
-                //get Awating payment test code Guid_status
-                $testCode = $getCodeFromPattern['test_code'];
-                $testCodeSatusID = $db->row("SELECT Guid_status FROM `tbl_mdl_status` WHERE parent_id=:parent_id AND status=:status", array('parent_id'=>'52', 'status'=>$testCode));
-                $status_AwaitingPayment_IDs[] = $testCodeSatusID['Guid_status'];
+        if(isset($statuses['AwaitingPayment']['CptPattern'])){
+            $cpt_pattern = $statuses['AwaitingPayment']['CptPattern'];
+            $getCodeFromPattern = $db->row("SELECT * FROM tbl_mdl_dmdl_cpt_mapping WHERE cpt_pattern=:cpt_pattern", array('cpt_pattern'=>$cpt_pattern));
+            if( !empty($getCodeFromPattern) ){
+                if(isset($getCodeFromPattern['test_code']) && $getCodeFromPattern['test_code']!=''){
+                    //get Awating payment test code Guid_status
+                    $testCode = $getCodeFromPattern['test_code'];
+                    $testCodeSatusID = $db->row("SELECT Guid_status FROM `tbl_mdl_status` WHERE parent_id=:parent_id AND status=:status", array('parent_id'=>'52', 'status'=>$testCode));
+                    $status_AwaitingPayment_IDs[] = $testCodeSatusID['Guid_status'];
+                }
+            } else {
+
             }
-        } else {
-            
         }
         if(isValidStatusGroup($db,$status_AwaitingPayment_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_AwaitingPayment_IDs, $statusLogData);
