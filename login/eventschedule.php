@@ -558,9 +558,9 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                         $("#modalaccountopt").val(event.accountid);
                     }
                 });
-                
+
                 popup_comment(event.id);
-                
+
                 $("#modalfull_name_id").val(event.hltname);
                 $("#modalstreet1_id").val(event.street1);
                 $("#modalstreet2_id").val(event.street2);
@@ -581,14 +581,14 @@ if (isset($_POST['search']) && (strlen($_POST['from_date']) || strlen($_POST['to
                     $("div.modalaccounttype").hide();
                     $("div.modalhealthcare").show();
                 }
-                var today = new Date().getUnixTime();
-                var currentDate = today.getDate().getUnixTime();
+                var today = new Date();
+                var currentDate = today.getDate();
                 var eventDate = $.fullCalendar.formatDate(event.start, "DD");
                 var parsedNow =  new Date(today).getUnixTime();
                 var parsedEventTime = new Date(event.start).getUnixTime();
                 //if (parsedEventTime >= parsedNow) {
-                    //modal.style.display = "block";
-                    $("#myModal").delay( 100 ).fadeIn( 400 )
+                //modal.style.display = "block";
+                $("#myModal").delay( 100 ).fadeIn( 400 )
                 //}
             },
             eventMouseover: function (calEvent, jsEvent) {
