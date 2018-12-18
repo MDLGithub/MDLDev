@@ -1108,7 +1108,6 @@ function generate_gene_mutation($error) {
 											<option value="BRCA1"<? echo ((isset($gene[$i]) && ($gene[$i] == "BRCA1")) ? " selected" : ""); ?>>BRCA1</option>
 											<option value="BRCA2"<? echo ((isset($gene[$i]) && ($gene[$i] == "BRCA2")) ? " selected" : ""); ?>>BRCA2</option>
 											<option value="Both"<? echo ((isset($gene[$i]) && ($gene[$i] == "Both")) ? " selected" : ""); ?>>Both</option>
-											<option value="unknown"<? echo ((isset($gene[$i]) && ($gene[$i] == "unknown")) ? " selected" : ""); ?>>Unknown</option>
 <?php
 	} else {				
 		foreach($gene_mutations as $gene_mutation) {
@@ -1118,6 +1117,8 @@ function generate_gene_mutation($error) {
 		}
 	}
 ?>
+
+											<option value="unknown"<? echo ((isset($gene[$i]) && ($gene[$i] == "unknown")) ? " selected" : ""); ?>>Unknown</option>
 										</select>
 						                <icon class="icon istatus"><span class="required"></span></icon>
 					                </div>
@@ -1489,7 +1490,12 @@ function generate_cancer_detail($error=array(), $field_name=array()) {
 				
 <?php
 			}
-		}		
+		}
+		if (isset($error['min_num_relative'])) {
+?>
+							<li>Relatives must be on the same side of the family</li>
+<?php
+		}
 ?>
 					
 					</ul>			
@@ -1498,11 +1504,7 @@ function generate_cancer_detail($error=array(), $field_name=array()) {
 			</div
 <?php
 	}
-	if (isset($error['min_num_relative'])) {
-?>
-				
-<?php
-	}
+	
 	$cancer_type = array();
 		
 	$insurance = $qualify['insurance'];
