@@ -382,7 +382,7 @@ $(function() {
 	$('.accordion > .acc_btn:first-child').addClass('show');
 	$('.acc_con').not('.acc_con.first').hide();
 	
-	$('.add_field').click(function(e){	
+	$('.add_field').not('.cancer_detail').click(function(e){	
 		$('#additional_relatives').val("Yes");
 		
 		$('#app_wrap').submit();
