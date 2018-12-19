@@ -37,7 +37,7 @@ $initLabels = array(
     'salesrep'=>'Sales Rep',
 );
 
-$initQ = 'SELECT s.Guid_status, s.Guid_user, s.Date, s.Date_created, p.Guid_patient, 
+$initQ = 'SELECT s.Guid_status, s.Guid_user, s.Loaded, s.Date, s.Date_created, p.Guid_patient, 
     aes_decrypt(p.firstname_enc, "F1rstn@m3@_%") as firstname, 
     aes_decrypt(p.lastname_enc, "L@stn@m3&%#") as lastname, 
     a.Guid_account, a.account AS account_number, a.Guid_category,
@@ -174,6 +174,10 @@ $labels = array(
     'location'=>array(
         'name' => 'Location', 
         'class' => 'dropdownFilter'
+    ),
+    'Loaded'=>array(
+        'name' => 'Loaded', 
+        'class' => ''
     )
 );
 
@@ -254,7 +258,7 @@ require_once ('navbar.php');
                                 <?php } ?>
                                 
                                 <?php if(isFieldVisibleForStatus($db, 'first_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'first_name', $roleID)){ ?>
-                                <td><a href="<?php echo $patientInfoUrl.$incomplateStr; ?>"><?php echo ucfirst(strtolower($v['firstname']));?></a></td>                              
+                                <td><a href="<?php echo $patientInfoUrl.$incomplateStr; ?>"><?php echo (isset($v['firstname'])&&$v['firstname']!='') ? ucfirst(strtolower($v['firstname'])) : '------';?></a></td>                              
                                 <?php } ?>
                                 
                                 <?php if(isFieldVisibleForStatus($db, 'last_name', $_GET['status_id']) && isFieldVisibleForRole($db, 'last_name', $roleID)){ ?>
@@ -307,6 +311,10 @@ require_once ('navbar.php');
                                 
                                 <?php if(isFieldVisibleForStatus($db, 'location', $_GET['status_id']) && isFieldVisibleForRole($db, 'location', $roleID)){ ?>
                                 <td><?php echo $v['location']; ?></td> 
+                                <?php } ?>
+                                
+                                <?php if(isFieldVisibleForStatus($db, 'Loaded', $_GET['status_id']) && isFieldVisibleForRole($db, 'Loaded', $roleID)){ ?>
+                                <td><?php echo $v['Loaded']; ?></td> 
                                 <?php } ?>
                             </tr>
                             <?php } ?>

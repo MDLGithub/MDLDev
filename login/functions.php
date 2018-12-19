@@ -1,7 +1,7 @@
 <?php
 /**
- *  Redirect url
- */
+*  Redirect url
+*/
 function Leave($url) {
     header("Location: $url");exit;
 }
@@ -11,15 +11,15 @@ function Leave($url) {
  * @return type
  */
 function cleanString($string) {
-    $string = str_replace(' ', '', $string); // Replaces all spaces with empty.
-    $string = str_replace('-', '', $string); // Replaces all hyphens with empty.
+   $string = str_replace(' ', '', $string); // Replaces all spaces with empty.
+   $string = str_replace('-', '', $string); // Replaces all hyphens with empty.
 
-    return preg_replace('/[^A-Za-z0-9\-]/', '', $string); // Removes special chars.
+   return preg_replace('/[^A-Za-z0-9\-]/', '', $string); // Removes special chars.
 }
 
 /**
- *  Encode given text to hash using md5
- */
+*  Encode given text to hash using md5
+*/
 function encode_password($password) {
     return md5($password);
 }
@@ -42,25 +42,25 @@ function str_random($length = 16)
 }
 
 /**
- *  Generate a token string
- *
- * @return $str
- */
+*  Generate a token string
+*
+* @return $str
+*/
 function generateTokenString(){
-    // generate as random of a token as possible for lower PHP versions
-    $str = sha1(uniqid(sha1(PASSWORD_SALT), true) . time() . str_random(20));
-
-    return $str;
+   // generate as random of a token as possible for lower PHP versions
+   $str = sha1(uniqid(sha1(PASSWORD_SALT), true) . time() . str_random(20));
+   
+   return $str;
 }
 function escape($str){
     switch (gettype($str))
     {
         case 'string' : $str = addslashes(stripslashes($str));
-            break;
+        break;
         case 'boolean' : $str = ($str === FALSE) ? 0 : 1;
-            break;
+        break;
         default : $str = ($str === NULL) ? 'NULL' : $str;
-            break;
+        break;
     }
 
     return $str;
@@ -110,8 +110,8 @@ function remove_accent($str) {
     return str_replace($a, $b, $str);
 }
 /**
- *   Return page url
- */
+*   Return page url
+*/
 function thisUrl(){
     if(isset($_SERVER['HTTPS'])){
         $protocol = ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? "https" : "http";
@@ -122,8 +122,8 @@ function thisUrl(){
     return $protocol . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 }
 /**
- *   Return Base url
- */
+*   Return Base url
+*/
 function baseUrl(){
     if(isset($_SERVER['HTTPS'])){
         $protocol = ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? "https" : "http";
@@ -162,16 +162,16 @@ function getThisUserID(){
  * @return boolean
  */
 function isUser($db, $role){
-    $userID = $_SESSION['user']['id'];
+    $userID = $_SESSION['user']['id'];    
     $query = "SELECT r.Guid_role, r.role FROM tblrole r LEFT JOIN tbluser u ON r.Guid_role = u.Guid_role WHERE u.Guid_user = " . $userID;
     $userInfo = $db->row($query);
     if( $userInfo['role'] == $role ){
         return TRUE;
-    }
-    return FALSE;
+    }    
+    return FALSE;  
 }
 /**
- * Deactivate User by user id
+ * Deactivate User by user id 
  * @param type $db
  * @param type $Guid_user
  * @return boolean
@@ -191,7 +191,7 @@ function deleteUserByID($db, $userID){
     deleteByField($db, 'tblprovider','Guid_user', $userID);
     deleteByField($db, 'tblpatient','Guid_user', $userID);
     //delet from users table
-    deleteByField($db, 'tbluser','Guid_user', $userID);
+    deleteByField($db, 'tbluser','Guid_user', $userID);    
     return TRUE;
 }
 /**
@@ -201,14 +201,14 @@ function deleteUserByID($db, $userID){
  * @param type $userID
  * @return type
  */
-function getUserName($db, $userID){
+function getUserName($db, $userID){    
     $query = "SELECT * FROM tblrole r LEFT JOIN tbluser u ON r.Guid_role = u.Guid_role WHERE u.Guid_user = " . $userID;
     $userInfo = $db->row($query);
-
+    
     if($userInfo['role']=='Patient'){
         $query = "SELECT aes_decrypt(firstname_enc, 'F1rstn@m3@_%') as firstname FROM `tblpatient` WHERE Guid_user=:Guid_user";
         $patientInfo = $db->row($query, array("Guid_user"=>$userInfo['Guid_user']));
-
+        
         if($patientInfo){
             $result = $patientInfo['firstname'];
         } else {
@@ -248,12 +248,12 @@ function getUserName($db, $userID){
     return $result;
 }
 
-function getUserFullInfo($db, $userID){
+function getUserFullInfo($db, $userID){    
     $query = "SELECT * FROM tblrole r LEFT JOIN tbluser u ON r.Guid_role = u.Guid_role WHERE u.Guid_user = $userID";
-
+    
     $userInfo = $db->row($query);
     $result = "";
-
+    
     if ($userInfo['role']=='Sales Rep' || $userInfo['role']=='Sales Manager') {
         $query = "SELECT * FROM `tblsalesrep` WHERE Guid_user=:Guid_user";
         $salesrepInfo = $db->row($query, array("Guid_user"=>$userID));
@@ -273,7 +273,7 @@ function getUserFullInfo($db, $userID){
             $result = $providerInfo;
         }
     } else {
-
+        
         $query = "SELECT *, aes_decrypt(firstname_enc, 'F1rstn@m3@_%') AS first_name, aes_decrypt(lastname_enc, 'L@stn@m3&%#') AS last_name FROM `tblpatient` WHERE Guid_user=:Guid_user";
         $patientInfo = $db->row($query, array("Guid_user"=>$userID));
         if(!empty($patientInfo)){
@@ -493,12 +493,12 @@ function getUserDetails($db, $userRole, $userID, $patientID=""){
             $userDetail = $db->row($q, array("Guid_patient"=>$patientID));
         }
     }
-
-    return $userDetail;
+    
+    return $userDetail;    
 }
 
 function saveUserDetails($db, $Guid_user, $Guid_role, $userDetails){
-
+    
     if($Guid_role=='1'){//admin
         $userQ = "SELECT Guid_user FROM tbladmins WHERE Guid_user=:Guid_user";
         $isUserExists = $db->row($userQ, array('Guid_user'=>$Guid_user));
@@ -516,20 +516,20 @@ function saveUserDetails($db, $Guid_user, $Guid_role, $userDetails){
         }else{
             $userDetails['Guid_user'] = $Guid_user;
             insertIntoTable($db, 'tblprovider', $userDetails);
-        }
+        }        
     } elseif ($Guid_role=='3' || $Guid_role=='6') {//patient or mdl patient
         $userQ = "SELECT Guid_user FROM tblpatient WHERE Guid_user=:Guid_user";
         $isUserExists = $db->row($userQ, array('Guid_user'=>$Guid_user));
         if($isUserExists){
             $fname = $userDetails['firstname_enc'];
             $lname = $userDetails['lastname_enc'];
-
+            
             $query = "UPDATE `tblpatient` SET firstname_enc=AES_ENCRYPT('".$fname."','F1rstn@m3@_%'), lastname_enc=AES_ENCRYPT('".$lname."', 'L@stn@m3&%#') WHERE `Guid_user`=$Guid_user";
             $update = $db->query($query);
         }else{
             $userDetails['Guid_user'] = $Guid_user;
             insertIntoTable($db, 'tblpatient', $userDetails);
-        }
+        } 
     } elseif ($Guid_role=='4' || $Guid_role=='5') {//salesrep & salesmgr
         $userQ = "SELECT Guid_user FROM tblsalesrep WHERE Guid_user=:Guid_user";
         $isUserExists = $db->row($userQ, array('Guid_user'=>$Guid_user));
@@ -538,9 +538,9 @@ function saveUserDetails($db, $Guid_user, $Guid_role, $userDetails){
         }else{
             $userDetails['Guid_user'] = $Guid_user;
             insertIntoTable($db, 'tblsalesrep', $userDetails);
-        }
+        } 
     }
-
+    
 }
 /**
  * Move user to proper table if user role is changed
@@ -550,17 +550,17 @@ function saveUserDetails($db, $Guid_user, $Guid_role, $userDetails){
  */
 //this function under development
 function moveUserData($db, $Guid_user, $userDetails, $thisRole, $prevRole){
-    //we'll work only with users Admin, Sales Rep and Sales Manager (Guid_role -> 1, 4, 5)
+    //we'll work only with users Admin, Sales Rep and Sales Manager (Guid_role -> 1, 4, 5)    
     $fName = (isset($userDetails['first_name'])) ? $userDetails['first_name']: "";
     $lName = (isset($userDetails['last_name'])) ? $userDetails['last_name']: "";
     $filename = (isset($userDetails['photo_filename'])) ? $userDetails['photo_filename']: "";
-
-    if($thisRole != $prevRole){
+    
+    if($thisRole != $prevRole){        
         if($thisRole=='1'){//Admin
             //we need to move sales rep to admin table
             $salesrepQ = "SELECT * FROM tblsalesrep WHERE Guid_user=:Guid_user";
-            $getSalserep = $db->row($salesrepQ, array('Guid_user'=>$Guid_user));
-
+            $getSalserep = $db->row($salesrepQ, array('Guid_user'=>$Guid_user));           
+            
             $adminData = array(
                 'Guid_user' => $Guid_user,
                 'first_name' => ($fName !="") ? $fName:$getSalserep['first_name'],
@@ -570,28 +570,28 @@ function moveUserData($db, $Guid_user, $userDetails, $thisRole, $prevRole){
                 'address' => $getSalserep['address'],
                 'city' => $getSalserep['city'],
                 'state' => $getSalserep['state'],
-                'zip' => $getSalserep['zip']
+                'zip' => $getSalserep['zip']                
             );
             $insert = insertIntoTable($db, 'tbladmins', $adminData);
-
+            
             if(isset($insert['insertID'])){
                 $Guid_salesrep = $getSalserep['Guid_salesrep'];
                 deleteByField($db, 'tblsalesrep', 'Guid_salesrep', $Guid_salesrep);
             }
-
+            
             return $insert;
         } elseif ($thisRole=='4' || $thisRole=='5') {//Sales Rep OR Sales Manager
-
-            if($prevRole == '4' || $prevRole == '5'){
-
+           
+            if($prevRole == '4' || $prevRole == '5'){ 
+               
                 // need just change role, don't need of moving data
                 $is_manager = ($thisRole=='5') ? '1' : '0'; //1-sales Mgr and 0-Sales Rep
                 updateTable($db, 'tblsalesrep', array('is_manager'=>$is_manager), array('Guid_user'=>$Guid_user));
                 return TRUE;
             } else { //we need to move admin to salesrep table
-
+               
                 $adminQ = "SELECT * FROM tbladmins WHERE Guid_user=:Guid_user";
-                $getAdmin = $db->row($adminQ, array('Guid_user'=>$Guid_user));
+                $getAdmin = $db->row($adminQ, array('Guid_user'=>$Guid_user));               
 
                 $salesrepData = array(
                     'Guid_user' => $Guid_user,
@@ -602,21 +602,21 @@ function moveUserData($db, $Guid_user, $userDetails, $thisRole, $prevRole){
                     'address' => $getAdmin['address'],
                     'city' => $getAdmin['city'],
                     'state' => $getAdmin['state'],
-                    'zip' => $getAdmin['zip']
+                    'zip' => $getAdmin['zip']                
                 );
                 if($thisRole=='5'){
                     $salesrepData['is_manager'] = '1';
                 }
 
                 $insert = insertIntoTable($db, 'tblsalesrep', $salesrepData);
-                if(isset($insert['insertID'])){
+                if(isset($insert['insertID'])){                
                     $Guid_admin = $getAdmin['Guid_admin'];
                     deleteByField($db, 'tbladmins', 'Guid_admin', $Guid_admin);
                 }
                 return $insert;
             }
-
-        }
+            
+        }        
     }
     return FALSE;
 }
@@ -626,29 +626,29 @@ function moveUserData($db, $Guid_user, $userDetails, $thisRole, $prevRole){
  * @param type $Guid_user
  * @param type $catIDs
  */
-function saveCategoryUserLinks($db, $Guid_user, $catIDs){
+function saveCategoryUserLinks($db, $Guid_user, $catIDs){  
     //delete old links
     $db->query("DELETE FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$Guid_user));
-    if(!empty($catIDs)){
+    if(!empty($catIDs)){  
         foreach ($catIDs as $k=>$Guid_category){
             $userCatData = array('Guid_category'=>$Guid_category, 'Guid_user'=>$Guid_user);
             //insert new links
-            insertIntoTable($db,'tbl_mdl_category_user_link', $userCatData);
+            insertIntoTable($db,'tbl_mdl_category_user_link', $userCatData);            
         }
     }
 }
 
-function verify_input(&$error) {
-    if (strlen($_POST['from_date']) && (!strlen($_POST['to_date']))) {
-        $error['to_date'] = 1;
-    } elseif ((!strlen($_POST['from_date'])) && strlen($_POST['to_date'])) {
-        $error['from_date'] = 1;
-    } elseif (strlen($_POST['from_date']) && strlen($_POST['to_date']) && (strtotime($_POST['to_date']) < strtotime($_POST['from_date']))) {
-        $error['from_date'] = 1;
-        $error['to_date'] = 1;
-    }
+function verify_input(&$error) {	
+	if (strlen($_POST['from_date']) && (!strlen($_POST['to_date']))) {
+		$error['to_date'] = 1;
+	} elseif ((!strlen($_POST['from_date'])) && strlen($_POST['to_date'])) {
+		$error['from_date'] = 1;
+	} elseif (strlen($_POST['from_date']) && strlen($_POST['to_date']) && (strtotime($_POST['to_date']) < strtotime($_POST['from_date']))) {		
+		$error['from_date'] = 1;
+		$error['to_date'] = 1;
+	}
 }
-function getUrlConfigurations($db, $userID){
+function getUrlConfigurations($db, $userID){ 
     $query = "SELECT 
                     tblurlconfig.id, tblurlconfig.Guid_user, tblurlconfig.geneveda, tblurlconfig.pin, 
                     tblaccount.*,  
@@ -663,7 +663,7 @@ function getUrlConfigurations($db, $userID){
                     WHERE tblurlconfig.Guid_user=:Guid_user 
                     ORDER BY tblurlconfig.id DESC LIMIT 5";
     $urlConfigs = $db->query($query, array("Guid_user"=>$userID));
-
+ 
     return $urlConfigs;
 }
 
@@ -691,95 +691,95 @@ function get_row($db, $table, $where=1){
 }
 function getDevicesBySalesrepID($db,$Guid_salesrep){
     $query = "SELECT tbldevice.*, tbldeviceinv.* FROM tbldevice "
-        . " LEFT JOIN `tbldeviceinv` ON tbldevice.deviceid  = tbldeviceinv.deviceid"
-        . " WHERE url_flag = :url_flag"
-        . " AND Guid_salesrep =:Guid_salesrep"
-        . " ORDER BY tbldeviceinv.serial_number DESC";
+                        . " LEFT JOIN `tbldeviceinv` ON tbldevice.deviceid  = tbldeviceinv.deviceid"
+                        . " WHERE url_flag = :url_flag"
+                        . " AND Guid_salesrep =:Guid_salesrep"
+                        . " ORDER BY tbldeviceinv.serial_number DESC";
     $result = $db->query($query, array("url_flag"=>'1', "Guid_salesrep"=>$Guid_salesrep));
     return $result;
 }
 function getDevicesWithSalesRepInfo($db, $flag=FALSE){
     $query = "SELECT "
-        . "tbldevice.device_name, "
-        . "tbldeviceinv.id, tbldeviceinv.deviceid, tbldeviceinv.serial_number, tbldeviceinv.comment, tbldeviceinv.inservice_date, tbldeviceinv.outservice_date, "
-        . "tblsalesrep.first_name, tblsalesrep.last_name "
-        . "FROM tbldevice LEFT JOIN `tbldeviceinv` "
-        . "ON tbldevice.deviceid = tbldeviceinv.deviceid "
-        . "LEFT JOIN `tblsalesrep` "
-        . "ON tbldeviceinv.Guid_salesrep = tblsalesrep.Guid_salesrep ";
+                    . "tbldevice.device_name, "
+                    . "tbldeviceinv.id, tbldeviceinv.deviceid, tbldeviceinv.serial_number, tbldeviceinv.comment, tbldeviceinv.inservice_date, tbldeviceinv.outservice_date, "
+                    . "tblsalesrep.first_name, tblsalesrep.last_name "
+                    . "FROM tbldevice LEFT JOIN `tbldeviceinv` "
+                    . "ON tbldevice.deviceid = tbldeviceinv.deviceid "
+                    . "LEFT JOIN `tblsalesrep` "
+                    . "ON tbldeviceinv.Guid_salesrep = tblsalesrep.Guid_salesrep ";    
     if($flag){
         $query.= "WHERE url_flag = :url_flag ";
     }
     $query.= "ORDER BY tblsalesrep.first_name, tblsalesrep.last_name, tbldevice.device_name, tbldeviceinv.serial_number  DESC";
-
+    
     if($flag){
         $result = $db->query($query, array("url_flag"=>$flag));
     }else{
         $result = $db->query($query);
     }
-
+    
     return $result;
 }
 function getDeviceInvsWithSalesRepInfo($db, $flag=FALSE){
     $query = "SELECT "
-        . "tbldevice.device_name, "
-        . "tbldeviceinv.id, tbldeviceinv.Guid_salesrep, tbldeviceinv.deviceid, tbldeviceinv.serial_number, tbldeviceinv.comment, tbldeviceinv.inservice_date, tbldeviceinv.outservice_date, "
-        . "tblsalesrep.first_name, tblsalesrep.last_name "
-        . "FROM tbldeviceinv LEFT JOIN `tbldevice` "
-        . "ON tbldevice.deviceid = tbldeviceinv.deviceid "
-        . "LEFT JOIN `tblsalesrep` "
-        . "ON tbldeviceinv.Guid_salesrep = tblsalesrep.Guid_salesrep ";
+                    . "tbldevice.device_name, "
+                    . "tbldeviceinv.id, tbldeviceinv.Guid_salesrep, tbldeviceinv.deviceid, tbldeviceinv.serial_number, tbldeviceinv.comment, tbldeviceinv.inservice_date, tbldeviceinv.outservice_date, "
+                    . "tblsalesrep.first_name, tblsalesrep.last_name "
+                    . "FROM tbldeviceinv LEFT JOIN `tbldevice` "
+                    . "ON tbldevice.deviceid = tbldeviceinv.deviceid "
+                    . "LEFT JOIN `tblsalesrep` "
+                    . "ON tbldeviceinv.Guid_salesrep = tblsalesrep.Guid_salesrep ";    
     if($flag){
         $query.= "WHERE url_flag = :url_flag ";
     }
     $query.= "ORDER BY tblsalesrep.first_name, tblsalesrep.last_name, tbldevice.device_name, tbldeviceinv.serial_number  DESC";
-
+    
     if($flag){
         $result = $db->query($query, array("url_flag"=>$flag));
     }else{
         $result = $db->query($query);
     }
-
+    
     return $result;
 }
 function getDeviceinves($db){
     $query = "SELECT tbldeviceinv.*, tbldevice.device_name, tbldevice.url_flag"
-        . " FROM tbldeviceinv "
-        . " LEFT JOIN `tbldevice` ON tbldeviceinv.deviceid = tbldevice.deviceid";
+            . " FROM tbldeviceinv "
+            . " LEFT JOIN `tbldevice` ON tbldeviceinv.deviceid = tbldevice.deviceid";
     $result = $db->query($query);
     return $result;
 }
 function getAccountAndSalesrep($db, $accountGuid=NULL, $getRow=NULL){
     $query = "SELECT tblaccount.*, "
-        . "tblsalesrep.Guid_salesrep, tblsalesrep.first_name AS salesrepFName, tblsalesrep.last_name AS salesrepLName,"
-        . "tblsalesrep.email AS salesrepEmail, tblsalesrep.phone_number AS salesrepPhone , "
-        . "tblsalesrep.region AS salesrepRegion, tblsalesrep.title AS salesrepTitle, "
-        . "tblsalesrep.address AS salesrepAddress, tblsalesrep.city AS salesrepCity, "
-        . "tblsalesrep.state AS salesrepState, tblsalesrep.zip AS salesrepZip, tblsalesrep.photo_filename AS salesrepPhoto, "
-        . "tbl_mdl_category.slug AS category_slug, tbl_mdl_category.name AS category_name "
-        . "FROM tblaccount "
-        . "LEFT JOIN tblaccountrep ON tblaccount.Guid_account = tblaccountrep.Guid_account "
-        . "LEFT JOIN tblsalesrep ON tblsalesrep.Guid_salesrep=tblaccountrep.Guid_salesrep "
-        . "LEFT JOIN tbl_mdl_category ON tblaccount.Guid_category=tbl_mdl_category.Guid_category ";
+            . "tblsalesrep.Guid_salesrep, tblsalesrep.first_name AS salesrepFName, tblsalesrep.last_name AS salesrepLName,"
+            . "tblsalesrep.email AS salesrepEmail, tblsalesrep.phone_number AS salesrepPhone , "
+            . "tblsalesrep.region AS salesrepRegion, tblsalesrep.title AS salesrepTitle, "
+            . "tblsalesrep.address AS salesrepAddress, tblsalesrep.city AS salesrepCity, "
+            . "tblsalesrep.state AS salesrepState, tblsalesrep.zip AS salesrepZip, tblsalesrep.photo_filename AS salesrepPhoto, "
+            . "tbl_mdl_category.slug AS category_slug, tbl_mdl_category.name AS category_name "
+            . "FROM tblaccount "
+            . "LEFT JOIN tblaccountrep ON tblaccount.Guid_account = tblaccountrep.Guid_account "
+            . "LEFT JOIN tblsalesrep ON tblsalesrep.Guid_salesrep=tblaccountrep.Guid_salesrep "         
+            . "LEFT JOIN tbl_mdl_category ON tblaccount.Guid_category=tbl_mdl_category.Guid_category ";         
     $thisUserID = $_SESSION['user']['id'];
     $roleInfo = getRole($db, $thisUserID);
     $thisUserRole = $roleInfo['role'];
-
+    
     if($thisUserRole == "Sales Manager"){
-        $userCategories = $db->query("SELECT Guid_category FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$thisUserID));
+        $userCategories = $db->query("SELECT Guid_category FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$thisUserID)); 
         $userLinks = '';
         if(!empty($userCategories)){
             foreach ($userCategories as $k=>$v){
                 $userLinks .= $v['Guid_category'].', ';
             }
             $userLinks = rtrim($userLinks, ', ');
-        }
+        }    
         if($userLinks != ''){
             $wherAccount = strpos($query, 'WHERE') ? " AND " : " WHERE ";
             $query .= $wherAccount . " tblaccount.Guid_category IN (" . $userLinks . ") ";
-        }
+        } 
     }
-
+    
     if($accountGuid){
         $wherAccount = strpos($query, 'WHERE') ? " AND " : " WHERE ";
         $query .= $wherAccount . " tblaccount.Guid_account=:id";
@@ -788,10 +788,10 @@ function getAccountAndSalesrep($db, $accountGuid=NULL, $getRow=NULL){
     elseif ($getRow) {
         $result = $db->row($query);
     }else{
-        $query .= " GROUP BY tblaccount.Guid_account";
+        $query .= " GROUP BY tblaccount.Guid_account"; 
         $result = $db->query($query);
-    }
-
+    }   
+    
     return $result;
 }
 function getSalesrepAccounts($db, $Guid_user){
@@ -812,13 +812,13 @@ function getSalesrepAccounts($db, $Guid_user){
  * @param type int $account
  * @param type int $Guid_status
  * @param type mixed $eventDate
- * @return type int $result['count']
+ * @return type int $result['count'] 
  */
-function getAccountStatusCount($db, $account, $Guid_status, $eventDate=NULL ){
+function getAccountStatusCount($db, $account, $Guid_status, $eventDate=NULL ){    
     $params = array('account'=>$account,'Guid_status'=>$Guid_status);
     $q = "SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l "
         . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
-        . "WHERE l.Guid_status =:Guid_status AND l.account=:account AND u.marked_test='0' ";
+        . "WHERE l.Guid_status =:Guid_status AND l.account=:account AND u.marked_test='0' "; 
     if($eventDate){
         if(is_array($eventDate)) {
             $q .=  "AND l.Date between :from and :to";
@@ -830,7 +830,7 @@ function getAccountStatusCount($db, $account, $Guid_status, $eventDate=NULL ){
         }
     }
 
-    $result = $db->row($q, $params);
+    $result = $db->row($q, $params);    
     return $result['count'];
 }
 
@@ -842,12 +842,12 @@ function getAccountStatusCount($db, $account, $Guid_status, $eventDate=NULL ){
  * @param type $Guid_status
  * @return type
  */
-function getSalesrepStatusCount($db, $Guid_salesrep, $Guid_status ){
+function getSalesrepStatusCount($db, $Guid_salesrep, $Guid_status ){     
     $q = "SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l "
         . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
-        . "WHERE l.Guid_status =:Guid_status AND l.Guid_salesrep=:Guid_salesrep AND u.marked_test='0'";
-
-    $result = $db->row($q, array('Guid_salesrep'=>$Guid_salesrep,'Guid_status'=>$Guid_status));
+        . "WHERE l.Guid_status =:Guid_status AND l.Guid_salesrep=:Guid_salesrep AND u.marked_test='0'"; 
+    
+    $result = $db->row($q, array('Guid_salesrep'=>$Guid_salesrep,'Guid_status'=>$Guid_status));    
     return $result['count'];
 }
 /**
@@ -857,49 +857,49 @@ function getSalesrepStatusCount($db, $Guid_salesrep, $Guid_status ){
  * @param type $Guid_status
  * @return type
  */
-function getDeviceStatusCount($db, $Guid_salesrep, $Guid_status, $deviceinventoryID ){
+function getDeviceStatusCount($db, $Guid_salesrep, $Guid_status, $deviceinventoryID ){     
     $q = "SELECT COUNT(*) AS `count` FROM `tbl_mdl_status_log` l "
         . "LEFT JOIN tbluser u ON l.Guid_user = u.Guid_user "
-        . "WHERE l.deviceid=:id AND l.Guid_status =:Guid_status AND l.Guid_salesrep=:Guid_salesrep AND u.marked_test='0'";
+        . "WHERE l.deviceid=:id AND l.Guid_status =:Guid_status AND l.Guid_salesrep=:Guid_salesrep AND u.marked_test='0'"; 
     $where = array(
-        'Guid_salesrep'=>$Guid_salesrep,
-        'Guid_status'=>$Guid_status,
-        'id'=>$deviceinventoryID
-    );
-    $result = $db->row($q, $where);
+                'Guid_salesrep'=>$Guid_salesrep,
+                'Guid_status'=>$Guid_status,
+                'id'=>$deviceinventoryID
+            );
+    $result = $db->row($q, $where);    
     return $result['count'];
 }
 /**
- * Get provider Status count by medicalNecessity and providerID
+ * Get provider Status count by medicalNecessity and providerID 
  * @param type $db
  * @param type $medicalNecessity => Completed(Yes+No+Unknown), Incomplete
  * Registered => Incomplete + Completed(Yes+No+Unknown)
  * Completed => Completed(Yes+No+Unknown)
  * Qualified => Yes
  * Submitted => Specimen collected=>Yes from patients info screen
- * @param type $Guid_provider
+ * @param type $Guid_provider 
  * @param type $Guid_status
  * @return type
  */
 function getProviderStatusCount($db, $medicalNecessity, $Guid_provider){
-
+    
     if($medicalNecessity=='Incomplete'){
         $table = "tblqualify";
         $where = "WHERE NOT EXISTS(SELECT * FROM tbl_ss_qualify qs WHERE q.Guid_qualify=qs.Guid_qualify) "
-            . "AND u.marked_test='0' ";
+                . "AND u.marked_test='0' ";
     } else {
         $table = "tbl_ss_qualify";
         $where = "WHERE u.marked_test='0' ";
         $where .= "AND q.`Date_created` = (SELECT MAX(Date_created) FROM tbl_ss_qualify AS m2 WHERE q.Guid_qualify = m2.Guid_qualify)";
 
     }
-
+    
     $q  = "SELECT COUNT(*) AS count "
-        . "FROM `".$table."` q "
-        . "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user ";
-
-    $q .= $where;
-
+            . "FROM `".$table."` q "
+            . "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user ";
+    
+    $q .= $where; 
+    
     if($medicalNecessity=='Yes'){
         $q .= "AND q.qualified = 'Yes' ";
     }
@@ -909,10 +909,10 @@ function getProviderStatusCount($db, $medicalNecessity, $Guid_provider){
     if($medicalNecessity=='Unknown'){
         $q .= "AND q.qualified = 'Unknown' ";
     }
-
+    
     $q .= "AND q.provider_id = '" . $Guid_provider . "' ";
-
-    $result = $db->row($q);
+    
+    $result = $db->row($q);    
     return $result['count'];
 }
 
@@ -922,24 +922,24 @@ function getProviderStatusCount($db, $medicalNecessity, $Guid_provider){
  * @param type $Guid_provider
  * @return string
  */
-function getProviderSubmitedCount($db, $Guid_provider ){
-
+function getProviderSubmitedCount($db, $Guid_provider ){ 
+    
     $andQ = "AND q.provider_id = '" . $Guid_provider . "' ";
     $andQ .= "AND q.`Date_created` = (SELECT MAX(Date_created) FROM tbl_ss_qualify AS m2 WHERE q.Guid_qualify = m2.Guid_qualify)";
-
+    
     $completedQ  = "SELECT q.Guid_user "
-        . "FROM `tbl_ss_qualify` q "
-        . "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user ";
+                    . "FROM `tbl_ss_qualify` q "
+                    . "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user ";
     $completedQ  .= "WHERE u.marked_test='0' ";
     $completedQ  .= $andQ;
-
+    
     $incompleteQ  = "SELECT q.Guid_user "
-        . "FROM `tblqualify` q "
-        . "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user ";
+                    . "FROM `tblqualify` q "
+                    . "LEFT JOIN tbluser u ON q.Guid_user = u.Guid_user ";
     $incompleteQ .= "WHERE NOT EXISTS(SELECT * FROM tbl_ss_qualify qs WHERE q.Guid_qualify=qs.Guid_qualify) "
-        . "AND u.marked_test='0' ";
+                   . "AND u.marked_test='0' ";
     $incompleteQ .= $andQ;
-
+    
     $completedUsers = $db->query($completedQ);
     $incompleteUsers = $db->query($incompleteQ);
     $userIds = "";
@@ -952,31 +952,31 @@ function getProviderSubmitedCount($db, $Guid_provider ){
         foreach ($incompleteUsers as $k=>$v) {
             $userIds .= "'".$v['Guid_user']."', ";
         }
-    }
+    }    
     if($userIds!=""){
         $userIds = rtrim($userIds, ', ');
-
+        
         $submitedQ="SELECT COUNT(*) AS count FROM `tbl_mdl_status_log` l
                 LEFT JOIN tbluser u ON u.Guid_user=l.Guid_user
                 WHERE l.Guid_user IN(".$userIds.")
                 AND u.marked_test='0'
                 AND l.Guid_status=1";
-        // AND l.currentstatus='Y'";
+               // AND l.currentstatus='Y'";
         $result = $db->row($submitedQ);
     }
-
+    
     if(isset($result['count']) && $result['count']!=""){
         $count =  $result['count'];
     } else{
         $count = '0';
     }
     return $count;
-
+    
 }
 
 
 /**
- *
+ * 
  * @param type $db
  * @param type $providerID
  * @return type
@@ -996,7 +996,7 @@ function getProviderSalesRep($db, $providerID) {
         ON asp.`Guid_salesrep` = s.`Guid_salesrep`
         WHERE p.`Guid_user` =:providerID";
     $row = $db->row($query, array('providerID'=>$providerID));
-
+    
     return $row;
 }
 
@@ -1005,30 +1005,30 @@ function ifAccountIDValid($accountID, $Guid_account = NULL){
     $db = new Db(DB_SERVER, DB_NAME, DB_USER, DB_PASSWORD);
     $query = "";
     if($Guid_account){
-        $query = "SELECT `account` FROM tblaccount WHERE Guid_account<>:Guid_account AND account=:account";
-        $row = $db->row($query, array("Guid_account"=>$Guid_account,"account"=>$accountID));
+       $query = "SELECT `account` FROM tblaccount WHERE Guid_account<>:Guid_account AND account=:account";
+       $row = $db->row($query, array("Guid_account"=>$Guid_account,"account"=>$accountID));
     } else {
         $query = "SELECT `account` FROM tblaccount WHERE account=:account";
         $row = $db->row($query, array("account"=>$accountID));
-    }
+    } 
     if($row['account']==$accountID || $accountID=="0"){
         return FALSE;
-    }
+    } 
     return TRUE;
 }
 function ifDeviceSerialValid($serial_number, $deviceID=NULL){
     $db = new Db(DB_SERVER, DB_NAME, DB_USER, DB_PASSWORD);
     $query = "";
     if($serial_number){
-        $query = "SELECT `serial_number` FROM tbldeviceinv WHERE id<>:id AND serial_number=:serial_number";
-        $row = $db->row($query, array("id"=>$deviceID, 'serial_number'=>$serial_number));
+       $query = "SELECT `serial_number` FROM tbldeviceinv WHERE id<>:id AND serial_number=:serial_number";
+       $row = $db->row($query, array("id"=>$deviceID, 'serial_number'=>$serial_number));
     } else {
         $query = "SELECT `serial_number` FROM tbldeviceinv WHERE serial=:serial";
         $row = $db->row($query, array("serial"=>$serial_number));
-    }
+    } 
     if($row['serial_number']==$serial_number){
         return FALSE;
-    }
+    } 
     return TRUE;
 }
 
@@ -1052,14 +1052,14 @@ function get_field_value($db, $table, $extractFieldValue, $where=1){
     return $field;
 }
 function get_value($db, $table, $extractFieldValue, $where=array()){
-
+    
     $field = $db->row("SELECT $extractFieldValue FROM `".$table."` $where");
     return $field;
 }
 
 
 function validateProviderId($db, $data, $npi){
-    extract($data);
+    extract($data);    
     $providers = array();
     $query = "";
     if($action=='update'){
@@ -1080,53 +1080,53 @@ function validateProviderId($db, $data, $npi){
     } else {
         return array('status'=>0, 'msg'=>'NPI already exists.');
     }
-
-
+       
+    
 }
 
 function validateSettings($db, $data){
     $isMatching = 0;
     extract($data);
     $query = "SELECT * FROM tblurlconfig "
-        . "WHERE Guid_user=:currentUserId "
-        . "AND geneveda=:geneveda "
-        . "AND account=:account "
-        . "AND location=:location "
-        . "AND pin=:pin "
-        . "AND device_id=:device_id";
+            . "WHERE Guid_user=:currentUserId "
+            . "AND geneveda=:geneveda "
+            . "AND account=:account "
+            . "AND location=:location "
+            . "AND pin=:pin "
+            . "AND device_id=:device_id";
     $row = $db->query($query, array(
-        "currentUserId" => $currentUserId,
-        "geneveda" => $geneveda,
-        "account" => $account,
-        "location" => $location,
-        "account" => $account,
-        "pin" => $pin,
-        "device_id" => $device_id,
-    ));
-
+                                    "currentUserId" => $currentUserId,
+                                    "geneveda" => $geneveda,
+                                    "account" => $account,
+                                    "location" => $location,
+                                    "account" => $account,
+                                    "pin" => $pin,
+                                    "device_id" => $device_id,
+                    ));
+                    
     if(empty($row)){
         $isMatching = 1;
-    }
-
+    } 
+    
     return $isMatching;
 }
 
 function saveUrlSettings($db, $data){
-    extract($data);
+    extract($data);    
     $query = "INSERT INTO `".DB_PREFIX."urlconfig`"
-        . "(Guid_user, geneveda, account, location, pin, device_id) VALUES"
-        . "(:Guid_user,:geneveda, :account, :location, :pin, :device_id )";
+            . "(Guid_user, geneveda, account, location, pin, device_id) VALUES"
+            . "(:Guid_user,:geneveda, :account, :location, :pin, :device_id )";
     $insert = $db->query(
-        $query,
-        array(
-            "Guid_user"=>"$currentUserId",
-            "geneveda"=>"$geneveda",
-            "account"=>"$account",
-            "location"=>"$location",
-            "pin"=>"$pin",
-            "device_id"=>"$device_id"
-        ));
-
+                $query, 
+                array(
+                    "Guid_user"=>"$currentUserId",
+                    "geneveda"=>"$geneveda", 
+                    "account"=>"$account", 
+                    "location"=>"$location",
+                    "pin"=>"$pin",
+                    "device_id"=>"$device_id"                    
+                ));
+    
     if($insert > 0 ) {
         return array(
             'message'=>'Table View Succesfully created!',
@@ -1137,23 +1137,23 @@ function saveUrlSettings($db, $data){
             'message'=>'Insert Issue',
             'status'=>'0'
         );
-    }
+    } 
 }
 
 function insertDevice($db, $data){
-    extract($data);
+    extract($data);    
     $query = "INSERT INTO `".DB_PREFIX."device`"
-        . "(serial_number, Guid_salesrep, device_type, device_name, url_flag) VALUES"
-        . "(:serial_number,:Guid_salesrep, :device_type, :device_name, :url_flag)";
+            . "(serial_number, Guid_salesrep, device_type, device_name, url_flag) VALUES"
+            . "(:serial_number,:Guid_salesrep, :device_type, :device_name, :url_flag)";
     $insert = $db->query(
-        $query,
-        array(
-            "serial_number"=>"$serial_number",
-            "Guid_salesrep"=>"$Guid_salesrep",
-            "device_type"=>"$device_type",
-            "device_name"=>"$device_name",
-            "url_flag"=>"$url_flag"
-        ));
+                $query, 
+                array(
+                    "serial_number"=>"$serial_number",
+                    "Guid_salesrep"=>"$Guid_salesrep", 
+                    "device_type"=>"$device_type", 
+                    "device_name"=>"$device_name",
+                    "url_flag"=>"$url_flag"                   
+                ));    
     if($insert > 0 ) {
         return array(
             'message'=>'Table View Succesfully created!',
@@ -1164,7 +1164,7 @@ function insertDevice($db, $data){
             'message'=>'Insert Issue',
             'status'=>'0'
         );
-    }
+    } 
 }
 
 function updateDevice($db, $data){
@@ -1175,21 +1175,21 @@ function updateDevice($db, $data){
         $update = $db->query($query, array("serial_number"=>"$serial_number", "Guid_salesrep"=>"$Guid_salesrep", "device_type"=>"$device_type", "device_name"=>"$device_name", "url_flag"=>"$url_flag", "id"=>"$id"));
 
         if($update) {
-            return array(
-                'message'=>'Table View Succesfully updated!',
-                'status'=>'1'
-            );
+          return array(
+                  'message'=>'Table View Succesfully updated!',
+                  'status'=>'1'
+                );
         } else {
-            return array(
-                'message'=>'Update Issue',
-                'status'=>'0'
-            );
+          return array(
+                  'message'=>'Update Issue',
+                  'status'=>'0'
+                );
         }
     }
 }
 
 /**
- *
+ * 
  * ex. getTableRow($db, 'tblaccountrep', array('Guid_account'=>$_POST['Guid_account']))
  * @param type $db
  * @param type $table
@@ -1197,7 +1197,7 @@ function updateDevice($db, $data){
  * @return type
  */
 function getTableRow($db, $table, $where){
-
+    
     $fields = "";
     $fieldsFlag = "";
     $executeArray = array();
@@ -1205,22 +1205,22 @@ function getTableRow($db, $table, $where){
         $whereStr = " WHERE `$key`=:$key";
         $executeArray["$key"] = $val;
     }
-
+    
     $query = "SELECT * FROM `".$table."` $whereStr";
-
+   
     $result = $db->row($query, $executeArray);
-    return $result;
+    return $result;    
 }
 
 /**
  * Update Table function
  * @param type $db
  * @param type $table - string table name
- * @param type $data - array which would be updated
- * @param type $where - array with key and value
+ * @param type $data - array which would be updated 
+ * @param type $where - array with key and value 
  * @return type array with status and message
  */
-function updateTable($db, $table, $data, $where ){
+function updateTable($db, $table, $data, $where ){   
     $updateFields = "";
     $whereStr = "";
     $executeArray = array();
@@ -1228,26 +1228,26 @@ function updateTable($db, $table, $data, $where ){
         $updateFields .= "`$key`=:$key, ";
         $executeArray["$key"] = $val;
     }
-    $updateFields = rtrim($updateFields,", ");
-
+    $updateFields = rtrim($updateFields,", ");   
+    
     foreach ($where as $key => $val) {
         $whereStr = " WHERE `$key`=:$key";
         $executeArray["$key"] = $val;
-    }
+    }     
     $query = "UPDATE `$table` SET $updateFields $whereStr";
     $update = $db->query($query, $executeArray);
-
-    return $update;
+    
+    return $update;  
 }
 /**
  * Insert Table function
  * @param type $db
  * @param type $table - string table name
- * @param type $data - array which would be updated
- * @param type $where - array with key and value
+ * @param type $data - array which would be updated 
+ * @param type $where - array with key and value 
  * @return type array with status and message
  */
-function insertIntoTable($db, $table, $data, $msg=NULL ){
+function insertIntoTable($db, $table, $data, $msg=NULL ){   
     $insertFields = "";
     $insertFieldsFlag = "";
     $executeArray = array();
@@ -1256,11 +1256,11 @@ function insertIntoTable($db, $table, $data, $msg=NULL ){
         $insertFieldsFlag .= ":$key, ";
         $executeArray["$key"] = $val;
     }
-    $insertFields = rtrim($insertFields,", ");
-    $insertFieldsFlag = rtrim($insertFieldsFlag,", ");
-
+    $insertFields = rtrim($insertFields,", ");   
+    $insertFieldsFlag = rtrim($insertFieldsFlag,", "); 
+       
     $query = "INSERT INTO `$table` ($insertFields) VALUES ($insertFieldsFlag)";
-    $insert = $db->query( $query, $executeArray);
+    $insert = $db->query( $query, $executeArray);    
     if($insert > 0 ) {
         $messageSuccess = isset($msg['success']) ? $msg['success'] : 'Data Succesfully created!';
         return array(
@@ -1274,7 +1274,7 @@ function insertIntoTable($db, $table, $data, $msg=NULL ){
             'message'=>$messageError,
             'status'=>'0'
         );
-    }
+    }    
 }
 /**
  * deleteRowByField where
@@ -1295,7 +1295,7 @@ function deleteRowByField($db, $table, $where){
 }
 function getLastUrlConfig($db){
     $lastConfig = $db->row("SELECT * FROM `tblurlconfig` ORDER BY id DESC");
-
+    
     return $lastConfig;
 }
 
@@ -1330,7 +1330,7 @@ function uploadFile($uploadName, $uploadFolder=NULL){
     } else {
         $target_dir = $uploadFolder;
     }
-
+    
     $target_file = $target_dir . basename($_FILES["$uploadName"]["name"]);
     $uploadOk = 1;
     $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
@@ -1369,17 +1369,17 @@ function uploadFile($uploadName, $uploadFolder=NULL){
     // Check if $uploadOk is set to 0 by an error
     if ($uploadOk == 0) {
         $message['status'] = "0";
-        // if everything is ok, try to upload file
+    // if everything is ok, try to upload file
     } else {
         if (move_uploaded_file($_FILES["$uploadName"]["tmp_name"], $target_file)) {
             $message['msg'] = "The file ". basename( $_FILES["$uploadName"]["name"]). " has been uploaded.";
-            $message['status'] = "1";
+            $message['status'] = "1";            
         } else {
             $message['msg'] = "Sorry, there was an error uploading your file.";
             $message['status'] = "0";
         }
     }
-
+    
     return $message;
 }
 /**
@@ -1388,14 +1388,14 @@ function uploadFile($uploadName, $uploadFolder=NULL){
  * @return string
  */
 function formatMoney($number){
-    $pieces = explode(".", $number);
+    $pieces = explode(".", $number);  
     $startPiece = $pieces[0];
     if(isset($pieces[1])){
         $endPiece = $pieces[1];
-    }
+    }     
     $n=number_format(abs($startPiece));
     $newNum = $n;
-    if(isset($endPiece)&&$endPiece!=""){
+    if(isset($endPiece)&&$endPiece!=""){        
         $newNum .= ".".$endPiece;
         if(strlen($endPiece)=='1'){
             $newNum .= "0";
@@ -1403,7 +1403,7 @@ function formatMoney($number){
     } else {
         $newNum .= ".00";
     }
-
+    
     return $newNum;
 }
 
@@ -1426,8 +1426,8 @@ function formatAccountName($accountName){
 }
 
 /**
- * Get nested status names
- * used in patient info screen
+ * Get nested status names 
+ * used in patient info screen 
  * Test Status Change Log Table - status names
  */
 function get_nested_statuses($db, $Guid_status, $Guid_user, $Log_group, $i=0){
@@ -1438,7 +1438,7 @@ function get_nested_statuses($db, $Guid_status, $Guid_user, $Log_group, $i=0){
     $status = $db->query($statQ);
     $names = '';
     if(!empty($status)){
-        foreach ($status as $k=>$v){
+        foreach ($status as $k=>$v){   
             $parent = $v['Guid_status'];
             $children = $db->query("SELECT sl.Guid_status, s.status FROM tbl_mdl_status_log sl 
                         LEFT JOIN tblpatient p ON sl.Guid_patient=p.Guid_user 
@@ -1450,7 +1450,7 @@ function get_nested_statuses($db, $Guid_status, $Guid_user, $Log_group, $i=0){
                 echo $v['status'].', ';
             } else {
                 echo $v['status'];
-            }
+            }            
             if(!empty($children)){
                 foreach ($children as $key => $value) {
                     get_nested_statuses($db, $value['Guid_status'], $Guid_user, $Log_group, $i=1);
@@ -1464,10 +1464,10 @@ function get_nested_statuses($db, $Guid_status, $Guid_user, $Log_group, $i=0){
 
 function get_selected_log_dropdown($db, $Log_group, $parent="0") {
     $selectedStatuses = $db->query(
-        "SELECT sl.Guid_status, st.status, st.parent_id FROM tbl_mdl_status_log sl "
-        . " LEFT JOIN tbl_mdl_status st ON st.Guid_status=sl.Guid_status"
-        . " WHERE `Log_group`= ".$Log_group
-        . " ORDER BY st.parent_id ASC, st.order_by ASC"
+                "SELECT sl.Guid_status, st.status, st.parent_id FROM tbl_mdl_status_log sl "
+                . " LEFT JOIN tbl_mdl_status st ON st.Guid_status=sl.Guid_status"                
+                . " WHERE `Log_group`= ".$Log_group
+                . " ORDER BY st.parent_id ASC, st.order_by ASC"
     );
     $content = "";
     foreach ($selectedStatuses as $k => $v){
@@ -1476,34 +1476,34 @@ function get_selected_log_dropdown($db, $Log_group, $parent="0") {
         $content .= '<div class="f2 valid ">
                         <div class="group">
                             <select data-parent="'.$parent.'" required class="status-dropdown" name="status[]" id="">
-                                <option value="0">Select Status</option>';
-        if ( $statuses ) {
-            foreach ( $statuses as $status ) {
-                $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
+                                <option value="0">Select Status</option>';    
+                                    if ( $statuses ) {
+                                        foreach ( $statuses as $status ) {  
+                                            $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
 
-                $optionClass = '';
-                if ( !empty($checkCildren) ) {
-                    $optionClass = 'has_sub_menu';
-                }
-                $selected = isStatusSelected($status['Guid_status'],$selectedStatuses) ? " selected": "";
-                $content .= "<option ".$selected." value='".$status['Guid_status']."' class='".$optionClass."'>".$status['status'];
+                                            $optionClass = '';
+                                            if ( !empty($checkCildren) ) { 
+                                                $optionClass = 'has_sub_menu';                 
+                                            }  
+                                            $selected = isStatusSelected($status['Guid_status'],$selectedStatuses) ? " selected": "";
+                                            $content .= "<option ".$selected." value='".$status['Guid_status']."' class='".$optionClass."'>".$status['status'];
 
-                $content .= '</option>';
-            }
-        }
+                                            $content .= '</option>';
+                                        }
+                                    }
         $content .= '</select><p class="f_status"><span class="status_icons"><strong></strong></span>';
-        $content .= '</p></div></div>';
+        $content .= '</p></div></div>';    
     }
     return $content;
 }
 
 function isStatusSelected($status, $selectedStatuses){
     foreach ($selectedStatuses as $k=>$v){
-        if($status == $v['Guid_status']){
+         if($status == $v['Guid_status']){
             return TRUE;
         }
     }
-
+   
     return FALSE;
 }
 /**
@@ -1513,112 +1513,115 @@ function isStatusSelected($status, $selectedStatuses){
  * @param type $Date
  * @return boolean
  */
-function isValidStatusGroup($db,$statusIDs, $Guid_user, $Date){
-    //check combination Guid_status AND Date before saving
-    $count = 0;
+function isValidStatusGroup($db,$statusIDs, $Guid_user, $Date){ 
+    //check combination Guid_status AND Date before saving   
+    $count = 0;    
     foreach ($statusIDs as $k=>$v){
         $query = "SELECT Guid_status FROM tbl_mdl_status_log WHERE Guid_user=$Guid_user AND DATE(`Date`)='$Date' AND Guid_status='$v'";
         $checkStat = $db->row($query, array('Guid_user'=>$Guid_user,'Guid_status'=>$v,'Date'=>$Date));
         if(!empty($checkStat)){
             $count++;
-        }
+        }        
     }
-    if(count($statusIDs)==$count){
-        //if full combination match than not valid,
+    if(count($statusIDs)==$count){ 
+        //if full combination match than not valid, 
         //return false in order not to record the same combination again
         return FALSE;
-    }
+    }    
     return TRUE;
 }
 
 function saveStatusLog($db,$statusIDs, $statusLogData){
-
+    
     $i = 1;
-    foreach ($statusIDs as $k=>$status){
+    foreach ($statusIDs as $k=>$status){        
         $statusLogData['Guid_status'] = $status;
 
         if($i==1){
             $insertStatusLog = insertIntoTable($db, 'tbl_mdl_status_log', $statusLogData);
             $insertID = $insertStatusLog['insertID'];
-            if($insertID!=""){
+            if($insertID!=""){ 
                 $LogGroupID=$insertID;
                 $LogGroupData['Log_group']=$insertID;
                 $where['Guid_status_log']=$insertID;
                 //setting first insert id as a log group id
                 updateTable($db, 'tbl_mdl_status_log', $LogGroupData, $where);
-            }
+            }    
             $i++;
         } else {
             //after first insert seting first insert id as logGroupID
             $statusLogData['Log_group']=$LogGroupID;
-            $insertStatusLog = insertIntoTable($db, 'tbl_mdl_status_log', $statusLogData);
+            $insertStatusLog = insertIntoTable($db, 'tbl_mdl_status_log', $statusLogData);            
         }
     }
     return TRUE;
 }
 
 function updateCurrentStatusID($db, $Guid_patient){
-    //SELECT statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date`
+    $getUserId = $db->row("SELECT `Guid_user` FROM `tblpatient` WHERE Guid_patient=:Guid_patient", array('Guid_patient'=>$Guid_patient));
+    $Guid_user = $getUserId['Guid_user'];
+    //SELECT statuses.*, statuslogs.`Guid_status_log`, statuslogs.`Guid_patient`, statuslogs.`Log_group`, statuslogs.`order_by`, statuslogs.`Date` 
     $q  =   "SELECT * 
             FROM `tbl_mdl_status` statuses
             LEFT JOIN `tbl_mdl_status_log` statuslogs
-            ON statuses.`Guid_status`= statuslogs.`Guid_status` ";
+            ON statuses.`Guid_status`= statuslogs.`Guid_status` ";    
     $q  .=  "AND statuslogs.`Guid_status_log`<>''
             AND statuses.parent_id='0'
             AND statuslogs.Guid_patient=$Guid_patient
+            AND statuslogs.Guid_user=$Guid_user
             ORDER BY statuslogs.`Date` DESC, statuses.order_by DESC LIMIT 1";
     $result = $db->row($q);
-
+ 
     updateTable($db, 'tbl_mdl_status_log', array('currentstatus'=>'N'), array('Guid_patient'=>$Guid_patient));
     updateTable($db, 'tbl_mdl_status_log', array('currentstatus'=>'Y'), array('Log_group'=>$result['Log_group']));
-
+   
     return $result['Guid_status_log'];
 }
 
 function get_status_dropdown($db, $parent='0', $Guid_status=FALSE) {
     if($Guid_status){
         $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `Guid_status` = ".$Guid_status);
-
+        
     }else{
         $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." AND visibility='1' ORDER BY order_by ASC, Guid_status ASC");
     }
-
+    
     $content = '<div class="f2  ">
                     <div class="group">
                         <select data-parent="'.$parent.'" required class="status-dropdown" name="status[]" id="">
-                            <option value="">Select Status</option>';
+                            <option value="">Select Status</option>';    
     if ( $statuses ) {
-        foreach ( $statuses as $status ) {
+        foreach ( $statuses as $status ) {  
             $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
-
+             
             $optionClass = '';
-            if ( !empty($checkCildren) ) {
-                $optionClass = 'has_sub_menu';
-            }
+            if ( !empty($checkCildren) ) { 
+                $optionClass = 'has_sub_menu';                 
+            }            
             $content .= "<option value='".$status['Guid_status']."' class='".$optionClass."'>".$status['status'];
-
+            
             $content .= '</option>';
         }
     }
     $content .= '</select><p class="f_status"><span class="status_icons"><strong></strong></span>
                             </p></div></div>';
-
+   
     return $content;
 }
 
 function get_nested_status_dropdown($db, $parent = 0) {
     $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." AND visibility='1' ORDER BY order_by ASC, Guid_status ASC");
-
+    
     $content = '<select class="no-selection" name="parent_id" id="parent">
-                            <option value="0">Select Status Parent</option>';
+                            <option value="0">Select Status Parent</option>';    
     if ( $statuses ) {
-        foreach ( $statuses as $status ) {
+        foreach ( $statuses as $status ) {  
             $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
-
+             
             $optionClass = '';
-            if ( !empty($checkCildren) ) {
-                $optionClass = 'has_sub_menu';
-            }
+            if ( !empty($checkCildren) ) { 
+                $optionClass = 'has_sub_menu';                 
+            }            
             $content .= "<option value='".$status['Guid_status']."' class='".$optionClass."'>".$status['status'];
             if ( !empty($checkCildren) ) {
                 $content .= get_option_of_nested_status( $db, $status['Guid_status'], "-&nbsp;" );
@@ -1627,7 +1630,7 @@ function get_nested_status_dropdown($db, $parent = 0) {
         }
     }
     $content .= "</select>";
-
+   
     return $content;
 }
 function get_option_of_nested_status($db, $parent = 0,  $level = '', $checkboxes=FALSE) {
@@ -1635,14 +1638,14 @@ function get_option_of_nested_status($db, $parent = 0,  $level = '', $checkboxes
     if ( $statuses ) {
         $content ='';
         $prefix = 0;
-        foreach ( $statuses as $status ) {
-
+        foreach ( $statuses as $status ) {  
+            
             $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
             $optionClass = '';
-
-            if ( !empty($checkCildren) ) {
-                $optionClass = 'has_sub';
-            }
+           
+            if ( !empty($checkCildren) ) { 
+                $optionClass = 'has_sub';   
+            }         
             if($checkboxes){
                 //used for mdl-stat-details-config.php config field popup status select list
                 $getOption = getOption($db, 'stat_details_config');
@@ -1652,7 +1655,7 @@ function get_option_of_nested_status($db, $parent = 0,  $level = '', $checkboxes
                 $isSelected = "";
                 if(isset($fieldOptions[$fieldId]) && $thisStatuses!=""){
                     $isSelected = in_array($status['Guid_status'], $thisStatuses)? " checked": "";
-                }
+                }                
                 $content .= $level."<input ".$isSelected." type='checkbox' name=stauses[] value='".$status['Guid_status']."' class='".$optionClass."'> " .$status['status'].'</br>';
             }else{
                 $content .= "<option value='".$status['Guid_status']."' class='".$optionClass."'>".$level . " " .$status['status'];
@@ -1670,28 +1673,28 @@ function get_option_of_nested_status($db, $parent = 0,  $level = '', $checkboxes
             }
         }
     }
-
+   
     return $content;
 }
 
 function get_nested_ststus_editable_rows($db, $parent = 0, $level = '') {
     $statuses = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC, Guid_status ASC");
     $roles= $db->query('SELECT * FROM `tblrole` WHERE `role`<>"Admin" AND `role`<>"Patient" AND `role`<>"MDL Patient"');
-
+    
     $content = "";
     if ( $statuses ) {
         $content ='';
         $prefix = 0;
-
-        foreach ( $statuses as $status ) {
-
+        
+        foreach ( $statuses as $status ) {  
+         
             $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
             $optionClass = '';
-
-            if ( !empty($checkCildren) ) {
-                $optionClass = 'has_sub';
-            }
-
+           
+            if ( !empty($checkCildren) ) { 
+                $optionClass = 'has_sub';   
+            }         
+            
             $content .= "<td>".$status['Guid_status'] . "</td>";
             $content .= "<td  class='".$optionClass."'>".$level . " ";
             $content .= "<input type='hidden' name=status[Guid_status][] value='".$status['Guid_status']."' />";
@@ -1704,21 +1707,21 @@ function get_nested_ststus_editable_rows($db, $parent = 0, $level = '') {
                                 <option ".$selectedY." value='1'>Yes</option>
                                 <option ".$selectedN." value='0'>No</option>
                             </select>
-                        </td>";
+                        </td>";            
             $content .= "<td class='roles'>";
             if($roles){
                 $content .= "<p><span class='toggleThisRoles pull-right far fa-eye-slash'></span></p>";
-                $content .= "<div class='rolesBlock hidden'>";   //.hidden
+                $content .= "<div class='rolesBlock hidden'>";   //.hidden             
                 foreach ($roles as $k => $v) {
-                    $checked = "";
+                    $checked = "";                    
                     if($status['access_roles'] && $status['access_roles']!=""){
-                        $accessRoles = unserialize($status['access_roles']);
+                        $accessRoles = unserialize($status['access_roles']); 
                         if($accessRoles){
                             if(array_key_exists($v['Guid_role'], $accessRoles)){
                                 $checked = " checked";
-                            }
+                            }       
                         }
-                    }
+                    }                    
                     $content .= "<p><input name=status[roles][".$status['Guid_status']."][".$v["Guid_role"]."] type='checkbox' ".$checked." />".$v['role']."</p>";
                 }
                 $content .= "</div>";
@@ -1726,37 +1729,37 @@ function get_nested_ststus_editable_rows($db, $parent = 0, $level = '') {
             $content .= "</td>";
             $content .= "</tr>";
             if ( !empty($checkCildren) ) {
-                $prefix .= '-';
+                $prefix .= '-';            
                 $content .= get_nested_ststus_editable_rows( $db, $status['Guid_status'], $level . "-&nbsp;" );
             }
         }
-
+        
     }
-
+   
     return $content;
 }
 function getDmdlEditableCategories($db) {
     $categories = $db->query("SELECT * FROM tbl_mdl_category");
-
+   
     $content = "";
     if ( !empty($categories) ) {
-
-        foreach ( $categories as $k=>$category ) {
+        
+        foreach ( $categories as $k=>$category ) {  
             $content .= "<tr>";
             $content .= "<td>".$category['Guid_category'];
             $content .= "<input type='hidden' name=category[".$category['Guid_category']."][Guid_category] value='".$category['Guid_category']."' />";
-            $content .= "</td>";
+            $content .= "</td>";            
             $content .= "<td>";
             $content .= "<input name=category[".$category['Guid_category']."][slug] type='text' value='".$category['slug']."'/>";
-            $content .= "</td>";
+            $content .= "</td>";            
             $content .= "<td>";
             $content .= "<input name=category[".$category['Guid_category']."][name] type='text' value='".$category['name']."' />";
             $content .= "</td>";
             $content .= "</tr>";
         }
-
+        
     }
-
+   
     return $content;
 }
 
@@ -1772,7 +1775,7 @@ function getMarkedTestUserIDs($db){
         $userIds .= $v['Guid_user'].', ';
     }
     $markedTestUserIds = rtrim($userIds, ', ');
-
+    
     return $markedTestUserIds;
 }
 
@@ -1788,23 +1791,23 @@ function getTestUserIDs($db){
         $userIds .= $v['Guid_user'].', ';
     }
     $testUserIds = rtrim($userIds, ', ');
-
-    return $testUserIds;
+    
+    return $testUserIds;    
 }
 
 function formatDate($date){
     if (empty($date)) {
-        return '';
+	return '';
     } else {
-        return date("n/j/Y", strtotime($date));
+	return date("n/j/Y", strtotime($date));
     }
 }
 
 function dbDateFormat($date){
     if (empty($date)) {
-        return '';
+	return '';
     } else {
-        return date("Y-m-d H:i:s", strtotime($date));
+	return date("Y-m-d H:i:s", strtotime($date));
     }
 }
 
@@ -1814,7 +1817,7 @@ function dbDateFormat($date){
  * @param type $statusID
  * @return type array ('count'=>5, 'info'=>array())
  */
-function get_stats_info($db, $statusID, $hasChildren=FALSE, $searchData=array()){
+function get_stats_info($db, $statusID, $hasChildren=FALSE, $searchData=array()){    
     //exclude test users
     $markedTestUserIds = getMarkedTestUserIDs($db);
     $testUserIds = getTestUserIDs($db);
@@ -1827,10 +1830,10 @@ function get_stats_info($db, $statusID, $hasChildren=FALSE, $searchData=array())
             LEFT JOIN `tbl_mdl_status_log` statuslogs ON statuses.`Guid_status`= statuslogs.`Guid_status`
             LEFT JOIN `tbl_mdl_number` mdlnum ON statuslogs.Guid_user=mdlnum.Guid_user 
             LEFT JOIN `tblaccount` account ON account.Guid_account=statuslogs.Guid_account ";
-
+    
     $q .=  "WHERE  statuslogs.`currentstatus`='Y' ";
-
-    if(!empty($searchData)){
+    
+    if(!empty($searchData)){ 
         if (isset($searchData['from_date']) && $searchData['from_date']!="" && isset($searchData['to_date']) && $searchData['to_date']!="") {
             if ($searchData['from_date'] == $searchData['to_date']) {
                 $q .= " AND statuslogs.Date LIKE '%" . date("Y-m-d", strtotime($searchData['from_date'])) . "%'";
@@ -1853,58 +1856,58 @@ function get_stats_info($db, $statusID, $hasChildren=FALSE, $searchData=array())
             $filterUrlStr .= "&account=".$searchData['Guid_account'];
         }
     }
-
+  
     $q .=  " AND statuslogs.`Guid_status_log`<>'' 
             AND statuslogs.Guid_status=$statusID ";
     if($markedTestUserIds!=""){
-        $q .=  " AND statuslogs.Guid_user NOT IN(".$markedTestUserIds.") ";
+    $q .=  " AND statuslogs.Guid_user NOT IN(".$markedTestUserIds.") "; 
     }
     if($testUserIds!=""){
-        $q .=  " AND statuslogs.Guid_user NOT IN(".$testUserIds.") ";
+    $q .=  " AND statuslogs.Guid_user NOT IN(".$testUserIds.") ";   
     }
-
+    
     $thisUserID = $_SESSION['user']['id'];
     $roleInfo = getRole($db, $thisUserID);
     $thisUserRole = $roleInfo['role'];
-
+    
     if($thisUserRole == "Sales Manager"){
-        $userCategories = $db->query("SELECT Guid_category FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$thisUserID));
+        $userCategories = $db->query("SELECT Guid_category FROM `tbl_mdl_category_user_link` WHERE Guid_user=:Guid_user", array('Guid_user'=>$thisUserID)); 
         $userLinks = '';
         if(!empty($userCategories)){
             foreach ($userCategories as $catK=>$catV){
                 $userLinks .= $catV['Guid_category'].', ';
             }
             $userLinks = rtrim($userLinks, ', ');
-        }
+        }    
         if($userLinks != ''){
             $q .= " AND account.Guid_category IN (" . $userLinks . ") ";
-        }
+        } 
     }
-
-
+    
+    
     $q .=  " AND statuslogs.Guid_patient<>'0' 
             ORDER BY statuslogs.`Date` DESC, statuses.`order_by` DESC";
-
+    
     $stats = $db->query($q);
     $result['count'] = 0;
     if(!empty($stats)){
         $result['count'] = count($stats);
         $result['filterUrlStr'] = $filterUrlStr;
         $result['info'] = $stats;
-    }
-
+    }  
+    
     return $result;
 }
 
-function get_status_table_rows($db, $parent = 0, $searchData=array(), $linkArr=array()) {
+function get_status_table_rows($db, $parent = 0, $searchData=array(), $linkArr=array()) { 
     $statusQ = "SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$parent." ORDER BY order_by ASC";
     $statuses = $db->query($statusQ);
     $filterUrlStr = "";
-    $content = '';
+    $content = '';    
     if ( $statuses ) {
-        foreach ( $statuses as $status ) {
+        foreach ( $statuses as $status ) {  
             $checkCildren = $db->query("SELECT * FROM tbl_mdl_status "
-                . "WHERE `parent_id` = ".$status['Guid_status']);
+                    . "WHERE `parent_id` = ".$status['Guid_status']);
             $stats = get_stats_info($db, $status['Guid_status'], FALSE, $searchData);
             $link = '';
             if($stats['count']!=0){
@@ -1917,22 +1920,22 @@ function get_status_table_rows($db, $parent = 0, $searchData=array(), $linkArr=a
                     foreach ($linkArr as $k=>$v){
                         $link .= $k.'='.$v.'&';
                     }
-                    $link = rtrim($link,'&');
+                    $link = rtrim($link,'&');                    
                 }
-                if ( !empty($checkCildren) ) {
-                    $optionClass = 'has_sub';
-                }
+                if ( !empty($checkCildren) ) { 
+                    $optionClass = 'has_sub';                 
+                } 
                 $content .= "<tr id='".$status['Guid_status']."' class='parent ".$optionClass."'>";
-                $content .= "<td class='text-left'><span>".$status['status'].'</span></td>';
+                $content .= "<td class='text-left'><span>".$status['status'].'</span></td>';            
                 $content .= '<td><a href="'.$link.'">'.$stats['count'].'</a></td>';
                 if ( !empty($checkCildren) ) {
                     $content .= get_status_child_rows( $db, $status['Guid_status'], "&nbsp;", $searchData, $linkArr );
-                }
+                }            
                 $content .= "</tr>";
             }
         }
-    }
-
+    }   
+   
     return $content;
 }
 function get_status_child_rows($db, $parent = 0,  $level = '', $searchData=array(), $linkArr=array()) {
@@ -1940,15 +1943,15 @@ function get_status_child_rows($db, $parent = 0,  $level = '', $searchData=array
     if ( $statuses ) {
         $content ='';
         $prefix = 0;
-        foreach ( $statuses as $status ) {
+        foreach ( $statuses as $status ) { 
             $checkCildren = $db->query("SELECT * FROM tbl_mdl_status WHERE `parent_id` = ".$status['Guid_status']);
-            $optionClass = '';
+            $optionClass = '';  
             $stats = get_stats_info($db, $status['Guid_status'], TRUE, $searchData);
             if($stats['count']!=0){
                 $filterUrlStr = $stats['filterUrlStr'];
-                if ( !empty($checkCildren) ) {
-                    $optionClass = 'parent has_sub';
-                }
+                if ( !empty($checkCildren) ) { 
+                    $optionClass = 'parent has_sub';   
+                }  
                 $link = '';
                 if(empty($linkArr)){
                     $link .= SITE_URL.'/mdl-stat-details.php?status_id='.$status['Guid_status'].'&parent='.$parent.$filterUrlStr;
@@ -1957,7 +1960,7 @@ function get_status_child_rows($db, $parent = 0,  $level = '', $searchData=array
                     foreach ($linkArr as $k=>$v){
                         $link .= $k.'='.$v.'&';
                     }
-                    $link = rtrim($link,'&');
+                    $link = rtrim($link,'&');                    
                 }
                 $content .= "<tr id='".$status['Guid_status']."' data-parent-id='".$parent."' class='sub ".$optionClass."'>";
                 $content .= "<td class='text-left'><span>".$level . " " .$status['status'].'</span></td>';
@@ -1966,11 +1969,11 @@ function get_status_child_rows($db, $parent = 0,  $level = '', $searchData=array
                     $prefix .= '&nbsp;';
                     $content .= get_status_child_rows( $db, $status['Guid_status'], $level . "&nbsp;", $searchData, $linkArr );
                 }
-                $content .= "</tr>";
+                 $content .= "</tr>";
             }
         }
     }
-
+   
     return $content;
 }
 
@@ -1980,11 +1983,11 @@ function getStatusName($db, $Guid_status, $parent){
     if($parent != ""){
         $parentRow = $db->row("SELECT `status` FROM tbl_mdl_status WHERE Guid_status=:Guid_status", array('Guid_status'=>$parent));
         $name .= $parentRow['status']." - ";
-    }
+    }    
     if($status){
         $name .= $status['status'];
     }
-
+    
     return $name;
 }
 function getStatusParentNames($db, $Guid_status){
@@ -1992,7 +1995,7 @@ function getStatusParentNames($db, $Guid_status){
     $names = "";
     if($status){
         $names .= $status['status'].'; ';
-    }
+    }    
     return $names;
 }
 function getRoleName($db, $roleID){
@@ -2000,13 +2003,13 @@ function getRoleName($db, $roleID){
     $names = "";
     if($role){
         $names .= $role['role'];
-    }
+    }    
     return $names;
 }
 /**
  * Checking if field status assigned for given field
- * Statuses configurable from MDL details config page(mdl-stat-details-config.php)
- * Returns True if status assigned to that field
+ * Statuses configurable from MDL details config page(mdl-stat-details-config.php) 
+ * Returns True if status assigned to that field 
  * @param type $db
  * @param type $fieldID
  * @param type $statusID
@@ -2018,15 +2021,15 @@ function isFieldVisibleForStatus($db, $fieldID, $statusID){
     if(isset($optionVal[$fieldID]['statuses']) && !empty($optionVal[$fieldID]['statuses'])){
         if(in_array($statusID, $optionVal[$fieldID]['statuses'])){
             return TRUE;
-        }
+        }     
         return FALSE;
     }
-    return FALSE;
+    return FALSE;    
 }
 /**
  * Checking if role assigned for given filed
- * Roles configurable from MDL details config page(mdl-stat-details-config.php)
- * Returns True if role assigned to that field
+ * Roles configurable from MDL details config page(mdl-stat-details-config.php) 
+ * Returns True if role assigned to that field 
  * @param type $db
  * @param type $fieldID
  * @param type $roleID
@@ -2034,14 +2037,14 @@ function isFieldVisibleForStatus($db, $fieldID, $statusID){
  */
 function isFieldVisibleForRole($db, $fieldID, $roleID){
     $configOptions = getOption($db, 'stat_details_config');
-    $optionVal = unserialize($configOptions['value']);
+    $optionVal = unserialize($configOptions['value']);    
     if(isset($optionVal[$fieldID]['roles']) && !empty($optionVal[$fieldID]['roles'])){
         if(in_array($roleID, $optionVal[$fieldID]['roles'])){
             return TRUE;
-        }
+        }     
         return FALSE;
     }
-    return FALSE;
+    return FALSE;    
 }
 /**
  * Get Revenue Details for stats page
@@ -2052,12 +2055,12 @@ function isFieldVisibleForRole($db, $fieldID, $roleID){
 function getRevenueStat($db, $Guid_user){
     $revenueData = array();
     $getPayorQ = "SELECT r.Guid_payor, p.name FROM `tbl_revenue` r "
-        . "LEFT JOIN tbl_mdl_payors p ON r.Guid_payor=p.Guid_payor "
-        . "WHERE r.Guid_payor<>'' AND r.Guid_user=:Guid_user "
-        . "GROUP BY r.Guid_payor ORDER BY r.Guid_payor ";
-
+                . "LEFT JOIN tbl_mdl_payors p ON r.Guid_payor=p.Guid_payor "
+                . "WHERE r.Guid_payor<>'' AND r.Guid_user=:Guid_user "
+                . "GROUP BY r.Guid_payor ORDER BY r.Guid_payor ";
+    
     $payors = $db->query($getPayorQ, array('Guid_user'=>$Guid_user));
-
+    
     $paidPatient = 0;
     $paidInsurance = 0;
     $total = 0;
@@ -2068,7 +2071,7 @@ function getRevenueStat($db, $Guid_user){
             $revenueAmmountQ = "SELECT r.amount FROM `tbl_revenue` r
                                 LEFT JOIN `tbl_mdl_payors` p ON r.`Guid_payor`=p.`Guid_payor`
                                 WHERE r.`Guid_payor`= $Guid_payor AND r.Guid_user=$Guid_user
-                                ORDER BY r.`Guid_payor` ";
+                                ORDER BY r.`Guid_payor` "; 
             $revenueAmmount = $db->query($revenueAmmountQ);
             foreach ($revenueAmmount as $amount){
                 if($Guid_payor=='1'){ // Payor ID with 1 is Patients
@@ -2081,14 +2084,14 @@ function getRevenueStat($db, $Guid_user){
             if($Guid_payor!='1'){
                 $insuranceName .= $v['name']."; ";
             }
-        }
+        }         
     }
     $insuranceName = rtrim($insuranceName, '; ');
-    $revenueData['patient_paid'] =  $paidPatient;
-    $revenueData['insurance_paid'] =  $paidInsurance;
-    $revenueData['total'] =  $total;
-    $revenueData['insurance_name'] =  $insuranceName;
-
+    $revenueData['patient_paid'] =  $paidPatient;   
+    $revenueData['insurance_paid'] =  $paidInsurance;   
+    $revenueData['total'] =  $total;   
+    $revenueData['insurance_name'] =  $insuranceName;  
+    
     return $revenueData;
 }
 /**
@@ -2097,16 +2100,16 @@ function getRevenueStat($db, $Guid_user){
  * @param type $Guid_status
  * @return type array
  */
-function getStatusRevenueTotals($db, $Guid_status, $searchData=array()){
+function getStatusRevenueTotals($db, $Guid_status, $searchData=array()){    
     $usersQ = "SELECT sl.*, mn.mdl_number FROM `tbl_mdl_status_log` sl "
-        . "LEFT JOIN tbl_mdl_number mn "
-        . "ON sl.Guid_user=mn.Guid_user ";
-
+            . "LEFT JOIN tbl_mdl_number mn "
+            . "ON sl.Guid_user=mn.Guid_user "; 
+    
     $usersQ .= " WHERE sl.Guid_status=:Guid_status AND sl.currentstatus='Y' ";
-
+ 
     if(!empty($searchData)){
-
-        //adding filter conditions
+        
+        //adding filter conditions 
         if(isset($searchData['Guid_salesrep'])&&$searchData['Guid_salesrep']!=""){
             $usersQ .= 'AND sl.Guid_salesrep='.$searchData['Guid_salesrep'].' ';
         }
@@ -2124,7 +2127,7 @@ function getStatusRevenueTotals($db, $Guid_status, $searchData=array()){
             }
         }
     }
-
+    
     $users = $db->query($usersQ, array('Guid_status'=>$Guid_status, ));
 
     $patientTotal = 0;
@@ -2132,11 +2135,11 @@ function getStatusRevenueTotals($db, $Guid_status, $searchData=array()){
     $total = 0;
     $revenueTotalsData = array();
     if(!empty($users)){
-
+        
         foreach ($users as $user){
-
+            
             $revenuDetails = getRevenueStat($db, $user['Guid_user']);
-
+           
             if(!empty($revenuDetails)){
                 $patientTotal += $revenuDetails['patient_paid'];
                 $insuranceTotal += $revenuDetails['insurance_paid'];
@@ -2147,8 +2150,8 @@ function getStatusRevenueTotals($db, $Guid_status, $searchData=array()){
     $revenueTotalsData['patient_total'] = $patientTotal;
     $revenueTotalsData['insurance_total'] = $insuranceTotal;
     $revenueTotalsData['total'] = $total;
-
-    return $revenueTotalsData;
+    
+    return $revenueTotalsData;    
 }
 
 /**
@@ -2161,8 +2164,8 @@ function topNavLinks($role=FALSE){
     if($role=='Physician'){
         $content .= '<a href="'.SITE_URL.'/accounts.php" class="button homeIcon"></a>';
     }else{
-        $content .= '<a href="'.SITE_URL.'/dashboard2.php" class="button homeIcon"></a>';
-    }
+       $content .= '<a href="'.SITE_URL.'/dashboard2.php" class="button homeIcon"></a>'; 
+    }    
     $content .= '<a href="'.QUESTIONNAIRE_URL.'" target="_blank" class="button submit smaller_button"><strong>View Questionnaire</strong></a>';
 
     return $content;
@@ -2172,7 +2175,7 @@ function topNavLinks($role=FALSE){
 function get_status_state($db, $parent = 0, $searchData=array(), $linkArr=array(), $today) {
     $statuses = array('28' => 'Registered Paient', '36' => 'Completed Questionnaire', '16' => 'Insufficient Informatin' , '29' => 'Medically Qualified' );
     $filterUrlStr = "";
-    $content = '';
+    $content = '';    
     foreach ($statuses as $key => $status) {
         $stats1 = get_stats_info($db, $key, FALSE, $searchData);
         $stats2 = get_stats_info_today($db, $key, FALSE, $searchData, $today);
@@ -2180,13 +2183,13 @@ function get_status_state($db, $parent = 0, $searchData=array(), $linkArr=array(
         $content .= "<td><span>".$status."</span></td>";
         $content .= '<td><a>'.$stats2['count'].'</a></td>';
         $content .= '<td><a>'.$stats1['count'].'</a></td>';
-        $content .= "</tr>";
-    }
+        $content .= "</tr>";    
+    }    
     return $content;
 }
 
 
-function get_stats_info_today($db, $statusID, $hasChildren=FALSE, $searchData=array(), $today){
+function get_stats_info_today($db, $statusID, $hasChildren=FALSE, $searchData=array(), $today){    
     //exclude test users
     $markedTestUserIds = getMarkedTestUserIDs($db);
     $testUserIds = getTestUserIDs($db);
@@ -2206,7 +2209,7 @@ function get_stats_info_today($db, $statusID, $hasChildren=FALSE, $searchData=ar
         $q .= "WHERE statuslogs.`currentstatus`  ";
     }
 
-    if(!empty($searchData)){
+    if(!empty($searchData)){ 
         if (isset($searchData['from_date']) && $searchData['from_date']!="" && isset($searchData['to_date']) && $searchData['to_date']!="") {
             if ($searchData['from_date'] == $searchData['to_date']) {
                 $q .= " AND statuslogs.Date LIKE '%" . date("Y-m-d", strtotime($searchData['from_date'])) . "%'";
@@ -2229,14 +2232,14 @@ function get_stats_info_today($db, $statusID, $hasChildren=FALSE, $searchData=ar
             $filterUrlStr .= "&account=".$searchData['Guid_account'];
         }
     }
-
+  
     $q .=  //" AND statuslogs.`Guid_status_log`<>''
-        " AND statuslogs.Guid_status=$statusID ";
+            " AND statuslogs.Guid_status=$statusID ";
     if($markedTestUserIds!=""){
-        $q .=  " AND statuslogs.Guid_user NOT IN(".$markedTestUserIds.") ";
+    $q .=  " AND statuslogs.Guid_user NOT IN(".$markedTestUserIds.") ";
     }
     if($testUserIds!=""){
-        $q .=  " AND statuslogs.Guid_user NOT IN(".$testUserIds.") ";
+    $q .=  " AND statuslogs.Guid_user NOT IN(".$testUserIds.") ";   
     }
     $q .=  " AND statuslogs.Guid_patient<>'0' 
             ORDER BY statuslogs.`Date` DESC, statuses.`order_by` DESC";
@@ -2250,16 +2253,16 @@ function get_stats_info_today($db, $statusID, $hasChildren=FALSE, $searchData=ar
         $result['count'] = count($stats);
         $result['filterUrlStr'] = $filterUrlStr;
         $result['info'] = $stats;
-    }
-
+    }  
+    
     return $result;
 }
 
 function updateOrInsertAccount($db, $apiData){
-
+   
     $checkAccount = $db->row("SELECT * FROM tblaccount WHERE account=:account", array('account'=>$apiData['number']));
-
-    if(!empty($checkAccount)){
+    
+    if(!empty($checkAccount)){ 
         //update account for empty values only
         //check if it already has value don't update
         $Guid_account = $checkAccount['Guid_account'];
@@ -2270,37 +2273,37 @@ function updateOrInsertAccount($db, $apiData){
             }
         }
         if(isset($checkAccount['name']) && $checkAccount['name']==''){
-            if(isset($apiData['name'])){
+            if(isset($apiData['name'])){                
                 $accountData['name'] = $apiData['name'];
             }
         }
         if(isset($checkAccount['address']) && $checkAccount['address']==''){
-            if(isset($apiData['address'])){
+            if(isset($apiData['address'])){        
                 $accountData['address'] = $apiData['address'];
             }
         }
-        if(isset($checkAccount['address1']) && $checkAccount['address1']==''){
-            if(isset($apiData['address1'])){
+        if(isset($checkAccount['address1']) && $checkAccount['address1']==''){ 
+            if(isset($apiData['address1'])){              
                 $accountData['address1'] = $apiData['address1'];
             }
         }
-        if(isset($checkAccount['city']) && $checkAccount['city']==''){
-            if(isset($apiData['city'])){
+        if(isset($checkAccount['city']) && $checkAccount['city']==''){ 
+            if(isset($apiData['city'])){              
                 $accountData['city'] = $apiData['city'];
             }
-        }
+        }    
         if(isset($checkAccount['state']) && $checkAccount['state']==''){
-            if(isset($apiData['state'])){
+            if(isset($apiData['state'])){            
                 $accountData['state'] = $apiData['state'];
             }
         }
         if(isset($checkAccount['zip']) && $checkAccount['zip']==''){
-            if(isset($apiData['zip'])){
+            if(isset($apiData['zip'])){            
                 $accountData['zip'] = $apiData['zip'];
             }
         }
         if(isset($checkAccount['phone_number']) && $checkAccount['phone_number']==''){
-            if(isset($apiData['phone_number'])){
+            if(isset($apiData['phone_number'])){        
                 $accountData['phone_number'] = $apiData['phone_number'];
             }
         }
@@ -2308,35 +2311,35 @@ function updateOrInsertAccount($db, $apiData){
             if(isset($apiData['fax'])){
                 $accountData['fax'] = $apiData['fax'];
             }
-        }
+        } 
         if(!empty($accountData)){
             $whereAccount = array('Guid_account'=>$Guid_account);
             $updateAccount = updateTable($db, 'tblaccount', $accountData, $whereAccount);
-        }
+        }        
     } else {
-        //insert new account
+    //insert new account
         if(isset($apiData['number'])){
             $accountData['account'] = $apiData['number'];
         }
-        if(isset($apiData['name'])){
+        if(isset($apiData['name'])){                
             $accountData['name'] = $apiData['name'];
         }
-        if(isset($apiData['address'])){
+        if(isset($apiData['address'])){        
             $accountData['address'] = $apiData['address'];
         }
-        if(isset($apiData['address1'])){
+        if(isset($apiData['address1'])){              
             $accountData['address1'] = $apiData['address1'];
         }
-        if(isset($apiData['city'])){
+        if(isset($apiData['city'])){              
             $accountData['city'] = $apiData['city'];
         }
-        if(isset($apiData['state'])){
+        if(isset($apiData['state'])){            
             $accountData['state'] = $apiData['state'];
         }
-        if(isset($apiData['zip'])){
+        if(isset($apiData['zip'])){            
             $accountData['zip'] = $apiData['zip'];
         }
-        if(isset($apiData['phone_number'])){
+        if(isset($apiData['phone_number'])){        
             $accountData['phone_number'] = $apiData['phone_number'];
         }
         if(isset($apiData['fax'])){
@@ -2349,17 +2352,17 @@ function updateOrInsertAccount($db, $apiData){
             $Guid_account = $insertAccount['insertID'];
         }
     }
-
-    return $Guid_account;
+    
+    return $Guid_account;    
 }
 
-function updateOrInsertProvider($db,$accountNum, $Guid_account, $Guid_user, $apiProviderData){
-    //check provider
-    $checkProvider = $db->row("SELECT * FROM tblprovider WHERE account_id=:account_id", array('account_id'=>$accountNum));
-    if(!empty($checkProvider)){ //update fields which are empty
-
+function updateOrInsertProvider($db,$accountNum, $Guid_account, $Guid_user, $apiProviderData){    
+    //check provider   
+    $checkProvider = $db->row("SELECT * FROM tblprovider WHERE account_id=:account_id", array('account_id'=>$accountNum)); 
+    if(!empty($checkProvider)){ //update fields which are empty                                    
+        
         $Guid_provider = $checkProvider['Guid_provider'];
-
+        
         if(isset($checkProvider['npi']) && $checkProvider['npi']==''){
             $providerData['npi'] = $apiProviderData['npi'];
         }
@@ -2374,7 +2377,7 @@ function updateOrInsertProvider($db,$accountNum, $Guid_account, $Guid_user, $api
         }
         if(isset($Guid_provider) && !empty($providerData)){
             $updateProvider = updateTable($db, 'tblprovider', $providerData, array('Guid_provider'=>$Guid_provider));
-        }
+        }                               
     } else { //insert
         $providerData = array(
             'Guid_user'=>$Guid_user,
@@ -2399,12 +2402,12 @@ function updateOrInsertProvider($db,$accountNum, $Guid_account, $Guid_user, $api
     }
 
     return $Guid_provider;
-
+    
 }
 function loadTableData($db, $tableName, $tableClass='', $tableID=''){
     $columns = $db->query('SHOW COLUMNS FROM ' . $tableName);
     $data = $db->query('SELECT * FROM ' . $tableName);
-
+    
     $cnt = "";
     $cnt .= "<table class='".$tableClass."' id='".$tableID."'>";
     $cnt .= "<thead>";
@@ -2416,23 +2419,23 @@ function loadTableData($db, $tableName, $tableClass='', $tableID=''){
     }
     $cnt .= "</tr>";
     $cnt .= "</thead>";
-
+    
     $cnt .= "<tbody>";
-
+    
     foreach ($data as $k=>$rowData){
         $cnt .= "<tr>";
         foreach ($rowData as $key=>$val){
-            $cnt .= "<td>";
-            $cnt .= $val;
-            $cnt .= "</td>";
+        $cnt .= "<td>";
+        $cnt .= $val;
+        $cnt .= "</td>";
         }
         $cnt .= "</tr>";
     }
-
+    
     $cnt .= "</tbody>";
     $cnt .= "</table>";
-
-
+    
+    
     return $cnt;
 }
 
@@ -2446,11 +2449,11 @@ function convertDmdlDate($date){
     if($date!=''){
         if (stripos($date,'T') !== false) {
             $dateExp  = explode("T", $date);
-            $convertedDate = $dateExp['0'];
+            $convertedDate = $dateExp['0'];            
         } else {
             $date = str_replace('/', '-', $date);
-            $dateExp  = explode("-", $date) ;
-            $convertedDate = $dateExp['2']."-".$dateExp['0']."-".$dateExp['1'];
+            $dateExp  = explode("-", $date) ;            
+            $convertedDate = $dateExp['2']."-".$dateExp['0']."-".$dateExp['1'];            
         }
         return $convertedDate;
     }
@@ -2459,30 +2462,30 @@ function convertDmdlDate($date){
 
 function getPaientPossibleMatch($db,$firstname,$lastname,$Date_Of_Birth){
     $SQuery = "SELECT p.Guid_patient, p.Guid_user, p.dob, p.accountNumber, "
-        . "AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') as firstname,"
-        . "AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') as lastname, "
-        . "mdlNum.mdl_number "
-        . "FROM tblpatient p "
-        . "LEFT JOIN tbluser u ON u.Guid_user = p.Guid_user "
-        . "LEFT JOIN tbl_mdl_number mdlNum ON mdlNum.Guid_user=p.Guid_user  "
-        . "WHERE u.marked_test='0' AND u.Loaded='N' AND p.Linked='N' "
-        . "AND (LOWER(CONVERT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') USING 'utf8')) LIKE '%".strtolower($firstname)."%' "
-        . "OR LOWER(CONVERT(AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') USING 'utf8')) LIKE '%".strtolower($lastname)."%' "
-        . "OR p.dob='".convertDmdlDate($Date_Of_Birth)."' ) "
-        . "ORDER BY firstname, lastname ";
+            . "AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') as firstname,"
+            . "AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') as lastname, "
+            . "mdlNum.mdl_number "
+            . "FROM tblpatient p "
+            . "LEFT JOIN tbluser u ON u.Guid_user = p.Guid_user "
+            . "LEFT JOIN tbl_mdl_number mdlNum ON mdlNum.Guid_user=p.Guid_user  "
+            . "WHERE u.marked_test='0' AND u.Loaded='N' AND p.Linked='N' "
+            . "AND (LOWER(CONVERT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') USING 'utf8')) LIKE '%".strtolower($firstname)."%' "
+            . "OR LOWER(CONVERT(AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') USING 'utf8')) LIKE '%".strtolower($lastname)."%' "
+            . "OR p.dob='".convertDmdlDate($Date_Of_Birth)."' ) "
+            . "ORDER BY firstname, lastname ";
 
     $SGetPatient = $db->query($SQuery);
-
+    
     return $SGetPatient;
 }
 
 function getMatchedPatientsDropdown($db, $Guid_MDLNumber, $SGetPatient){
     //var_dump($SGetPatient);
     $sOption = ''; $sContent = ''; $mdl_num = '';
-    foreach ($SGetPatient as $k=>$v){
-        $matchedPatient=$v;
-        $this_Guid_user = $v['Guid_user'];
-
+    foreach ($SGetPatient as $k=>$v){       
+        $matchedPatient=$v; 
+        $this_Guid_user = $v['Guid_user'];    
+        
         $DOS_braca = $db->query("SELECT Date(`Date`) as Date FROM `tbl_mdl_status_log` WHERE Guid_status='1' AND Guid_user=:Guid_user",array('Guid_user'=>$this_Guid_user));
         $DOS_braca_date = '';
         if(!empty($DOS_braca)){
@@ -2491,14 +2494,14 @@ function getMatchedPatientsDropdown($db, $Guid_MDLNumber, $SGetPatient){
             }
         }
         $DOS_braca_date = rtrim($DOS_braca_date, ', ');
-        $sOption .= "<option value='".$v['Guid_patient']."'>";
+        $sOption .= "<option value='".$v['Guid_patient']."'>";                        
         $sOption .= ucwords(strtolower($v['firstname']." ".$v['lastname']));
         $sOption .= " (".date("m/d/Y", strtotime($matchedPatient['dob'])).") ";
         if($v['mdl_number'] && $v['mdl_number']!=''){
             $sOption .= "MDL#: ".$v['mdl_number'].', ';
         }
         if($v['accountNumber'] && $v['accountNumber']!=''){
-            $sOption .= "Acct#: ".$v['accountNumber'].", ";
+        $sOption .= "Acct#: ".$v['accountNumber'].", ";
         }
         $sOption .= "Patient ID: ".$v['Guid_patient'].", User ID: ".$v['Guid_user'];
         if($DOS_braca_date!=''){
@@ -2518,14 +2521,14 @@ function getMatchedPatientsDropdown($db, $Guid_MDLNumber, $SGetPatient){
 function getPaientPerfectMatch($db,$firstname,$lastname,$Date_Of_Birth){
     $dobConverted = convertDmdlDate($Date_Of_Birth);
     $query = "SELECT p.Guid_patient, p.Guid_user, p.dob,"
-        . "AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') as firstname,"
-        . "AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') as lastname "
-        . "FROM tblpatient p "
-        . "LEFT JOIN tbluser u ON u.Guid_user = p.Guid_user "
-        . "WHERE u.marked_test='0' AND u.Loaded='N' AND p.Linked='N' "
-        . "AND LOWER(CONVERT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') USING 'utf8'))='".strtolower($firstname)."' "
-        . "AND LOWER(CONVERT(AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') USING 'utf8'))='".strtolower($lastname)."' "
-        . "AND dob='$dobConverted'";
+            . "AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') as firstname,"
+            . "AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') as lastname "
+            . "FROM tblpatient p "
+            . "LEFT JOIN tbluser u ON u.Guid_user = p.Guid_user "
+            . "WHERE u.marked_test='0' AND u.Loaded='N' AND p.Linked='N' "
+            . "AND LOWER(CONVERT(AES_DECRYPT(p.firstname_enc, 'F1rstn@m3@_%') USING 'utf8'))='".strtolower($firstname)."' "
+            . "AND LOWER(CONVERT(AES_DECRYPT(p.lastname_enc, 'L@stn@m3&%#') USING 'utf8'))='".strtolower($lastname)."' "
+            . "AND dob='$dobConverted'";
     //var_dump("getPaientPerfectMatch Query");
     //var_dump($query);
     $getPatient = $db->query($query);
@@ -2536,22 +2539,22 @@ function getPaientPerfectMatch($db,$firstname,$lastname,$Date_Of_Birth){
 
 
 function resetDmdlLoadedData($db){
-    $loadedDataTables = array('tbluser','tblpatient', 'tblaccount',
-        'tblprovider', 'tbl_mdl_number', 'tbl_mdl_status_log',
-        'tbl_mdl_payors', 'tbl_revenue', 'tbl_mdl_cpt_code'
-    );
+    $loadedDataTables = array('tbluser','tblpatient', 'tblaccount', 
+                                'tblprovider', 'tbl_mdl_number', 'tbl_mdl_status_log', 
+                                'tbl_mdl_payors', 'tbl_revenue', 'tbl_mdl_cpt_code'
+                            );
     //Delete table rows wirh Loaded flag = 'Y'
     foreach ($loadedDataTables as $k=>$tableName){
         $db->query("DELETE FROM $tableName WHERE Loaded='Y'");
-    }
+    } 
     //Reset Linked Flags
     $linkedDataTables = array('tbl_mdl_dmdl','tblpatient');
     foreach ($linkedDataTables as $k=>$tableName){
         $db->query("UPDATE $tableName SET Linked='N' WHERE Linked='Y'");
-    }
+    } 
     //set ToUpdate From N to Y in tbl_mdl_dmdl
     $db->query("UPDATE `tbl_mdl_dmdl` SET ToUpdate='Y' WHERE ToUpdate='N'");
-
+    
     return TRUE;
 }
 /**
@@ -2561,7 +2564,7 @@ function resetDmdlLoadedData($db){
  */
 function getDmdlStatusesArray($res){
     $statuses = array();
-
+    
     //1. Specimen Collected
     if (isset($res['DOS']) && !empty($res['DOS'])) {
         $statuses['statuses']['SpecimenCollected']['Date'] = convertDmdlDate($res['DOS']);
@@ -2645,11 +2648,11 @@ function getDmdlStatusesArray($res){
     if (isset($res['PR_AddFamilyHistory']) && !empty($res['PR_AddFamilyHistory'])) {
         $statuses['statuses']['PR_AddFamilyHistory']['Date'] = convertDmdlDate($res['PR_AddFamilyHistory']);
     }
-    //4.5 Patient Responsibility: Family History Received
+    //4.5 Patient Responsibility: Family History Received 
     if (isset($res['PR_FamilyHistoryReceived']) && !empty($res['PR_FamilyHistoryReceived'])) {
         $statuses['statuses']['PR_FamilyHistoryReceived']['Date'] = convertDmdlDate($res['PR_FamilyHistoryReceived']);
     }
-    //4.6 & 4.7 Patient Responsibility: Genetic Counseling: Pending, Completed...
+    //4.6 & 4.7 Patient Responsibility: Genetic Counseling: Pending, Completed...          
     if (isset($res['Genetic_Counseling_Status']) && !empty($res['Genetic_Counseling_Status'])) {
         $statuses['statuses']['Genetic_Counseling']['Status'] = $res['Genetic_Counseling_Status'];
     }
@@ -2676,11 +2679,11 @@ function getDmdlStatusesArray($res){
     if (isset($res['TC_MDLOON']) && !empty($res['TC_MDLOON'])) {
         $statuses['statuses']['TC_MDLOON']['Date'] = convertDmdlDate($res['TC_MDLOON']);
     }
-    //6.2 Test Cancelled: MDL In-Network/High
+    //6.2 Test Cancelled: MDL In-Network/High 
     if (isset($res['TC_MDLIN']) && !empty($res['TC_MDLIN'])) {
         $statuses['statuses']['TC_MDLIN']['Date'] = convertDmdlDate($res['TC_MDLIN']);
     }
-    //6.3 Test Cancelled: Physician Cancelled Testing
+    //6.3 Test Cancelled: Physician Cancelled Testing 
     if (isset($res['TC_PhysicianCancelled']) && !empty($res['TC_PhysicianCancelled'])) {
         $statuses['statuses']['TC_PhysicianCancelled']['Date'] = convertDmdlDate($res['TC_PhysicianCancelled']);
     }
@@ -2723,7 +2726,7 @@ function getDmdlStatusesArray($res){
     //7.1 waiting for billed ststus updated from API
     if (isset($res['BillingDate']) && !empty($res['BillingDate'])) {
         $statuses['statuses']['BillingDate']['Date'] = convertDmdlDate($res['BillingDate']);
-    }
+    } 
     //8.1 Legal/AR Review: In Progress: Legal Review
     if (isset($res['Legal_InProgress_Review']) && !empty($res['Legal_InProgress_Review'])) {
         $statuses['statuses']['Legal_InProgress_Review']['Date'] = convertDmdlDate($res['Legal_InProgress_Review']);
@@ -2753,7 +2756,7 @@ function getDmdlStatusesArray($res){
         $statuses['statuses']['Testing_Status']['Status'] = $res['Testing_Status'];
         $statuses['statuses']['Testing_Status']['Date'] = convertDmdlDate($res['Testing_Status_Date']);
     }
-
+    
     return $statuses['statuses'];
 }
 /**
@@ -2810,11 +2813,11 @@ function getInvoiceDetail($res){
 
 /**
  * update dMDL Linked Patients
- * update Statuses and Payment information
+ * update Statuses and Payment information 
  * for those that are already linked and not showing on the screen
  * Those should be updated until the status is Payment received or Test Canceled.
  * @param type $db
- * @param type array $patientInfo
+ * @param type array $patientInfo 
  * @return boolean
  */
 function updatedMDLLinkedPatients($db, $patientInfo){
@@ -2823,53 +2826,53 @@ function updatedMDLLinkedPatients($db, $patientInfo){
     try {
         $opts = array('ssl' => array('ciphers'=>'RC4-SHA'));
         $client = new SoapClient('https://patientpayment.mdlab.com/MDL.WebService/BillingWebService?wsdl',
-            array ('stream_context' => stream_context_create($opts),"exceptions"=>0));
-    } catch (Exception $e) {
+        array ('stream_context' => stream_context_create($opts),"exceptions"=>0));
+    } catch (Exception $e) { 
         $headers = "MIME-Version: 1.0\r\n";
         $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
         $headers .= 'From: billingcustomerservice@mdlab.com' . "\r\n";
         $message = "faultcode: " . $e->faultcode . ", faultstring: " . $e->faultstring;
-        $subject = "SOAP Fault";
+        $subject = "SOAP Fault";  
         mail('agokhale@mdlab.com', $subject, $message, $headers);
         trigger_error("SOAP Fault: (faultcode: {$e->faultcode}, faultstring: {$e->faultstring})", E_USER_ERROR);
         return;
-    }
-
+    } 
+    
     $param = array(
-        "patientId" => $patientInfo['Guid_dmdl_patient'],
+        "patientId" => $patientInfo['Guid_dmdl_patient'], 
         "physicianId" => $patientInfo['Guid_dmdl_physician'],
         "mdlNumber"=>$patientInfo['dMDL_mdl_number']
     );
-    $result = (array)$client->GetGeneticResultsMDL($param);
-    $domObj = new xmlToArrayParser($result['GetGeneticResultsMDLResult']);
-    $domArr = $domObj->array;
-    if($domObj->parse_error){
-        echo $domObj->get_xml_error();
-    } else {
+    $result = (array)$client->GetGeneticResultsMDL($param);       
+    $domObj = new xmlToArrayParser($result['GetGeneticResultsMDLResult']); 
+    $domArr = $domObj->array; 
+    if($domObj->parse_error){ 
+        echo $domObj->get_xml_error();            
+    } else { 
         if(isset($domArr['CombinedResults']['GeneticResults']['0'])){
             $res = $domArr['CombinedResults']['GeneticResults']['0'];
-        }else{
+        }else{            
             $res = $domArr['CombinedResults']['GeneticResults'];
         }
     }
-
+        
     //status log data
     $statusLogData = array(
-        'Guid_user' =>  $patientInfo['Guid_user'],
-        'Guid_patient'=> $patientInfo['Guid_patient'],
-        'account' => $patientInfo['accountNumber'],
-        'Recorded_by' => $_SESSION['user']['id'],
-        'provider_id' => $patientInfo['provider_id'],
-        'Guid_account' => "",
-        'Guid_salesrep' => "",
-        'salesrep_fname' => "",
-        'salesrep_lname' => "",
-        'deviceid' => "",
-        'Date_created'=>date('Y-m-d h:i:s')
-    );
+                        'Guid_user' =>  $patientInfo['Guid_user'],
+                        'Guid_patient'=> $patientInfo['Guid_patient'],                        
+                        'account' => $patientInfo['accountNumber'],
+                        'Recorded_by' => $_SESSION['user']['id'],  
+                        'provider_id' => $patientInfo['provider_id'],
+                        'Guid_account' => "",
+                        'Guid_salesrep' => "",
+                        'salesrep_fname' => "",
+                        'salesrep_lname' => "",
+                        'deviceid' => "",
+                        'Date_created'=>date('Y-m-d h:i:s')
+                    );
     if(isset($patientInfo['accountNumber']) && $patientInfo['accountNumber'] !=''){
         $getGuid_account = $db->row("SELECT * FROM `tblaccount` WHERE account=:account", array('account'=>$patientInfo['accountNumber']));
-        $Guid_account = $getGuid_account['Guid_account'];
+        $Guid_account = $getGuid_account['Guid_account'];       
         $statusLogData['Guid_account'] = $Guid_account;
     }
     $getSalesrep = $db->row("SELECT * FROM tblsalesrep srep
@@ -2878,13 +2881,13 @@ function updatedMDLLinkedPatients($db, $patientInfo){
     if(!empty($getSalesrep)){
         $statusLogData['Guid_salesrep'] = $getSalesrep['Guid_salesrep'];
         $statusLogData['salesrep_fname'] = $getSalesrep['first_name'];
-        $statusLogData['salesrep_lname'] = $getSalesrep['last_name'];
+        $statusLogData['salesrep_lname'] = $getSalesrep['last_name'];        
     }
-
+    
     $dmdl_mdl_number = $patientInfo['Guid_dmdl_patient'];
     $Guid_mdl_dmdl = $patientInfo['Guid_mdl_dmdl'];
     $csvMdlNumber = $patientInfo['csv_mdlnumber'];
-
+    
     //Statuses arrray
     $statuses = getDmdlStatusesArray($res);
     if(!empty($statuses)){
@@ -2892,13 +2895,13 @@ function updatedMDLLinkedPatients($db, $patientInfo){
         $invoiceDetails = isset($res['BillingDetail']['invoiceDetail']) ? $res['BillingDetail']['invoiceDetail']: array();
         insertDmdlStatuses($db,$statuses,$statusLogData, $dmdl_mdl_number,$Guid_mdl_dmdl, $invoiceDetails, $csvMdlNumber);
     }
-
-    //update or insert payor and revenue data
+    
+    //update or insert payor and revenue data      
     if(isset($res['BillingDetail']['invoiceDetail']) && !empty($res['BillingDetail']['invoiceDetail'])){
         $getInvoiceDetail = getInvoiceDetail($res);
         updateOrInsertRevenue($db, $patientInfo['Guid_user'], $getInvoiceDetail['invoiceDetail']);
-    }
-
+    }  
+    
 }
 
 /**
@@ -2906,34 +2909,34 @@ function updatedMDLLinkedPatients($db, $patientInfo){
  * @param type $db
  * @return string
  */
-function dmdl_refresh($db){
+function dmdl_refresh($db){ 
     require_once 'classes/xmlToArrayParser.php';
     ini_set("soap.wsdl_cache_enabled", 0);
     try {
         $opts = array('ssl' => array('ciphers'=>'RC4-SHA'));
         $client = new SoapClient('https://patientpayment.mdlab.com/MDL.WebService/BillingWebService?wsdl',
-            array ('stream_context' => stream_context_create($opts),"exceptions"=>0));
-    } catch (Exception $e) {
+        array ('stream_context' => stream_context_create($opts),"exceptions"=>0));
+    } catch (Exception $e) { 
         $headers = "MIME-Version: 1.0\r\n";
         $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
         $headers .= 'From: billingcustomerservice@mdlab.com' . "\r\n";
         $message = "faultcode: " . $e->faultcode . ", faultstring: " . $e->faultstring;
-        $subject = "SOAP Fault";
+        $subject = "SOAP Fault";  
         mail('agokhale@mdlab.com', $subject, $message, $headers);
         trigger_error("SOAP Fault: (faultcode: {$e->faultcode}, faultstring: {$e->faultstring})", E_USER_ERROR);
         return;
-    }
+    }    
     //Process GET variables to get $start value for LIMIT
     $per_page=50;
-    //getting total number of records
+    //getting total number of records 
     $res=$db->row("SELECT count(Guid_mdl_dmdl) as count FROM tbl_mdl_dmdl WHERE ToUpdate='Y' AND Linked='N'");
     $total_rows=$res['count'];
 
     //Process GET variables to get $start value for LIMIT
     if (isset($_GET['page'])) $CUR_PAGE=($_GET['page']); else $CUR_PAGE=1;
     $start=abs(($CUR_PAGE-1)*$per_page);
-
-    //skip ToUpdate='N'
+    
+    //skip ToUpdate='N' 
     //select [toupdate = Y] and [time of now - updatedatetime > 1 hour or is null
     /* $dmdlResult = $db->query("SELECT * FROM tbl_mdl_dmdl "
             . "WHERE ToUpdate='Y' AND Linked='N' "
@@ -2942,12 +2945,12 @@ function dmdl_refresh($db){
             . "OR UpdateDatetime < NOW() - INTERVAL 60 MINUTE "); */
     $dmdlResult = $db->query("SELECT * FROM tbl_mdl_dmdl WHERE ToUpdate='Y' AND Linked='N' ORDER BY MDLNumber ASC LIMIT $start,$per_page");
     $content=""; $match=""; $possibleM ="";
-
+    
     $content .= "<form action='' method='POST'>";
-
+    
     $content .= "<div class='pB-15 text-right'>";
     $content .= "<button name='dmdlUpdate' type='submit' class='botton btn-inline'>Update</button>";
-    //$content .= "<button name='dmdlCreateNew' type='submit' class='botton btn-inline'>Create New</button>";
+    //$content .= "<button name='dmdlCreateNew' type='submit' class='botton btn-inline'>Create New</button>";    
     $content .= "</div>";
     $content .= "<table id='refresh-log-table' class='table'>";
     $content .= "<thead>";
@@ -2956,7 +2959,7 @@ function dmdl_refresh($db){
     $content .= "<th colspan='3' class='tbl-borderR braca'>BRCA Admin</th>";
     $content .= "</tr>";
     $content .= "<tr class='tableHeader'>";
-    $content .= "<th>Matched</th>";
+    $content .= "<th>Matched</th>";    
     $content .= "<th>Patient F Name</th>";
     $content .= "<th>Patient L Name</th>";
     $content .= "<th>DOB</th>";
@@ -2978,188 +2981,188 @@ function dmdl_refresh($db){
     //var_dump($dmdlResult);
     foreach ( $dmdlResult as $dmdlKey=>$dmdlVal ){
         $param = array(
-            "patientId" => $dmdlVal['PatientID'],
+            "patientId" => $dmdlVal['PatientID'], 
             "physicianId" => $dmdlVal['PhysicianID'],
             "mdlNumber"=>$dmdlVal['MDLNumber']
         );
-        $result = (array)$client->GetGeneticResultsMDL($param);
-        $domObj = new xmlToArrayParser($result['GetGeneticResultsMDLResult']);
-        $domArr = $domObj->array;
-        if($domObj->parse_error){
-            echo $domObj->get_xml_error();
-        } else {
+        $result = (array)$client->GetGeneticResultsMDL($param);       
+        $domObj = new xmlToArrayParser($result['GetGeneticResultsMDLResult']); 
+        $domArr = $domObj->array; 
+        if($domObj->parse_error){ 
+            echo $domObj->get_xml_error();            
+        } else { 
             if(isset($domArr['CombinedResults']['GeneticResults'])){
                 if(isset($domArr['CombinedResults']['GeneticResults']['0'])){
                     $res = $domArr['CombinedResults']['GeneticResults']['0'];
                     $bgClass = 'duplicateResult';
-                }else{
+                }else{            
                     $res = $domArr['CombinedResults']['GeneticResults'];
                     $bgClass = '';
                 }
-
-                $Guid_MDLNumber = isset($res['Guid_MDLNumber'])?$res['Guid_MDLNumber']:'';
-                $Date_Of_Birth = isset($res['Date_Of_Birth'])?$res['Date_Of_Birth']:'';
+           
+                $Guid_MDLNumber = isset($res['Guid_MDLNumber'])?$res['Guid_MDLNumber']:'';            
+                $Date_Of_Birth = isset($res['Date_Of_Birth'])?$res['Date_Of_Birth']:'';          
                 $firstname = isset($res['Patient_FirstName'])?$res['Patient_FirstName']:'';
-                $lastname = isset($res['Patient_LastName'])?$res['Patient_LastName']:'';
-                $accountNumber = isset($res['ClientID'])?$res['ClientID']:'';
+                $lastname = isset($res['Patient_LastName'])?$res['Patient_LastName']:'';           
+                $accountNumber = isset($res['ClientID'])?$res['ClientID']:'';  
                 $DOS = '';
                 if(isset($res['DOS'])){
                     $DOS = str_replace('-','/',$res['DOS']);
                 }
-
-                $dob = str_replace('-','/',$Date_Of_Birth);
+            
+                $dob = str_replace('-','/',$Date_Of_Birth);            
                 $where = array(
                     'firstname' => $firstname,
                     'lastname' => $lastname,
                     'dob' => convertDmdlDate($Date_Of_Birth)
                 );
                 $getPatient = getPaientPerfectMatch($db,$firstname,$lastname,$Date_Of_Birth);
-
+         
                 $content .= "<tr class='$bgClass'>";
                 if(empty($getPatient)){ //patient not match with dmdl data => ststus=no
-                    $match = "<td class='mn no'>"
+                $match = "<td class='mn no'>"
                         . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][status]' value='no' />"
-                        . "No</td>";
+                        . "No</td>"; 
+                $SGetPatient = getPaientPossibleMatch($db,$firstname,$lastname,$Date_Of_Birth);                
+                $sContent = "";  $sOption = ""; $matchedPatient=array();
+                if(!empty($SGetPatient)){
+                    $sContent .= getMatchedPatientsDropdown($db, $Guid_MDLNumber, $SGetPatient);
+                } else {
+                    //if there is not possible match it should create new records
+                    $sContent .= "Create New";
+                    $sContent .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Possible_Match]' value='create_new' />";
+                }
+                $possibleM = "<td class='tbl-borderR possiblematchTh'>".$sContent."</td>";
+            } else {                
+                if(count($getPatient)>1){ //duplicate records => status=duplicate                  
+                    $match = "<td class='hasDuplicate'>"
+                            . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][status]' value='duplicate' />"
+                            . "Duplicate</td>";
+                   
                     $SGetPatient = getPaientPossibleMatch($db,$firstname,$lastname,$Date_Of_Birth);
-                    $sContent = "";  $sOption = ""; $matchedPatient=array();
+
+                    $sContent=""; $sOption=""; $mdl_num = ""; 
                     if(!empty($SGetPatient)){
                         $sContent .= getMatchedPatientsDropdown($db, $Guid_MDLNumber, $SGetPatient);
-                    } else {
-                        //if there is not possible match it should create new records
+                    } else { //create new records if possibe match not found
                         $sContent .= "Create New";
                         $sContent .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Possible_Match]' value='create_new' />";
                     }
                     $possibleM = "<td class='tbl-borderR possiblematchTh'>".$sContent."</td>";
-                } else {
-                    if(count($getPatient)>1){ //duplicate records => status=duplicate
-                        $match = "<td class='hasDuplicate'>"
-                            . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][status]' value='duplicate' />"
-                            . "Duplicate</td>";
-
-                        $SGetPatient = getPaientPossibleMatch($db,$firstname,$lastname,$Date_Of_Birth);
-
-                        $sContent=""; $sOption=""; $mdl_num = "";
-                        if(!empty($SGetPatient)){
-                            $sContent .= getMatchedPatientsDropdown($db, $Guid_MDLNumber, $SGetPatient);
-                        } else { //create new records if possibe match not found
-                            $sContent .= "Create New";
-                            $sContent .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Possible_Match]' value='create_new' />";
-                        }
-                        $possibleM = "<td class='tbl-borderR possiblematchTh'>".$sContent."</td>";
-                    }else{
-                        //update mdl# for this perfect match => status=yes
-                        $matchedPatient = $getPatient['0'];
-                        //update the Physician MDL ID Guid_dmdl_patient
-                        $dmdlData = array(
-                            'Guid_dmdl_patient'=>$res['Guid_PatientId'],
-                            'Guid_dmdl_physician'=>$res['GUID_PhysicianID']
-                        );
-                        $update_dmdl_patient = updateTable($db, 'tblpatient', $dmdlData, array('Guid_patient'=>$matchedPatient['Guid_patient']));
-                        $acctLink = ''; $patientInfoOption=''; $patientInfo = '';
-                        if(isset($matchedPatient['Guid_user'])){
-                            $this_Guid_user = $matchedPatient['Guid_user'];
-                            $sqlQualify = "SELECT q.account_number FROM tbl_ss_qualify q WHERE Guid_user=:Guid_user ORDER BY q.`Date_created` DESC LIMIT 1 ";
-                            $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$this_Guid_user));
-                            if(isset($qualifyResult['account_number'])&&$qualifyResult['account_number']!=''){
-                                $acctLink = '&account='.$qualifyResult['account_number'];
-                            }
-                            $mdlNumberResult = $db->query("SELECT `mdl_number` FROM `tbl_mdl_number` WHERE Guid_user=:Guid_user", array('Guid_user'=>$this_Guid_user));
-                            $mdl_num = '';
-                            if(!empty($mdlNumberResult)){
-                                $mdlNumMatch = False;
-                                foreach ($mdlNumberResult as $key => $val) {
-                                    if($val['mdl_number']!=''){
-                                        if($val['mdl_number']==$Guid_MDLNumber){
-                                            $mdlNumMatch = True;
-                                        }else{
-                                            $mdlNumMatch = False;
-                                        }
-                                        $mdl_num .= $val['mdl_number'].', ';
-                                    }
-                                }
-                                $mdl_num = rtrim($mdl_num, ', ');
-                            }
-                            $DOS_braca = $db->query("SELECT Date(`Date`) as Date FROM `tbl_mdl_status_log` WHERE Guid_status='1' AND Guid_user=:Guid_user",array('Guid_user'=>$this_Guid_user));
-                            $DOS_braca_date = '';
-                            if(!empty($DOS_braca)){
-                                foreach ($DOS_braca as $k=>$date){
-                                    $DOS_braca_date .= $date['Date'].', ';
-                                }
-                                $DOS_braca_date = rtrim($DOS_braca_date, ', ');
-                            }
-                        }
-                        if($DOS_braca_date!=''){
-                            $bracaDOS = date("m/d/Y", strtotime($DOS_braca_date));
-                        } else {
-                            $bracaDOS = '';
-                        }
-                        $patientInfoStr = '';
-                        $patientInfoStr .= ucwords(strtolower($matchedPatient['firstname']." ".$matchedPatient['lastname']));
-                        $patientInfoOption .= ucwords(strtolower($matchedPatient['firstname']." ".$matchedPatient['lastname']));
-                        if($bracaDOS!=''){
-                            $patientInfoStr .= " (".$bracaDOS.") ";
-                            $patientInfoOption .= " (".$bracaDOS.") ";
-                        }
-                        if($mdl_num!=''){
-                            if($mdlNumMatch){
-                                $patientInfoStr .= "MDL#: ".$mdl_num.", ";
-                                $patientInfoOption .= "MDL#: ".$mdl_num.", ";
-                                $patientInfoStr .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Possible_Match]' value='".$matchedPatient['Guid_patient']."' />";
-                            }else{
-                                $patientInfoStr .= "<span class='color-red'>MDL#: ".$mdl_num."</span>, ";
-                                $patientInfoStr .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Possible_Match]' value='create_new' />";
-                            }
-                        }
+                }else{ 
+                    //update mdl# for this perfect match => status=yes 
+                    $matchedPatient = $getPatient['0'];
+                    //update the Physician MDL ID Guid_dmdl_patient
+                    $dmdlData = array(
+                                    'Guid_dmdl_patient'=>$res['Guid_PatientId'], 
+                                    'Guid_dmdl_physician'=>$res['GUID_PhysicianID']
+                                );
+                    $update_dmdl_patient = updateTable($db, 'tblpatient', $dmdlData, array('Guid_patient'=>$matchedPatient['Guid_patient']));
+                    $acctLink = ''; $patientInfoOption=''; $patientInfo = '';
+                    if(isset($matchedPatient['Guid_user'])){
+                        $this_Guid_user = $matchedPatient['Guid_user'];
+                        $sqlQualify = "SELECT q.account_number FROM tbl_ss_qualify q WHERE Guid_user=:Guid_user ORDER BY q.`Date_created` DESC LIMIT 1 ";
+                        $qualifyResult = $db->row($sqlQualify, array('Guid_user'=>$this_Guid_user));
                         if(isset($qualifyResult['account_number'])&&$qualifyResult['account_number']!=''){
-                            $patientInfoStr .= "Acct#: ".$qualifyResult['account_number'].", ";
-                            $patientInfoOption .= "Acct#: ".$qualifyResult['account_number'].", ";
+                            $acctLink = '&account='.$qualifyResult['account_number'];
                         }
-                        $patientInfoStr .= "Patient ID: ".$matchedPatient['Guid_patient'];
-                        $patientInfoOption .= "Patient ID: ".$matchedPatient['Guid_patient'];
-                        if($bracaDOS!=''){
-                            $patientInfoStr .= ", DOS: ".$bracaDOS;
-                            $patientInfoOption .= ", DOS: ".$bracaDOS;
+                        $mdlNumberResult = $db->query("SELECT `mdl_number` FROM `tbl_mdl_number` WHERE Guid_user=:Guid_user", array('Guid_user'=>$this_Guid_user));
+                        $mdl_num = '';
+                        if(!empty($mdlNumberResult)){
+                            $mdlNumMatch = False;
+                            foreach ($mdlNumberResult as $key => $val) {
+                                if($val['mdl_number']!=''){
+                                    if($val['mdl_number']==$Guid_MDLNumber){
+                                        $mdlNumMatch = True;
+                                    }else{
+                                        $mdlNumMatch = False;
+                                    }
+                                    $mdl_num .= $val['mdl_number'].', ';
+                                }
+                            } 
+                            $mdl_num = rtrim($mdl_num, ', ');
                         }
-                        if( $DOS === $bracaDOS ){
-                            $patientInfo .= "<a href='".SITE_URL."/patient-info.php?patient=".$matchedPatient['Guid_user'].$acctLink."'>";
-                            $patientInfo .= $patientInfoStr;
-                            $patientInfo .= "</a>";
-                        } else {
-                            $patientInfo .= "<select name='dmdl[".$Guid_MDLNumber."][Possible_Match]'>";
-                            $patientInfo .= "<option value=''>Select From Possible Match</option>";
-                            $patientInfo .= "<option value='create_new'>Create New</option>";
-                            $patientInfo .= "<option value='".$matchedPatient['Guid_patient']."'>".$patientInfoOption."</option>";
-                            $patientInfo .= "</select>";
+                        $DOS_braca = $db->query("SELECT Date(`Date`) as Date FROM `tbl_mdl_status_log` WHERE Guid_status='1' AND Guid_user=:Guid_user",array('Guid_user'=>$this_Guid_user));
+                        $DOS_braca_date = '';
+                        if(!empty($DOS_braca)){
+                            foreach ($DOS_braca as $k=>$date){
+                                $DOS_braca_date .= $date['Date'].', ';
+                            }
+                            $DOS_braca_date = rtrim($DOS_braca_date, ', ');
                         }
-                        $match = "<td class='mn yes'>"
+                    }                    
+                    if($DOS_braca_date!=''){
+                        $bracaDOS = date("m/d/Y", strtotime($DOS_braca_date));
+                    } else {
+                        $bracaDOS = '';
+                    }                    
+                    $patientInfoStr = '';    
+                    $patientInfoStr .= ucwords(strtolower($matchedPatient['firstname']." ".$matchedPatient['lastname']));
+                    $patientInfoOption .= ucwords(strtolower($matchedPatient['firstname']." ".$matchedPatient['lastname']));
+                    if($bracaDOS!=''){
+                        $patientInfoStr .= " (".$bracaDOS.") ";
+                        $patientInfoOption .= " (".$bracaDOS.") ";                        
+                    }
+                    if($mdl_num!=''){
+                        if($mdlNumMatch){
+                            $patientInfoStr .= "MDL#: ".$mdl_num.", ";
+                            $patientInfoOption .= "MDL#: ".$mdl_num.", ";
+                            $patientInfoStr .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Possible_Match]' value='".$matchedPatient['Guid_patient']."' />";
+                        }else{
+                            $patientInfoStr .= "<span class='color-red'>MDL#: ".$mdl_num."</span>, ";
+                            $patientInfoStr .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Possible_Match]' value='create_new' />";
+                        }
+                    }
+                    if(isset($qualifyResult['account_number'])&&$qualifyResult['account_number']!=''){
+                        $patientInfoStr .= "Acct#: ".$qualifyResult['account_number'].", ";
+                        $patientInfoOption .= "Acct#: ".$qualifyResult['account_number'].", ";
+                    }
+                    $patientInfoStr .= "Patient ID: ".$matchedPatient['Guid_patient'];
+                    $patientInfoOption .= "Patient ID: ".$matchedPatient['Guid_patient'];
+                    if($bracaDOS!=''){
+                        $patientInfoStr .= ", DOS: ".$bracaDOS;
+                        $patientInfoOption .= ", DOS: ".$bracaDOS;
+                    }                    
+                    if( $DOS === $bracaDOS ){    
+                        $patientInfo .= "<a href='".SITE_URL."/patient-info.php?patient=".$matchedPatient['Guid_user'].$acctLink."'>";                        
+                        $patientInfo .= $patientInfoStr;
+                        $patientInfo .= "</a>";
+                    } else {
+                        $patientInfo .= "<select name='dmdl[".$Guid_MDLNumber."][Possible_Match]'>";
+                        $patientInfo .= "<option value=''>Select From Possible Match</option>";
+                        $patientInfo .= "<option value='create_new'>Create New</option>";
+                        $patientInfo .= "<option value='".$matchedPatient['Guid_patient']."'>".$patientInfoOption."</option>";
+                        $patientInfo .= "</select>";
+                    }
+                    $match = "<td class='mn yes'>"
                             . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][status]' value='yes' />"
                             . "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Guid_patient]' value='".$getPatient['0']['Guid_patient']."' />"
-                            . "Yes</td>";
-                        $possibleM = "<td class='tbl-borderR possiblematchTh'>".$patientInfo."</td>";
-                    }
+                            . "Yes</td>";  
+                    $possibleM = "<td class='tbl-borderR possiblematchTh'>".$patientInfo."</td>";
                 }
-
+            }
+            
                 $apiDataLink = SITE_URL."/dmdlPatientInfo.php?patientId=".$dmdlVal['PatientID']."&physicianId=".$dmdlVal['PhysicianID']."&mdlNumber=".$dmdlVal['MDLNumber'];
 
-                $content .= $match; //match status=>yes,no,duplicate
+                $content .= $match; //match status=>yes,no,duplicate  
                 $content .= "<td><a target='_blank' href='".$apiDataLink."'>".ucwords(strtolower($firstname))."</a></td>";
                 $content .= "<td><a target='_blank' href='".$apiDataLink."'>".ucwords(strtolower($lastname))."</a></td>";
-                $content .= "<td>$dob</td>";
+                $content .= "<td>$dob</td>"; 
                 if($dmdlVal['MDLNumber'] != $Guid_MDLNumber){
                     $content .= "<td class='color-red'>dmdl: $Guid_MDLNumber <br/>csv: ".$dmdlVal['MDLNumber']."</td>";
                 } else {
                     $content .= "<td>$Guid_MDLNumber</td>";
                 }
-
-                $content .= "<td>$accountNumber</td>";
-                $content .= "<td>$DOS</td>";
+           
+                $content .= "<td>$accountNumber</td>";            
+                $content .= "<td>$DOS</td>";            
                 $content .= $possibleM;
 
                 $content.= "<td class='text-center'>"
-                    . "<input name='dmdl[selected][".$Guid_MDLNumber."]' type='checkbox' class='checkboxSelect' />"
-                    . "</td>";
-
-                //hidden inputs
+                        . "<input name='dmdl[selected][".$Guid_MDLNumber."]' type='checkbox' class='checkboxSelect' />"
+                        . "</td>";            
+            
+                //hidden inputs            
                 if(isset($res['Guid_MDLNumber']) && !empty($res['Guid_MDLNumber'])){
                     $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][mdlnumber]' value='". $res['Guid_MDLNumber']."' />";
                 }
@@ -3211,7 +3214,7 @@ function dmdl_refresh($db){
                 }
                 if(isset($res['Insurance_Company'])&&!empty($res['Insurance_Company'])){
                     $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Insurance_Company]' value='".$res['Insurance_Company']."' />";
-                }
+                }            
                 if(isset($res['PolicyID'])&&!empty($res['PolicyID'])){
                     $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][policyID]' value='".$res['PolicyID']."' />";
                 }
@@ -3229,7 +3232,7 @@ function dmdl_refresh($db){
                 if(isset($res['Physician_LastName'])&&!empty($res['Physician_LastName'])){
                     $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Physician][LastName]' value='".$res['Physician_LastName']."' />";
                 }
-                if(isset($res['Physician_Title'])&&!empty($res['Physician_Title'])){
+                            if(isset($res['Physician_Title'])&&!empty($res['Physician_Title'])){
                     $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][Physician][Physician_Title]' value='".$res['Physician_Title']."' />";
                 }
 
@@ -3260,7 +3263,7 @@ function dmdl_refresh($db){
                 }
                 if(isset($res['ClientFax'])&&!empty($res['ClientFax'])){
                     $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][account][fax]' value='".$res['ClientFax']."' />";
-                }
+                }          
 
                 //BillingDetail
                 if(isset($res['BillingDetail']['invoiceDetail']) && !empty($res['BillingDetail']['invoiceDetail'])){
@@ -3290,7 +3293,7 @@ function dmdl_refresh($db){
                         }
                         if(isset($invDetail['DatePaid'])){
                             $content .= "<input type='hidden' name='dmdl[".$Guid_MDLNumber."][invoiceDetail][".$invKey."][DatePaid]' value='".convertDmdlDate($invDetail['DatePaid'])."' />";
-                        }
+                        } 
 
                         $amount = 0;
                         if(isset($invDetail['Total_PtPaid'])){
@@ -3388,11 +3391,11 @@ function dmdl_refresh($db){
                 if (isset($res['PR_AddFamilyHistory']) && !empty($res['PR_AddFamilyHistory'])) {
                     $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][PR_AddFamilyHistory][Date]' value='" . convertDmdlDate($res['PR_AddFamilyHistory']) . "' />";
                 }
-                //4.5 Patient Responsibility: Family History Received
+                //4.5 Patient Responsibility: Family History Received 
                 if (isset($res['PR_FamilyHistoryReceived']) && !empty($res['PR_FamilyHistoryReceived'])) {
                     $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][PR_FamilyHistoryReceived][Date]' value='" . convertDmdlDate($res['PR_FamilyHistoryReceived']) . "' />";
                 }
-                //4.6 & 4.7 Patient Responsibility: Genetic Counseling: Pending, Completed...
+                //4.6 & 4.7 Patient Responsibility: Genetic Counseling: Pending, Completed...          
                 if (isset($res['Genetic_Counseling_Status']) && !empty($res['Genetic_Counseling_Status'])) {
                     $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][Genetic_Counseling][Status]' value='" . $res['Genetic_Counseling_Status'] . "' />";
                 }
@@ -3419,11 +3422,11 @@ function dmdl_refresh($db){
                 if (isset($res['TC_MDLOON']) && !empty($res['TC_MDLOON'])) {
                     $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_MDLOON][Date]' value='" . convertDmdlDate($res['TC_MDLOON']) . "' />";
                 }
-                //6.2 Test Cancelled: MDL In-Network/High
+                //6.2 Test Cancelled: MDL In-Network/High 
                 if (isset($res['TC_MDLIN']) && !empty($res['TC_MDLIN'])) {
                     $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_MDLIN][Date]' value='" . convertDmdlDate($res['TC_MDLIN']) . "' />";
                 }
-                //6.3 Test Cancelled: Physician Cancelled Testing
+                //6.3 Test Cancelled: Physician Cancelled Testing 
                 if (isset($res['TC_PhysicianCancelled']) && !empty($res['TC_PhysicianCancelled'])) {
                     $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][TC_PhysicianCancelled][Date]' value='" . convertDmdlDate($res['TC_PhysicianCancelled']) . "' />";
                 }
@@ -3466,10 +3469,10 @@ function dmdl_refresh($db){
                 //7.1 waiting for billed ststus updated from API
                 if (isset($res['BillingDate']) && !empty($res['BillingDate'])) {
                     $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][BillingDate][Date]' value='" . convertDmdlDate($res['BillingDate']) . "' />";
-                }
+                }            
                 if (isset($res['CPT']) && !empty($res['CPT'])) {
                     $content .= "<input type='hidden' name='dmdl[" . $Guid_MDLNumber . "][statuses][AwaitingPayment][CptPattern]' value='" . $res['CPT']  . "' />";
-                }
+                }            
 
                 //8.1 Legal/AR Review: In Progress: Legal Review
                 if (isset($res['Legal_InProgress_Review']) && !empty($res['Legal_InProgress_Review'])) {
@@ -3512,22 +3515,22 @@ function dmdl_refresh($db){
                 $content .= "</tr>";
             } else {
                 $content.= "<tr><td colspan='9'>"
-                    . "<strong>dMDL API Result is empty for this patient. </strong>"
-                    . "Patient ID => ".$dmdlVal['PatientID']."; "
-                    . "Physician ID => ". $dmdlVal['PhysicianID']."; "
-                    . "MDL# => ".$dmdlVal['MDLNumber']
-                    . "</td></tr>";
+                        . "<strong>dMDL API Result is empty for this patient. </strong>"
+                        . "Patient ID => ".$dmdlVal['PatientID']."; " 
+                        . "Physician ID => ". $dmdlVal['PhysicianID']."; " 
+                        . "MDL# => ".$dmdlVal['MDLNumber'] 
+                        . "</td></tr>";
             }
-        }
+        }        
         //Getting page URL without query string
         $uri=strtok($_SERVER['REQUEST_URI'],"?")."?";
-
+        
         //create a new query string without a page variable
         if (isset($_GET['page'])) unset($_GET['page']);
         if (count($_GET)) {
-            foreach ($_GET as $k => $v) {
-                if ($k != "page") $uri.=urlencode($k)."=".urlencode($v)."&";
-            }
+          foreach ($_GET as $k => $v) {
+            if ($k != "page") $uri.=urlencode($k)."=".urlencode($v)."&";
+          }
         }
         //getting total number of pages and filling an array with links
         $num_pages=ceil($total_rows/$per_page);
@@ -3536,20 +3539,20 @@ function dmdl_refresh($db){
     $content .= "</tbody>";
     $content .= "</table>";
     $content .= "</form>";
-
+    
     if(isset($PAGES)){
-        $content .= "<div class='refreshPaging'>";
-        foreach ($PAGES as $i => $link){
-            if ($i == $CUR_PAGE){
-                $content .= "<span class='current'>".$i."</span>";
-            } else{
-                $content .= "<span><a href=".$link.">".$i."</a></span>";
-            }
-        }
-        $content .= "</div>";
+    $content .= "<div class='refreshPaging'>"; 
+    foreach ($PAGES as $i => $link){
+        if ($i == $CUR_PAGE){
+            $content .= "<span class='current'>".$i."</span>";
+        } else{ 
+            $content .= "<span><a href=".$link.">".$i."</a></span>";
+        }    
     }
-
-    return $content;
+    $content .= "</div>";
+    }
+    
+    return $content;       
 }
 /**
  * Update or insert new payor
@@ -3557,9 +3560,9 @@ function dmdl_refresh($db){
  * @param type $db
  * @param type $Guid_user
  * @param type $dataPayor
- * @return type number => $Guid_payor
+ * @return type number => $Guid_payor 
  */
-function updateOrInsertPayor($db,$Guid_user,$name, $fullName=FALSE){
+function updateOrInsertPayor($db,$Guid_user,$name, $fullName=FALSE){  
     $checkPayor = $db->row("SELECT * FROM `tbl_mdl_payors` WHERE name=:name", array('name'=>$name));
     $thisPayorData = array();
     if(!empty($checkPayor)){ //update empty fields
@@ -3573,28 +3576,28 @@ function updateOrInsertPayor($db,$Guid_user,$name, $fullName=FALSE){
         if(!empty($thisPayorData)){
             updateTable($db, 'tbl_mdl_payors', $thisPayorData, array('Guid_payor'=>$Guid_payor));
         }
-    } else { //insert new row
-        $thisPayorData['name'] = $name;
+    } else { //insert new row        
+        $thisPayorData['name'] = $name;        
         if($fullName){
             $thisPayorData['fullName'] = $fullName;
         }
         $thisPayorData['Loaded'] = 'Y';
         $insertPayor = insertIntoTable($db, 'tbl_mdl_payors', $thisPayorData);
-        $Guid_payor = $insertPayor['insertID'];
-    }
+        $Guid_payor = $insertPayor['insertID'];        
+    }       
     return $Guid_payor;
 }
 
-function updateOrInsertRevenue($db, $Guid_user, $invoiceDetails){
+function updateOrInsertRevenue($db, $Guid_user, $invoiceDetails){    
     $invoiceArray = $invoiceDetails;
-
+    
     if(!isset($invoiceDetails[0])){
         $invoiceArray[0] = $invoiceDetails;
     }
-    foreach ($invoiceArray as $k=>$invoiceDetail) {
+    foreach ($invoiceArray as $k=>$invoiceDetail) {  
         $revenueData = array();
         if(isset($invoiceDetail['CPT'])&&$invoiceDetail['CPT']!=''){
-
+            
             //check CPT
             $checkCPT = $db->row("SELECT * FROM `tbl_mdl_cpt_code` WHERE code=:code",array('code'=>$invoiceDetail['CPT']));
             if(!empty($checkCPT)){
@@ -3602,9 +3605,9 @@ function updateOrInsertRevenue($db, $Guid_user, $invoiceDetails){
             }else{ //insert new CPT code
                 $newCpt = insertIntoTable($db, 'tbl_mdl_cpt_code', array('code'=>$invoiceDetail['CPT'], 'Loaded'=>'Y'));
                 $Guid_cpt = $newCpt['insertID'];
-            }
+            }        
             $revenueData['Guid_cpt'] = $Guid_cpt;
-        }
+        }  
         if(isset($invoiceDetail['PayID'])){
             //$db,$Guid_user,$name, $fullName
             $name = $invoiceDetail['PayID'];
@@ -3612,15 +3615,15 @@ function updateOrInsertRevenue($db, $Guid_user, $invoiceDetails){
             $Guid_payor = updateOrInsertPayor($db, $Guid_user,$name, $fullName);
             $revenueData['Guid_payor'] = $Guid_payor;
         }
-
+        
         if(isset($invoiceDetail['amount'])){
             $revenueData['amount'] = $invoiceDetail['amount'];
         }
         if(isset($invoiceDetail['DatePaid'])&&$invoiceDetail['DatePaid']!=''){
             $date_paid = date('Y-m-d h:i:s', strtotime($invoiceDetail['DatePaid']));
             $revenueData['date_paid'] = $date_paid;
-        }
-        if(!empty($revenueData)){
+        }     
+        if(!empty($revenueData)){        
             $revenueData['Guid_user'] = $Guid_user;
             $revenueData['Loaded'] = 'Y';
             $isRevenueExists = checkRevenue($db, $revenueData); //returns true if exists
@@ -3629,10 +3632,10 @@ function updateOrInsertRevenue($db, $Guid_user, $invoiceDetails){
             }
         }
     }
-
+    
 }
 /**
- * Check Revenue
+ * Check Revenue 
  * @param type $db
  * @param type $revenueData
  * @return boolean - true if data exists and false if not
@@ -3644,21 +3647,21 @@ function checkRevenue($db, $revenueData){
         $Guid_user = $revenueData['Guid_user'];
         $where .= "Guid_user='$Guid_user' AND ";
     }
-    if(isset($revenueData['Guid_payor']) && $revenueData['Guid_payor'] != ''){
+    if(isset($revenueData['Guid_payor']) && $revenueData['Guid_payor'] != ''){        
         $Guid_payor = $revenueData['Guid_payor'];
         $where .= "Guid_payor='$Guid_payor' AND ";
     }
     if(isset($revenueData['Guid_cpt']) && $revenueData['Guid_cpt'] != ''){
         $Guid_cpt = $revenueData['Guid_cpt'];
-        $where .= "Guid_cpt='$Guid_cpt' AND ";
+        $where .= "Guid_cpt='$Guid_cpt' AND ";        
     }
     if(isset($revenueData['amount']) && $revenueData['amount'] != ''){
         $amount = $revenueData['amount'];
-        $where .= "amount='$amount' AND ";
+        $where .= "amount='$amount' AND ";        
     }
     if(isset($revenueData['date_paid']) && $revenueData['date_paid'] != ''){
         $date_paid = $revenueData['date_paid'];
-        $where .= "date_paid='$date_paid' AND ";
+        $where .= "date_paid='$date_paid' AND ";        
     }
     $where = rtrim($where, "AND ");
     if($where!=''){
@@ -3674,8 +3677,8 @@ function checkRevenue($db, $revenueData){
     return FALSE;
 }
 
-function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl, $invoiceDetails, $csvMdlNumber){
-
+function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl, $invoiceDetails, $csvMdlNumber){    
+    
     $statusLogData = array(
         'Loaded' => 'Y',
         'Guid_user' => $data['Guid_user'],
@@ -3685,31 +3688,31 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         'Guid_salesrep' => $data['Guid_salesrep'],
         'salesrep_fname' => $data['salesrep_fname'],
         'salesrep_lname' => $data['salesrep_lname'],
-        'Recorded_by' => $_SESSION['user']['id'],
+        'Recorded_by' => $_SESSION['user']['id'],  
         'provider_id' => $data['provider_id'],
-        'deviceid' => $data['deviceid'],
+        'deviceid' => $data['deviceid'],        
         'Date_created'=>date('Y-m-d h:i:s')
     );
     $Guid_user = $data['Guid_user'];
     // 1. Specimen Collected
     if(isset($statuses['SpecimenCollected']['Date'])){
         $statusLogData['Date'] = $statuses['SpecimenCollected']['Date'];
-        if(isValidStatusGroup($db, array('1'), $Guid_user, $statusLogData['Date'])){
+        if(isValidStatusGroup($db, array('1'), $Guid_user, $statusLogData['Date'])){            
             updateTable($db, 'tblpatient', array('specimen_collected'=>'Yes'), array('Guid_patient'=>$data['Guid_patient']));
             saveStatusLog($db, array('1'), $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
-    }
+    }   
     //2 Specimen Accessioned, 2.1 SpecimenAccessioned Test Code
     if(isset($statuses['SpecimenAccessioned']['Date'])){
         $statusLogData['Date'] = $statuses['SpecimenAccessioned']['Date'];
-        $statusSAccIDs[] = '2';
-        if(isset($statuses['SpecimenAccessioned']['Test_Ordered']) && $statuses['SpecimenAccessioned']['Test_Ordered']!=''){
+        $statusSAccIDs[] = '2';        
+        if(isset($statuses['SpecimenAccessioned']['Test_Ordered']) && $statuses['SpecimenAccessioned']['Test_Ordered']!=''){ 
             //checking for test codes
             $sAccCodes = $statuses['SpecimenAccessioned']['Test_Ordered'];
             $apiTestCodes = explode(',', $sAccCodes );
             $allowedTestCodes = array('1221', '1222', '1223', '1224', '1235', '1241', '1243', '1268', '1279');
-
+            
             foreach ($apiTestCodes as $key => $value) {
                 if(in_array($value, $allowedTestCodes)){
                     $getGuidStatusRow = $db->row("SELECT Guid_status FROM tbl_mdl_status WHERE `parent_id`='2' AND `status`='$value'");
@@ -3723,12 +3726,12 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
                 }
             }
         }
-
+        
     }
     //3.1 Insurance Preauthorization: Pending: Eligibility Review
     if(isset($statuses['IPP_EligibilityReview']['Date'])){
         $statusLogData['Date'] = $statuses['IPP_EligibilityReview']['Date'];
-        $statusIPP_EIDs = array('6','7','84');
+        $statusIPP_EIDs = array('6','7','84'); 
         if(isValidStatusGroup($db,$statusIPP_EIDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $statusIPP_EIDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -3737,7 +3740,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //3.2 Insurance Preauthorization: Pending: Preauthorization Review
     if(isset($statuses['IPP_PreauthorizationReview']['Date'])){
         $statusLogData['Date'] = $statuses['IPP_PreauthorizationReview']['Date'];
-        $statusIPP_ERIDs = array('6','7','85');
+        $statusIPP_ERIDs = array('6','7','85');  
         if(isValidStatusGroup($db,$statusIPP_ERIDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $statusIPP_ERIDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -3746,7 +3749,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //3.3 Insurance Preauthorization: Pending: Preauthorization Review
     if(isset($statuses['IPP_LegalPolicy']['Date'])){
         $statusLogData['Date'] = $statuses['IPP_LegalPolicy']['Date'];
-        $statusIPP_LPIDs = array('6','7','46');
+        $statusIPP_LPIDs = array('6','7','46');  
         if(isValidStatusGroup($db,$statusIPP_LPIDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $statusIPP_LPIDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -3755,7 +3758,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //3.4 Insurance Preauthorization: Not Required
     if(isset($statuses['IP_NotRequired']['Date'])){
         $statusLogData['Date'] = $statuses['IP_NotRequired']['Date'];
-        $statusIP_NRIDs = array('6','27');
+        $statusIP_NRIDs = array('6','27');  
         if(isValidStatusGroup($db,$statusIP_NRIDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $statusIP_NRIDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -3764,7 +3767,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //3.5 Insurance Preauthorization: Approved
     if(isset($statuses['IP_Approved']['Date'])){
         $statusLogData['Date'] = $statuses['IP_Approved']['Date'];
-        $statusIP_ApprovedIDs = array('6','8');
+        $statusIP_ApprovedIDs = array('6','8');  
         if(isValidStatusGroup($db,$statusIP_ApprovedIDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $statusIP_ApprovedIDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -3773,7 +3776,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //3.6 Insurance Preauthorization: Declined: Medical Necessity Not Met
     if(isset($statuses['IP_Declined_MedNecNotMet']['Date'])){
         $statusLogData['Date'] = $statuses['IP_Declined_MedNecNotMet']['Date'];
-        $statusIP_DMNM_IDs = array('6','9','10');
+        $statusIP_DMNM_IDs = array('6','9','10');  
         if(isValidStatusGroup($db,$statusIP_DMNM_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $statusIP_DMNM_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -3782,7 +3785,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //3.7 Insurance Preauthorization: Declined: Not a Covered Benefit
     if(isset($statuses['IP_Declined_NotCovered']['Date'])){
         $statusLogData['Date'] = $statuses['IP_Declined_NotCovered']['Date'];
-        $statusIP_DNC_IDs = array('6','9','11');
+        $statusIP_DNC_IDs = array('6','9','11');  
         if(isValidStatusGroup($db,$statusIP_DNC_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $statusIP_DNC_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -3791,7 +3794,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //3.8 Insurance Preauthorization: Declined: Experimental/Investigational
     if(isset($statuses['IP_Declined_Experimental']['Date'])){
         $statusLogData['Date'] = $statuses['IP_Declined_Experimental']['Date'];
-        $statusIP_DE_IDs = array('6','9','25');
+        $statusIP_DE_IDs = array('6','9','25');  
         if(isValidStatusGroup($db,$statusIP_DE_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $statusIP_DE_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -3800,17 +3803,17 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //3.9 Insurance Preauthorization: Declined: MDL is OON
     if(isset($statuses['IP_Declined_MDLisOON']['Date'])){
         $statusLogData['Date'] = $statuses['IP_Declined_MDLisOON']['Date'];
-        $statusIP_DMDLOON_IDs = array('6','9','33');
+        $statusIP_DMDLOON_IDs = array('6','9','33');  
         if(isValidStatusGroup($db,$statusIP_DMDLOON_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $statusIP_DMDLOON_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
-
+    
     //3.10 Physician Responsibility: New Requisition Required
     if(isset($statuses['IP_PhysAct_NewReqRequired']['Date'])){
         $statusLogData['Date'] = $statuses['IP_PhysAct_NewReqRequired']['Date'];
-        $statusIP_PANRR_IDs = array('99','47');
+        $statusIP_PANRR_IDs = array('99','47'); 
         if(isValidStatusGroup($db,$statusIP_PANRR_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $statusIP_PANRR_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -3819,7 +3822,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //3.11 Physician Responsibility: Additional ICD-10 Codes/Info Required
     if(isset($statuses['IP_PhysAct_AddICD10Required']['Date'])){
         $statusLogData['Date'] = $statuses['IP_PhysAct_AddICD10Required']['Date'];
-        $statusIP_AICD10_IDs = array('99','48');
+        $statusIP_AICD10_IDs = array('99','48');  
         if(isValidStatusGroup($db,$statusIP_AICD10_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $statusIP_AICD10_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -3828,7 +3831,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //3.12 Physician Action Required: Physician Consultation Required
     if(isset($statuses['IP_PhysAct_PhysConsultationRequired']['Date'])){
         $statusLogData['Date'] = $statuses['IP_PhysAct_PhysConsultationRequired']['Date'];
-        $statusIP_PAPCR_IDs = array('99','49');
+        $statusIP_PAPCR_IDs = array('99','49');  
         if(isValidStatusGroup($db,$statusIP_PAPCR_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $statusIP_PAPCR_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -3837,7 +3840,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //3.13 Physician Action Required: Precertification Required: AIMs
     if(isset($statuses['IP_PhysAct_PrecertificationRequiredAIMS']['Date'])){
         $statusLogData['Date'] = $statuses['IP_PhysAct_PrecertificationRequiredAIMS']['Date'];
-        $statusIP_PAPRAIMs_IDs = array('99','74','75');
+        $statusIP_PAPRAIMs_IDs = array('99','74','75');  
         if(isValidStatusGroup($db,$statusIP_PAPRAIMs_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $statusIP_PAPRAIMs_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -3846,13 +3849,13 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //3.14 Physician Action Required: Precertification Required: Beacon
     if(isset($statuses['IP_PhysAct_PrecertificationRequiredBeacon']['Date'])){
         $statusLogData['Date'] = $statuses['IP_PhysAct_PrecertificationRequiredBeacon']['Date'];
-        $statusIP_PAPRB_IDs = array('99','74','76');
+        $statusIP_PAPRB_IDs = array('99','74','76');  
         if(isValidStatusGroup($db,$statusIP_PAPRB_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $statusIP_PAPRB_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
-
+    
     //4.1 Patient Responsibility: Assume financial responsibility
     if(isset($statuses['PR_AssumeFinancialResponsibility']['Date'])){
         $statusLogData['Date'] = $statuses['PR_AssumeFinancialResponsibility']['Date'];
@@ -3889,7 +3892,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
-    //4.5 Patient Responsibility: Family History Received
+    //4.5 Patient Responsibility: Family History Received 
     if(isset($statuses['PR_FamilyHistoryReceived']['Date'])){
         $statusLogData['Date'] = $statuses['PR_FamilyHistoryReceived']['Date'];
         $statusPR_FHR_IDs = array('34','97');   // ????????????????????
@@ -3898,7 +3901,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
-    //4.6 & 4.7 Patient Responsibility: Genetic Counseling: Pending,Completed,Waived
+    //4.6 & 4.7 Patient Responsibility: Genetic Counseling: Pending,Completed,Waived    
     if(isset($statuses['Genetic_Counseling']['Status'])){
         $statusGCIDs[] = '34'; //Patient Responsibility
         $statusGCIDs[] = '3'; //Patient Responsibility --> Genetic Counseling
@@ -3916,7 +3919,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //5.1 Laboratory Testing Status: Pending
     if(isset($statuses['Testing_Pending']['Date'])){
         $statusLogData['Date'] = $statuses['Testing_Pending']['Date'];
-        $status_LabTP_IDs = array('17','18');
+        $status_LabTP_IDs = array('17','18');  
         if(isValidStatusGroup($db,$status_LabTP_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_LabTP_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -3925,7 +3928,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //5.2 Laboratory Testing Status: In Progress
     if(isset($statuses['Testing_InProgress']['Date'])){
         $statusLogData['Date'] = $statuses['Testing_InProgress']['Date'];
-        $status_LabTInP_IDs = array('17','19');
+        $status_LabTInP_IDs = array('17','19');  
         if(isValidStatusGroup($db,$status_LabTInP_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_LabTInP_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -3934,7 +3937,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //5.3 Laboratory Testing Status: Recollection Requested
     if(isset($statuses['Testing_RecollectionRequested']['Date'])){
         $statusLogData['Date'] = $statuses['Testing_RecollectionRequested']['Date'];
-        $status_RR_IDs = array('17','21');
+        $status_RR_IDs = array('17','21');  
         if(isValidStatusGroup($db,$status_RR_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_RR_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -3944,17 +3947,17 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //6.1 Test Cancelled: MDL Out-of-Network/High Patient Responsibility
     if(isset($statuses['TC_MDLOON']['Date'])){
         $statusLogData['Date'] = $statuses['TC_MDLOON']['Date'];
-        $status_TC_MDLOON_IDs = array('12','13');
+        $status_TC_MDLOON_IDs = array('12','13');  
         if(isValidStatusGroup($db,$status_TC_MDLOON_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_MDLOON_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
             $testCancelledStat = TRUE;
         }
     }
-    //6.2 Test Cancelled: MDL In-Network/High
+    //6.2 Test Cancelled: MDL In-Network/High 
     if(isset($statuses['TC_MDLIN']['Date'])){
         $statusLogData['Date'] = $statuses['TC_MDLIN']['Date'];
-        $status_TC_MDLIN_IDs = array('12','14');
+        $status_TC_MDLIN_IDs = array('12','14');  
         if(isValidStatusGroup($db,$status_TC_MDLIN_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_MDLIN_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -3964,7 +3967,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //6.3 Test Cancelled: Physician Cancelled Testing
     if(isset($statuses['TC_PhysicianCancelled']['Date'])){
         $statusLogData['Date'] = $statuses['TC_PhysicianCancelled']['Date'];
-        $status_TC_phC_IDs = array('12','15');
+        $status_TC_phC_IDs = array('12','15');  
         if(isValidStatusGroup($db,$status_TC_phC_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_phC_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -3974,7 +3977,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //6.4 Test Cancelled: Incomplete Genetic Counselling
     if(isset($statuses['TC_IncompleteGC']['Date'])){
         $statusLogData['Date'] = $statuses['TC_IncompleteGC']['Date'];
-        $status_TC_IncompleteGC_IDs = array('12','16');
+        $status_TC_IncompleteGC_IDs = array('12','16');  
         if(isValidStatusGroup($db,$status_TC_IncompleteGC_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_IncompleteGC_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -3984,7 +3987,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //6.5 Test Cancelled: Patient refused to sign consent form
     if(isset($statuses['TC_PatientRefused']['Date'])){
         $statusLogData['Date'] = $statuses['TC_PatientRefused']['Date'];
-        $status_TC_PatientRefused_IDs = array('12','26');
+        $status_TC_PatientRefused_IDs = array('12','26');  
         if(isValidStatusGroup($db,$status_TC_PatientRefused_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_PatientRefused_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -3994,7 +3997,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //6.6 Test Cancelled: Replaced by a new MDL
     if(isset($statuses['TC_NewMDL']['Date'])){
         $statusLogData['Date'] = $statuses['TC_NewMDL']['Date'];
-        $status_TC_NewMDL_IDs = array('12','51');
+        $status_TC_NewMDL_IDs = array('12','51');  
         if(isValidStatusGroup($db,$status_TC_NewMDL_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_NewMDL_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -4004,7 +4007,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //6.7 Test Cancelled: Cancelled following Genetic Counselor Consultation
     if(isset($statuses['TC_GC']['Date'])){
         $statusLogData['Date'] = $statuses['TC_GC']['Date'];
-        $status_TC_GC_IDs = array('12','65');
+        $status_TC_GC_IDs = array('12','65');  
         if(isValidStatusGroup($db,$status_TC_GC_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_GC_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -4014,7 +4017,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //6.8 Test Cancelled: Patient did not want to assume OOP costs: Out-Of-Network: Humana
     if(isset($statuses['TC_Humana']['Date'])){
         $statusLogData['Date'] = $statuses['TC_Humana']['Date'];
-        $status_TC_Humana_IDs = array('12','67','93','95');
+        $status_TC_Humana_IDs = array('12','67','93','95');  
         if(isValidStatusGroup($db,$status_TC_Humana_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_Humana_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -4024,7 +4027,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //6.9 Test Cancelled: Patient did not want to assume OOP costs: Other Insurance
     if(isset($statuses['TC_OtherInsurance']['Date'])){
         $statusLogData['Date'] = $statuses['TC_OtherInsurance']['Date'];
-        $status_TC_OtherInsurance_IDs = array('12','67','93','96');
+        $status_TC_OtherInsurance_IDs = array('12','67','93','96');  
         if(isValidStatusGroup($db,$status_TC_OtherInsurance_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_OtherInsurance_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -4034,7 +4037,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //6.10 Test Cancelled: Patient did not want to assume OOP costs: Deductible
     if(isset($statuses['TC_Deductible']['Date'])){
         $statusLogData['Date'] = $statuses['TC_Deductible']['Date'];
-        $status_TC_Deductible_IDs = array('12','67','94');
+        $status_TC_Deductible_IDs = array('12','67','94');  
         if(isValidStatusGroup($db,$status_TC_Deductible_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_Deductible_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -4044,7 +4047,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //6.11 Test Cancelled: Patient did not want to assume OOP costs: No Coverage due to Lack of MN
     if(isset($statuses['TC_NoCoverage']['Date'])){
         $statusLogData['Date'] = $statuses['TC_NoCoverage']['Date'];
-        $status_TC_NoCoverage_IDs = array('12','67','98');
+        $status_TC_NoCoverage_IDs = array('12','67','98');  
         if(isValidStatusGroup($db,$status_TC_NoCoverage_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_NoCoverage_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -4054,7 +4057,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //6.12 Test Cancelled: Patient did not want to assume OOP costs: Not a Covered Benefit
     if(isset($statuses['TC_NotCovered']['Date'])){
         $statusLogData['Date'] = $statuses['TC_NotCovered']['Date'];
-        $status_TC_NotCovered_IDs = array('12','67','100');
+        $status_TC_NotCovered_IDs = array('12','67','100');  
         if(isValidStatusGroup($db,$status_TC_NotCovered_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TC_NotCovered_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -4062,20 +4065,25 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
         }
     }
     //if Any of Test Cancelled Statuses updated set ToUpdate = 'N' in tbl_mdl_dmdl
-    if($testCancelledStat){
+    if($testCancelledStat){        
         updateTable($db, 'tbl_mdl_dmdl', array('ToUpdate'=>'N'), array('MDLNumber'=>$csvMdlNumber));
     }
-
+    
     //7 Test Result Released
-    if(isset($statuses['Testing_Complete']['Date'])){
+    $isTestingComplete = TRUE;
+    if(isset($statuses['Testing_Status']['Status']) && $statuses['Testing_Status']['Status']=='Rejected' ) {
+        //dont allow addin status Test Results Released
+        $isTestingComplete = FALSE;
+    }
+    if($isTestingComplete && isset($statuses['Testing_Complete']['Date'])){
         $statusLogData['Date'] = $statuses['Testing_Complete']['Date'];
-        $status_TestReleased_IDs = array('22');
+        $status_TestReleased_IDs = array('22');  
         if(isValidStatusGroup($db,$status_TestReleased_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_TestReleased_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
     }
-
+    
     //8.1 Billed statuses
     if(isset($statuses['BillingDate']['Date'])){
         $statusLogData['Date'] = $statuses['Testing_Complete']['Date'];
@@ -4100,45 +4108,45 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
         /* Checking for Billed: Payment Received
-         * When all of the CPT codes have payments (and not 0.00),
-         * and the total of the payments is > 0,
-         * then the status of Payment Received could be added.
+         * When all of the CPT codes have payments (and not 0.00), 
+         * and the total of the payments is > 0, 
+         * then the status of Payment Received could be added. 
          * The date of that status would be the latest CPT payment date.
          * do not display Billed: Payment Received if any of the CPT code amounts come back as 0
          */
         $invoiceArray = array();
-        if(!empty($invoiceDetails)){
-
+        if(!empty($invoiceDetails)){    
+            
             $invoiceArray = $invoiceDetails;
             if(!isset($invoiceDetails[0])){
                 $invoiceArray[0] = $invoiceDetails;
-            }
+            }   
             //for calculateing sum of revenue amount
-            $isPaymentReceived = TRUE;
+            $isPaymentReceived = TRUE;            
             foreach ($invoiceArray as $k=>$v){
                 $DatePaid = isset($v['DatePaid'])?$v['DatePaid']:'';
                 if(isset($v['amount']) && $v['amount']<=0){
                     $isPaymentReceived = FALSE;
                     break;
-                }
-            }
+                }              
+            } 
             if($isPaymentReceived){
                 $statusLogData['Date'] = $DatePaid;
                 $status_PaymentReceived_IDs = array('32','53');  //Billed: Payment Received
-                if(isValidStatusGroup($db,$status_PaymentReceived_IDs, $Guid_user, $statusLogData['Date'] )){
+                if(isValidStatusGroup($db,$status_PaymentReceived_IDs, $Guid_user, $statusLogData['Date'] )){                                        
                     saveStatusLog($db, $status_PaymentReceived_IDs, $statusLogData);
                     updateCurrentStatusID($db, $data['Guid_patient']);
                     //if Billed: Payment Received, set ToUpdate = 'N' in tbl_mdl_dmdl
                     updateTable($db, 'tbl_mdl_dmdl', array('ToUpdate'=>'N'), array('MDLNumber'=>$csvMdlNumber));
                 }
-            }
+            }            
         }
     }
-
+    
     //9.1 Legal/AR Review: In Progress: Legal Review
     if(isset($statuses['Legal_InProgress_Review']['Date'])){
         $statusLogData['Date'] = $statuses['Legal_InProgress_Review']['Date'];
-        $status_Legal_InProgress_Review_IDs = array('55','56','59');
+        $status_Legal_InProgress_Review_IDs = array('55','56','59');  
         if(isValidStatusGroup($db,$status_Legal_InProgress_Review_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_Legal_InProgress_Review_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -4147,7 +4155,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //9.2 Legal/AR Review: In Progress: Seeking additional ICD-10 codes
     if(isset($statuses['Legal_InProgress_AddICD10']['Date'])){
         $statusLogData['Date'] = $statuses['Legal_InProgress_AddICD10']['Date'];
-        $status_Legal_InProgress_AddICD10_IDs = array('55','56','60');
+        $status_Legal_InProgress_AddICD10_IDs = array('55','56','60');  
         if(isValidStatusGroup($db,$status_Legal_InProgress_AddICD10_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_Legal_InProgress_AddICD10_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -4156,7 +4164,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //9.3 Legal/AR Review: In Progress: Obtaining Medical Records
     if(isset($statuses['Legal_InProgress_OR']['Date'])){
         $statusLogData['Date'] = $statuses['Legal_InProgress_OR']['Date'];
-        $status_Legal_InProgress_OR_IDs = array('55','56','61');
+        $status_Legal_InProgress_OR_IDs = array('55','56','61');  
         if(isValidStatusGroup($db,$status_Legal_InProgress_OR_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_Legal_InProgress_OR_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -4165,7 +4173,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //9.4 Legal/AR Review: In Progress: AR Review
     if(isset($statuses['Legal_InProgress_ARReview']['Date'])){
         $statusLogData['Date'] = $statuses['Legal_InProgress_ARReview']['Date'];
-        $status_Legal_InProgress_ARReview_IDs = array('55','56','62');
+        $status_Legal_InProgress_ARReview_IDs = array('55','56','62');  
         if(isValidStatusGroup($db,$status_Legal_InProgress_ARReview_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_Legal_InProgress_ARReview_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -4174,7 +4182,7 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //9.5 Legal/AR Review: Policy Limitation
     if(isset($statuses['Legal_PolicyLimitation']['Date'])){
         $statusLogData['Date'] = $statuses['Legal_PolicyLimitation']['Date'];
-        $status_Legal_PolicyLimitation_IDs = array('55','57');
+        $status_Legal_PolicyLimitation_IDs = array('55','57'); 
         if(isValidStatusGroup($db,$status_Legal_PolicyLimitation_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_Legal_PolicyLimitation_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
@@ -4183,12 +4191,12 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
     //9.6 Legal/AR Review: Appeal Submitted
     if(isset($statuses['Legal_AppealSubmitted']['Date'])){
         $statusLogData['Date'] = $statuses['Legal_AppealSubmitted']['Date'];
-        $status_Legal_AppealSubmitted_IDs = array('55','58');
+        $status_Legal_AppealSubmitted_IDs = array('55','58');  
         if(isValidStatusGroup($db,$status_Legal_AppealSubmitted_IDs, $Guid_user, $statusLogData['Date'] )){
             saveStatusLog($db, $status_Legal_AppealSubmitted_IDs, $statusLogData);
             updateCurrentStatusID($db, $data['Guid_patient']);
         }
-    }
+    } 
     //10. When [Testing_Status] => Rejected, the status should be Test Cancelled
     if(isset($statuses['Testing_Status']['Date'])){
         $statusLogData['Date'] = $statuses['Testing_Status']['Date'];
@@ -4199,8 +4207,8 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
             //if Any of Test Cancelled Statuses updated set ToUpdate = 'N' in tbl_mdl_dmdl
             updateTable($db, 'tbl_mdl_dmdl', array('ToUpdate'=>'N'), array('MDLNumber'=>$csvMdlNumber));
         }
-    }
-
+    } 
+       
 }
 /**
  * Update function for patient
@@ -4210,30 +4218,30 @@ function insertDmdlStatuses($db,$statuses,$data, $dmdl_mdl_number,$Guid_mdl_dmdl
  * @param type $where
  * @return boolean
  */
-function updatePatientData($db,$data,$where){
+function updatePatientData($db,$data,$where){   
     $updateFields = "";
     $whereStr = "";
     $executeArray = array();
     foreach ($data as $key => $val) {
-        if($key=='firstname_enc'){
+        if($key=='firstname_enc'){           
             $updateFields .= "`$key`=AES_ENCRYPT('$val', 'F1rstn@m3@_%'), ";
-        } elseif ($key=='lastname_enc') {
+        } elseif ($key=='lastname_enc') {            
             $updateFields .= "`$key`=AES_ENCRYPT('$val', 'L@stn@m3&%#'), ";
         } else {
             $updateFields .= "`$key`='$val', ";
         }
     }
-    $updateFields = rtrim($updateFields,", ");
-
+    $updateFields = rtrim($updateFields,", ");   
+    
     foreach ($where as $key => $val) {
         $whereStr = " WHERE `$key`=:$key";
         $executeArray["$key"] = $val;
-    }
+    }   
     if($updateFields!=''){
         $query = "UPDATE `tblpatient` SET $updateFields $whereStr";
         $update = $db->query($query, $executeArray);
 
-        return $update;
+        return $update;  
     }
     return FALSE;
 }

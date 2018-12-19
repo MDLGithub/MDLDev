@@ -51,7 +51,8 @@ $labels = array(
     'total_paid'=>'Total Paid', 
     'insurance_name'=>'Insurance Name',
     'test_ordered'=>'Test Ordered', 
-    'location'=>'Location'
+    'location'=>'Location',
+    'Loaded' => 'Loaded'
 );
 $statsConfigUrl= SITE_URL.'/mdl-stat-details-config.php';
 
