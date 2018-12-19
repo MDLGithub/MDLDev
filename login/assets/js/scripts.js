@@ -144,6 +144,32 @@ $(document).ready(function () {
             }
         });
     });   
+
+    //Add New Patient
+
+      firsttab = $("#add-new-patient");
+      firsttab.show();
+      $("#add-new-patient-button").addClass("active-tab");
+      secondtab = $("#new-patient-table");
+      secondtab.hide();
+ 
+
+      $("#add-new-patient-button").click(function(){
+        firsttab.show();
+        secondtab.hide();
+
+        $(this).addClass("active-tab");
+        $("#all-new-patients-button").removeClass("active-tab");
+        $("#all-new-patients-button").addClass("disabled-css");
+      });
+
+        $("#all-new-patients-button").click(function(){
+        firsttab.hide();
+        secondtab.show();
+        $(this).addClass("active-tab");
+        $("#add-new-patient-button").removeClass("active-tab");
+        $("#add-new-patient-button").addClass("disabled-css");
+      });
     
     $('#unlock-user').on('click', function(e){
         var email = $(this).attr('data-unlock-user-email');
